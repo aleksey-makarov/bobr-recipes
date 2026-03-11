@@ -24,7 +24,7 @@
         fi
       fi
 
-      export PATH="/bootstrap-root/tools/bin:${PATH:-}"
+      export PATH="/tools/bin:${PATH:-}"
 
       sed '6031s/$add_dir//' -i ltmain.sh
 
@@ -45,29 +45,29 @@
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
       make -j"${jobs}"
-      make DESTDIR="/out/${out}/bootstrap-root" install
+      make DESTDIR="/out/${out}" install
 
       rm -fv \
-        "/out/${out}/bootstrap-root/usr/lib/libbfd.a" \
-        "/out/${out}/bootstrap-root/usr/lib/libbfd.la" \
-        "/out/${out}/bootstrap-root/usr/lib/libctf.a" \
-        "/out/${out}/bootstrap-root/usr/lib/libctf.la" \
-        "/out/${out}/bootstrap-root/usr/lib/libctf-nobfd.a" \
-        "/out/${out}/bootstrap-root/usr/lib/libctf-nobfd.la" \
-        "/out/${out}/bootstrap-root/usr/lib/libopcodes.a" \
-        "/out/${out}/bootstrap-root/usr/lib/libopcodes.la" \
-        "/out/${out}/bootstrap-root/usr/lib/libsframe.a" \
-        "/out/${out}/bootstrap-root/usr/lib/libsframe.la"
+        "/out/${out}/usr/lib/libbfd.a" \
+        "/out/${out}/usr/lib/libbfd.la" \
+        "/out/${out}/usr/lib/libctf.a" \
+        "/out/${out}/usr/lib/libctf.la" \
+        "/out/${out}/usr/lib/libctf-nobfd.a" \
+        "/out/${out}/usr/lib/libctf-nobfd.la" \
+        "/out/${out}/usr/lib/libopcodes.a" \
+        "/out/${out}/usr/lib/libopcodes.la" \
+        "/out/${out}/usr/lib/libsframe.a" \
+        "/out/${out}/usr/lib/libsframe.la"
       "%,
   },
 
   "buildscript-binutils-pass1-2.45" =
     (import "build/autotools.ncl").autotools {
       output = "buildscript-binutils-pass1-2.45",
-      prefix = "/bootstrap-root/tools",
+      prefix = "/tools",
       in_source = false,
       configure_args = [
-        "--with-sysroot=/bootstrap-root",
+        "--with-sysroot=/",
         "--target=x86_64-lfs-linux-gnu",
         "--disable-nls",
         "--enable-gprofng=no",

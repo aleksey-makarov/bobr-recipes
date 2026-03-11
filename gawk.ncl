@@ -24,7 +24,7 @@
         fi
       fi
 
-      export PATH="/bootstrap-root/tools/bin:${PATH:-}"
+      export PATH="/tools/bin:${PATH:-}"
 
       sed -i 's/extras//' Makefile.in
 
@@ -34,7 +34,7 @@
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
       make -j"${jobs}"
-      make DESTDIR="/out/${out}/bootstrap-root" install
+      make DESTDIR="/out/${out}" install
       "%,
   },
 

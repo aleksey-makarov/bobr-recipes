@@ -2,11 +2,11 @@
   "buildscript-autotools-mpc-pass1-1.3.1" =
     (import "build/autotools.ncl").autotools {
       output = "buildscript-autotools-mpc-pass1-1.3.1",
-      install = "make DESTDIR=\"/out/${out}/bootstrap-root\"",
+      install = "make DESTDIR=\"/out/${out}\"",
       install_args = ["install"],
       configure_args = [
-        "--with-mpfr=/bootstrap-root/usr",
-        "--with-gmp=/bootstrap-root/usr",
+        "--with-mpfr=/usr",
+        "--with-gmp=/usr",
       ],
     },
 

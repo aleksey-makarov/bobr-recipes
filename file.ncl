@@ -24,7 +24,7 @@
         fi
       fi
 
-      export PATH="/bootstrap-root/tools/bin:${PATH:-}"
+      export PATH="/tools/bin:${PATH:-}"
 
       mkdir -p build
       pushd build
@@ -42,8 +42,8 @@
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
       make -j"${jobs}" FILE_COMPILE="$(pwd)/build/src/file"
-      make DESTDIR="/out/${out}/bootstrap-root" install
-      rm -fv "/out/${out}/bootstrap-root/usr/lib/libmagic.la"
+      make DESTDIR="/out/${out}" install
+      rm -fv "/out/${out}/usr/lib/libmagic.la"
       "%,
   },
 

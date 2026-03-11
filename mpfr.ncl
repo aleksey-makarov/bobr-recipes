@@ -3,7 +3,7 @@
     type = "binary",
     inputs = [
       "mpfr-src-4.2.2",
-      "buildscript-autotools-bootstrap-root",
+      "buildscript-autotools-lfs",
       "bootstrap-binary-image",
     ],
     outputs = ["mpfr-pass1-4.2.2"],

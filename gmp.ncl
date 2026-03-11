@@ -3,7 +3,7 @@
     type = "binary",
     inputs = [
       "gmp-src-6.3.0",
-      "buildscript-autotools-bootstrap-root",
+      "buildscript-autotools-lfs",
       "bootstrap-binary-image",
     ],
     outputs = ["gmp-pass1-6.3.0"],

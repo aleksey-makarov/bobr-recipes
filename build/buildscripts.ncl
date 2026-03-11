@@ -5,19 +5,19 @@ let autotools = import "autotools.ncl" in
       output = "buildscript-autotools",
     },
 
-  "buildscript-autotools-bootstrap-root" =
+  "buildscript-autotools-lfs" =
     autotools.autotools {
-      output = "buildscript-autotools-bootstrap-root",
-      install = "make DESTDIR=\"/out/${out}/bootstrap-root\"",
+      output = "buildscript-autotools-lfs",
+      install = "make DESTDIR=\"/out/${out}\"",
       install_args = ["install"],
     },
 
   "buildscript-autotools-pass1" =
     autotools.autotools {
       output = "buildscript-autotools-pass1",
-      install = "make DESTDIR=\"/out/${out}/bootstrap-root\"",
+      install = "make DESTDIR=\"/out/${out}\"",
       install_args = ["install"],
-      prepend_path = ["/bootstrap-root/tools/bin"],
+      prepend_path = ["/tools/bin"],
       configure_args = [
         "--host=x86_64-lfs-linux-gnu",
         "--build=x86_64-pc-linux-gnu",

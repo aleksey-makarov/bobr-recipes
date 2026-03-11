@@ -24,7 +24,7 @@
         fi
       fi
 
-      export PATH="/bootstrap-root/tools/bin:${PATH:-}"
+      export PATH="/tools/bin:${PATH:-}"
 
       ./configure --prefix=/usr                          \
                   --host=x86_64-lfs-linux-gnu           \
@@ -34,16 +34,16 @@
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
       make -j"${jobs}"
-      make DESTDIR="/out/${out}/bootstrap-root" install
+      make DESTDIR="/out/${out}" install
 
-      mkdir -pv "/out/${out}/bootstrap-root/usr/sbin"
-      mv -v "/out/${out}/bootstrap-root/usr/bin/chroot" \
-            "/out/${out}/bootstrap-root/usr/sbin/chroot"
-      mkdir -pv "/out/${out}/bootstrap-root/usr/share/man/man8"
-      mv -v "/out/${out}/bootstrap-root/usr/share/man/man1/chroot.1" \
-            "/out/${out}/bootstrap-root/usr/share/man/man8/chroot.8"
+      mkdir -pv "/out/${out}/usr/sbin"
+      mv -v "/out/${out}/usr/bin/chroot" \
+            "/out/${out}/usr/sbin/chroot"
+      mkdir -pv "/out/${out}/usr/share/man/man8"
+      mv -v "/out/${out}/usr/share/man/man1/chroot.1" \
+            "/out/${out}/usr/share/man/man8/chroot.8"
       sed -i 's/\"1\"/\"8\"/' \
-             "/out/${out}/bootstrap-root/usr/share/man/man8/chroot.8"
+             "/out/${out}/usr/share/man/man8/chroot.8"
       "%,
   },
 

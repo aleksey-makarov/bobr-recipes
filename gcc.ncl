@@ -24,7 +24,7 @@
         fi
       fi
 
-      export PATH="/bootstrap-root/tools/bin:${PATH:-}"
+      export PATH="/tools/bin:${PATH:-}"
 
       mkdir -p build
       cd build
@@ -40,13 +40,13 @@
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
       make -j"${jobs}"
-      make DESTDIR="/out/${out}/bootstrap-root" install
+      make DESTDIR="/out/${out}" install
 
       rm -fv \
-        "/out/${out}/bootstrap-root/usr/lib/libstdc++.la" \
-        "/out/${out}/bootstrap-root/usr/lib/libstdc++exp.la" \
-        "/out/${out}/bootstrap-root/usr/lib/libstdc++fs.la" \
-        "/out/${out}/bootstrap-root/usr/lib/libsupc++.la"
+        "/out/${out}/usr/lib/libstdc++.la" \
+        "/out/${out}/usr/lib/libstdc++exp.la" \
+        "/out/${out}/usr/lib/libstdc++fs.la" \
+        "/out/${out}/usr/lib/libsupc++.la"
       "%,
   },
 
@@ -63,18 +63,18 @@
   "buildscript-gcc-pass1-15.2.0" =
     (import "build/autotools.ncl").autotools {
       output = "buildscript-gcc-pass1-15.2.0",
-      prefix = "/bootstrap-root/tools",
+      prefix = "/tools",
       in_source = false,
-      prepend_path = ["/bootstrap-root/tools/bin"],
+      prepend_path = ["/tools/bin"],
       configure_args = [
         "--target=x86_64-lfs-linux-gnu",
         "--with-glibc-version=2.42",
-        "--with-sysroot=/bootstrap-root",
+        "--with-sysroot=/",
         "--with-newlib",
         "--without-headers",
-        "--with-gmp=/bootstrap-root/usr",
-        "--with-mpfr=/bootstrap-root/usr",
-        "--with-mpc=/bootstrap-root/usr",
+        "--with-gmp=/usr",
+        "--with-mpfr=/usr",
+        "--with-mpc=/usr",
         "--enable-default-pie",
         "--enable-default-ssp",
         "--disable-nls",
@@ -98,7 +98,7 @@
         "%,
       post_install = m%"
         cat ../gcc/limitx.h ../gcc/glimits.h ../gcc/limity.h > \
-          "$(dirname "$(/out/${out}/bootstrap-root/tools/bin/x86_64-lfs-linux-gnu-gcc -print-libgcc-file-name)")/include/limits.h"
+          "$(dirname "$(/out/${out}/tools/bin/x86_64-lfs-linux-gnu-gcc -print-libgcc-file-name)")/include/limits.h"
         "%,
     },
 
@@ -167,7 +167,7 @@
       unset CFLAGS
       unset CXXFLAGS
 
-      export PATH="/bootstrap-root/tools/bin:${PATH:-}"
+      export PATH="/tools/bin:${PATH:-}"
 
       mkdir -p build
       cd build
@@ -177,7 +177,7 @@
         --host=x86_64-lfs-linux-gnu  \
         --target=x86_64-lfs-linux-gnu \
         --prefix=/usr                \
-        --with-build-sysroot=/bootstrap-root \
+        --with-build-sysroot=/ \
         --enable-default-pie         \
         --enable-default-ssp         \
         --disable-nls                \
@@ -193,9 +193,9 @@
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
       make -j"${jobs}"
-      make DESTDIR="/out/${out}/bootstrap-root" install
+      make DESTDIR="/out/${out}" install
 
-      ln -svf gcc "/out/${out}/bootstrap-root/usr/bin/cc"
+      ln -svf gcc "/out/${out}/usr/bin/cc"
       "%,
   },
 

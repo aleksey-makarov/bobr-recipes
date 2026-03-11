@@ -24,7 +24,7 @@
         fi
       fi
 
-      export PATH="/bootstrap-root/tools/bin:${PATH:-}"
+      export PATH="/tools/bin:${PATH:-}"
 
       ./configure --prefix=/usr                      \
                   --build="$(sh support/config.guess)" \
@@ -33,9 +33,9 @@
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
       make -j"${jobs}"
-      make DESTDIR="/out/${out}/bootstrap-root" install
-      mkdir -p "/out/${out}/bootstrap-root/bin"
-      ln -svf ../usr/bin/bash "/out/${out}/bootstrap-root/bin/sh"
+      make DESTDIR="/out/${out}" install
+      mkdir -p "/out/${out}/bin"
+      ln -svf ../usr/bin/bash "/out/${out}/bin/sh"
       "%,
   },
 

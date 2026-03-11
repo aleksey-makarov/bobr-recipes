@@ -35,7 +35,7 @@
         fi
       fi
 
-      export PATH="/bootstrap-root/tools/bin:${PATH:-}"
+      export PATH="/tools/bin:${PATH:-}"
 
       patch -Np1 -i /in/glibc-fhs-patch-2.42
       mkdir -p build
@@ -43,21 +43,21 @@
 
       echo "rootsbindir=/usr/sbin" > configparms
 
-      CC="x86_64-lfs-linux-gnu-gcc --sysroot=/bootstrap-root" \
-      CXX="x86_64-lfs-linux-gnu-g++ --sysroot=/bootstrap-root" \
+      CC="x86_64-lfs-linux-gnu-gcc --sysroot=/" \
+      CXX="x86_64-lfs-linux-gnu-g++ --sysroot=/" \
       ../configure                               \
         --prefix=/usr                            \
         --host=x86_64-lfs-linux-gnu             \
         --build="$(../scripts/config.guess)"    \
         --disable-nscd                           \
-        --with-headers=/bootstrap-root/usr/include \
-        --with-binutils=/bootstrap-root/tools/bin \
+        --with-headers=/usr/include \
+        --with-binutils=/tools/bin \
         libc_cv_slibdir=/usr/lib                 \
         --enable-kernel=5.4
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
       make -j"${jobs}"
-      make DESTDIR="/out/${out}/bootstrap-root" install
+      make DESTDIR="/out/${out}" install
       "%,
   },
 

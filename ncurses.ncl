@@ -24,17 +24,17 @@
         fi
       fi
 
-      export PATH="/bootstrap-root/tools/bin:${PATH:-}"
+      export PATH="/tools/bin:${PATH:-}"
 
       mkdir -p build
       pushd build
-        ../configure --prefix=/bootstrap-root/tools AWK=gawk
+        ../configure --prefix=/tools AWK=gawk
         make -C include
         make -C progs tic
-        install -Dm755 progs/tic "/out/${out}/bootstrap-root/tools/bin/tic"
+        install -Dm755 progs/tic "/out/${out}/tools/bin/tic"
       popd
 
-      export PATH="/out/${out}/bootstrap-root/tools/bin:/bootstrap-root/tools/bin:${PATH:-}"
+      export PATH="/out/${out}/tools/bin:/tools/bin:${PATH:-}"
 
       ./configure --prefix=/usr                \
                   --host=x86_64-lfs-linux-gnu  \
@@ -51,9 +51,9 @@
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
       make -j"${jobs}"
-      make DESTDIR="/out/${out}/bootstrap-root" install
-      ln -svf libncursesw.so "/out/${out}/bootstrap-root/usr/lib/libncurses.so"
-      sed -e 's/^#if.*XOPEN.*$/#if 1/' -i "/out/${out}/bootstrap-root/usr/include/curses.h"
+      make DESTDIR="/out/${out}" install
+      ln -svf libncursesw.so "/out/${out}/usr/lib/libncurses.so"
+      sed -e 's/^#if.*XOPEN.*$/#if 1/' -i "/out/${out}/usr/include/curses.h"
       "%,
   },
 

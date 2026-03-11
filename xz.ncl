@@ -24,7 +24,7 @@
         fi
       fi
 
-      export PATH="/bootstrap-root/tools/bin:${PATH:-}"
+      export PATH="/tools/bin:${PATH:-}"
 
       ./configure --prefix=/usr                     \
                   --host=x86_64-lfs-linux-gnu       \
@@ -34,8 +34,8 @@
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
       make -j"${jobs}"
-      make DESTDIR="/out/${out}/bootstrap-root" install
-      rm -fv "/out/${out}/bootstrap-root/usr/lib/liblzma.la"
+      make DESTDIR="/out/${out}" install
+      rm -fv "/out/${out}/usr/lib/liblzma.la"
       "%,
   },
 
