@@ -5,13 +5,6 @@ let autotools = import "autotools.ncl" in
       output = "buildscript-autotools",
     },
 
-  "buildscript-autotools-lfs" =
-    autotools.autotools {
-      output = "buildscript-autotools-lfs",
-      install = "make DESTDIR=\"/out/${out}\"",
-      install_args = ["install"],
-    },
-
   "buildscript-autotools-pass1" =
     autotools.autotools {
       output = "buildscript-autotools-pass1",

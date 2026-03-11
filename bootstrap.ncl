@@ -6,19 +6,11 @@
     outputs = ["bootstrap-binary-image"],
   },
 
-  "bootstrap-for-mpc-pass1-1.3.1" = {
-    type = "image",
-    inputs = ["bootstrap-binary-image", "mpfr-pass1-4.2.2"],
-    outputs = ["bootstrap-for-mpc-pass1-1.3.1"],
-  },
-
   "bootstrap-for-gcc-pass1-15.2.0" = {
     type = "image",
     inputs = [
-      "bootstrap-for-mpc-pass1-1.3.1",
+      "bootstrap-binary-image",
       "binutils-pass1-2.45",
-      "gmp-pass1-6.3.0",
-      "mpc-pass1-1.3.1",
     ],
     outputs = ["bootstrap-for-gcc-pass1-15.2.0"],
   },

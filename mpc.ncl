@@ -1,25 +1,4 @@
 {
-  "buildscript-autotools-mpc-pass1-1.3.1" =
-    (import "build/autotools.ncl").autotools {
-      output = "buildscript-autotools-mpc-pass1-1.3.1",
-      install = "make DESTDIR=\"/out/${out}\"",
-      install_args = ["install"],
-      configure_args = [
-        "--with-mpfr=/usr",
-        "--with-gmp=/usr",
-      ],
-    },
-
-  "mpc-pass1-1.3.1" = {
-    type = "binary",
-    inputs = [
-      "mpc-src-1.3.1",
-      "buildscript-autotools-mpc-pass1-1.3.1",
-      "bootstrap-for-mpc-pass1-1.3.1",
-    ],
-    outputs = ["mpc-pass1-1.3.1"],
-  },
-
   "mpc-src-1.3.1" = {
     type = "fetch",
     outputs = ["mpc-src-1.3.1"],
