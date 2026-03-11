@@ -1,3 +1,10 @@
+let bt = {
+  type = "image",
+  inputs = ["bootstrap-for-glibc-pass1-2.42", "glibc-pass1-2.42"],
+  outputs = ["bootstrap-for-libstdcxx-pass1-15.2.0"],
+}
+in
+
 {
   "bootstrap-binary-image" = {
     type = "container-image",
@@ -27,20 +34,17 @@
     outputs = ["bootstrap-for-glibc-pass1-2.42"],
   },
 
-  "bootstrap-for-libstdcxx-pass1-15.2.0" = {
-    type = "image",
-    inputs = ["bootstrap-for-glibc-pass1-2.42", "glibc-pass1-2.42"],
-    outputs = ["bootstrap-for-libstdcxx-pass1-15.2.0"],
-  },
+  "bootstrap-for-libstdcxx-pass1-15.2.0" = bt,
+  "bootstrap-pass1" = bt,
 
-  "bootstrap-pass1" = {
-    type = "image",
-    inputs = [
-      "bootstrap-for-libstdcxx-pass1-15.2.0",
-      "libstdcxx-pass1-15.2.0",
-    ],
-    outputs = ["bootstrap-pass1"],
-  },
+  # "bootstrap-pass1" = {
+  #     type = "image",
+  #     inputs = [
+  #      "bootstrap-for-libstdcxx-pass1-15.2.0",
+  #       "libstdcxx-pass1-15.2.0",
+  #     ],
+  #     outputs = ["bootstrap-pass1"],
+  # },
 
   "bootstrap-for-gcc-pass2-15.2.0" = {
     type = "image",
