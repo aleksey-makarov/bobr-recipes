@@ -10,5 +10,10 @@ let rec pkgs =
   }
   & ((import "binutils.ncl") pkgs)
   & ((import "linux.ncl") pkgs)
+  & ((import "bootstrap.ncl") pkgs)
+  & ((import "gmp.ncl") pkgs)
+  & ((import "mpfr.ncl") pkgs)
+  & ((import "mpc.ncl") pkgs)
+  & ((import "gcc.ncl") pkgs)
 in
 pkgs

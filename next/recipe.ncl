@@ -1,2 +1,2 @@
 let pkgs = import "pkgs.ncl" in
-pkgs.linux_headers_temp_6_18_10
+pkgs.gcc_temp_15_2_0
