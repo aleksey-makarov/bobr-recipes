@@ -1,5 +1,6 @@
 let lib = import "lib.ncl" in
 let mk_binutils = import "binutils.ncl" in
+let mk_linux = import "linux.ncl" in
 
 let rec pkgs =
   {
@@ -10,5 +11,6 @@ let rec pkgs =
       },
   }
   & (mk_binutils pkgs)
+  & (mk_linux pkgs)
 in
 pkgs
