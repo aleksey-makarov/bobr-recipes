@@ -1,81 +1,89 @@
-{
-  "glibc-fhs-patch-2.42" = {
-    type = "fetch",
-    unpack = false,
-    outputs = ["glibc-fhs-patch-2.42"],
-    url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch",
-    hash = "md5:9a5997c3452909b1769918c759eff8a2",
-  },
+fun pkgs =>
+  let glibc_fhs_patch_2_42 =
+    store.fetch "glibc-fhs-patch-2.42" {
+      url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch",
+      hash = "md5:9a5997c3452909b1769918c759eff8a2",
+      unpack = false,
+    }
+  in
 
-  "glibc-src-2.42" = {
-    type = "fetch",
-    outputs = ["glibc-src-2.42"],
-    url = [
-      "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz",
-      "https://mirrors.kernel.org/gnu/glibc/glibc-2.42.tar.xz",
-    ],
-    hash = "md5:23c6f5a27932b435cae94e087cb8b1f5",
-  },
+  let glibc_src_2_42 =
+    store.fetch "glibc-src-2.42" {
+      url = [
+        "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz",
+        "https://mirrors.kernel.org/gnu/glibc/glibc-2.42.tar.xz",
+      ],
+      hash = "md5:23c6f5a27932b435cae94e087cb8b1f5",
+    }
+  in
 
-  "buildscript-glibc-temp-2.42" = {
-    type = "text",
-    artifact_kind = "build-script",
-    outputs = ["buildscript-glibc-temp-2.42"],
-    source = m%"
-      #!/usr/bin/env bash
-      set -euo pipefail
+  let buildscript_glibc_temp_2_42 =
+    store.text "buildscript-glibc-temp-2.42" {
+      kind = "build-script",
+      source = m%"
+        #!/usr/bin/env bash
+        set -euo pipefail
 
-      src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-      out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+        src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
+        out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
 
-      cd "/in/${src}"
+        cd "/in/${src}"
 
-      if [ ! -x ./configure ]; then
-        candidates=()
-        for d in ./*; do
-          if [ -d "$d" ] && [ -x "$d/configure" ]; then
-            candidates+=("$d")
+        if [ ! -x ./configure ]; then
+          candidates=()
+          for d in ./*; do
+            if [ -d "$d" ] && [ -x "$d/configure" ]; then
+              candidates+=("$d")
+            fi
+          done
+          if [ "${#candidates[@]}" -eq 1 ]; then
+            cd "${candidates[0]}"
           fi
-        done
-        if [ "${#candidates[@]}" -eq 1 ]; then
-          cd "${candidates[0]}"
         fi
-      fi
 
-      export PATH="/tools/bin:${PATH:-}"
+        export PATH="/tools/bin:${PATH:-}"
 
-      patch -Np1 -i /in/glibc-fhs-patch-2.42
-      mkdir -p build
-      cd build
+        patch -Np1 -i /in/sources1
+        mkdir -p build
+        cd build
 
-      echo "rootsbindir=/usr/sbin" > configparms
+        echo "rootsbindir=/usr/sbin" > configparms
 
-      CC="x86_64-lfs-linux-gnu-gcc --sysroot=/" \
-      CXX="x86_64-lfs-linux-gnu-g++ --sysroot=/" \
-      ../configure                               \
-        --prefix=/usr                            \
-        --host=x86_64-lfs-linux-gnu             \
-        --build="$(../scripts/config.guess)"    \
-        --disable-nscd                          \
-        --with-headers=/usr/include             \
-        --with-binutils=/tools/bin              \
-        libc_cv_slibdir=/usr/lib                \
-        --enable-kernel=5.4
+        CC="x86_64-lfs-linux-gnu-gcc --sysroot=/" \
+        CXX="x86_64-lfs-linux-gnu-g++ --sysroot=/" \
+        ../configure                               \
+          --prefix=/usr                            \
+          --host=x86_64-lfs-linux-gnu             \
+          --build="$(../scripts/config.guess)"    \
+          --disable-nscd                          \
+          --with-headers=/usr/include             \
+          --with-binutils=/tools/bin              \
+          libc_cv_slibdir=/usr/lib                \
+          --enable-kernel=5.4
 
-      jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-      make -j"${jobs}"
-      make DESTDIR="/out/${out}" install
-      "%,
-  },
+        jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
+        make -j"${jobs}"
+        make DESTDIR="/out/${out}" install
+        "%,
+    }
+  in
 
-  "glibc-temp-2.42" = {
-    type = "binary",
-    inputs = [
-      "glibc-src-2.42",
-      "glibc-fhs-patch-2.42",
-      "buildscript-glibc-temp-2.42",
-      "bootstrap-for-glibc-temp-2.42",
+  let glibc_temp_2_42 =
+    store.bind glibc_src_2_42 (fun glibc_src =>
+    store.bind glibc_fhs_patch_2_42 (fun glibc_fhs_patch =>
+    store.bind buildscript_glibc_temp_2_42 (fun script =>
+    store.bind pkgs.glibc_temp_build_image (fun image =>
+    store.binary "glibc-temp-2.42" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [glibc_src, glibc_fhs_patch]))))
+  in
+
+  {
+    include [
+      glibc_fhs_patch_2_42,
+      glibc_src_2_42,
+      buildscript_glibc_temp_2_42,
+      glibc_temp_2_42,
     ],
-    outputs = ["glibc-temp-2.42"],
-  },
-}
+  }

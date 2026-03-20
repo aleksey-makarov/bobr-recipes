@@ -7,6 +7,25 @@ fun pkgs =>
     } host_image [binutils_temp]))
   in
 
+  let bison_temp_build_image =
+    store.bind pkgs.gcc_temp_build_image (fun gcc_temp_build_image =>
+    store.bind pkgs.m4_temp_1_4_20 (fun m4_temp =>
+    store.image "bison-temp-build-image" {
+      mode = "layered",
+    } gcc_temp_build_image [m4_temp]))
+  in
+
+  let glibc_temp_build_image =
+    store.bind pkgs.gcc_temp_build_image (fun gcc_temp_build_image =>
+    store.bind pkgs.gcc_temp_15_2_0 (fun gcc_temp =>
+    store.bind pkgs.linux_headers_temp_6_18_10 (fun linux_headers_temp =>
+    store.bind pkgs.gawk_temp_5_3_2 (fun gawk_temp =>
+    store.bind pkgs.bison_temp_3_8_2 (fun bison_temp =>
+    store.image "glibc-temp-build-image" {
+      mode = "layered",
+    } gcc_temp_build_image [gcc_temp, linux_headers_temp, gawk_temp, bison_temp])))))
+  in
+
   {
-    include [gcc_temp_build_image],
+    include [gcc_temp_build_image, bison_temp_build_image, glibc_temp_build_image],
   }

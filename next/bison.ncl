@@ -1,0 +1,45 @@
+let buildscripts = import "buildscripts.ncl" in
+
+fun pkgs =>
+  let bison_src_3_8_2 =
+    store.fetch "bison-src-3.8.2" {
+      url = [
+        "https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz",
+        "https://mirrors.kernel.org/gnu/bison/bison-3.8.2.tar.xz",
+      ],
+      hash = "md5:c28f119f405a2304ff0a7ccdcc629713",
+    }
+  in
+
+  let buildscript_bison_temp_3_8_2 =
+    store.text "buildscript-bison-temp-3.8.2" {
+      kind = "build-script",
+      source =
+        (buildscripts.autotools {
+          output = "buildscript-bison-temp-3.8.2",
+          prepend_path = ["/tools/bin"],
+          configure_args = [
+            "--host=x86_64-lfs-linux-gnu",
+            "--build=x86_64-pc-linux-gnu",
+          ],
+        }).source,
+    }
+  in
+
+  let bison_temp_3_8_2 =
+    store.bind bison_src_3_8_2 (fun bison_src =>
+    store.bind buildscript_bison_temp_3_8_2 (fun script =>
+    store.bind pkgs.bison_temp_build_image (fun image =>
+    store.binary "bison-temp-3.8.2" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [bison_src])))
+  in
+
+  {
+    include [
+      bison_src_3_8_2,
+      buildscript_bison_temp_3_8_2,
+      bison_temp_3_8_2,
+    ],
+  }

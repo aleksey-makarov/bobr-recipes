@@ -1,2 +1,2 @@
 let pkgs = import "pkgs.ncl" in
-pkgs.gcc_temp_15_2_0
+pkgs.glibc_temp_2_42
