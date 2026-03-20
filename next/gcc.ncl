@@ -57,38 +57,19 @@ fun pkgs =>
             ;;
         esac
 
-        export PATH="/tools/bin:${PATH:-}"
-
         mkdir -p build
         cd build
 
         ../configure                     \
-          --target=x86_64-lfs-linux-gnu  \
-          --prefix=/tools                \
-          --with-glibc-version=2.42      \
-          --with-sysroot=/               \
-          --with-newlib                  \
-          --without-headers              \
-          --enable-default-pie           \
-          --enable-default-ssp           \
+          --prefix=/usr                  \
           --disable-nls                  \
-          --disable-shared               \
           --disable-multilib             \
-          --disable-threads              \
-          --disable-libatomic            \
-          --disable-libgomp              \
-          --disable-libquadmath          \
-          --disable-libssp               \
-          --disable-libvtv               \
-          --disable-libstdcxx            \
+          --disable-bootstrap            \
           --enable-languages=c,c++
 
         jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
         make -j"${jobs}"
         make DESTDIR="/out/${out}" install
-
-        cat ../gcc/limitx.h ../gcc/glimits.h ../gcc/limity.h > \
-          "$(dirname "$(/out/${out}/tools/bin/x86_64-lfs-linux-gnu-gcc -print-libgcc-file-name)")/include/limits.h"
         "%,
     }
   in

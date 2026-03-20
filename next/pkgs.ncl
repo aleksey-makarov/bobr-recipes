@@ -11,7 +11,6 @@ let rec pkgs =
   & ((import "binutils.ncl") pkgs)
   & ((import "linux.ncl") pkgs)
   & ((import "bootstrap.ncl") pkgs)
-  & ((import "m4.ncl") pkgs)
   & ((import "gawk.ncl") pkgs)
   & ((import "bison.ncl") pkgs)
   & ((import "gmp.ncl") pkgs)

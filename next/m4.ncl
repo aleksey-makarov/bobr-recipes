@@ -17,11 +17,6 @@ fun pkgs =>
       source =
         (buildscripts.autotools {
           output = "buildscript-m4-temp-1.4.20",
-          prepend_path = ["/tools/bin"],
-          configure_args = [
-            "--host=x86_64-lfs-linux-gnu",
-            "--build=x86_64-pc-linux-gnu",
-          ],
         }).source,
     }
   in
@@ -29,7 +24,7 @@ fun pkgs =>
   let m4_temp_1_4_20 =
     store.bind m4_src_1_4_20 (fun m4_src =>
     store.bind buildscript_m4_temp_1_4_20 (fun script =>
-    store.bind pkgs.gcc_temp_build_image (fun image =>
+    store.bind pkgs.host_image (fun image =>
     store.binary "m4-temp-1.4.20" {
       kind = "binary-output",
       optimize = "size",

@@ -17,11 +17,6 @@ fun pkgs =>
       source =
         (buildscripts.autotools {
           output = "buildscript-gawk-temp-5.3.2",
-          prepend_path = ["/tools/bin"],
-          configure_args = [
-            "--host=x86_64-lfs-linux-gnu",
-            "--build=x86_64-pc-linux-gnu",
-          ],
           pre_configure = "sed -i 's/extras//' Makefile.in",
         }).source,
     }
@@ -30,7 +25,7 @@ fun pkgs =>
   let gawk_temp_5_3_2 =
     store.bind gawk_src_5_3_2 (fun gawk_src =>
     store.bind buildscript_gawk_temp_5_3_2 (fun script =>
-    store.bind pkgs.gcc_temp_build_image (fun image =>
+    store.bind pkgs.host_image (fun image =>
     store.binary "gawk-temp-5.3.2" {
       kind = "binary-output",
       optimize = "size",

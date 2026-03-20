@@ -1,7 +1,4 @@
 {
-  target = "x86_64-lfs-linux-gnu",
-  build = "x86_64-pc-linux-gnu",
-
   host_image_name = "host-image",
   host_image = {
     image = "docker.io/library/buildpack-deps:bookworm",

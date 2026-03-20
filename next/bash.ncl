@@ -34,11 +34,7 @@
         fi
       fi
 
-      export PATH="/tools/bin:${PATH:-}"
-
-      ./configure --prefix=/usr                        \
-                  --build="$(sh support/config.guess)" \
-                  --host=x86_64-lfs-linux-gnu         \
+      ./configure --prefix=/usr                \
                   --without-bash-malloc
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
@@ -84,8 +80,7 @@
         fi
       fi
 
-      ./configure --prefix=/usr                        \
-                  --build="$(sh support/config.guess)" \
+      ./configure --prefix=/usr        \
                   --without-bash-malloc
 
       jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"

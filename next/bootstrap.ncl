@@ -7,14 +7,6 @@ fun pkgs =>
     } host_image [binutils_temp]))
   in
 
-  let bison_temp_build_image =
-    store.bind pkgs.gcc_temp_build_image (fun gcc_temp_build_image =>
-    store.bind pkgs.m4_temp_1_4_20 (fun m4_temp =>
-    store.image "bison-temp-build-image" {
-      mode = "layered",
-    } gcc_temp_build_image [m4_temp]))
-  in
-
   let glibc_temp_build_image =
     store.bind pkgs.gcc_temp_build_image (fun gcc_temp_build_image =>
     store.bind pkgs.gcc_temp_15_2_0 (fun gcc_temp =>
@@ -26,6 +18,14 @@ fun pkgs =>
     } gcc_temp_build_image [gcc_temp, linux_headers_temp, gawk_temp, bison_temp])))))
   in
 
+  let stage1_userland_build_image =
+    store.bind pkgs.glibc_temp_build_image (fun glibc_temp_build_image =>
+    store.bind pkgs.glibc_temp_2_42 (fun glibc_temp =>
+    store.image "stage1-userland-build-image" {
+      mode = "layered",
+    } glibc_temp_build_image [glibc_temp]))
+  in
+
   {
-    include [gcc_temp_build_image, bison_temp_build_image, glibc_temp_build_image],
+    include [gcc_temp_build_image, glibc_temp_build_image, stage1_userland_build_image],
   }

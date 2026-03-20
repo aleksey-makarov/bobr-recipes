@@ -40,15 +40,11 @@ fun pkgs =>
           fi
         fi
 
-        export PATH="/tools/bin:${PATH:-}"
-
         mkdir -p build
         cd build
 
         ../configure                               \
-          --prefix=/tools                          \
-          --with-sysroot=/                         \
-          --target=x86_64-lfs-linux-gnu           \
+          --prefix=/usr                            \
           --disable-nls                            \
           --enable-gprofng=no                      \
           --disable-werror                         \

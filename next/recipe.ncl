@@ -1,2 +1,2 @@
 let pkgs = import "pkgs.ncl" in
-pkgs.glibc_temp_2_42
+pkgs.stage1_userland_build_image

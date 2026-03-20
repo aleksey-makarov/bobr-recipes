@@ -41,24 +41,17 @@ fun pkgs =>
           fi
         fi
 
-        export PATH="/tools/bin:${PATH:-}"
-
         patch -Np1 -i /in/sources1
         mkdir -p build
         cd build
 
         echo "rootsbindir=/usr/sbin" > configparms
 
-        CC="x86_64-lfs-linux-gnu-gcc --sysroot=/" \
-        CXX="x86_64-lfs-linux-gnu-g++ --sysroot=/" \
         ../configure                               \
           --prefix=/usr                            \
-          --host=x86_64-lfs-linux-gnu             \
-          --build="$(../scripts/config.guess)"    \
-          --disable-nscd                          \
-          --with-headers=/usr/include             \
-          --with-binutils=/tools/bin              \
-          libc_cv_slibdir=/usr/lib                \
+          --disable-nscd                           \
+          --with-headers=/usr/include              \
+          libc_cv_slibdir=/usr/lib                 \
           --enable-kernel=5.4
 
         jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
