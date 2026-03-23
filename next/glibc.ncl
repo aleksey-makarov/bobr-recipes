@@ -50,7 +50,6 @@ fun pkgs =>
         ../configure                               \
           --prefix=/usr                            \
           --disable-nscd                           \
-          --with-headers=/usr/include              \
           libc_cv_slibdir=/usr/lib                 \
           --enable-kernel=5.4
 
@@ -61,11 +60,20 @@ fun pkgs =>
     }
   in
 
+  let glibc_gen1_build_image =
+    store.bind pkgs.host_image (fun host_image =>
+    store.bind pkgs.gawk_gen1_5_3_2 (fun gawk_gen1 =>
+    store.bind pkgs.bison_gen1_3_8_2 (fun bison_gen1 =>
+    store.image "glibc-gen1-build-image" {
+      mode = "layered",
+    } host_image [gawk_gen1, bison_gen1])))
+  in
+
   let glibc_gen1_2_42 =
     store.bind glibc_src_2_42 (fun glibc_src =>
     store.bind glibc_fhs_patch_2_42 (fun glibc_fhs_patch =>
     store.bind buildscript_glibc_gen1_2_42 (fun script =>
-    store.bind pkgs.host_image (fun image =>
+    store.bind glibc_gen1_build_image (fun image =>
     store.binary "glibc-gen1-2.42" {
       kind = "binary-output",
       optimize = "size",
@@ -77,6 +85,7 @@ fun pkgs =>
       glibc_fhs_patch_2_42,
       glibc_src_2_42,
       buildscript_glibc_gen1_2_42,
+      glibc_gen1_build_image,
       glibc_gen1_2_42,
     ],
   }

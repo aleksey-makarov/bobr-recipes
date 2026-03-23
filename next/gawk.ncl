@@ -11,22 +11,22 @@ fun pkgs =>
     }
   in
 
-  let buildscript_gawk_temp_5_3_2 =
-    store.text "buildscript-gawk-temp-5.3.2" {
+  let buildscript_gawk_gen1_5_3_2 =
+    store.text "buildscript-gawk-gen1-5.3.2" {
       kind = "build-script",
       source =
         (buildscripts.autotools {
-          output = "buildscript-gawk-temp-5.3.2",
+          output = "buildscript-gawk-gen1-5.3.2",
           pre_configure = "sed -i 's/extras//' Makefile.in",
         }).source,
     }
   in
 
-  let gawk_temp_5_3_2 =
+  let gawk_gen1_5_3_2 =
     store.bind gawk_src_5_3_2 (fun gawk_src =>
-    store.bind buildscript_gawk_temp_5_3_2 (fun script =>
+    store.bind buildscript_gawk_gen1_5_3_2 (fun script =>
     store.bind pkgs.host_image (fun image =>
-    store.binary "gawk-temp-5.3.2" {
+    store.binary "gawk-gen1-5.3.2" {
       kind = "binary-output",
       optimize = "size",
     } image script [gawk_src])))
@@ -35,7 +35,7 @@ fun pkgs =>
   {
     include [
       gawk_src_5_3_2,
-      buildscript_gawk_temp_5_3_2,
-      gawk_temp_5_3_2,
+      buildscript_gawk_gen1_5_3_2,
+      gawk_gen1_5_3_2,
     ],
   }

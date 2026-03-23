@@ -11,21 +11,21 @@ fun pkgs =>
     }
   in
 
-  let buildscript_bison_temp_3_8_2 =
-    store.text "buildscript-bison-temp-3.8.2" {
+  let buildscript_bison_gen1_3_8_2 =
+    store.text "buildscript-bison-gen1-3.8.2" {
       kind = "build-script",
       source =
         (buildscripts.autotools {
-          output = "buildscript-bison-temp-3.8.2",
+          output = "buildscript-bison-gen1-3.8.2",
         }).source,
     }
   in
 
-  let bison_temp_3_8_2 =
+  let bison_gen1_3_8_2 =
     store.bind bison_src_3_8_2 (fun bison_src =>
-    store.bind buildscript_bison_temp_3_8_2 (fun script =>
+    store.bind buildscript_bison_gen1_3_8_2 (fun script =>
     store.bind pkgs.host_image (fun image =>
-    store.binary "bison-temp-3.8.2" {
+    store.binary "bison-gen1-3.8.2" {
       kind = "binary-output",
       optimize = "size",
     } image script [bison_src])))
@@ -34,7 +34,7 @@ fun pkgs =>
   {
     include [
       bison_src_3_8_2,
-      buildscript_bison_temp_3_8_2,
-      bison_temp_3_8_2,
+      buildscript_bison_gen1_3_8_2,
+      bison_gen1_3_8_2,
     ],
   }
