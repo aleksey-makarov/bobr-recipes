@@ -36,10 +36,7 @@ fun pkgs =>
   in
 
   let buildscript_patch_2_8 =
-    store.text "buildscript-patch-2.8" {
-      kind = "build-script",
-      source = patch_buildscript_source_2_8,
-    }
+    buildscript_patch_gen1_2_8
   in
 
   let patch_2_8 =

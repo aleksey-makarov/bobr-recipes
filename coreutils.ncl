@@ -53,10 +53,7 @@ fun pkgs =>
   in
 
   let buildscript_coreutils_9_7 =
-    store.text "buildscript-coreutils-9.7" {
-      kind = "build-script",
-      source = coreutils_buildscript_source_9_7,
-    }
+    buildscript_coreutils_gen1_9_7
   in
 
   let coreutils_9_7 =

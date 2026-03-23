@@ -35,10 +35,7 @@ fun pkgs =>
   in
 
   let buildscript_bison_3_8_2 =
-    store.text "buildscript-bison-3.8.2" {
-      kind = "build-script",
-      source = bison_buildscript_source_3_8_2,
-    }
+    buildscript_bison_gen1_3_8_2
   in
 
   let bison_3_8_2 =

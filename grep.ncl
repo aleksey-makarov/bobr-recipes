@@ -36,10 +36,7 @@ fun pkgs =>
   in
 
   let buildscript_grep_3_12 =
-    store.text "buildscript-grep-3.12" {
-      kind = "build-script",
-      source = grep_buildscript_source_3_12,
-    }
+    buildscript_grep_gen1_3_12
   in
 
   let grep_3_12 =

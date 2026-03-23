@@ -37,10 +37,7 @@ fun pkgs =>
   in
 
   let buildscript_gawk_5_3_2 =
-    store.text "buildscript-gawk-5.3.2" {
-      kind = "build-script",
-      source = gawk_buildscript_source_5_3_2,
-    }
+    buildscript_gawk_gen1_5_3_2
   in
 
   let gawk_5_3_2 =

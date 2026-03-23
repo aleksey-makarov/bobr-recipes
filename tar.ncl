@@ -39,10 +39,7 @@ fun pkgs =>
   in
 
   let buildscript_tar_1_35 =
-    store.text "buildscript-tar-1.35" {
-      kind = "build-script",
-      source = tar_buildscript_source_1_35,
-    }
+    buildscript_tar_gen1_1_35
   in
 
   let tar_1_35 =

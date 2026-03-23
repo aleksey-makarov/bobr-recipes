@@ -36,10 +36,7 @@ fun pkgs =>
   in
 
   let buildscript_gzip_1_14 =
-    store.text "buildscript-gzip-1.14" {
-      kind = "build-script",
-      source = gzip_buildscript_source_1_14,
-    }
+    buildscript_gzip_gen1_1_14
   in
 
   let gzip_1_14 =

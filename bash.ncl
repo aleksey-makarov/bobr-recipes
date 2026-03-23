@@ -59,10 +59,7 @@ fun pkgs =>
   in
 
   let buildscript_bash_5_3 =
-    store.text "buildscript-bash-5.3" {
-      kind = "build-script",
-      source = bash_buildscript_source_5_3,
-    }
+    buildscript_bash_gen1_5_3
   in
 
   let bash_5_3 =

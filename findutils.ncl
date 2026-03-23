@@ -40,10 +40,7 @@ fun pkgs =>
   in
 
   let buildscript_findutils_4_10_0 =
-    store.text "buildscript-findutils-4.10.0" {
-      kind = "build-script",
-      source = findutils_buildscript_source_4_10_0,
-    }
+    buildscript_findutils_gen1_4_10_0
   in
 
   let findutils_4_10_0 =

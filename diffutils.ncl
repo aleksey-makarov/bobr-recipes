@@ -37,10 +37,7 @@ fun pkgs =>
   in
 
   let buildscript_diffutils_3_12 =
-    store.text "buildscript-diffutils-3.12" {
-      kind = "build-script",
-      source = diffutils_buildscript_source_3_12,
-    }
+    buildscript_diffutils_gen1_3_12
   in
 
   let diffutils_3_12 =

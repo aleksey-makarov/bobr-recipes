@@ -36,10 +36,7 @@ fun pkgs =>
   in
 
   let buildscript_sed_4_9 =
-    store.text "buildscript-sed-4.9" {
-      kind = "build-script",
-      source = sed_buildscript_source_4_9,
-    }
+    buildscript_sed_gen1_4_9
   in
 
   let sed_4_9 =

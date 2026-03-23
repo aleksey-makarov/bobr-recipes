@@ -36,10 +36,7 @@ fun pkgs =>
   in
 
   let buildscript_make_4_4_1 =
-    store.text "buildscript-make-4.4.1" {
-      kind = "build-script",
-      source = make_buildscript_source_4_4_1,
-    }
+    buildscript_make_gen1_4_4_1
   in
 
   let make_4_4_1 =
