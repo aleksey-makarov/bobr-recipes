@@ -1,2 +1,2 @@
 let pkgs = import "pkgs.ncl" in
-pkgs.bootstrap_image
+pkgs.glibc_2_42

@@ -40,8 +40,7 @@ fun pkgs =>
         jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
         make -j"${jobs}"
         make DESTDIR="/out/${out}" install
-        mkdir -p "/out/${out}/bin"
-        ln -svf ../usr/bin/bash "/out/${out}/bin/sh"
+        ln -svf bash "/out/${out}/usr/bin/sh"
         "%,
     }
   in
