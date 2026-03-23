@@ -1,96 +1,78 @@
-{
-  "buildscript-coreutils-pass1-9.7" = {
-    type = "text",
-    artifact_kind = "build-script",
-    outputs = ["buildscript-coreutils-pass1-9.7"],
-    source = m%"
-      #!/usr/bin/env bash
-      set -euo pipefail
+let buildscripts = import "buildscripts.ncl" in
 
-      src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-      out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+fun pkgs =>
+  let coreutils_src_9_7 =
+    store.fetch "coreutils-src-9.7" {
+      url = [
+        "https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz",
+        "https://mirrors.kernel.org/gnu/coreutils/coreutils-9.7.tar.xz",
+      ],
+      hash = "md5:6b7285faf7d5eb91592bdd689270d3f1",
+    }
+  in
 
-      cd "/in/${src}"
+  let coreutils_buildscript_source_9_7 =
+    (buildscripts.autotools {
+      output = "buildscript-coreutils-gen1-9.7",
+      configure_args = [
+        "--disable-nls",
+        "--without-selinux",
+        "--without-openssl",
+        "--without-libgmp",
+        "--enable-install-program=hostname",
+        "--enable-no-install-program=kill,uptime",
+      ],
+      post_install = m%"
+            mkdir -pv "/out/${out}/usr/sbin"
+            mv -v "/out/${out}/usr/bin/chroot" \
+                  "/out/${out}/usr/sbin/chroot"
+            mkdir -pv "/out/${out}/usr/share/man/man8"
+            mv -v "/out/${out}/usr/share/man/man1/chroot.1" \
+                  "/out/${out}/usr/share/man/man8/chroot.8"
+            sed -i 's/"1"/"8"/' \
+                   "/out/${out}/usr/share/man/man8/chroot.8"
+          "%,
+    }).source
+  in
 
-      if [ ! -x ./configure ]; then
-        candidates=()
-        for d in ./*; do
-          if [ -d "$d" ] && [ -x "$d/configure" ] && [ -x "$d/build-aux/config.guess" ]; then
-            candidates+=("$d")
-          fi
-        done
-        if [ "${#candidates[@]}" -eq 1 ]; then
-          cd "${candidates[0]}"
-        fi
-      fi
+  let buildscript_coreutils_gen1_9_7 =
+    store.text "buildscript-coreutils-gen1-9.7" {
+      kind = "build-script",
+      source = coreutils_buildscript_source_9_7,
+    }
+  in
 
-      export PATH="/tools/bin:${PATH:-}"
+  let coreutils_gen1_9_7 =
+    store.bind coreutils_src_9_7 (fun coreutils_src =>
+    store.bind buildscript_coreutils_gen1_9_7 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "coreutils-gen1-9.7" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [coreutils_src])))
+  in
 
-      ./configure --prefix=/usr                          \
-                  --host=x86_64-lfs-linux-gnu           \
-                  --build="$(build-aux/config.guess)"   \
-                  --enable-install-program=hostname     \
-                  --enable-no-install-program=kill,uptime
+  let buildscript_coreutils_9_7 =
+    store.text "buildscript-coreutils-9.7" {
+      kind = "build-script",
+      source = coreutils_buildscript_source_9_7,
+    }
+  in
 
-      jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-      make -j"${jobs}"
-      make DESTDIR="/out/${out}" install
+  let coreutils_9_7 =
+    store.bind coreutils_src_9_7 (fun coreutils_src =>
+    store.bind buildscript_coreutils_9_7 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "coreutils-9.7" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [coreutils_src])))
+  in
 
-      mkdir -pv "/out/${out}/usr/sbin"
-      mv -v "/out/${out}/usr/bin/chroot" \
-            "/out/${out}/usr/sbin/chroot"
-      mkdir -pv "/out/${out}/usr/share/man/man8"
-      mv -v "/out/${out}/usr/share/man/man1/chroot.1" \
-            "/out/${out}/usr/share/man/man8/chroot.8"
-      sed -i 's/\"1\"/\"8\"/' \
-             "/out/${out}/usr/share/man/man8/chroot.8"
-      "%,
-  },
-
-  "coreutils-src-9.7" = {
-    type = "fetch",
-    outputs = ["coreutils-src-9.7"],
-    url = [
-      "https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz",
-      "https://mirrors.kernel.org/gnu/coreutils/coreutils-9.7.tar.xz",
+  {
+    include [
+      coreutils_src_9_7,
+      coreutils_gen1_9_7,
+      coreutils_9_7,
     ],
-    hash = "md5:6b7285faf7d5eb91592bdd689270d3f1",
-  },
-
-  "coreutils-pass1-9.7" = {
-    type = "binary",
-    inputs = [
-      "coreutils-src-9.7",
-      "buildscript-coreutils-pass1-9.7",
-      "bootstrap-pass1",
-    ],
-    outputs = ["coreutils-pass1-9.7"],
-  },
-
-  "buildscript-coreutils-static-9.7" = {
-    type = "text",
-    artifact_kind = "build-script",
-    outputs = ["buildscript-coreutils-static-9.7"],
-    source = m%"
-      #!/usr/bin/env bash
-      set -euo pipefail
-      src="/in/coreutils-src-9.7"
-      out="/out/coreutils-static-9.7"
-      cd "$src"
-      if [ -f Makefile ]; then
-        make distclean || true
-      fi
-      rm -f config.cache
-      CFLAGS="-O2 -static" LDFLAGS="-static" \
-        ./configure --prefix="$out" --without-selinux
-      make -j"$(nproc)"
-      make install
-      "%,
-  },
-
-  "coreutils-static-9.7" = {
-    type = "binary",
-    inputs = ["coreutils-src-9.7", "buildscript-coreutils-static-9.7", "bootstrap-binary-image"],
-    outputs = ["coreutils-static-9.7"],
-  },
-}
+  }

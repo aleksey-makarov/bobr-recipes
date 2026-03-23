@@ -1,57 +1,64 @@
-{
-  "buildscript-tar-pass1-1.35" = {
-    type = "text",
-    artifact_kind = "build-script",
-    outputs = ["buildscript-tar-pass1-1.35"],
-    source = m%"
-      #!/usr/bin/env bash
-      set -euo pipefail
+let buildscripts = import "buildscripts.ncl" in
 
-      src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-      out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+fun pkgs =>
+  let tar_src_1_35 =
+    store.fetch "tar-src-1.35" {
+      url = [
+        "https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz",
+        "https://mirrors.kernel.org/gnu/tar/tar-1.35.tar.xz",
+      ],
+      hash = "md5:a2d8042658cfd8ea939e6d911eaf4152",
+    }
+  in
 
-      cd "/in/${src}"
+  let tar_buildscript_source_1_35 =
+    (buildscripts.autotools {
+      output = "buildscript-tar-gen1-1.35",
+      configure_args = [
+        "--disable-nls",
+        "--without-selinux",
+      ],
+    }).source
+  in
 
-      if [ ! -x ./configure ]; then
-        candidates=()
-        for d in ./*; do
-          if [ -d "$d" ] && [ -x "$d/configure" ] && [ -x "$d/build-aux/config.guess" ]; then
-            candidates+=("$d")
-          fi
-        done
-        if [ "${#candidates[@]}" -eq 1 ]; then
-          cd "${candidates[0]}"
-        fi
-      fi
+  let buildscript_tar_gen1_1_35 =
+    store.text "buildscript-tar-gen1-1.35" {
+      kind = "build-script",
+      source = tar_buildscript_source_1_35,
+    }
+  in
 
-      export PATH="/tools/bin:${PATH:-}"
+  let tar_gen1_1_35 =
+    store.bind tar_src_1_35 (fun tar_src =>
+    store.bind buildscript_tar_gen1_1_35 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "tar-gen1-1.35" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [tar_src])))
+  in
 
-      ./configure --prefix=/usr                    \
-                  --host=x86_64-lfs-linux-gnu      \
-                  --build="$(build-aux/config.guess)"
+  let buildscript_tar_1_35 =
+    store.text "buildscript-tar-1.35" {
+      kind = "build-script",
+      source = tar_buildscript_source_1_35,
+    }
+  in
 
-      jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-      make -j"${jobs}"
-      make DESTDIR="/out/${out}" install
-      "%,
-  },
+  let tar_1_35 =
+    store.bind tar_src_1_35 (fun tar_src =>
+    store.bind buildscript_tar_1_35 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "tar-1.35" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [tar_src])))
+  in
 
-  "tar-pass1-1.35" = {
-    type = "binary",
-    inputs = [
-      "tar-src-1.35",
-      "buildscript-tar-pass1-1.35",
-      "bootstrap-pass1",
+  {
+    include [
+      tar_src_1_35,
+      tar_gen1_1_35,
+      tar_1_35,
     ],
-    outputs = ["tar-pass1-1.35"],
-  },
-  "tar-src-1.35" = {
-    type = "fetch",
-    outputs = ["tar-src-1.35"],
-    url = [
-      "https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz",
-      "https://mirrors.kernel.org/gnu/tar/tar-1.35.tar.xz",
-    ],
-    hash = "md5:a2d8042658cfd8ea939e6d911eaf4152",
-  },
-}
+  }

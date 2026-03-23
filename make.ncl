@@ -1,57 +1,61 @@
-{
-  "buildscript-make-pass1-4.4.1" = {
-    type = "text",
-    artifact_kind = "build-script",
-    outputs = ["buildscript-make-pass1-4.4.1"],
-    source = m%"
-      #!/usr/bin/env bash
-      set -euo pipefail
+let buildscripts = import "buildscripts.ncl" in
 
-      src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-      out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+fun pkgs =>
+  let make_src_4_4_1 =
+    store.fetch "make-src-4.4.1" {
+      url = [
+        "https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz",
+        "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",
+      ],
+      hash = "md5:c8469a3713cbbe04d955d4ae4be23eeb",
+    }
+  in
 
-      cd "/in/${src}"
+  let make_buildscript_source_4_4_1 =
+    (buildscripts.autotools {
+      output = "buildscript-make-gen1-4.4.1",
+      configure_args = ["--disable-nls"],
+    }).source
+  in
 
-      if [ ! -x ./configure ]; then
-        candidates=()
-        for d in ./*; do
-          if [ -d "$d" ] && [ -x "$d/configure" ] && [ -x "$d/build-aux/config.guess" ]; then
-            candidates+=("$d")
-          fi
-        done
-        if [ "${#candidates[@]}" -eq 1 ]; then
-          cd "${candidates[0]}"
-        fi
-      fi
+  let buildscript_make_gen1_4_4_1 =
+    store.text "buildscript-make-gen1-4.4.1" {
+      kind = "build-script",
+      source = make_buildscript_source_4_4_1,
+    }
+  in
 
-      export PATH="/tools/bin:${PATH:-}"
+  let make_gen1_4_4_1 =
+    store.bind make_src_4_4_1 (fun make_src =>
+    store.bind buildscript_make_gen1_4_4_1 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "make-gen1-4.4.1" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [make_src])))
+  in
 
-      ./configure --prefix=/usr                    \
-                  --host=x86_64-lfs-linux-gnu      \
-                  --build="$(build-aux/config.guess)"
+  let buildscript_make_4_4_1 =
+    store.text "buildscript-make-4.4.1" {
+      kind = "build-script",
+      source = make_buildscript_source_4_4_1,
+    }
+  in
 
-      jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-      make -j"${jobs}"
-      make DESTDIR="/out/${out}" install
-      "%,
-  },
+  let make_4_4_1 =
+    store.bind make_src_4_4_1 (fun make_src =>
+    store.bind buildscript_make_4_4_1 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "make-4.4.1" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [make_src])))
+  in
 
-  "make-pass1-4.4.1" = {
-    type = "binary",
-    inputs = [
-      "make-src-4.4.1",
-      "buildscript-make-pass1-4.4.1",
-      "bootstrap-pass1",
+  {
+    include [
+      make_src_4_4_1,
+      make_gen1_4_4_1,
+      make_4_4_1,
     ],
-    outputs = ["make-pass1-4.4.1"],
-  },
-  "make-src-4.4.1" = {
-    type = "fetch",
-    outputs = ["make-src-4.4.1"],
-    url = [
-      "https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz",
-      "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",
-    ],
-    hash = "md5:c8469a3713cbbe04d955d4ae4be23eeb",
-  },
-}
+  }

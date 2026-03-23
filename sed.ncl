@@ -1,57 +1,61 @@
-{
-  "buildscript-sed-pass1-4.9" = {
-    type = "text",
-    artifact_kind = "build-script",
-    outputs = ["buildscript-sed-pass1-4.9"],
-    source = m%"
-      #!/usr/bin/env bash
-      set -euo pipefail
+let buildscripts = import "buildscripts.ncl" in
 
-      src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-      out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+fun pkgs =>
+  let sed_src_4_9 =
+    store.fetch "sed-src-4.9" {
+      url = [
+        "https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz",
+        "https://mirrors.kernel.org/gnu/sed/sed-4.9.tar.xz",
+      ],
+      hash = "md5:6aac9b2dbafcd5b7a67a8a9bcb8036c3",
+    }
+  in
 
-      cd "/in/${src}"
+  let sed_buildscript_source_4_9 =
+    (buildscripts.autotools {
+      output = "buildscript-sed-gen1-4.9",
+      configure_args = ["--disable-nls", "--without-selinux"],
+    }).source
+  in
 
-      if [ ! -x ./configure ]; then
-        candidates=()
-        for d in ./*; do
-          if [ -d "$d" ] && [ -x "$d/configure" ] && [ -x "$d/build-aux/config.guess" ]; then
-            candidates+=("$d")
-          fi
-        done
-        if [ "${#candidates[@]}" -eq 1 ]; then
-          cd "${candidates[0]}"
-        fi
-      fi
+  let buildscript_sed_gen1_4_9 =
+    store.text "buildscript-sed-gen1-4.9" {
+      kind = "build-script",
+      source = sed_buildscript_source_4_9,
+    }
+  in
 
-      export PATH="/tools/bin:${PATH:-}"
+  let sed_gen1_4_9 =
+    store.bind sed_src_4_9 (fun sed_src =>
+    store.bind buildscript_sed_gen1_4_9 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "sed-gen1-4.9" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [sed_src])))
+  in
 
-      ./configure --prefix=/usr                    \
-                  --host=x86_64-lfs-linux-gnu      \
-                  --build="$(./build-aux/config.guess)"
+  let buildscript_sed_4_9 =
+    store.text "buildscript-sed-4.9" {
+      kind = "build-script",
+      source = sed_buildscript_source_4_9,
+    }
+  in
 
-      jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-      make -j"${jobs}"
-      make DESTDIR="/out/${out}" install
-      "%,
-  },
+  let sed_4_9 =
+    store.bind sed_src_4_9 (fun sed_src =>
+    store.bind buildscript_sed_4_9 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "sed-4.9" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [sed_src])))
+  in
 
-  "sed-pass1-4.9" = {
-    type = "binary",
-    inputs = [
-      "sed-src-4.9",
-      "buildscript-sed-pass1-4.9",
-      "bootstrap-pass1",
+  {
+    include [
+      sed_src_4_9,
+      sed_gen1_4_9,
+      sed_4_9,
     ],
-    outputs = ["sed-pass1-4.9"],
-  },
-  "sed-src-4.9" = {
-    type = "fetch",
-    outputs = ["sed-src-4.9"],
-    url = [
-      "https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz",
-      "https://mirrors.kernel.org/gnu/sed/sed-4.9.tar.xz",
-    ],
-    hash = "md5:6aac9b2dbafcd5b7a67a8a9bcb8036c3",
-  },
-}
+  }

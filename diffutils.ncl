@@ -1,59 +1,62 @@
-{
-  "buildscript-diffutils-pass1-3.12" = {
-    type = "text",
-    artifact_kind = "build-script",
-    outputs = ["buildscript-diffutils-pass1-3.12"],
-    source = m%"
-      #!/usr/bin/env bash
-      set -euo pipefail
+let buildscripts = import "buildscripts.ncl" in
 
-      src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-      out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+fun pkgs =>
+  let diffutils_src_3_12 =
+    store.fetch "diffutils-src-3.12" {
+      url = [
+        "https://ftp.gnu.org/gnu/diffutils/diffutils-3.12.tar.xz",
+        "https://mirrors.kernel.org/gnu/diffutils/diffutils-3.12.tar.xz",
+      ],
+      hash = "md5:d1b18b20868fb561f77861cd90b05de4",
+    }
+  in
 
-      cd "/in/${src}"
+  let diffutils_buildscript_source_3_12 =
+    (buildscripts.autotools {
+      output = "buildscript-diffutils-gen1-3.12",
+      configure_args = ["--disable-nls"],
+      env = { gl_cv_func_strcasecmp_works = "y" },
+    }).source
+  in
 
-      if [ ! -x ./configure ]; then
-        candidates=()
-        for d in ./*; do
-          if [ -d "$d" ] && [ -x "$d/configure" ] && [ -x "$d/build-aux/config.guess" ]; then
-            candidates+=("$d")
-          fi
-        done
-        if [ "${#candidates[@]}" -eq 1 ]; then
-          cd "${candidates[0]}"
-        fi
-      fi
+  let buildscript_diffutils_gen1_3_12 =
+    store.text "buildscript-diffutils-gen1-3.12" {
+      kind = "build-script",
+      source = diffutils_buildscript_source_3_12,
+    }
+  in
 
-      export PATH="/tools/bin:${PATH:-}"
+  let diffutils_gen1_3_12 =
+    store.bind diffutils_src_3_12 (fun diffutils_src =>
+    store.bind buildscript_diffutils_gen1_3_12 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "diffutils-gen1-3.12" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [diffutils_src])))
+  in
 
-      ./configure --prefix=/usr                     \
-                  --host=x86_64-lfs-linux-gnu      \
-                  gl_cv_func_strcasecmp_works=y    \
-                  --build="$(./build-aux/config.guess)"
+  let buildscript_diffutils_3_12 =
+    store.text "buildscript-diffutils-3.12" {
+      kind = "build-script",
+      source = diffutils_buildscript_source_3_12,
+    }
+  in
 
-      jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-      make -j"${jobs}"
-      make DESTDIR="/out/${out}" install
-      "%,
-  },
+  let diffutils_3_12 =
+    store.bind diffutils_src_3_12 (fun diffutils_src =>
+    store.bind buildscript_diffutils_3_12 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "diffutils-3.12" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [diffutils_src])))
+  in
 
-  "diffutils-pass1-3.12" = {
-    type = "binary",
-    inputs = [
-      "diffutils-src-3.12",
-      "buildscript-diffutils-pass1-3.12",
-      "bootstrap-pass1",
+  {
+    include [
+      diffutils_src_3_12,
+      diffutils_gen1_3_12,
+      diffutils_3_12,
     ],
-    outputs = ["diffutils-pass1-3.12"],
-  },
-
-  "diffutils-src-3.12" = {
-    type = "fetch",
-    outputs = ["diffutils-src-3.12"],
-    url = [
-      "https://ftp.gnu.org/gnu/diffutils/diffutils-3.12.tar.xz",
-      "https://mirrors.kernel.org/gnu/diffutils/diffutils-3.12.tar.xz",
-    ],
-    hash = "md5:d1b18b20868fb561f77861cd90b05de4",
-  },
-}
+  }

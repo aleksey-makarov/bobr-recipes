@@ -1,59 +1,65 @@
-{
-  "buildscript-findutils-pass1-4.10.0" = {
-    type = "text",
-    artifact_kind = "build-script",
-    outputs = ["buildscript-findutils-pass1-4.10.0"],
-    source = m%"
-      #!/usr/bin/env bash
-      set -euo pipefail
+let buildscripts = import "buildscripts.ncl" in
 
-      src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-      out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+fun pkgs =>
+  let findutils_src_4_10_0 =
+    store.fetch "findutils-src-4.10.0" {
+      url = [
+        "https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz",
+        "https://mirrors.kernel.org/gnu/findutils/findutils-4.10.0.tar.xz",
+      ],
+      hash = "md5:870cfd71c07d37ebe56f9f4aaf4ad872",
+    }
+  in
 
-      cd "/in/${src}"
+  let findutils_buildscript_source_4_10_0 =
+    (buildscripts.autotools {
+      output = "buildscript-findutils-gen1-4.10.0",
+      configure_args = [
+        "--disable-nls",
+        "--without-selinux",
+        "--localstatedir=/var/lib/locate",
+      ],
+    }).source
+  in
 
-      if [ ! -x ./configure ]; then
-        candidates=()
-        for d in ./*; do
-          if [ -d "$d" ] && [ -x "$d/configure" ] && [ -x "$d/build-aux/config.guess" ]; then
-            candidates+=("$d")
-          fi
-        done
-        if [ "${#candidates[@]}" -eq 1 ]; then
-          cd "${candidates[0]}"
-        fi
-      fi
+  let buildscript_findutils_gen1_4_10_0 =
+    store.text "buildscript-findutils-gen1-4.10.0" {
+      kind = "build-script",
+      source = findutils_buildscript_source_4_10_0,
+    }
+  in
 
-      export PATH="/tools/bin:${PATH:-}"
+  let findutils_gen1_4_10_0 =
+    store.bind findutils_src_4_10_0 (fun findutils_src =>
+    store.bind buildscript_findutils_gen1_4_10_0 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "findutils-gen1-4.10.0" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [findutils_src])))
+  in
 
-      ./configure --prefix=/usr                     \
-                  --localstatedir=/var/lib/locate  \
-                  --host=x86_64-lfs-linux-gnu      \
-                  --build="$(build-aux/config.guess)"
+  let buildscript_findutils_4_10_0 =
+    store.text "buildscript-findutils-4.10.0" {
+      kind = "build-script",
+      source = findutils_buildscript_source_4_10_0,
+    }
+  in
 
-      jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-      make -j"${jobs}"
-      make DESTDIR="/out/${out}" install
-      "%,
-  },
+  let findutils_4_10_0 =
+    store.bind findutils_src_4_10_0 (fun findutils_src =>
+    store.bind buildscript_findutils_4_10_0 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "findutils-4.10.0" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [findutils_src])))
+  in
 
-  "findutils-pass1-4.10.0" = {
-    type = "binary",
-    inputs = [
-      "findutils-src-4.10.0",
-      "buildscript-findutils-pass1-4.10.0",
-      "bootstrap-pass1",
+  {
+    include [
+      findutils_src_4_10_0,
+      findutils_gen1_4_10_0,
+      findutils_4_10_0,
     ],
-    outputs = ["findutils-pass1-4.10.0"],
-  },
-
-  "findutils-src-4.10.0" = {
-    type = "fetch",
-    outputs = ["findutils-src-4.10.0"],
-    url = [
-      "https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz",
-      "https://mirrors.kernel.org/gnu/findutils/findutils-4.10.0.tar.xz",
-    ],
-    hash = "md5:870cfd71c07d37ebe56f9f4aaf4ad872",
-  },
-}
+  }

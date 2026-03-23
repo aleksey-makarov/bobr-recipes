@@ -1,66 +1,62 @@
-{
-  "buildscript-gawk-pass1-5.3.2" = {
-    type = "text",
-    artifact_kind = "build-script",
-    outputs = ["buildscript-gawk-pass1-5.3.2"],
-    source = m%"
-      #!/usr/bin/env bash
-      set -euo pipefail
+let buildscripts = import "buildscripts.ncl" in
 
-      src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-      out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+fun pkgs =>
+  let gawk_src_5_3_2 =
+    store.fetch "gawk-src-5.3.2" {
+      url = [
+        "https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz",
+        "https://mirrors.kernel.org/gnu/gawk/gawk-5.3.2.tar.xz",
+      ],
+      hash = "md5:b7014650c5f45e5d4837c31209dc0037",
+    }
+  in
 
-      cd "/in/${src}"
+  let gawk_buildscript_source_5_3_2 =
+    (buildscripts.autotools {
+      output = "buildscript-gawk-gen1-5.3.2",
+      pre_configure = "sed -i 's/extras//' Makefile.in",
+      configure_args = ["--without-readline"],
+    }).source
+  in
 
-      if [ ! -x ./configure ]; then
-        candidates=()
-        for d in ./*; do
-          if [ -d "$d" ] && [ -x "$d/configure" ] && [ -x "$d/build-aux/config.guess" ]; then
-            candidates+=("$d")
-          fi
-        done
-        if [ "${#candidates[@]}" -eq 1 ]; then
-          cd "${candidates[0]}"
-        fi
-      fi
+  let buildscript_gawk_gen1_5_3_2 =
+    store.text "buildscript-gawk-gen1-5.3.2" {
+      kind = "build-script",
+      source = gawk_buildscript_source_5_3_2,
+    }
+  in
 
-      export PATH="/tools/bin:${PATH:-}"
+  let gawk_gen1_5_3_2 =
+    store.bind gawk_src_5_3_2 (fun gawk_src =>
+    store.bind buildscript_gawk_gen1_5_3_2 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "gawk-gen1-5.3.2" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [gawk_src])))
+  in
 
-      sed -i 's/extras//' Makefile.in
+  let buildscript_gawk_5_3_2 =
+    store.text "buildscript-gawk-5.3.2" {
+      kind = "build-script",
+      source = gawk_buildscript_source_5_3_2,
+    }
+  in
 
-      ./configure --prefix=/usr                    \
-                  --host=x86_64-lfs-linux-gnu      \
-                  --build="$(build-aux/config.guess)"
+  let gawk_5_3_2 =
+    store.bind gawk_src_5_3_2 (fun gawk_src =>
+    store.bind buildscript_gawk_5_3_2 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "gawk-5.3.2" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [gawk_src])))
+  in
 
-      jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-      make -j"${jobs}"
-      make DESTDIR="/out/${out}" install
-      "%,
-  },
-
-  "gawk-pass1-5.3.2" = {
-    type = "binary",
-    inputs = [
-      "gawk-src-5.3.2",
-      "buildscript-gawk-pass1-5.3.2",
-      "bootstrap-pass1",
+  {
+    include [
+      gawk_src_5_3_2,
+      gawk_gen1_5_3_2,
+      gawk_5_3_2,
     ],
-    outputs = ["gawk-pass1-5.3.2"],
-  },
-
-  "gawk-pass1-bootstrap-5.3.2" = {
-    type = "binary",
-    inputs = ["gawk-src-5.3.2", "buildscript-autotools", "bootstrap-binary-image"],
-    outputs = ["gawk-pass1-bootstrap-5.3.2"],
-  },
-
-  "gawk-src-5.3.2" = {
-    type = "fetch",
-    outputs = ["gawk-src-5.3.2"],
-    url = [
-      "https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz",
-      "https://mirrors.kernel.org/gnu/gawk/gawk-5.3.2.tar.xz",
-    ],
-    hash = "md5:b7014650c5f45e5d4837c31209dc0037",
-  },
-}
+  }

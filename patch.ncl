@@ -1,57 +1,61 @@
-{
-  "buildscript-patch-pass1-2.8" = {
-    type = "text",
-    artifact_kind = "build-script",
-    outputs = ["buildscript-patch-pass1-2.8"],
-    source = m%"
-      #!/usr/bin/env bash
-      set -euo pipefail
+let buildscripts = import "buildscripts.ncl" in
 
-      src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-      out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+fun pkgs =>
+  let patch_src_2_8 =
+    store.fetch "patch-src-2.8" {
+      url = [
+        "https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz",
+        "https://mirrors.kernel.org/gnu/patch/patch-2.8.tar.xz",
+      ],
+      hash = "md5:149327a021d41c8f88d034eab41c039f",
+    }
+  in
 
-      cd "/in/${src}"
+  let patch_buildscript_source_2_8 =
+    (buildscripts.autotools {
+      output = "buildscript-patch-gen1-2.8",
+      configure_args = ["--disable-nls"],
+    }).source
+  in
 
-      if [ ! -x ./configure ]; then
-        candidates=()
-        for d in ./*; do
-          if [ -d "$d" ] && [ -x "$d/configure" ] && [ -x "$d/build-aux/config.guess" ]; then
-            candidates+=("$d")
-          fi
-        done
-        if [ "${#candidates[@]}" -eq 1 ]; then
-          cd "${candidates[0]}"
-        fi
-      fi
+  let buildscript_patch_gen1_2_8 =
+    store.text "buildscript-patch-gen1-2.8" {
+      kind = "build-script",
+      source = patch_buildscript_source_2_8,
+    }
+  in
 
-      export PATH="/tools/bin:${PATH:-}"
+  let patch_gen1_2_8 =
+    store.bind patch_src_2_8 (fun patch_src =>
+    store.bind buildscript_patch_gen1_2_8 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "patch-gen1-2.8" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [patch_src])))
+  in
 
-      ./configure --prefix=/usr                    \
-                  --host=x86_64-lfs-linux-gnu      \
-                  --build="$(build-aux/config.guess)"
+  let buildscript_patch_2_8 =
+    store.text "buildscript-patch-2.8" {
+      kind = "build-script",
+      source = patch_buildscript_source_2_8,
+    }
+  in
 
-      jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-      make -j"${jobs}"
-      make DESTDIR="/out/${out}" install
-      "%,
-  },
+  let patch_2_8 =
+    store.bind patch_src_2_8 (fun patch_src =>
+    store.bind buildscript_patch_2_8 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "patch-2.8" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [patch_src])))
+  in
 
-  "patch-pass1-2.8" = {
-    type = "binary",
-    inputs = [
-      "patch-src-2.8",
-      "buildscript-patch-pass1-2.8",
-      "bootstrap-pass1",
+  {
+    include [
+      patch_src_2_8,
+      patch_gen1_2_8,
+      patch_2_8,
     ],
-    outputs = ["patch-pass1-2.8"],
-  },
-  "patch-src-2.8" = {
-    type = "fetch",
-    outputs = ["patch-src-2.8"],
-    url = [
-      "https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz",
-      "https://mirrors.kernel.org/gnu/patch/patch-2.8.tar.xz",
-    ],
-    hash = "md5:149327a021d41c8f88d034eab41c039f",
-  },
-}
+  }

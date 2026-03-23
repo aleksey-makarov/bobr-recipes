@@ -1,58 +1,61 @@
-{
-  "buildscript-grep-pass1-3.12" = {
-    type = "text",
-    artifact_kind = "build-script",
-    outputs = ["buildscript-grep-pass1-3.12"],
-    source = m%"
-      #!/usr/bin/env bash
-      set -euo pipefail
+let buildscripts = import "buildscripts.ncl" in
 
-      src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-      out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+fun pkgs =>
+  let grep_src_3_12 =
+    store.fetch "grep-src-3.12" {
+      url = [
+        "https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz",
+        "https://mirrors.kernel.org/gnu/grep/grep-3.12.tar.xz",
+      ],
+      hash = "md5:5d9301ed9d209c4a88c8d3a6fd08b9ac",
+    }
+  in
 
-      cd "/in/${src}"
+  let grep_buildscript_source_3_12 =
+    (buildscripts.autotools {
+      output = "buildscript-grep-gen1-3.12",
+      configure_args = ["--disable-nls", "--disable-perl-regexp"],
+    }).source
+  in
 
-      if [ ! -x ./configure ]; then
-        candidates=()
-        for d in ./*; do
-          if [ -d "$d" ] && [ -x "$d/configure" ] && [ -x "$d/build-aux/config.guess" ]; then
-            candidates+=("$d")
-          fi
-        done
-        if [ "${#candidates[@]}" -eq 1 ]; then
-          cd "${candidates[0]}"
-        fi
-      fi
+  let buildscript_grep_gen1_3_12 =
+    store.text "buildscript-grep-gen1-3.12" {
+      kind = "build-script",
+      source = grep_buildscript_source_3_12,
+    }
+  in
 
-      export PATH="/tools/bin:${PATH:-}"
+  let grep_gen1_3_12 =
+    store.bind grep_src_3_12 (fun grep_src =>
+    store.bind buildscript_grep_gen1_3_12 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "grep-gen1-3.12" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [grep_src])))
+  in
 
-      ./configure --prefix=/usr                    \
-                  --host=x86_64-lfs-linux-gnu      \
-                  --build="$(./build-aux/config.guess)"
+  let buildscript_grep_3_12 =
+    store.text "buildscript-grep-3.12" {
+      kind = "build-script",
+      source = grep_buildscript_source_3_12,
+    }
+  in
 
-      jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-      make -j"${jobs}"
-      make DESTDIR="/out/${out}" install
-      "%,
-  },
+  let grep_3_12 =
+    store.bind grep_src_3_12 (fun grep_src =>
+    store.bind buildscript_grep_3_12 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "grep-3.12" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [grep_src])))
+  in
 
-  "grep-pass1-3.12" = {
-    type = "binary",
-    inputs = [
-      "grep-src-3.12",
-      "buildscript-grep-pass1-3.12",
-      "bootstrap-pass1",
+  {
+    include [
+      grep_src_3_12,
+      grep_gen1_3_12,
+      grep_3_12,
     ],
-    outputs = ["grep-pass1-3.12"],
-  },
-
-  "grep-src-3.12" = {
-    type = "fetch",
-    outputs = ["grep-src-3.12"],
-    url = [
-      "https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz",
-      "https://mirrors.kernel.org/gnu/grep/grep-3.12.tar.xz",
-    ],
-    hash = "md5:5d9301ed9d209c4a88c8d3a6fd08b9ac",
-  },
-}
+  }
