@@ -17,8 +17,8 @@ fun pkgs =>
     }
   in
 
-  let buildscript_glibc_temp_2_42 =
-    store.text "buildscript-glibc-temp-2.42" {
+  let buildscript_glibc_gen1_2_42 =
+    store.text "buildscript-glibc-gen1-2.42" {
       kind = "build-script",
       source = m%"
         #!/usr/bin/env bash
@@ -61,12 +61,12 @@ fun pkgs =>
     }
   in
 
-  let glibc_temp_2_42 =
+  let glibc_gen1_2_42 =
     store.bind glibc_src_2_42 (fun glibc_src =>
     store.bind glibc_fhs_patch_2_42 (fun glibc_fhs_patch =>
-    store.bind buildscript_glibc_temp_2_42 (fun script =>
-    store.bind pkgs.glibc_temp_build_image (fun image =>
-    store.binary "glibc-temp-2.42" {
+    store.bind buildscript_glibc_gen1_2_42 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "glibc-gen1-2.42" {
       kind = "binary-output",
       optimize = "size",
     } image script [glibc_src, glibc_fhs_patch]))))
@@ -76,7 +76,7 @@ fun pkgs =>
     include [
       glibc_fhs_patch_2_42,
       glibc_src_2_42,
-      buildscript_glibc_temp_2_42,
-      glibc_temp_2_42,
+      buildscript_glibc_gen1_2_42,
+      glibc_gen1_2_42,
     ],
   }

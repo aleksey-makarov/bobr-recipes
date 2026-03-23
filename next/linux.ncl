@@ -3,8 +3,8 @@ fun pkgs =>
   let pkg_version = "6.18.10" in
 
   let source_name = "%{pkg_name}-src-%{pkg_version}" in
-  let temp_script_name = "buildscript-linux-headers-temp-%{pkg_version}" in
-  let temp_name = "linux-headers-temp-%{pkg_version}" in
+  let headers_script_name = "buildscript-linux-headers-%{pkg_version}" in
+  let headers_name = "linux-headers-%{pkg_version}" in
 
   let linux_src_6_18_10 =
     store.fetch source_name {
@@ -13,8 +13,8 @@ fun pkgs =>
     }
   in
 
-  let buildscript_linux_headers_temp_6_18_10 =
-    store.text temp_script_name {
+  let buildscript_linux_headers_6_18_10 =
+    store.text headers_script_name {
       kind = "build-script",
       source = m%"
         #!/usr/bin/env bash
@@ -47,11 +47,11 @@ fun pkgs =>
     }
   in
 
-  let linux_headers_temp_6_18_10 =
+  let linux_headers_6_18_10 =
     store.bind linux_src_6_18_10 (fun src =>
-    store.bind buildscript_linux_headers_temp_6_18_10 (fun script =>
+    store.bind buildscript_linux_headers_6_18_10 (fun script =>
     store.bind pkgs.host_image (fun image =>
-    store.binary temp_name {
+    store.binary headers_name {
       kind = "binary-output",
       optimize = "size",
     } image script [src])))
@@ -60,7 +60,7 @@ fun pkgs =>
   {
     include [
       linux_src_6_18_10,
-      buildscript_linux_headers_temp_6_18_10,
-      linux_headers_temp_6_18_10,
+      buildscript_linux_headers_6_18_10,
+      linux_headers_6_18_10,
     ],
   }

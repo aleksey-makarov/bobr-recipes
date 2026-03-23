@@ -3,8 +3,8 @@ fun pkgs =>
   let pkg_version = "2.45" in
 
   let source_name = "%{pkg_name}-src-%{pkg_version}" in
-  let temp_script_name = "buildscript-%{pkg_name}-temp-%{pkg_version}" in
-  let temp_name = "%{pkg_name}-temp-%{pkg_version}" in
+  let gen1_script_name = "buildscript-%{pkg_name}-gen1-%{pkg_version}" in
+  let gen1_name = "%{pkg_name}-gen1-%{pkg_version}" in
 
   let binutils_src_2_45 =
     store.fetch source_name {
@@ -16,8 +16,8 @@ fun pkgs =>
     }
   in
 
-  let buildscript_binutils_temp_2_45 =
-    store.text temp_script_name {
+  let buildscript_binutils_gen1_2_45 =
+    store.text gen1_script_name {
       kind = "build-script",
       source = m%"
         #!/usr/bin/env bash
@@ -58,11 +58,11 @@ fun pkgs =>
     }
   in
 
-  let binutils_temp_2_45 =
+  let binutils_gen1_2_45 =
     store.bind binutils_src_2_45 (fun src =>
-    store.bind buildscript_binutils_temp_2_45 (fun script =>
+    store.bind buildscript_binutils_gen1_2_45 (fun script =>
     store.bind pkgs.host_image (fun image =>
-    store.binary temp_name {
+    store.binary gen1_name {
       kind = "binary-output",
       optimize = "size",
     } image script [src])))
@@ -71,7 +71,7 @@ fun pkgs =>
   {
     include [
       binutils_src_2_45,
-      buildscript_binutils_temp_2_45,
-      binutils_temp_2_45,
+      buildscript_binutils_gen1_2_45,
+      binutils_gen1_2_45,
     ],
   }

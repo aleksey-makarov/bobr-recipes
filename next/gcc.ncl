@@ -9,8 +9,8 @@ fun pkgs =>
     }
   in
 
-  let buildscript_gcc_temp_15_2_0 =
-    store.text "buildscript-gcc-temp-15.2.0" {
+  let buildscript_gcc_gen1_15_2_0 =
+    store.text "buildscript-gcc-gen1-15.2.0" {
       kind = "build-script",
       source = m%"
         #!/usr/bin/env bash
@@ -74,14 +74,14 @@ fun pkgs =>
     }
   in
 
-  let gcc_temp_15_2_0 =
+  let gcc_gen1_15_2_0 =
     store.bind gcc_src_15_2_0 (fun gcc_src =>
     store.bind pkgs.gmp_src_6_3_0 (fun gmp_src =>
     store.bind pkgs.mpfr_src_4_2_2 (fun mpfr_src =>
     store.bind pkgs.mpc_src_1_3_1 (fun mpc_src =>
-    store.bind buildscript_gcc_temp_15_2_0 (fun script =>
-    store.bind pkgs.gcc_temp_build_image (fun image =>
-    store.binary "gcc-temp-15.2.0" {
+    store.bind buildscript_gcc_gen1_15_2_0 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "gcc-gen1-15.2.0" {
       kind = "binary-output",
       optimize = "size",
     } image script [gcc_src, gmp_src, mpfr_src, mpc_src]))))))
@@ -90,7 +90,7 @@ fun pkgs =>
   {
     include [
       gcc_src_15_2_0,
-      buildscript_gcc_temp_15_2_0,
-      gcc_temp_15_2_0,
+      buildscript_gcc_gen1_15_2_0,
+      gcc_gen1_15_2_0,
     ],
   }
