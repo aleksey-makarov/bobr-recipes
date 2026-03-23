@@ -18,6 +18,7 @@ fun pkgs =>
         (buildscripts.autotools {
           output = "buildscript-gawk-gen1-5.3.2",
           pre_configure = "sed -i 's/extras//' Makefile.in",
+          configure_args = ["--without-readline"],
         }).source,
     }
   in

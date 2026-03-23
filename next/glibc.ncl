@@ -50,6 +50,7 @@ fun pkgs =>
         ../configure                               \
           --prefix=/usr                            \
           --disable-nscd                           \
+          --without-selinux                        \
           --enable-kernel=5.4
 
         jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"

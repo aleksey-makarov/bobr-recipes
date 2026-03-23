@@ -51,12 +51,6 @@ fun pkgs =>
         cp -a "${mpfr_dir}" mpfr
         cp -a "${mpc_dir}" mpc
 
-        case $(uname -m) in
-          x86_64)
-            sed -e '/m64=/s/lib64/lib/' -i gcc/config/i386/t-linux64
-            ;;
-        esac
-
         mkdir -p build
         cd build
 
@@ -65,6 +59,7 @@ fun pkgs =>
           --disable-nls                  \
           --disable-multilib             \
           --disable-bootstrap            \
+          --without-zstd                \
           --enable-languages=c,c++
 
         jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"

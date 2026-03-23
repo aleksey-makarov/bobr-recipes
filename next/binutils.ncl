@@ -46,6 +46,7 @@ fun pkgs =>
         ../configure                               \
           --prefix=/usr                            \
           --disable-nls                            \
+          --without-zstd                           \
           --enable-gprofng=no                      \
           --disable-werror                         \
           --enable-new-dtags                       \

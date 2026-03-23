@@ -20,6 +20,8 @@ fun pkgs =>
           configure_args = [
             "--disable-nls",
             "--without-selinux",
+            "--without-openssl",
+            "--without-libgmp",
             "--enable-install-program=hostname",
             "--enable-no-install-program=kill,uptime",
           ],
