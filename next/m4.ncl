@@ -54,9 +54,7 @@ fun pkgs =>
   {
     include [
       m4_src_1_4_20,
-      buildscript_m4_gen1_1_4_20,
       m4_gen1_1_4_20,
-      buildscript_m4_1_4_20,
       m4_1_4_20,
     ],
   }

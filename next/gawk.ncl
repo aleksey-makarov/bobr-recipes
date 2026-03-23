@@ -56,9 +56,7 @@ fun pkgs =>
   {
     include [
       gawk_src_5_3_2,
-      buildscript_gawk_gen1_5_3_2,
       gawk_gen1_5_3_2,
-      buildscript_gawk_5_3_2,
       gawk_5_3_2,
     ],
   }

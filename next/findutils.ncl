@@ -59,9 +59,7 @@ fun pkgs =>
   {
     include [
       findutils_src_4_10_0,
-      buildscript_findutils_gen1_4_10_0,
       findutils_gen1_4_10_0,
-      buildscript_findutils_4_10_0,
       findutils_4_10_0,
     ],
   }

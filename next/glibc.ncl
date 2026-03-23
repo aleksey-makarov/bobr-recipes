@@ -141,8 +141,6 @@ fun pkgs =>
     include [
       glibc_fhs_patch_2_42,
       glibc_src_2_42,
-      buildscript_glibc_gen1_2_42,
-      buildscript_glibc_2_42,
       glibc_gen1_build_image,
       glibc_gen1_2_42,
       glibc_2_42,

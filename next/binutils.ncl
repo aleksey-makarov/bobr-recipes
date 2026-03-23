@@ -128,8 +128,6 @@ fun pkgs =>
   {
     include [
       binutils_src_2_45,
-      buildscript_binutils_gen1_2_45,
-      buildscript_binutils_2_45,
       binutils_gen1_2_45,
       binutils_2_45,
     ],

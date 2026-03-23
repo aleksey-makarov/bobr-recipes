@@ -55,9 +55,7 @@ fun pkgs =>
   {
     include [
       make_src_4_4_1,
-      buildscript_make_gen1_4_4_1,
       make_gen1_4_4_1,
-      buildscript_make_4_4_1,
       make_4_4_1,
     ],
   }

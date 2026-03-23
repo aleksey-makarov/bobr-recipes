@@ -55,7 +55,6 @@ fun pkgs =>
 
   {
     include [
-      buildscript_base_filesystem,
       base_filesystem,
     ],
   }

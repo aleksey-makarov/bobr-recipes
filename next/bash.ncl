@@ -78,9 +78,7 @@ fun pkgs =>
   {
     include [
       bash_src_5_3,
-      buildscript_bash_gen1_5_3,
       bash_gen1_5_3,
-      buildscript_bash_5_3,
       bash_5_3,
     ],
   }

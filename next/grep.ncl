@@ -55,9 +55,7 @@ fun pkgs =>
   {
     include [
       grep_src_3_12,
-      buildscript_grep_gen1_3_12,
       grep_gen1_3_12,
-      buildscript_grep_3_12,
       grep_3_12,
     ],
   }

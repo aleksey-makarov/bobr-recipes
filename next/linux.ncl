@@ -60,7 +60,6 @@ fun pkgs =>
   {
     include [
       linux_src_6_18_10,
-      buildscript_linux_headers_6_18_10,
       linux_headers_6_18_10,
     ],
   }

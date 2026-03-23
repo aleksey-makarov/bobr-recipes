@@ -163,8 +163,6 @@ fun pkgs =>
   {
     include [
       gcc_src_15_2_0,
-      buildscript_gcc_gen1_15_2_0,
-      buildscript_gcc_15_2_0,
       gcc_gen1_15_2_0,
       gcc_15_2_0,
     ],

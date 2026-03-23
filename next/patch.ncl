@@ -55,9 +55,7 @@ fun pkgs =>
   {
     include [
       patch_src_2_8,
-      buildscript_patch_gen1_2_8,
       patch_gen1_2_8,
-      buildscript_patch_2_8,
       patch_2_8,
     ],
   }

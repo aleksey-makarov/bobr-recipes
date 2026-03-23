@@ -58,9 +58,7 @@ fun pkgs =>
   {
     include [
       tar_src_1_35,
-      buildscript_tar_gen1_1_35,
       tar_gen1_1_35,
-      buildscript_tar_1_35,
       tar_1_35,
     ],
   }

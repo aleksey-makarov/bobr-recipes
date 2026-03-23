@@ -72,9 +72,7 @@ fun pkgs =>
   {
     include [
       coreutils_src_9_7,
-      buildscript_coreutils_gen1_9_7,
       coreutils_gen1_9_7,
-      buildscript_coreutils_9_7,
       coreutils_9_7,
     ],
   }

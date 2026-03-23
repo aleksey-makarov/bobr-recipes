@@ -56,9 +56,7 @@ fun pkgs =>
   {
     include [
       diffutils_src_3_12,
-      buildscript_diffutils_gen1_3_12,
       diffutils_gen1_3_12,
-      buildscript_diffutils_3_12,
       diffutils_3_12,
     ],
   }

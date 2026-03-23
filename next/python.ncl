@@ -78,7 +78,6 @@ fun pkgs =>
   {
     include [
       python_src_3_13_7,
-      buildscript_python_gen1_3_13_7,
       python_gen1_3_13_7,
     ],
   }

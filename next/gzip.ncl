@@ -55,9 +55,7 @@ fun pkgs =>
   {
     include [
       gzip_src_1_14,
-      buildscript_gzip_gen1_1_14,
       gzip_gen1_1_14,
-      buildscript_gzip_1_14,
       gzip_1_14,
     ],
   }

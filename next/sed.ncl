@@ -55,9 +55,7 @@ fun pkgs =>
   {
     include [
       sed_src_4_9,
-      buildscript_sed_gen1_4_9,
       sed_gen1_4_9,
-      buildscript_sed_4_9,
       sed_4_9,
     ],
   }

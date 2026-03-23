@@ -54,9 +54,7 @@ fun pkgs =>
   {
     include [
       bison_src_3_8_2,
-      buildscript_bison_gen1_3_8_2,
       bison_gen1_3_8_2,
-      buildscript_bison_3_8_2,
       bison_3_8_2,
     ],
   }
