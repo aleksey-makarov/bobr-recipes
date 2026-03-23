@@ -16,25 +16,25 @@ in
 
 let ArgsContract = {
   output | String,
-  prefix | String | optional,
-  configure | String | optional,
-  configure_args | Array String | optional,
-  make | String | optional,
-  make_args | Array String | optional,
-  install | String | optional,
+  prefix | String | default = "/usr",
+  configure | String | default = "./configure",
+  configure_args | Array String | default = [],
+  make | String | default = "make",
+  make_args | Array String | default = [],
+  install | String | default = "make",
   install_args | Array String | optional,
-  env | { _ | String } | optional,
-  prepend_path | Array String | optional,
-  prepend_pkg_config_path | Array String | optional,
-  prepend_cflags | Array String | optional,
-  prepend_cppflags | Array String | optional,
-  prepend_ldflags | Array String | optional,
-  in_source | Bool | optional,
-  build_dir | String | optional,
-  autoreconf | Bool | optional,
-  autoreconf_args | Array String | optional,
-  pre_configure | String | optional,
-  post_install | String | optional,
+  env | { _ | String } | default = {},
+  prepend_path | Array String | default = [],
+  prepend_pkg_config_path | Array String | default = [],
+  prepend_cflags | Array String | default = [],
+  prepend_cppflags | Array String | default = [],
+  prepend_ldflags | Array String | default = [],
+  in_source | Bool | default = true,
+  build_dir | String | default = "build",
+  autoreconf | Bool | default = false,
+  autoreconf_args | Array String | default = ["-fi"],
+  pre_configure | String | default = "",
+  post_install | String | default = "",
   ..
 }
 in
@@ -42,76 +42,50 @@ in
 {
   autotools = fun cfg =>
     let cfg = cfg | ArgsContract in
-    let get_or = fun key =>
-      fun fallback =>
-        if std.record.has_field key cfg then
-          std.record.get key cfg
-        else
-          fallback
-    in
-    let prefix = get_or "prefix" "/usr" in
-    let configure = get_or "configure" "./configure" in
-    let configure_args = get_or "configure_args" [] in
-    let make = get_or "make" "make" in
-    let make_args = get_or "make_args" [] in
-    let install = get_or "install" "make" in
-    let install_args = get_or "install_args" ["install"] in
-    let env = get_or "env" {} in
-    let prepend_path = get_or "prepend_path" [] in
-    let prepend_pkg_config_path = get_or "prepend_pkg_config_path" [] in
-    let prepend_cflags = get_or "prepend_cflags" [] in
-    let prepend_cppflags = get_or "prepend_cppflags" [] in
-    let prepend_ldflags = get_or "prepend_ldflags" [] in
-    let in_source = get_or "in_source" true in
-    let build_dir = get_or "build_dir" "build" in
-    let autoreconf = get_or "autoreconf" false in
-    let autoreconf_args = get_or "autoreconf_args" ["-fi"] in
-    let pre_configure = get_or "pre_configure" "" in
-    let post_install = get_or "post_install" "" in
     let configure_cmd =
       let configure_program =
-        if in_source then
-          configure
-        else if configure == "./configure" then
+        if cfg.in_source then
+          cfg.configure
+        else if cfg.configure == "./configure" then
           "../configure"
         else
-          configure
+          cfg.configure
       in
-      append_args (configure_program ++ " --prefix=" ++ shell_quote prefix) configure_args
+      append_args (configure_program ++ " --prefix=" ++ shell_quote cfg.prefix) cfg.configure_args
     in
-    let make_cmd = append_args make make_args ++ " -j\"$jobs\"" in
+    let make_cmd = append_args cfg.make cfg.make_args ++ " -j\"$jobs\"" in
     let install_cmd =
       if std.record.has_field "install_args" cfg then
-        append_args install install_args
+        append_args cfg.install cfg.install_args
       else
-        install ++ " DESTDIR=\"/out/${out}\" install"
+        cfg.install ++ " DESTDIR=\"/out/${out}\" install"
     in
     let env_lines =
       std.array.map
-        (fun key => "export " ++ key ++ "=" ++ shell_quote (std.record.get key env))
-        (std.record.fields env)
+        (fun key => "export " ++ key ++ "=" ++ shell_quote (std.record.get key cfg.env))
+        (std.record.fields cfg.env)
     in
     let prepend_lines =
       std.array.concat
         (
           std.array.concat
             (
-              if prepend_path == [] then
+              if cfg.prepend_path == [] then
                 []
               else
                 [
                   "export PATH="
-                  ++ shell_quote (std.string.join ":" prepend_path)
+                  ++ shell_quote (std.string.join ":" cfg.prepend_path)
                   ++ ":\"${PATH:-}\"",
                 ]
             )
             (
-              if prepend_pkg_config_path == [] then
+              if cfg.prepend_pkg_config_path == [] then
                 []
               else
                 [
                   "export PKG_CONFIG_PATH="
-                  ++ shell_quote (std.string.join ":" prepend_pkg_config_path)
+                  ++ shell_quote (std.string.join ":" cfg.prepend_pkg_config_path)
                   ++ ":\"${PKG_CONFIG_PATH:-}\"",
                 ]
             )
@@ -119,42 +93,42 @@ in
         (
           std.array.concat
             (
-              if prepend_cflags == [] then
+              if cfg.prepend_cflags == [] then
                 []
               else
                 [
                   "export CFLAGS="
-                  ++ shell_quote (std.string.join " " prepend_cflags)
+                  ++ shell_quote (std.string.join " " cfg.prepend_cflags)
                   ++ "\"${CFLAGS:+ ${CFLAGS}}\"",
                 ]
             )
             (
               std.array.concat
                 (
-                  if prepend_cppflags == [] then
+                  if cfg.prepend_cppflags == [] then
                     []
                   else
                     [
                       "export CPPFLAGS="
-                      ++ shell_quote (std.string.join " " prepend_cppflags)
+                      ++ shell_quote (std.string.join " " cfg.prepend_cppflags)
                       ++ "\"${CPPFLAGS:+ ${CPPFLAGS}}\"",
                     ]
                 )
                 (
-                  if prepend_ldflags == [] then
+                  if cfg.prepend_ldflags == [] then
                     []
                   else
                     [
                       "export LDFLAGS="
-                      ++ shell_quote (std.string.join " " prepend_ldflags)
+                      ++ shell_quote (std.string.join " " cfg.prepend_ldflags)
                       ++ "\"${LDFLAGS:+ ${LDFLAGS}}\"",
                     ]
                 )
             )
         )
     in
-    let pre_lines = if pre_configure == "" then [] else [pre_configure] in
-    let post_lines = if post_install == "" then [] else [post_install] in
+    let pre_lines = if cfg.pre_configure == "" then [] else [cfg.pre_configure] in
+    let post_lines = if cfg.post_install == "" then [] else [cfg.post_install] in
     let base_lines = [
       "#!/usr/bin/env bash",
       "set -euo pipefail",
@@ -184,11 +158,11 @@ in
     ]
     in
     let autoreconf_lines =
-      if autoreconf then
+      if cfg.autoreconf then
         [
           "if [ -x ./autogen.sh ]; then ./autogen.sh; fi",
           "if [ -x ./bootstrap ]; then ./bootstrap; fi",
-          append_args "autoreconf" autoreconf_args,
+          append_args "autoreconf" cfg.autoreconf_args,
           "",
         ]
       else
@@ -203,12 +177,12 @@ in
     ]
     in
     let build_dir_lines =
-      if in_source then
+      if cfg.in_source then
         []
       else
         [
-          "mkdir -p " ++ shell_quote build_dir,
-          "cd " ++ shell_quote build_dir,
+          "mkdir -p " ++ shell_quote cfg.build_dir,
+          "cd " ++ shell_quote cfg.build_dir,
           "",
         ]
     in
