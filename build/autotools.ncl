@@ -10,6 +10,10 @@ let append_args = fun command args =>
   if args == [] then command else command ++ " " ++ render_args args
 in
 
+let concat_many = fun chunks =>
+  std.array.fold_left std.array.concat [] chunks
+in
+
 let ArgsContract = {
   output | String,
   prefix | String | optional,
@@ -221,38 +225,18 @@ in
     in
     std.string.join
       "\n"
-      (
-        std.array.concat
-          (
-            std.array.concat
-              (
-                std.array.concat
-                  (
-                    std.array.concat
-                      (
-                        std.array.concat
-                          (
-                            std.array.concat
-                              (
-                                std.array.concat
-                                  (
-                                    std.array.concat
-                                      (std.array.concat base_lines prepend_lines)
-                                      env_lines
-                                  )
-                                  configure_search_lines
-                              )
-                              autoreconf_lines
-                          )
-                          configure_check_lines
-                      )
-                      pre_lines
-                  )
-                  build_dir_lines
-              )
-              build_lines
-          )
-          (std.array.concat command_lines post_lines)
-      )
+      (concat_many [
+        base_lines,
+        prepend_lines,
+        env_lines,
+        configure_search_lines,
+        autoreconf_lines,
+        configure_check_lines,
+        pre_lines,
+        build_dir_lines,
+        build_lines,
+        command_lines,
+        post_lines,
+      ])
     ++ "\n",
 }
