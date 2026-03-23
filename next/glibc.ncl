@@ -100,6 +100,7 @@ fun pkgs =>
 
         jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
         make -j"${jobs}"
+        mkdir -p "/out/${out}"
         make DESTDIR="/out/${out}" install
         "%,
     }

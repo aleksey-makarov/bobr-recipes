@@ -14,6 +14,7 @@ let rec pkgs =
   & ((import "coreutils.ncl") pkgs)
   & ((import "sed.ncl") pkgs)
   & ((import "grep.ncl") pkgs)
+  & ((import "gzip.ncl") pkgs)
   & ((import "patch.ncl") pkgs)
   & ((import "findutils.ncl") pkgs)
   & ((import "diffutils.ncl") pkgs)
