@@ -17,7 +17,7 @@ fun pkgs =>
       source =
         (buildscripts.autotools {
           output = "buildscript-grep-gen1-3.12",
-          configure_args = ["--disable-nls"],
+          configure_args = ["--disable-nls", "--disable-perl-regexp"],
         }).source,
     }
   in

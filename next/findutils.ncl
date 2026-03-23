@@ -19,6 +19,7 @@ fun pkgs =>
           output = "buildscript-findutils-gen1-4.10.0",
           configure_args = [
             "--disable-nls",
+            "--without-selinux",
             "--localstatedir=/var/lib/locate",
           ],
         }).source,

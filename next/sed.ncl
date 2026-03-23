@@ -17,7 +17,7 @@ fun pkgs =>
       source =
         (buildscripts.autotools {
           output = "buildscript-sed-gen1-4.9",
-          configure_args = ["--disable-nls"],
+          configure_args = ["--disable-nls", "--without-selinux"],
         }).source,
     }
   in
