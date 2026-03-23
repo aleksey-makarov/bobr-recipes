@@ -11,17 +11,20 @@ fun pkgs =>
     }
   in
 
+  let tar_buildscript_source_1_35 =
+    (buildscripts.autotools {
+      output = "buildscript-tar-gen1-1.35",
+      configure_args = [
+        "--disable-nls",
+        "--without-selinux",
+      ],
+    }).source
+  in
+
   let buildscript_tar_gen1_1_35 =
     store.text "buildscript-tar-gen1-1.35" {
       kind = "build-script",
-      source =
-        (buildscripts.autotools {
-          output = "buildscript-tar-gen1-1.35",
-          configure_args = [
-            "--disable-nls",
-            "--without-selinux",
-          ],
-        }).source,
+      source = tar_buildscript_source_1_35,
     }
   in
 
@@ -35,10 +38,29 @@ fun pkgs =>
     } image script [tar_src])))
   in
 
+  let buildscript_tar_1_35 =
+    store.text "buildscript-tar-1.35" {
+      kind = "build-script",
+      source = tar_buildscript_source_1_35,
+    }
+  in
+
+  let tar_1_35 =
+    store.bind tar_src_1_35 (fun tar_src =>
+    store.bind buildscript_tar_1_35 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "tar-1.35" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [tar_src])))
+  in
+
   {
     include [
       tar_src_1_35,
       buildscript_tar_gen1_1_35,
       tar_gen1_1_35,
+      buildscript_tar_1_35,
+      tar_1_35,
     ],
   }

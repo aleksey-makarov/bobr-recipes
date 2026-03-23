@@ -11,14 +11,17 @@ fun pkgs =>
     }
   in
 
+  let gzip_buildscript_source_1_14 =
+    (buildscripts.autotools {
+      output = "buildscript-gzip-gen1-1.14",
+      configure_args = ["--disable-nls"],
+    }).source
+  in
+
   let buildscript_gzip_gen1_1_14 =
     store.text "buildscript-gzip-gen1-1.14" {
       kind = "build-script",
-      source =
-        (buildscripts.autotools {
-          output = "buildscript-gzip-gen1-1.14",
-          configure_args = ["--disable-nls"],
-        }).source,
+      source = gzip_buildscript_source_1_14,
     }
   in
 
@@ -32,10 +35,29 @@ fun pkgs =>
     } image script [gzip_src])))
   in
 
+  let buildscript_gzip_1_14 =
+    store.text "buildscript-gzip-1.14" {
+      kind = "build-script",
+      source = gzip_buildscript_source_1_14,
+    }
+  in
+
+  let gzip_1_14 =
+    store.bind gzip_src_1_14 (fun gzip_src =>
+    store.bind buildscript_gzip_1_14 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "gzip-1.14" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [gzip_src])))
+  in
+
   {
     include [
       gzip_src_1_14,
       buildscript_gzip_gen1_1_14,
       gzip_gen1_1_14,
+      buildscript_gzip_1_14,
+      gzip_1_14,
     ],
   }

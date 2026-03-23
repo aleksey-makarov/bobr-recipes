@@ -11,13 +11,16 @@ fun pkgs =>
     }
   in
 
+  let m4_buildscript_source_1_4_20 =
+    (buildscripts.autotools {
+      output = "buildscript-m4-gen1-1.4.20",
+    }).source
+  in
+
   let buildscript_m4_gen1_1_4_20 =
     store.text "buildscript-m4-gen1-1.4.20" {
       kind = "build-script",
-      source =
-        (buildscripts.autotools {
-          output = "buildscript-m4-gen1-1.4.20",
-        }).source,
+      source = m4_buildscript_source_1_4_20,
     }
   in
 
@@ -31,10 +34,29 @@ fun pkgs =>
     } image script [m4_src])))
   in
 
+  let buildscript_m4_1_4_20 =
+    store.text "buildscript-m4-1.4.20" {
+      kind = "build-script",
+      source = m4_buildscript_source_1_4_20,
+    }
+  in
+
+  let m4_1_4_20 =
+    store.bind m4_src_1_4_20 (fun m4_src =>
+    store.bind buildscript_m4_1_4_20 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "m4-1.4.20" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [m4_src])))
+  in
+
   {
     include [
       m4_src_1_4_20,
       buildscript_m4_gen1_1_4_20,
       m4_gen1_1_4_20,
+      buildscript_m4_1_4_20,
+      m4_1_4_20,
     ],
   }
