@@ -219,13 +219,10 @@ in
       install_cmd,
     ]
     in
-    {
-      type = "text",
-      artifact_kind = "build-script",
-      outputs = [output],
-      source =
-        std.string.join
-          "\n"
+    std.string.join
+      "\n"
+      (
+        std.array.concat
           (
             std.array.concat
               (
@@ -240,25 +237,22 @@ in
                                 std.array.concat
                                   (
                                     std.array.concat
-                                      (
-                                        std.array.concat
-                                          (std.array.concat base_lines prepend_lines)
-                                          env_lines
-                                      )
-                                      configure_search_lines
+                                      (std.array.concat base_lines prepend_lines)
+                                      env_lines
                                   )
-                                  autoreconf_lines
+                                  configure_search_lines
                               )
-                              configure_check_lines
+                              autoreconf_lines
                           )
-                          pre_lines
+                          configure_check_lines
                       )
-                      build_dir_lines
+                      pre_lines
                   )
-                  build_lines
+                  build_dir_lines
               )
-              (std.array.concat command_lines post_lines)
+              build_lines
           )
-        ++ "\n",
-    }.source,
+          (std.array.concat command_lines post_lines)
+      )
+    ++ "\n",
 }
