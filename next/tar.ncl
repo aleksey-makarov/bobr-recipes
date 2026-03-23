@@ -1,0 +1,44 @@
+let buildscripts = import "buildscripts.ncl" in
+
+fun pkgs =>
+  let tar_src_1_35 =
+    store.fetch "tar-src-1.35" {
+      url = [
+        "https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz",
+        "https://mirrors.kernel.org/gnu/tar/tar-1.35.tar.xz",
+      ],
+      hash = "md5:a2d8042658cfd8ea939e6d911eaf4152",
+    }
+  in
+
+  let buildscript_tar_gen1_1_35 =
+    store.text "buildscript-tar-gen1-1.35" {
+      kind = "build-script",
+      source =
+        (buildscripts.autotools {
+          output = "buildscript-tar-gen1-1.35",
+          configure_args = [
+            "--disable-nls",
+            "--without-selinux",
+          ],
+        }).source,
+    }
+  in
+
+  let tar_gen1_1_35 =
+    store.bind tar_src_1_35 (fun tar_src =>
+    store.bind buildscript_tar_gen1_1_35 (fun script =>
+    store.bind pkgs.host_image (fun image =>
+    store.binary "tar-gen1-1.35" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [tar_src])))
+  in
+
+  {
+    include [
+      tar_src_1_35,
+      buildscript_tar_gen1_1_35,
+      tar_gen1_1_35,
+    ],
+  }

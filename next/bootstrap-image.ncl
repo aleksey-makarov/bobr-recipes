@@ -13,6 +13,7 @@ fun pkgs =>
     store.bind pkgs.sed_gen1_4_9 (fun sed_gen1 =>
     store.bind pkgs.grep_gen1_3_12 (fun grep_gen1 =>
     store.bind pkgs.gzip_gen1_1_14 (fun gzip_gen1 =>
+    store.bind pkgs.tar_gen1_1_35 (fun tar_gen1 =>
     store.bind pkgs.patch_gen1_2_8 (fun patch_gen1 =>
     store.bind pkgs.findutils_gen1_4_10_0 (fun findutils_gen1 =>
     store.bind pkgs.diffutils_gen1_3_12 (fun diffutils_gen1 =>
@@ -34,12 +35,13 @@ fun pkgs =>
       sed_gen1,
       grep_gen1,
       gzip_gen1,
+      tar_gen1,
       patch_gen1,
       findutils_gen1,
       diffutils_gen1,
       m4_gen1,
       python_gen1,
-    ]))))))))))))))))))
+    ])))))))))))))))))))
   in
 
   {

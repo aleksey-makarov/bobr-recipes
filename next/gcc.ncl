@@ -59,6 +59,7 @@ fun pkgs =>
           --disable-nls                  \
           --disable-multilib             \
           --disable-bootstrap            \
+          --disable-fixincludes          \
           --without-zstd                \
           --enable-languages=c,c++
 
@@ -121,6 +122,7 @@ fun pkgs =>
           --enable-default-ssp           \
           --disable-multilib             \
           --disable-bootstrap            \
+          --disable-fixincludes          \
           --disable-nls                  \
           --without-zstd
 
