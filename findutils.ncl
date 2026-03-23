@@ -19,7 +19,7 @@ fun pkgs =>
         "--without-selinux",
         "--localstatedir=/var/lib/locate",
       ],
-    }).source
+    })
   in
 
   let buildscript_findutils_gen1_4_10_0 =

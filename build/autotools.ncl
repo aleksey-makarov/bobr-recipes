@@ -260,5 +260,5 @@ in
               (std.array.concat command_lines post_lines)
           )
         ++ "\n",
-    },
+    }.source,
 }

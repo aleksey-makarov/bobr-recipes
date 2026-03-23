@@ -16,7 +16,7 @@ fun pkgs =>
       output = "buildscript-gawk-gen1-5.3.2",
       pre_configure = "sed -i 's/extras//' Makefile.in",
       configure_args = ["--without-readline"],
-    }).source
+    })
   in
 
   let buildscript_gawk_gen1_5_3_2 =

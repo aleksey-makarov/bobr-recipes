@@ -15,7 +15,7 @@ fun pkgs =>
     (buildscripts.autotools {
       output = "buildscript-patch-gen1-2.8",
       configure_args = ["--disable-nls"],
-    }).source
+    })
   in
 
   let buildscript_patch_gen1_2_8 =

@@ -18,7 +18,7 @@ fun pkgs =>
         "--disable-nls",
         "--without-selinux",
       ],
-    }).source
+    })
   in
 
   let buildscript_tar_gen1_1_35 =

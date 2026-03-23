@@ -14,7 +14,7 @@ fun pkgs =>
   let bison_buildscript_source_3_8_2 =
     (buildscripts.autotools {
       output = "buildscript-bison-gen1-3.8.2",
-    }).source
+    })
   in
 
   let buildscript_bison_gen1_3_8_2 =

@@ -16,7 +16,7 @@ fun pkgs =>
       output = "buildscript-diffutils-gen1-3.12",
       configure_args = ["--disable-nls"],
       env = { gl_cv_func_strcasecmp_works = "y" },
-    }).source
+    })
   in
 
   let buildscript_diffutils_gen1_3_12 =

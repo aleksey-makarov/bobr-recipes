@@ -32,7 +32,7 @@ fun pkgs =>
             sed -i 's/"1"/"8"/' \
                    "/out/${out}/usr/share/man/man8/chroot.8"
           "%,
-    }).source
+    })
   in
 
   let buildscript_coreutils_gen1_9_7 =

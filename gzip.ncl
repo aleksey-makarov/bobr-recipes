@@ -15,7 +15,7 @@ fun pkgs =>
     (buildscripts.autotools {
       output = "buildscript-gzip-gen1-1.14",
       configure_args = ["--disable-nls"],
-    }).source
+    })
   in
 
   let buildscript_gzip_gen1_1_14 =
