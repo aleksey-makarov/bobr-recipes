@@ -11,21 +11,18 @@ fun pkgs =>
     }
   in
 
-  let buildscript_coreutils_gen1_9_7 =
-    store.text "buildscript-coreutils-gen1-9.7" {
-      kind = "build-script",
-      source =
-        (buildscripts.autotools {
-          output = "buildscript-coreutils-gen1-9.7",
-          configure_args = [
-            "--disable-nls",
-            "--without-selinux",
-            "--without-openssl",
-            "--without-libgmp",
-            "--enable-install-program=hostname",
-            "--enable-no-install-program=kill,uptime",
-          ],
-          post_install = m%"
+  let coreutils_buildscript_source_9_7 =
+    (buildscripts.autotools {
+      output = "buildscript-coreutils-gen1-9.7",
+      configure_args = [
+        "--disable-nls",
+        "--without-selinux",
+        "--without-openssl",
+        "--without-libgmp",
+        "--enable-install-program=hostname",
+        "--enable-no-install-program=kill,uptime",
+      ],
+      post_install = m%"
             mkdir -pv "/out/${out}/usr/sbin"
             mv -v "/out/${out}/usr/bin/chroot" \
                   "/out/${out}/usr/sbin/chroot"
@@ -35,7 +32,13 @@ fun pkgs =>
             sed -i 's/"1"/"8"/' \
                    "/out/${out}/usr/share/man/man8/chroot.8"
           "%,
-        }).source,
+    }).source
+  in
+
+  let buildscript_coreutils_gen1_9_7 =
+    store.text "buildscript-coreutils-gen1-9.7" {
+      kind = "build-script",
+      source = coreutils_buildscript_source_9_7,
     }
   in
 
@@ -49,10 +52,29 @@ fun pkgs =>
     } image script [coreutils_src])))
   in
 
+  let buildscript_coreutils_9_7 =
+    store.text "buildscript-coreutils-9.7" {
+      kind = "build-script",
+      source = coreutils_buildscript_source_9_7,
+    }
+  in
+
+  let coreutils_9_7 =
+    store.bind coreutils_src_9_7 (fun coreutils_src =>
+    store.bind buildscript_coreutils_9_7 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "coreutils-9.7" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [coreutils_src])))
+  in
+
   {
     include [
       coreutils_src_9_7,
       buildscript_coreutils_gen1_9_7,
       coreutils_gen1_9_7,
+      buildscript_coreutils_9_7,
+      coreutils_9_7,
     ],
   }

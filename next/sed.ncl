@@ -11,14 +11,17 @@ fun pkgs =>
     }
   in
 
+  let sed_buildscript_source_4_9 =
+    (buildscripts.autotools {
+      output = "buildscript-sed-gen1-4.9",
+      configure_args = ["--disable-nls", "--without-selinux"],
+    }).source
+  in
+
   let buildscript_sed_gen1_4_9 =
     store.text "buildscript-sed-gen1-4.9" {
       kind = "build-script",
-      source =
-        (buildscripts.autotools {
-          output = "buildscript-sed-gen1-4.9",
-          configure_args = ["--disable-nls", "--without-selinux"],
-        }).source,
+      source = sed_buildscript_source_4_9,
     }
   in
 
@@ -32,10 +35,29 @@ fun pkgs =>
     } image script [sed_src])))
   in
 
+  let buildscript_sed_4_9 =
+    store.text "buildscript-sed-4.9" {
+      kind = "build-script",
+      source = sed_buildscript_source_4_9,
+    }
+  in
+
+  let sed_4_9 =
+    store.bind sed_src_4_9 (fun sed_src =>
+    store.bind buildscript_sed_4_9 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "sed-4.9" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [sed_src])))
+  in
+
   {
     include [
       sed_src_4_9,
       buildscript_sed_gen1_4_9,
       sed_gen1_4_9,
+      buildscript_sed_4_9,
+      sed_4_9,
     ],
   }

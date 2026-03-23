@@ -11,18 +11,21 @@ fun pkgs =>
     }
   in
 
+  let findutils_buildscript_source_4_10_0 =
+    (buildscripts.autotools {
+      output = "buildscript-findutils-gen1-4.10.0",
+      configure_args = [
+        "--disable-nls",
+        "--without-selinux",
+        "--localstatedir=/var/lib/locate",
+      ],
+    }).source
+  in
+
   let buildscript_findutils_gen1_4_10_0 =
     store.text "buildscript-findutils-gen1-4.10.0" {
       kind = "build-script",
-      source =
-        (buildscripts.autotools {
-          output = "buildscript-findutils-gen1-4.10.0",
-          configure_args = [
-            "--disable-nls",
-            "--without-selinux",
-            "--localstatedir=/var/lib/locate",
-          ],
-        }).source,
+      source = findutils_buildscript_source_4_10_0,
     }
   in
 
@@ -36,10 +39,29 @@ fun pkgs =>
     } image script [findutils_src])))
   in
 
+  let buildscript_findutils_4_10_0 =
+    store.text "buildscript-findutils-4.10.0" {
+      kind = "build-script",
+      source = findutils_buildscript_source_4_10_0,
+    }
+  in
+
+  let findutils_4_10_0 =
+    store.bind findutils_src_4_10_0 (fun findutils_src =>
+    store.bind buildscript_findutils_4_10_0 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "findutils-4.10.0" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [findutils_src])))
+  in
+
   {
     include [
       findutils_src_4_10_0,
       buildscript_findutils_gen1_4_10_0,
       findutils_gen1_4_10_0,
+      buildscript_findutils_4_10_0,
+      findutils_4_10_0,
     ],
   }

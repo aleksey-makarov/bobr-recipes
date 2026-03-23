@@ -9,10 +9,7 @@ fun pkgs =>
     }
   in
 
-  let buildscript_bash_gen1_5_3 =
-    store.text "buildscript-bash-gen1-5.3" {
-      kind = "build-script",
-      source = m%"
+  let bash_buildscript_source_5_3 = m%"
         #!/usr/bin/env bash
         set -euo pipefail
 
@@ -41,7 +38,13 @@ fun pkgs =>
         make -j"${jobs}"
         make DESTDIR="/out/${out}" install
         ln -svf bash "/out/${out}/usr/bin/sh"
-        "%,
+        "%
+  in
+
+  let buildscript_bash_gen1_5_3 =
+    store.text "buildscript-bash-gen1-5.3" {
+      kind = "build-script",
+      source = bash_buildscript_source_5_3,
     }
   in
 
@@ -55,10 +58,29 @@ fun pkgs =>
     } image script [bash_src])))
   in
 
+  let buildscript_bash_5_3 =
+    store.text "buildscript-bash-5.3" {
+      kind = "build-script",
+      source = bash_buildscript_source_5_3,
+    }
+  in
+
+  let bash_5_3 =
+    store.bind bash_src_5_3 (fun bash_src =>
+    store.bind buildscript_bash_5_3 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "bash-5.3" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [bash_src])))
+  in
+
   {
     include [
       bash_src_5_3,
       buildscript_bash_gen1_5_3,
       bash_gen1_5_3,
+      buildscript_bash_5_3,
+      bash_5_3,
     ],
   }

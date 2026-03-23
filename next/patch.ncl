@@ -11,14 +11,17 @@ fun pkgs =>
     }
   in
 
+  let patch_buildscript_source_2_8 =
+    (buildscripts.autotools {
+      output = "buildscript-patch-gen1-2.8",
+      configure_args = ["--disable-nls"],
+    }).source
+  in
+
   let buildscript_patch_gen1_2_8 =
     store.text "buildscript-patch-gen1-2.8" {
       kind = "build-script",
-      source =
-        (buildscripts.autotools {
-          output = "buildscript-patch-gen1-2.8",
-          configure_args = ["--disable-nls"],
-        }).source,
+      source = patch_buildscript_source_2_8,
     }
   in
 
@@ -32,10 +35,29 @@ fun pkgs =>
     } image script [patch_src])))
   in
 
+  let buildscript_patch_2_8 =
+    store.text "buildscript-patch-2.8" {
+      kind = "build-script",
+      source = patch_buildscript_source_2_8,
+    }
+  in
+
+  let patch_2_8 =
+    store.bind patch_src_2_8 (fun patch_src =>
+    store.bind buildscript_patch_2_8 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "patch-2.8" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [patch_src])))
+  in
+
   {
     include [
       patch_src_2_8,
       buildscript_patch_gen1_2_8,
       patch_gen1_2_8,
+      buildscript_patch_2_8,
+      patch_2_8,
     ],
   }

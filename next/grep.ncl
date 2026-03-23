@@ -11,14 +11,17 @@ fun pkgs =>
     }
   in
 
+  let grep_buildscript_source_3_12 =
+    (buildscripts.autotools {
+      output = "buildscript-grep-gen1-3.12",
+      configure_args = ["--disable-nls", "--disable-perl-regexp"],
+    }).source
+  in
+
   let buildscript_grep_gen1_3_12 =
     store.text "buildscript-grep-gen1-3.12" {
       kind = "build-script",
-      source =
-        (buildscripts.autotools {
-          output = "buildscript-grep-gen1-3.12",
-          configure_args = ["--disable-nls", "--disable-perl-regexp"],
-        }).source,
+      source = grep_buildscript_source_3_12,
     }
   in
 
@@ -32,10 +35,29 @@ fun pkgs =>
     } image script [grep_src])))
   in
 
+  let buildscript_grep_3_12 =
+    store.text "buildscript-grep-3.12" {
+      kind = "build-script",
+      source = grep_buildscript_source_3_12,
+    }
+  in
+
+  let grep_3_12 =
+    store.bind grep_src_3_12 (fun grep_src =>
+    store.bind buildscript_grep_3_12 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "grep-3.12" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [grep_src])))
+  in
+
   {
     include [
       grep_src_3_12,
       buildscript_grep_gen1_3_12,
       grep_gen1_3_12,
+      buildscript_grep_3_12,
+      grep_3_12,
     ],
   }

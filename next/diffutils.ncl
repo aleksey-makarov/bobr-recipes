@@ -11,15 +11,18 @@ fun pkgs =>
     }
   in
 
+  let diffutils_buildscript_source_3_12 =
+    (buildscripts.autotools {
+      output = "buildscript-diffutils-gen1-3.12",
+      configure_args = ["--disable-nls"],
+      env = { gl_cv_func_strcasecmp_works = "y" },
+    }).source
+  in
+
   let buildscript_diffutils_gen1_3_12 =
     store.text "buildscript-diffutils-gen1-3.12" {
       kind = "build-script",
-      source =
-        (buildscripts.autotools {
-          output = "buildscript-diffutils-gen1-3.12",
-          configure_args = ["--disable-nls"],
-          env = { gl_cv_func_strcasecmp_works = "y" },
-        }).source,
+      source = diffutils_buildscript_source_3_12,
     }
   in
 
@@ -33,10 +36,29 @@ fun pkgs =>
     } image script [diffutils_src])))
   in
 
+  let buildscript_diffutils_3_12 =
+    store.text "buildscript-diffutils-3.12" {
+      kind = "build-script",
+      source = diffutils_buildscript_source_3_12,
+    }
+  in
+
+  let diffutils_3_12 =
+    store.bind diffutils_src_3_12 (fun diffutils_src =>
+    store.bind buildscript_diffutils_3_12 (fun script =>
+    store.bind pkgs.build_image (fun image =>
+    store.binary "diffutils-3.12" {
+      kind = "binary-output",
+      optimize = "size",
+    } image script [diffutils_src])))
+  in
+
   {
     include [
       diffutils_src_3_12,
       buildscript_diffutils_gen1_3_12,
       diffutils_gen1_3_12,
+      buildscript_diffutils_3_12,
+      diffutils_3_12,
     ],
   }
