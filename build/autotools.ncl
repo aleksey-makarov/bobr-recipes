@@ -49,7 +49,6 @@ in
         else
           fallback
     in
-    let output = std.record.get "output" cfg in
     let prefix = get_or "prefix" "/usr" in
     let configure = get_or "configure" "./configure" in
     let configure_args = get_or "configure_args" [] in
