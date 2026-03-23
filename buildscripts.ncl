@@ -1,4 +1,4 @@
-let autotools_lib = import "old/build/autotools.ncl" in
+let autotools_lib = import "build/autotools.ncl" in
 {
   autotools = autotools_lib.autotools,
 }
