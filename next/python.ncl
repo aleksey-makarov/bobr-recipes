@@ -32,6 +32,27 @@ fun pkgs =>
           fi
         fi
 
+        cat > Modules/Setup.local <<'EOF'
+        # Minimal bootstrap Python: keep a self-contained interpreter and
+        # disable optional extension modules that would otherwise auto-detect
+        # host libraries and leak them into bootstrap-image.
+        *disabled*
+        _uuid
+        _ssl
+        _hashlib
+        _lzma
+        binascii
+        zlib
+        _gdbm
+        _ctypes
+        _sqlite3
+        _bz2
+        _curses_panel
+        _dbm
+        readline
+        _curses
+        EOF
+
         ./configure                     \
           --prefix=/usr                 \
           --without-ensurepip
