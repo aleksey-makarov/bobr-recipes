@@ -15,6 +15,8 @@ fun pkgs =>
     store.bind pkgs.patch_gen1_2_8 (fun patch_gen1 =>
     store.bind pkgs.findutils_gen1_4_10_0 (fun findutils_gen1 =>
     store.bind pkgs.diffutils_gen1_3_12 (fun diffutils_gen1 =>
+    store.bind pkgs.m4_gen1_1_4_20 (fun m4_gen1 =>
+    store.bind pkgs.python_gen1_3_13_7 (fun python_gen1 =>
     store.image "bootstrap-image" {
       mode = "bootstrap",
     } null [
@@ -33,7 +35,9 @@ fun pkgs =>
       patch_gen1,
       findutils_gen1,
       diffutils_gen1,
-    ])))))))))))))))
+      m4_gen1,
+      python_gen1,
+    ])))))))))))))))))
   in
 
   {

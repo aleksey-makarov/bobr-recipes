@@ -17,6 +17,8 @@ let rec pkgs =
   & ((import "patch.ncl") pkgs)
   & ((import "findutils.ncl") pkgs)
   & ((import "diffutils.ncl") pkgs)
+  & ((import "m4.ncl") pkgs)
+  & ((import "python.ncl") pkgs)
   & ((import "bash.ncl") pkgs)
   & ((import "gawk.ncl") pkgs)
   & ((import "bison.ncl") pkgs)
