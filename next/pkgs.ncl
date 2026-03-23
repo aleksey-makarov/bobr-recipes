@@ -10,6 +10,13 @@ let rec pkgs =
   }
   & ((import "binutils.ncl") pkgs)
   & ((import "linux.ncl") pkgs)
+  & ((import "make.ncl") pkgs)
+  & ((import "coreutils.ncl") pkgs)
+  & ((import "sed.ncl") pkgs)
+  & ((import "grep.ncl") pkgs)
+  & ((import "patch.ncl") pkgs)
+  & ((import "findutils.ncl") pkgs)
+  & ((import "diffutils.ncl") pkgs)
   & ((import "bash.ncl") pkgs)
   & ((import "gawk.ncl") pkgs)
   & ((import "bison.ncl") pkgs)
@@ -18,5 +25,7 @@ let rec pkgs =
   & ((import "mpc.ncl") pkgs)
   & ((import "gcc.ncl") pkgs)
   & ((import "glibc.ncl") pkgs)
+  & ((import "base-filesystem.ncl") pkgs)
+  & ((import "bootstrap-image.ncl") pkgs)
 in
 pkgs
