@@ -88,6 +88,7 @@ fun pkgs =>
 
         ../configure                               \
           --prefix=/usr                            \
+          --libdir=/usr/lib64                     \
           --enable-shared                          \
           --enable-64-bit-bfd                      \
           --enable-new-dtags                       \

@@ -31,5 +31,6 @@ let rec pkgs =
   & ((import "glibc.ncl") pkgs)
   & ((import "base-filesystem.ncl") pkgs)
   & ((import "bootstrap-image.ncl") pkgs)
+  & ((import "build-image.ncl") pkgs)
 in
 pkgs
