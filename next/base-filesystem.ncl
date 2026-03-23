@@ -10,14 +10,14 @@ fun pkgs =>
         dest="/out/${out}"
 
         mkdir -pv "$dest"/{etc,var,tmp,run,root,home}
-        mkdir -pv "$dest"/usr/{bin,lib,sbin,share,include,libexec}
+        mkdir -pv "$dest"/usr/{bin,lib,lib64,sbin,share,include,libexec}
         mkdir -pv "$dest"/var/{log,mail,spool,tmp}
 
         ln -sv usr/bin  "$dest"/bin
         ln -sv usr/sbin "$dest"/sbin
         ln -sv usr/lib  "$dest"/lib
         case "$(uname -m)" in
-          x86_64) ln -sv usr/lib "$dest"/lib64 ;;
+          x86_64) ln -sv usr/lib64 "$dest"/lib64 ;;
         esac
 
         cat > "$dest"/etc/passwd <<'EOF'
@@ -36,6 +36,7 @@ fun pkgs =>
 
         cat > "$dest"/etc/ld.so.conf <<'EOF'
         /usr/lib
+        /usr/lib64
         EOF
 
         ln -sv /proc/self/mounts "$dest"/etc/mtab

@@ -50,7 +50,6 @@ fun pkgs =>
         ../configure                               \
           --prefix=/usr                            \
           --disable-nscd                           \
-          libc_cv_slibdir=/usr/lib                 \
           --enable-kernel=5.4
 
         jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
