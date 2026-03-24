@@ -13,7 +13,6 @@ fun pkgs =>
 
   let findutils_buildscript_source_4_10_0 =
     (buildscripts.autotools {
-      output = "buildscript-findutils-gen1-4.10.0",
       configure_args = [
         "--disable-nls",
         "--without-selinux",

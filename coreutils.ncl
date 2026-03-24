@@ -13,7 +13,6 @@ fun pkgs =>
 
   let coreutils_buildscript_source_9_7 =
     (buildscripts.autotools {
-      output = "buildscript-coreutils-gen1-9.7",
       configure_args = [
         "--disable-nls",
         "--without-selinux",

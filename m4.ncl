@@ -13,7 +13,6 @@ fun pkgs =>
 
   let m4_buildscript_source_1_4_20 =
     (buildscripts.autotools {
-      output = "buildscript-m4-gen1-1.4.20",
     })
   in
 

@@ -13,7 +13,6 @@ fun pkgs =>
 
   let tar_buildscript_source_1_35 =
     (buildscripts.autotools {
-      output = "buildscript-tar-gen1-1.35",
       configure_args = [
         "--disable-nls",
         "--without-selinux",
