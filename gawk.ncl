@@ -35,17 +35,17 @@ fun pkgs =>
     } image script [gawk_src])))
   in
 
-  let buildscript_gawk_5_3_2 =
-    buildscript_gawk_gen1_5_3_2
-  in
-
   let gawk_5_3_2 =
     store.bind gawk_src_5_3_2 (fun gawk_src =>
-    store.bind buildscript_gawk_5_3_2 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "gawk-5.3.2" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {
+        pre_configure = "sed -i 's/extras//' Makefile.in",
+        configure_args = ["--without-readline"],
+      },
     } image script [gawk_src])))
   in
 

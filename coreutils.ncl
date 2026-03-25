@@ -51,17 +51,33 @@ fun pkgs =>
     } image script [coreutils_src])))
   in
 
-  let buildscript_coreutils_9_7 =
-    buildscript_coreutils_gen1_9_7
-  in
-
   let coreutils_9_7 =
     store.bind coreutils_src_9_7 (fun coreutils_src =>
-    store.bind buildscript_coreutils_9_7 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "coreutils-9.7" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {
+        configure_args = [
+          "--disable-nls",
+          "--without-selinux",
+          "--without-openssl",
+          "--without-libgmp",
+          "--enable-install-program=hostname",
+          "--enable-no-install-program=kill,uptime",
+        ],
+        post_install = m%"
+              mkdir -pv "/out/${out}/usr/sbin"
+              mv -v "/out/${out}/usr/bin/chroot" \
+                    "/out/${out}/usr/sbin/chroot"
+              mkdir -pv "/out/${out}/usr/share/man/man8"
+              mv -v "/out/${out}/usr/share/man/man1/chroot.1" \
+                    "/out/${out}/usr/share/man/man8/chroot.8"
+              sed -i 's/"1"/"8"/' \
+                     "/out/${out}/usr/share/man/man8/chroot.8"
+            "%,
+      },
     } image script [coreutils_src])))
   in
 

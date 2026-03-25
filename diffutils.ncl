@@ -35,17 +35,17 @@ fun pkgs =>
     } image script [diffutils_src])))
   in
 
-  let buildscript_diffutils_3_12 =
-    buildscript_diffutils_gen1_3_12
-  in
-
   let diffutils_3_12 =
     store.bind diffutils_src_3_12 (fun diffutils_src =>
-    store.bind buildscript_diffutils_3_12 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "diffutils-3.12" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {
+        configure_args = ["--disable-nls"],
+        env = { gl_cv_func_strcasecmp_works = "y" },
+      },
     } image script [diffutils_src])))
   in
 
