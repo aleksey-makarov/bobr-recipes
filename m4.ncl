@@ -1,5 +1,3 @@
-let buildscripts = import "buildscripts/autotools_orig.ncl" in
-
 fun pkgs =>
   let m4_src_1_4_20 =
     store.fetch "m4-src-1.4.20" {
@@ -12,8 +10,8 @@ fun pkgs =>
   in
 
   let m4_buildscript_source_1_4_20 =
-    (buildscripts.autotools {
-    })
+    (import "buildscripts/autotools_orig.ncl").autotools {
+    }
   in
 
   let buildscript_m4_gen1_1_4_20 =
@@ -33,17 +31,14 @@ fun pkgs =>
     } image script [m4_src])))
   in
 
-  let buildscript_m4_1_4_20 =
-    buildscript_m4_gen1_1_4_20
-  in
-
   let m4_1_4_20 =
     store.bind m4_src_1_4_20 (fun m4_src =>
-    store.bind buildscript_m4_1_4_20 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "m4-1.4.20" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {},
     } image script [m4_src])))
   in
 
