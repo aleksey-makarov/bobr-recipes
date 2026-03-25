@@ -37,17 +37,19 @@ fun pkgs =>
     } image script [tar_src])))
   in
 
-  let buildscript_tar_1_35 =
-    buildscript_tar_gen1_1_35
-  in
-
   let tar_1_35 =
     store.bind tar_src_1_35 (fun tar_src =>
-    store.bind buildscript_tar_1_35 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "tar-1.35" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {
+        configure_args = [
+          "--disable-nls",
+          "--without-selinux",
+        ],
+      },
     } image script [tar_src])))
   in
 
