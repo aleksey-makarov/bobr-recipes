@@ -34,17 +34,16 @@ fun pkgs =>
     } image script [patch_src])))
   in
 
-  let buildscript_patch_2_8 =
-    buildscript_patch_gen1_2_8
-  in
-
   let patch_2_8 =
     store.bind patch_src_2_8 (fun patch_src =>
-    store.bind buildscript_patch_2_8 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "patch-2.8" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {
+        configure_args = ["--disable-nls"],
+      },
     } image script [patch_src])))
   in
 

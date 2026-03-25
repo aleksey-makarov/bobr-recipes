@@ -34,17 +34,16 @@ fun pkgs =>
     } image script [sed_src])))
   in
 
-  let buildscript_sed_4_9 =
-    buildscript_sed_gen1_4_9
-  in
-
   let sed_4_9 =
     store.bind sed_src_4_9 (fun sed_src =>
-    store.bind buildscript_sed_4_9 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "sed-4.9" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {
+        configure_args = ["--disable-nls", "--without-selinux"],
+      },
     } image script [sed_src])))
   in
 

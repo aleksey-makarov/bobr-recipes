@@ -34,17 +34,16 @@ fun pkgs =>
     } image script [grep_src])))
   in
 
-  let buildscript_grep_3_12 =
-    buildscript_grep_gen1_3_12
-  in
-
   let grep_3_12 =
     store.bind grep_src_3_12 (fun grep_src =>
-    store.bind buildscript_grep_3_12 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "grep-3.12" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {
+        configure_args = ["--disable-nls", "--disable-perl-regexp"],
+      },
     } image script [grep_src])))
   in
 

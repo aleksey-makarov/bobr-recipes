@@ -34,17 +34,16 @@ fun pkgs =>
     } image script [gzip_src])))
   in
 
-  let buildscript_gzip_1_14 =
-    buildscript_gzip_gen1_1_14
-  in
-
   let gzip_1_14 =
     store.bind gzip_src_1_14 (fun gzip_src =>
-    store.bind buildscript_gzip_1_14 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "gzip-1.14" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {
+        configure_args = ["--disable-nls"],
+      },
     } image script [gzip_src])))
   in
 

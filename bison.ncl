@@ -33,17 +33,14 @@ fun pkgs =>
     } image script [bison_src])))
   in
 
-  let buildscript_bison_3_8_2 =
-    buildscript_bison_gen1_3_8_2
-  in
-
   let bison_3_8_2 =
     store.bind bison_src_3_8_2 (fun bison_src =>
-    store.bind buildscript_bison_3_8_2 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "bison-3.8.2" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {},
     } image script [bison_src])))
   in
 

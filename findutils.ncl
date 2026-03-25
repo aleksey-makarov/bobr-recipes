@@ -38,17 +38,20 @@ fun pkgs =>
     } image script [findutils_src])))
   in
 
-  let buildscript_findutils_4_10_0 =
-    buildscript_findutils_gen1_4_10_0
-  in
-
   let findutils_4_10_0 =
     store.bind findutils_src_4_10_0 (fun findutils_src =>
-    store.bind buildscript_findutils_4_10_0 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "findutils-4.10.0" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {
+        configure_args = [
+          "--disable-nls",
+          "--without-selinux",
+          "--localstatedir=/var/lib/locate",
+        ],
+      },
     } image script [findutils_src])))
   in
 
