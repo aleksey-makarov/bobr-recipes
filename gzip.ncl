@@ -1,4 +1,4 @@
-let buildscripts = import "buildscripts.ncl" in
+let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
   let gzip_src_1_14 =

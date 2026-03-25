@@ -1,4 +1,4 @@
-let buildscripts = import "buildscripts.ncl" in
+let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
   let diffutils_src_3_12 =
