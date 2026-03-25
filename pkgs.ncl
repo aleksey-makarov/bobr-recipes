@@ -8,6 +8,7 @@ let rec pkgs =
         digest = lib.host_image.digest,
       },
   }
+  & ((import "buildscripts/autotools.ncl") pkgs)
   & ((import "binutils.ncl") pkgs)
   & ((import "linux.ncl") pkgs)
   & ((import "make.ncl") pkgs)
