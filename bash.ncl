@@ -58,17 +58,19 @@ fun pkgs =>
     } image script [bash_src])))
   in
 
-  let buildscript_bash_5_3 =
-    buildscript_bash_gen1_5_3
-  in
-
   let bash_5_3 =
     store.bind bash_src_5_3 (fun bash_src =>
-    store.bind buildscript_bash_5_3 (fun script =>
+    store.bind pkgs.buildscript_autotools (fun script =>
     store.bind pkgs.build_image (fun image =>
     store.binary "bash-5.3" {
       kind = "binary-output",
       optimize = "size",
+      script_config = {
+        configure_args = [
+          "--without-bash-malloc",
+        ],
+        post_install = "ln -svf bash \"/out/${out}/usr/bin/sh\"",
+      },
     } image script [bash_src])))
   in
 
