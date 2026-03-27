@@ -10,7 +10,7 @@ fun pkgs =>
     fun name deps =>
       store.bind buildscript_test_smoke_build (fun script =>
       store.bind pkgs.host_image (fun image =>
-      store.bind (store.sequence deps) (fun _ =>
+      store.bind (store.sequence_ deps) (fun _ =>
       store.binary name {
         kind = "binary-output",
         optimize = "size",
