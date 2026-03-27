@@ -1,6 +1,8 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let tar_src_1_35 =
     store.fetch "tar-src-1.35" {
       url = [
@@ -38,19 +40,16 @@ fun pkgs =>
   in
 
   let tar_1_35 =
-    store.bind tar_src_1_35 (fun tar_src =>
-    store.bind pkgs.buildscript_autotools (fun script =>
-    store.bind pkgs.build_image (fun image =>
-    store.binary "tar-1.35" {
-      kind = "binary-output",
-      optimize = "size",
+    build.build_autotools {
+      name = "tar-1.35",
+      sources = [tar_src_1_35],
       script_config = {
         configure_args = [
           "--disable-nls",
           "--without-selinux",
         ],
       },
-    } image script [tar_src])))
+    }
   in
 
   {
