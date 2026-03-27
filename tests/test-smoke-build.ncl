@@ -6,16 +6,23 @@ fun pkgs =>
     }
   in
 
+  let smoke_build =
+    fun name deps =>
+      store.bind buildscript_test_smoke_build (fun script =>
+      store.bind pkgs.host_image (fun image =>
+      store.bind (store.sequence deps) (fun _ =>
+      store.binary name {
+        kind = "binary-output",
+        optimize = "size",
+      } image script [])))
+  in
+
   let test_smoke_build =
-    store.bind buildscript_test_smoke_build (fun script =>
-    store.bind pkgs.host_image (fun image =>
-    store.bind pkgs.bootstrap_image (fun bootstrap_image =>
-    store.bind pkgs.build_image (fun build_image =>
-    store.bind pkgs.build_image_2 (fun build_image_2 =>
-    store.binary "test-smoke-build" {
-      kind = "binary-output",
-      optimize = "size",
-    } image script [])))))
+    smoke_build "test-smoke-build" [
+      pkgs.bootstrap_image,
+      pkgs.build_image,
+      pkgs.build_image_2,
+    ]
   in
 
   {
