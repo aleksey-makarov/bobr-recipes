@@ -1,6 +1,8 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let gzip_src_1_14 =
     store.fetch "gzip-src-1.14" {
       url = [
@@ -35,16 +37,13 @@ fun pkgs =>
   in
 
   let gzip_1_14 =
-    store.bind gzip_src_1_14 (fun gzip_src =>
-    store.bind pkgs.buildscript_autotools (fun script =>
-    store.bind pkgs.build_image (fun image =>
-    store.binary "gzip-1.14" {
-      kind = "binary-output",
-      optimize = "size",
+    build.build_autotools {
+      name = "gzip-1.14",
+      sources = [gzip_src_1_14],
       script_config = {
         configure_args = ["--disable-nls"],
       },
-    } image script [gzip_src])))
+    }
   in
 
   {

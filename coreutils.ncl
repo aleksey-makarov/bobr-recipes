@@ -1,6 +1,8 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let coreutils_src_9_7 =
     store.fetch "coreutils-src-9.7" {
       url = [
@@ -52,12 +54,9 @@ fun pkgs =>
   in
 
   let coreutils_9_7 =
-    store.bind coreutils_src_9_7 (fun coreutils_src =>
-    store.bind pkgs.buildscript_autotools (fun script =>
-    store.bind pkgs.build_image (fun image =>
-    store.binary "coreutils-9.7" {
-      kind = "binary-output",
-      optimize = "size",
+    build.build_autotools {
+      name = "coreutils-9.7",
+      sources = [coreutils_src_9_7],
       script_config = {
         configure_args = [
           "--disable-nls",
@@ -78,7 +77,7 @@ fun pkgs =>
                      "/out/${out}/usr/share/man/man8/chroot.8"
             "%,
       },
-    } image script [coreutils_src])))
+    }
   in
 
   {

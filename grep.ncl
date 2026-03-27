@@ -1,6 +1,8 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let grep_src_3_12 =
     store.fetch "grep-src-3.12" {
       url = [
@@ -35,16 +37,13 @@ fun pkgs =>
   in
 
   let grep_3_12 =
-    store.bind grep_src_3_12 (fun grep_src =>
-    store.bind pkgs.buildscript_autotools (fun script =>
-    store.bind pkgs.build_image (fun image =>
-    store.binary "grep-3.12" {
-      kind = "binary-output",
-      optimize = "size",
+    build.build_autotools {
+      name = "grep-3.12",
+      sources = [grep_src_3_12],
       script_config = {
         configure_args = ["--disable-nls", "--disable-perl-regexp"],
       },
-    } image script [grep_src])))
+    }
   in
 
   {

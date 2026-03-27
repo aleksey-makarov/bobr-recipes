@@ -1,6 +1,8 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let diffutils_src_3_12 =
     store.fetch "diffutils-src-3.12" {
       url = [
@@ -36,17 +38,14 @@ fun pkgs =>
   in
 
   let diffutils_3_12 =
-    store.bind diffutils_src_3_12 (fun diffutils_src =>
-    store.bind pkgs.buildscript_autotools (fun script =>
-    store.bind pkgs.build_image (fun image =>
-    store.binary "diffutils-3.12" {
-      kind = "binary-output",
-      optimize = "size",
+    build.build_autotools {
+      name = "diffutils-3.12",
+      sources = [diffutils_src_3_12],
       script_config = {
         configure_args = ["--disable-nls"],
         env = { gl_cv_func_strcasecmp_works = "y" },
       },
-    } image script [diffutils_src])))
+    }
   in
 
   {

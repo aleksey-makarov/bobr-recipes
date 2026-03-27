@@ -1,6 +1,8 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let make_src_4_4_1 =
     store.fetch "make-src-4.4.1" {
       url = [
@@ -35,16 +37,13 @@ fun pkgs =>
   in
 
   let make_4_4_1 =
-    store.bind make_src_4_4_1 (fun make_src =>
-    store.bind pkgs.buildscript_autotools (fun script =>
-    store.bind pkgs.build_image (fun image =>
-    store.binary "make-4.4.1" {
-      kind = "binary-output",
-      optimize = "size",
+    build.build_autotools {
+      name = "make-4.4.1",
+      sources = [make_src_4_4_1],
       script_config = {
         configure_args = ["--disable-nls"],
       },
-    } image script [make_src])))
+    }
   in
 
   {

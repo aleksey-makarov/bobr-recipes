@@ -1,6 +1,8 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let bison_src_3_8_2 =
     store.fetch "bison-src-3.8.2" {
       url = [
@@ -34,14 +36,11 @@ fun pkgs =>
   in
 
   let bison_3_8_2 =
-    store.bind bison_src_3_8_2 (fun bison_src =>
-    store.bind pkgs.buildscript_autotools (fun script =>
-    store.bind pkgs.build_image (fun image =>
-    store.binary "bison-3.8.2" {
-      kind = "binary-output",
-      optimize = "size",
+    build.build_autotools {
+      name = "bison-3.8.2",
+      sources = [bison_src_3_8_2],
       script_config = {},
-    } image script [bison_src])))
+    }
   in
 
   {

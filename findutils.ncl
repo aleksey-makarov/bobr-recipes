@@ -1,6 +1,8 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let findutils_src_4_10_0 =
     store.fetch "findutils-src-4.10.0" {
       url = [
@@ -39,12 +41,9 @@ fun pkgs =>
   in
 
   let findutils_4_10_0 =
-    store.bind findutils_src_4_10_0 (fun findutils_src =>
-    store.bind pkgs.buildscript_autotools (fun script =>
-    store.bind pkgs.build_image (fun image =>
-    store.binary "findutils-4.10.0" {
-      kind = "binary-output",
-      optimize = "size",
+    build.build_autotools {
+      name = "findutils-4.10.0",
+      sources = [findutils_src_4_10_0],
       script_config = {
         configure_args = [
           "--disable-nls",
@@ -52,7 +51,7 @@ fun pkgs =>
           "--localstatedir=/var/lib/locate",
         ],
       },
-    } image script [findutils_src])))
+    }
   in
 
   {

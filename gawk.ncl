@@ -1,6 +1,8 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let gawk_src_5_3_2 =
     store.fetch "gawk-src-5.3.2" {
       url = [
@@ -36,17 +38,14 @@ fun pkgs =>
   in
 
   let gawk_5_3_2 =
-    store.bind gawk_src_5_3_2 (fun gawk_src =>
-    store.bind pkgs.buildscript_autotools (fun script =>
-    store.bind pkgs.build_image (fun image =>
-    store.binary "gawk-5.3.2" {
-      kind = "binary-output",
-      optimize = "size",
+    build.build_autotools {
+      name = "gawk-5.3.2",
+      sources = [gawk_src_5_3_2],
       script_config = {
         pre_configure = "sed -i 's/extras//' Makefile.in",
         configure_args = ["--without-readline"],
       },
-    } image script [gawk_src])))
+    }
   in
 
   {

@@ -1,4 +1,6 @@
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let m4_src_1_4_20 =
     store.fetch "m4-src-1.4.20" {
       url = [
@@ -32,14 +34,11 @@ fun pkgs =>
   in
 
   let m4_1_4_20 =
-    store.bind m4_src_1_4_20 (fun m4_src =>
-    store.bind pkgs.buildscript_autotools (fun script =>
-    store.bind pkgs.build_image (fun image =>
-    store.binary "m4-1.4.20" {
-      kind = "binary-output",
-      optimize = "size",
+    build.build_autotools {
+      name = "m4-1.4.20",
+      sources = [m4_src_1_4_20],
       script_config = {},
-    } image script [m4_src])))
+    }
   in
 
   {

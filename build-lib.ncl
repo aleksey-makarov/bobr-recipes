@@ -7,7 +7,7 @@ fun pkgs =>
       store.binary name {
         kind = "binary-output",
         optimize = "size",
-        script_config = script_config,
+        include script_config,
       } image script sources)))
   in
 

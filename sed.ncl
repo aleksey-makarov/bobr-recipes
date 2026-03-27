@@ -1,6 +1,8 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let sed_src_4_9 =
     store.fetch "sed-src-4.9" {
       url = [
@@ -35,16 +37,13 @@ fun pkgs =>
   in
 
   let sed_4_9 =
-    store.bind sed_src_4_9 (fun sed_src =>
-    store.bind pkgs.buildscript_autotools (fun script =>
-    store.bind pkgs.build_image (fun image =>
-    store.binary "sed-4.9" {
-      kind = "binary-output",
-      optimize = "size",
+    build.build_autotools {
+      name = "sed-4.9",
+      sources = [sed_src_4_9],
       script_config = {
         configure_args = ["--disable-nls", "--without-selinux"],
       },
-    } image script [sed_src])))
+    }
   in
 
   {
