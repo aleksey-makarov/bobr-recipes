@@ -34,6 +34,7 @@ let rec pkgs =
   & ((import "bootstrap-image.ncl") pkgs)
   & ((import "build-image.ncl") pkgs)
   & ((import "build-image-2.ncl") pkgs)
+  & ((import "tests/test-smoke-build.ncl") pkgs)
   & ((import "tests/test-image.ncl") pkgs)
   & ((import "tests/test-reports.ncl") pkgs)
 in
