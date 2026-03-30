@@ -36,6 +36,14 @@ if [ -f "${cfg}/pre_configure" ]; then
   source "${cfg}/pre_configure"
 fi
 
+configure_cmd="./configure"
+if [ -f "${cfg}/build_dir" ]; then
+  build_dir="$(cat "${cfg}/build_dir")"
+  mkdir -p "${build_dir}"
+  cd "${build_dir}"
+  configure_cmd="../configure"
+fi
+
 configure_args=()
 if [ -d "${cfg}/configure_args" ]; then
   while IFS= read -r -d '' path; do
@@ -44,8 +52,9 @@ if [ -d "${cfg}/configure_args" ]; then
 fi
 
 jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-./configure --prefix=/usr "${configure_args[@]}"
+"${configure_cmd}" --prefix=/usr "${configure_args[@]}"
 make -j"$jobs"
+mkdir -p "/out/${out}"
 make DESTDIR="/out/${out}" install
 
 if [ -f "${cfg}/post_install" ]; then

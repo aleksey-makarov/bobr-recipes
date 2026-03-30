@@ -1,4 +1,6 @@
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let glibc_fhs_patch_2_42 =
     store.fetch "glibc-fhs-patch-2.42" {
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch",
@@ -60,52 +62,6 @@ fun pkgs =>
     }
   in
 
-  let buildscript_glibc_2_42 =
-    store.text "buildscript-glibc-2.42" {
-      kind = "build-script",
-      source = m%"
-        #!/usr/bin/env bash
-        set -euo pipefail
-
-        src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-        out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
-
-        cd "/in/${src}"
-
-        if [ ! -x ./configure ]; then
-          candidates=()
-          for d in ./*; do
-            if [ -d "$d" ] && [ -x "$d/configure" ]; then
-              candidates+=("$d")
-            fi
-          done
-          if [ "${#candidates[@]}" -eq 1 ]; then
-            cd "${candidates[0]}"
-          fi
-        fi
-
-        patch -Np1 -i /in/sources1
-        mkdir -p build
-        cd build
-
-        echo "rootsbindir=/usr/sbin" > configparms
-
-        ../configure                               \
-          --prefix=/usr                            \
-          --disable-werror                         \
-          --enable-kernel=4.19                     \
-          --enable-stack-protector=strong          \
-          --disable-nscd                           \
-          --without-selinux
-
-        jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-        make -j"${jobs}"
-        mkdir -p "/out/${out}"
-        make DESTDIR="/out/${out}" install
-        "%,
-    }
-  in
-
   let glibc_gen1_build_image =
     store.bind pkgs.host_image (fun host_image =>
     store.bind pkgs.gawk_gen1_5_3_2 (fun gawk_gen1 =>
@@ -127,14 +83,25 @@ fun pkgs =>
   in
 
   let glibc_2_42 =
-    store.bind glibc_src_2_42 (fun glibc_src =>
-    store.bind glibc_fhs_patch_2_42 (fun glibc_fhs_patch =>
-    store.bind buildscript_glibc_2_42 (fun script =>
-    store.bind pkgs.bootstrap_image (fun image =>
-    store.binary "glibc-2.42" {
-      kind = "binary-output",
-      optimize = "size",
-    } image script [glibc_src, glibc_fhs_patch]))))
+    build.build_bootstrap_autotools {
+      name = "glibc-2.42",
+      sources = [glibc_src_2_42, glibc_fhs_patch_2_42],
+      script_config = {
+        build_dir = "build",
+        pre_configure = m%"
+          patch -Np1 -i /in/sources1
+          mkdir -p build
+          echo "rootsbindir=/usr/sbin" > build/configparms
+        "%,
+        configure_args = [
+          "--disable-werror",
+          "--enable-kernel=4.19",
+          "--enable-stack-protector=strong",
+          "--disable-nscd",
+          "--without-selinux",
+        ],
+      },
+    }
   in
 
   {
