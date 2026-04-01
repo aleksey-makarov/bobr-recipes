@@ -13,50 +13,18 @@ fun pkgs =>
     }
   in
 
-  let bash_buildscript_source_5_3 = m%"
-        #!/usr/bin/env bash
-        set -euo pipefail
-
-        src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-        out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
-
-        cd "/in/${src}"
-
-        if [ ! -x ./configure ]; then
-          candidates=()
-          for d in ./*; do
-            if [ -d "$d" ] && [ -x "$d/configure" ] && [ -x "$d/support/config.guess" ]; then
-              candidates+=("$d")
-            fi
-          done
-          if [ "${#candidates[@]}" -eq 1 ]; then
-            cd "${candidates[0]}"
-          fi
-        fi
-
-        ./configure --prefix=/usr        \
-                    --without-bash-malloc \
-                    --disable-readline
-
-        jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-        make -j"${jobs}"
-        make DESTDIR="/out/${out}" install
-        ln -svf bash "/out/${out}/usr/bin/sh"
-        "%
-  in
-
-  let buildscript_bash_gen1_5_3 =
-    recipe.text "buildscript-bash-gen1-5.3" {
-      kind = "build-script",
-      source = bash_buildscript_source_5_3,
-    }
-  in
-
   let bash_gen1_5_3 =
     recipe.binary "bash-gen1-5.3" {
       kind = "binary-output",
       optimize = "size",
-    } pkgs.host_image buildscript_bash_gen1_5_3 [bash_src_5_3]
+      script_config = {
+        configure_args = [
+          "--without-bash-malloc",
+          "--disable-readline",
+        ],
+        post_install = "ln -svf bash \"/out/${out}/usr/bin/sh\"",
+      },
+    } pkgs.host_image pkgs.buildscript_autotools [bash_src_5_3]
   in
 
   let bash_5_3 =
