@@ -21,49 +21,6 @@ fun pkgs =>
     }
   in
 
-  let buildscript_glibc_gen1_2_42 =
-    recipe.text "buildscript-glibc-gen1-2.42" {
-      kind = "build-script",
-      source = m%"
-        #!/usr/bin/env bash
-        set -euo pipefail
-
-        src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-        out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
-
-        cd "/in/${src}"
-
-        if [ ! -x ./configure ]; then
-          candidates=()
-          for d in ./*; do
-            if [ -d "$d" ] && [ -x "$d/configure" ]; then
-              candidates+=("$d")
-            fi
-          done
-          if [ "${#candidates[@]}" -eq 1 ]; then
-            cd "${candidates[0]}"
-          fi
-        fi
-
-        patch -Np1 -i /in/sources1
-        mkdir -p build
-        cd build
-
-        echo "rootsbindir=/usr/sbin" > configparms
-
-        ../configure                               \
-          --prefix=/usr                            \
-          --disable-nscd                           \
-          --without-selinux                        \
-          --enable-kernel=5.4
-
-        jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-        make -j"${jobs}"
-        make DESTDIR="/out/${out}" install
-        "%,
-    }
-  in
-
   let glibc_gen1_build_image =
     recipe.image "glibc-gen1-build-image" {
       mode = "layered",
@@ -74,7 +31,20 @@ fun pkgs =>
     recipe.binary "glibc-gen1-2.42" {
       kind = "binary-output",
       optimize = "size",
-    } glibc_gen1_build_image buildscript_glibc_gen1_2_42 [glibc_src_2_42, glibc_fhs_patch_2_42]
+      script_config = {
+        build_dir = "build",
+        pre_configure = m%"
+          patch -Np1 -i /in/sources1
+          mkdir -p build
+          echo "rootsbindir=/usr/sbin" > build/configparms
+        "%,
+        configure_args = [
+          "--disable-nscd",
+          "--without-selinux",
+          "--enable-kernel=5.4",
+        ],
+      },
+    } glibc_gen1_build_image pkgs.buildscript_autotools [glibc_src_2_42, glibc_fhs_patch_2_42]
   in
 
   let glibc_2_42 =
