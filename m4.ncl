@@ -13,23 +13,12 @@ fun pkgs =>
     }
   in
 
-  let m4_buildscript_source_1_4_20 =
-    (import "buildscripts/autotools_orig.ncl").autotools {
-    }
-  in
-
-  let buildscript_m4_gen1_1_4_20 =
-    recipe.text "buildscript-m4-gen1-1.4.20" {
-      kind = "build-script",
-      source = m4_buildscript_source_1_4_20,
-    }
-  in
-
   let m4_gen1_1_4_20 =
     recipe.binary "m4-gen1-1.4.20" {
       kind = "binary-output",
       optimize = "size",
-    } pkgs.host_image buildscript_m4_gen1_1_4_20 [m4_src_1_4_20]
+      script_config = {},
+    } pkgs.host_image pkgs.buildscript_autotools [m4_src_1_4_20]
   in
 
   let m4_1_4_20 =

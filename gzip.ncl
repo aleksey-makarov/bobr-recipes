@@ -1,4 +1,3 @@
-let buildscripts = import "buildscripts/autotools_orig.ncl" in
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
@@ -14,24 +13,14 @@ fun pkgs =>
     }
   in
 
-  let gzip_buildscript_source_1_14 =
-    (buildscripts.autotools {
-      configure_args = ["--disable-nls"],
-    })
-  in
-
-  let buildscript_gzip_gen1_1_14 =
-    recipe.text "buildscript-gzip-gen1-1.14" {
-      kind = "build-script",
-      source = gzip_buildscript_source_1_14,
-    }
-  in
-
   let gzip_gen1_1_14 =
     recipe.binary "gzip-gen1-1.14" {
       kind = "binary-output",
       optimize = "size",
-    } pkgs.host_image buildscript_gzip_gen1_1_14 [gzip_src_1_14]
+      script_config = {
+        configure_args = ["--disable-nls"],
+      },
+    } pkgs.host_image pkgs.buildscript_autotools [gzip_src_1_14]
   in
 
   let gzip_1_14 =

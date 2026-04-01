@@ -1,4 +1,3 @@
-let buildscripts = import "buildscripts/autotools_orig.ncl" in
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
@@ -14,24 +13,14 @@ fun pkgs =>
     }
   in
 
-  let sed_buildscript_source_4_9 =
-    (buildscripts.autotools {
-      configure_args = ["--disable-nls", "--without-selinux"],
-    })
-  in
-
-  let buildscript_sed_gen1_4_9 =
-    recipe.text "buildscript-sed-gen1-4.9" {
-      kind = "build-script",
-      source = sed_buildscript_source_4_9,
-    }
-  in
-
   let sed_gen1_4_9 =
     recipe.binary "sed-gen1-4.9" {
       kind = "binary-output",
       optimize = "size",
-    } pkgs.host_image buildscript_sed_gen1_4_9 [sed_src_4_9]
+      script_config = {
+        configure_args = ["--disable-nls", "--without-selinux"],
+      },
+    } pkgs.host_image pkgs.buildscript_autotools [sed_src_4_9]
   in
 
   let sed_4_9 =

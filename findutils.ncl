@@ -1,4 +1,3 @@
-let buildscripts = import "buildscripts/autotools_orig.ncl" in
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
@@ -14,28 +13,18 @@ fun pkgs =>
     }
   in
 
-  let findutils_buildscript_source_4_10_0 =
-    (buildscripts.autotools {
-      configure_args = [
-        "--disable-nls",
-        "--without-selinux",
-        "--localstatedir=/var/lib/locate",
-      ],
-    })
-  in
-
-  let buildscript_findutils_gen1_4_10_0 =
-    recipe.text "buildscript-findutils-gen1-4.10.0" {
-      kind = "build-script",
-      source = findutils_buildscript_source_4_10_0,
-    }
-  in
-
   let findutils_gen1_4_10_0 =
     recipe.binary "findutils-gen1-4.10.0" {
       kind = "binary-output",
       optimize = "size",
-    } pkgs.host_image buildscript_findutils_gen1_4_10_0 [findutils_src_4_10_0]
+      script_config = {
+        configure_args = [
+          "--disable-nls",
+          "--without-selinux",
+          "--localstatedir=/var/lib/locate",
+        ],
+      },
+    } pkgs.host_image pkgs.buildscript_autotools [findutils_src_4_10_0]
   in
 
   let findutils_4_10_0 =

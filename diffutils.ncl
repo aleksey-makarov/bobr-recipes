@@ -1,4 +1,3 @@
-let buildscripts = import "buildscripts/autotools_orig.ncl" in
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
@@ -14,25 +13,15 @@ fun pkgs =>
     }
   in
 
-  let diffutils_buildscript_source_3_12 =
-    (buildscripts.autotools {
-      configure_args = ["--disable-nls"],
-      env = { gl_cv_func_strcasecmp_works = "y" },
-    })
-  in
-
-  let buildscript_diffutils_gen1_3_12 =
-    recipe.text "buildscript-diffutils-gen1-3.12" {
-      kind = "build-script",
-      source = diffutils_buildscript_source_3_12,
-    }
-  in
-
   let diffutils_gen1_3_12 =
     recipe.binary "diffutils-gen1-3.12" {
       kind = "binary-output",
       optimize = "size",
-    } pkgs.host_image buildscript_diffutils_gen1_3_12 [diffutils_src_3_12]
+      script_config = {
+        configure_args = ["--disable-nls"],
+        env = { gl_cv_func_strcasecmp_works = "y" },
+      },
+    } pkgs.host_image pkgs.buildscript_autotools [diffutils_src_3_12]
   in
 
   let diffutils_3_12 =

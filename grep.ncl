@@ -1,4 +1,3 @@
-let buildscripts = import "buildscripts/autotools_orig.ncl" in
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
@@ -14,24 +13,14 @@ fun pkgs =>
     }
   in
 
-  let grep_buildscript_source_3_12 =
-    (buildscripts.autotools {
-      configure_args = ["--disable-nls", "--disable-perl-regexp"],
-    })
-  in
-
-  let buildscript_grep_gen1_3_12 =
-    recipe.text "buildscript-grep-gen1-3.12" {
-      kind = "build-script",
-      source = grep_buildscript_source_3_12,
-    }
-  in
-
   let grep_gen1_3_12 =
     recipe.binary "grep-gen1-3.12" {
       kind = "binary-output",
       optimize = "size",
-    } pkgs.host_image buildscript_grep_gen1_3_12 [grep_src_3_12]
+      script_config = {
+        configure_args = ["--disable-nls", "--disable-perl-regexp"],
+      },
+    } pkgs.host_image pkgs.buildscript_autotools [grep_src_3_12]
   in
 
   let grep_3_12 =

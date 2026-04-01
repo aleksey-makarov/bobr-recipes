@@ -1,4 +1,3 @@
-let buildscripts = import "buildscripts/autotools_orig.ncl" in
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
@@ -14,24 +13,14 @@ fun pkgs =>
     }
   in
 
-  let patch_buildscript_source_2_8 =
-    (buildscripts.autotools {
-      configure_args = ["--disable-nls"],
-    })
-  in
-
-  let buildscript_patch_gen1_2_8 =
-    recipe.text "buildscript-patch-gen1-2.8" {
-      kind = "build-script",
-      source = patch_buildscript_source_2_8,
-    }
-  in
-
   let patch_gen1_2_8 =
     recipe.binary "patch-gen1-2.8" {
       kind = "binary-output",
       optimize = "size",
-    } pkgs.host_image buildscript_patch_gen1_2_8 [patch_src_2_8]
+      script_config = {
+        configure_args = ["--disable-nls"],
+      },
+    } pkgs.host_image pkgs.buildscript_autotools [patch_src_2_8]
   in
 
   let patch_2_8 =

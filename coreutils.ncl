@@ -1,4 +1,3 @@
-let buildscripts = import "buildscripts/autotools_orig.ncl" in
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
@@ -14,41 +13,31 @@ fun pkgs =>
     }
   in
 
-  let coreutils_buildscript_source_9_7 =
-    (buildscripts.autotools {
-      configure_args = [
-        "--disable-nls",
-        "--without-selinux",
-        "--without-openssl",
-        "--without-libgmp",
-        "--enable-install-program=hostname",
-        "--enable-no-install-program=kill,uptime",
-      ],
-      post_install = m%"
-            mkdir -pv "/out/${out}/usr/sbin"
-            mv -v "/out/${out}/usr/bin/chroot" \
-                  "/out/${out}/usr/sbin/chroot"
-            mkdir -pv "/out/${out}/usr/share/man/man8"
-            mv -v "/out/${out}/usr/share/man/man1/chroot.1" \
-                  "/out/${out}/usr/share/man/man8/chroot.8"
-            sed -i 's/"1"/"8"/' \
-                   "/out/${out}/usr/share/man/man8/chroot.8"
-          "%,
-    })
-  in
-
-  let buildscript_coreutils_gen1_9_7 =
-    recipe.text "buildscript-coreutils-gen1-9.7" {
-      kind = "build-script",
-      source = coreutils_buildscript_source_9_7,
-    }
-  in
-
   let coreutils_gen1_9_7 =
     recipe.binary "coreutils-gen1-9.7" {
       kind = "binary-output",
       optimize = "size",
-    } pkgs.host_image buildscript_coreutils_gen1_9_7 [coreutils_src_9_7]
+      script_config = {
+        configure_args = [
+          "--disable-nls",
+          "--without-selinux",
+          "--without-openssl",
+          "--without-libgmp",
+          "--enable-install-program=hostname",
+          "--enable-no-install-program=kill,uptime",
+        ],
+        post_install = m%"
+              mkdir -pv "/out/${out}/usr/sbin"
+              mv -v "/out/${out}/usr/bin/chroot" \
+                    "/out/${out}/usr/sbin/chroot"
+              mkdir -pv "/out/${out}/usr/share/man/man8"
+              mv -v "/out/${out}/usr/share/man/man1/chroot.1" \
+                    "/out/${out}/usr/share/man/man8/chroot.8"
+              sed -i 's/"1"/"8"/' \
+                     "/out/${out}/usr/share/man/man8/chroot.8"
+            "%,
+      },
+    } pkgs.host_image pkgs.buildscript_autotools [coreutils_src_9_7]
   in
 
   let coreutils_9_7 =

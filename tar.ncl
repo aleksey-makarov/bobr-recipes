@@ -1,4 +1,3 @@
-let buildscripts = import "buildscripts/autotools_orig.ncl" in
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
@@ -14,27 +13,17 @@ fun pkgs =>
     }
   in
 
-  let tar_buildscript_source_1_35 =
-    (buildscripts.autotools {
-      configure_args = [
-        "--disable-nls",
-        "--without-selinux",
-      ],
-    })
-  in
-
-  let buildscript_tar_gen1_1_35 =
-    recipe.text "buildscript-tar-gen1-1.35" {
-      kind = "build-script",
-      source = tar_buildscript_source_1_35,
-    }
-  in
-
   let tar_gen1_1_35 =
     recipe.binary "tar-gen1-1.35" {
       kind = "binary-output",
       optimize = "size",
-    } pkgs.host_image buildscript_tar_gen1_1_35 [tar_src_1_35]
+      script_config = {
+        configure_args = [
+          "--disable-nls",
+          "--without-selinux",
+        ],
+      },
+    } pkgs.host_image pkgs.buildscript_autotools [tar_src_1_35]
   in
 
   let tar_1_35 =
