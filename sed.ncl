@@ -1,10 +1,11 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
+let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
   let sed_src_4_9 =
-    store.fetch "sed-src-4.9" {
+    recipe.fetch "sed-src-4.9" {
       url = [
         "https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz",
         "https://mirrors.kernel.org/gnu/sed/sed-4.9.tar.xz",
@@ -20,20 +21,17 @@ fun pkgs =>
   in
 
   let buildscript_sed_gen1_4_9 =
-    store.text "buildscript-sed-gen1-4.9" {
+    recipe.text "buildscript-sed-gen1-4.9" {
       kind = "build-script",
       source = sed_buildscript_source_4_9,
     }
   in
 
   let sed_gen1_4_9 =
-    store.bind sed_src_4_9 (fun sed_src =>
-    store.bind buildscript_sed_gen1_4_9 (fun script =>
-    store.bind pkgs.host_image (fun image =>
-    store.binary "sed-gen1-4.9" {
+    recipe.binary "sed-gen1-4.9" {
       kind = "binary-output",
       optimize = "size",
-    } image script [sed_src])))
+    } pkgs.host_image buildscript_sed_gen1_4_9 [sed_src_4_9]
   in
 
   let sed_4_9 =

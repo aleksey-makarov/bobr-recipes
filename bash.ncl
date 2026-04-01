@@ -1,8 +1,10 @@
+let recipe = import "recipe-lib.ncl" in
+
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
   let bash_src_5_3 =
-    store.fetch "bash-src-5.3" {
+    recipe.fetch "bash-src-5.3" {
       url = [
         "https://ftp.gnu.org/gnu/bash/bash-5.3.tar.gz",
         "https://mirrors.kernel.org/gnu/bash/bash-5.3.tar.gz",
@@ -44,20 +46,17 @@ fun pkgs =>
   in
 
   let buildscript_bash_gen1_5_3 =
-    store.text "buildscript-bash-gen1-5.3" {
+    recipe.text "buildscript-bash-gen1-5.3" {
       kind = "build-script",
       source = bash_buildscript_source_5_3,
     }
   in
 
   let bash_gen1_5_3 =
-    store.bind bash_src_5_3 (fun bash_src =>
-    store.bind buildscript_bash_gen1_5_3 (fun script =>
-    store.bind pkgs.host_image (fun image =>
-    store.binary "bash-gen1-5.3" {
+    recipe.binary "bash-gen1-5.3" {
       kind = "binary-output",
       optimize = "size",
-    } image script [bash_src])))
+    } pkgs.host_image buildscript_bash_gen1_5_3 [bash_src_5_3]
   in
 
   let bash_5_3 =

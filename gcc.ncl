@@ -1,8 +1,10 @@
+let recipe = import "recipe-lib.ncl" in
+
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
   let gcc_src_15_2_0 =
-    store.fetch "gcc-src-15.2.0" {
+    recipe.fetch "gcc-src-15.2.0" {
       url = [
         "https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz",
         "https://mirrors.kernel.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz",
@@ -12,7 +14,7 @@ fun pkgs =>
   in
 
   let buildscript_gcc_gen1_15_2_0 =
-    store.text "buildscript-gcc-gen1-15.2.0" {
+    recipe.text "buildscript-gcc-gen1-15.2.0" {
       kind = "build-script",
       source = m%"
         #!/usr/bin/env bash
@@ -62,7 +64,7 @@ fun pkgs =>
           --disable-multilib             \
           --disable-bootstrap            \
           --disable-fixincludes          \
-          --without-zstd                \
+          --without-zstd                 \
           --enable-languages=c,c++
 
         jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
@@ -73,16 +75,15 @@ fun pkgs =>
   in
 
   let gcc_gen1_15_2_0 =
-    store.bind gcc_src_15_2_0 (fun gcc_src =>
-    store.bind pkgs.gmp_src_6_3_0 (fun gmp_src =>
-    store.bind pkgs.mpfr_src_4_2_2 (fun mpfr_src =>
-    store.bind pkgs.mpc_src_1_3_1 (fun mpc_src =>
-    store.bind buildscript_gcc_gen1_15_2_0 (fun script =>
-    store.bind pkgs.host_image (fun image =>
-    store.binary "gcc-gen1-15.2.0" {
+    recipe.binary "gcc-gen1-15.2.0" {
       kind = "binary-output",
       optimize = "size",
-    } image script [gcc_src, gmp_src, mpfr_src, mpc_src]))))))
+    } pkgs.host_image buildscript_gcc_gen1_15_2_0 [
+      gcc_src_15_2_0,
+      pkgs.gmp_src_6_3_0,
+      pkgs.mpfr_src_4_2_2,
+      pkgs.mpc_src_1_3_1,
+    ]
   in
 
   let gcc_15_2_0 =

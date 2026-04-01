@@ -1,6 +1,8 @@
+let recipe = import "recipe-lib.ncl" in
+
 fun pkgs =>
   let python_src_3_13_7 =
-    store.fetch "python-src-3.13.7" {
+    recipe.fetch "python-src-3.13.7" {
       url = [
         "https://www.python.org/ftp/python/3.13.7/Python-3.13.7.tar.xz",
       ],
@@ -9,7 +11,7 @@ fun pkgs =>
   in
 
   let buildscript_python_gen1_3_13_7 =
-    store.text "buildscript-python-gen1-3.13.7" {
+    recipe.text "buildscript-python-gen1-3.13.7" {
       kind = "build-script",
       source = m%"
         #!/usr/bin/env bash
@@ -32,7 +34,7 @@ fun pkgs =>
           fi
         fi
 
-        cat > Modules/Setup.local <<'EOF'
+        cat > Modules/Setup.local <<'EOF_INNER'
         # Minimal bootstrap Python: keep a self-contained interpreter and
         # disable optional extension modules that would otherwise auto-detect
         # host libraries and leak them into bootstrap-image.
@@ -51,7 +53,7 @@ fun pkgs =>
         _dbm
         readline
         _curses
-        EOF
+        EOF_INNER
 
         ./configure                     \
           --prefix=/usr                 \
@@ -66,13 +68,10 @@ fun pkgs =>
   in
 
   let python_gen1_3_13_7 =
-    store.bind python_src_3_13_7 (fun python_src =>
-    store.bind buildscript_python_gen1_3_13_7 (fun script =>
-    store.bind pkgs.host_image (fun image =>
-    store.binary "python-gen1-3.13.7" {
+    recipe.binary "python-gen1-3.13.7" {
       kind = "binary-output",
       optimize = "size",
-    } image script [python_src])))
+    } pkgs.host_image buildscript_python_gen1_3_13_7 [python_src_3_13_7]
   in
 
   {

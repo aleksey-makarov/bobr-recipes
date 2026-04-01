@@ -1,10 +1,11 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
+let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
   let grep_src_3_12 =
-    store.fetch "grep-src-3.12" {
+    recipe.fetch "grep-src-3.12" {
       url = [
         "https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz",
         "https://mirrors.kernel.org/gnu/grep/grep-3.12.tar.xz",
@@ -20,20 +21,17 @@ fun pkgs =>
   in
 
   let buildscript_grep_gen1_3_12 =
-    store.text "buildscript-grep-gen1-3.12" {
+    recipe.text "buildscript-grep-gen1-3.12" {
       kind = "build-script",
       source = grep_buildscript_source_3_12,
     }
   in
 
   let grep_gen1_3_12 =
-    store.bind grep_src_3_12 (fun grep_src =>
-    store.bind buildscript_grep_gen1_3_12 (fun script =>
-    store.bind pkgs.host_image (fun image =>
-    store.binary "grep-gen1-3.12" {
+    recipe.binary "grep-gen1-3.12" {
       kind = "binary-output",
       optimize = "size",
-    } image script [grep_src])))
+    } pkgs.host_image buildscript_grep_gen1_3_12 [grep_src_3_12]
   in
 
   let grep_3_12 =

@@ -1,10 +1,11 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
+let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
   let tar_src_1_35 =
-    store.fetch "tar-src-1.35" {
+    recipe.fetch "tar-src-1.35" {
       url = [
         "https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz",
         "https://mirrors.kernel.org/gnu/tar/tar-1.35.tar.xz",
@@ -23,20 +24,17 @@ fun pkgs =>
   in
 
   let buildscript_tar_gen1_1_35 =
-    store.text "buildscript-tar-gen1-1.35" {
+    recipe.text "buildscript-tar-gen1-1.35" {
       kind = "build-script",
       source = tar_buildscript_source_1_35,
     }
   in
 
   let tar_gen1_1_35 =
-    store.bind tar_src_1_35 (fun tar_src =>
-    store.bind buildscript_tar_gen1_1_35 (fun script =>
-    store.bind pkgs.host_image (fun image =>
-    store.binary "tar-gen1-1.35" {
+    recipe.binary "tar-gen1-1.35" {
       kind = "binary-output",
       optimize = "size",
-    } image script [tar_src])))
+    } pkgs.host_image buildscript_tar_gen1_1_35 [tar_src_1_35]
   in
 
   let tar_1_35 =

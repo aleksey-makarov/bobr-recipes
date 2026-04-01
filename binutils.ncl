@@ -1,3 +1,5 @@
+let recipe = import "recipe-lib.ncl" in
+
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
@@ -9,7 +11,7 @@ fun pkgs =>
   let gen1_name = "%{pkg_name}-gen1-%{pkg_version}" in
 
   let binutils_src_2_45 =
-    store.fetch source_name {
+    recipe.fetch source_name {
       url = [
         "https://sourceware.org/pub/binutils/releases/binutils-2.45.tar.xz",
         "https://mirrors.kernel.org/gnu/binutils/binutils-2.45.tar.xz",
@@ -19,7 +21,7 @@ fun pkgs =>
   in
 
   let buildscript_binutils_gen1_2_45 =
-    store.text gen1_script_name {
+    recipe.text gen1_script_name {
       kind = "build-script",
       source = m%"
         #!/usr/bin/env bash
@@ -62,13 +64,10 @@ fun pkgs =>
   in
 
   let binutils_gen1_2_45 =
-    store.bind binutils_src_2_45 (fun src =>
-    store.bind buildscript_binutils_gen1_2_45 (fun script =>
-    store.bind pkgs.host_image (fun image =>
-    store.binary gen1_name {
+    recipe.binary gen1_name {
       kind = "binary-output",
       optimize = "size",
-    } image script [src])))
+    } pkgs.host_image buildscript_binutils_gen1_2_45 [binutils_src_2_45]
   in
 
   let binutils_2_45 =

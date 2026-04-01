@@ -1,3 +1,5 @@
+let recipe = import "recipe-lib.ncl" in
+
 fun pkgs =>
   let pkg_name = "linux" in
   let pkg_version = "6.18.10" in
@@ -7,14 +9,14 @@ fun pkgs =>
   let headers_name = "linux-headers-%{pkg_version}" in
 
   let linux_src_6_18_10 =
-    store.fetch source_name {
+    recipe.fetch source_name {
       url = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-6.18.10.tar.xz",
       hash = "md5:660e706a43f634b1fcd911f8839d2f61",
     }
   in
 
   let buildscript_linux_headers_6_18_10 =
-    store.text headers_script_name {
+    recipe.text headers_script_name {
       kind = "build-script",
       source = m%"
         #!/usr/bin/env bash
@@ -48,13 +50,10 @@ fun pkgs =>
   in
 
   let linux_headers_6_18_10 =
-    store.bind linux_src_6_18_10 (fun src =>
-    store.bind buildscript_linux_headers_6_18_10 (fun script =>
-    store.bind pkgs.host_image (fun image =>
-    store.binary headers_name {
+    recipe.binary headers_name {
       kind = "binary-output",
       optimize = "size",
-    } image script [src])))
+    } pkgs.host_image buildscript_linux_headers_6_18_10 [linux_src_6_18_10]
   in
 
   {

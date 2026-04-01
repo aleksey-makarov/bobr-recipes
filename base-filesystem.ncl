@@ -1,6 +1,8 @@
+let recipe = import "recipe-lib.ncl" in
+
 fun pkgs =>
   let buildscript_base_filesystem =
-    store.text "buildscript-base-filesystem" {
+    recipe.text "buildscript-base-filesystem" {
       kind = "build-script",
       source = m%"
         #!/usr/bin/env bash
@@ -20,24 +22,24 @@ fun pkgs =>
           x86_64) ln -sv usr/lib64 "$dest"/lib64 ;;
         esac
 
-        cat > "$dest"/etc/passwd <<'EOF'
+        cat > "$dest"/etc/passwd <<'EOF_INNER'
         root:x:0:0:root:/root:/bin/bash
         nobody:x:65534:65534:nobody:/nonexistent:/usr/bin/false
-        EOF
+        EOF_INNER
 
-        cat > "$dest"/etc/group <<'EOF'
+        cat > "$dest"/etc/group <<'EOF_INNER'
         root:x:0:
         bin:x:1:
         sys:x:2:
         kmem:x:9:
         wheel:x:10:
         nobody:x:65534:
-        EOF
+        EOF_INNER
 
-        cat > "$dest"/etc/ld.so.conf <<'EOF'
+        cat > "$dest"/etc/ld.so.conf <<'EOF_INNER'
         /usr/lib
         /usr/lib64
-        EOF
+        EOF_INNER
 
         ln -sv /proc/self/mounts "$dest"/etc/mtab
         "%,
@@ -45,12 +47,10 @@ fun pkgs =>
   in
 
   let base_filesystem =
-    store.bind buildscript_base_filesystem (fun script =>
-    store.bind pkgs.host_image (fun image =>
-    store.binary "base-filesystem" {
+    recipe.binary "base-filesystem" {
       kind = "binary-output",
       optimize = "size",
-    } image script []))
+    } pkgs.host_image buildscript_base_filesystem []
   in
 
   {

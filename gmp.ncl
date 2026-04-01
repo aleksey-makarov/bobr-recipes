@@ -1,6 +1,8 @@
-fun _pkgs =>
+let recipe = import "recipe-lib.ncl" in
+
+fun pkgs =>
   let gmp_src_6_3_0 =
-    store.fetch "gmp-src-6.3.0" {
+    recipe.fetch "gmp-src-6.3.0" {
       url = [
         "https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz",
         "https://mirrors.kernel.org/gnu/gmp/gmp-6.3.0.tar.xz",

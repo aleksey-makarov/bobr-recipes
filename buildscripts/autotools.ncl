@@ -1,6 +1,8 @@
+let recipe = import "../recipe-lib.ncl" in
+
 fun pkgs =>
   let buildscript_autotools =
-    store.text "buildscript-autotools" {
+    recipe.text "buildscript-autotools" {
       kind = "build-script",
       source = import "autotools.sh" as 'Text,
     }

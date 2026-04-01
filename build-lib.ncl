@@ -1,15 +1,14 @@
+let recipe = import "recipe-lib.ncl" in
+
 fun pkgs =>
   let build_autotools_with =
     fun image =>
     fun { name, sources, script_config } =>
-      store.bind (store.sequence sources) (fun sources =>
-      store.bind pkgs.buildscript_autotools (fun script =>
-      store.bind image (fun image =>
-      store.binary name {
+      recipe.binary name {
         kind = "binary-output",
         optimize = "size",
         include script_config,
-      } image script sources)))
+      } image pkgs.buildscript_autotools sources
   in
 
   let build_autotools =

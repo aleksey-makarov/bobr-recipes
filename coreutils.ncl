@@ -1,10 +1,11 @@
 let buildscripts = import "buildscripts/autotools_orig.ncl" in
+let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
   let coreutils_src_9_7 =
-    store.fetch "coreutils-src-9.7" {
+    recipe.fetch "coreutils-src-9.7" {
       url = [
         "https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz",
         "https://mirrors.kernel.org/gnu/coreutils/coreutils-9.7.tar.xz",
@@ -37,20 +38,17 @@ fun pkgs =>
   in
 
   let buildscript_coreutils_gen1_9_7 =
-    store.text "buildscript-coreutils-gen1-9.7" {
+    recipe.text "buildscript-coreutils-gen1-9.7" {
       kind = "build-script",
       source = coreutils_buildscript_source_9_7,
     }
   in
 
   let coreutils_gen1_9_7 =
-    store.bind coreutils_src_9_7 (fun coreutils_src =>
-    store.bind buildscript_coreutils_gen1_9_7 (fun script =>
-    store.bind pkgs.host_image (fun image =>
-    store.binary "coreutils-gen1-9.7" {
+    recipe.binary "coreutils-gen1-9.7" {
       kind = "binary-output",
       optimize = "size",
-    } image script [coreutils_src])))
+    } pkgs.host_image buildscript_coreutils_gen1_9_7 [coreutils_src_9_7]
   in
 
   let coreutils_9_7 =

@@ -1,47 +1,30 @@
+let recipe = import "recipe-lib.ncl" in
+
 fun pkgs =>
   let build_image_2 =
-    store.bind pkgs.base_filesystem (fun base_filesystem =>
-    store.bind pkgs.linux_headers_6_18_10 (fun linux_headers =>
-    store.bind pkgs.glibc_2_42 (fun glibc =>
-    store.bind pkgs.binutils_2_45 (fun binutils =>
-    store.bind pkgs.gcc_15_2_0 (fun gcc =>
-    store.bind pkgs.bash_5_3 (fun bash =>
-    store.bind pkgs.gawk_5_3_2 (fun gawk =>
-    store.bind pkgs.bison_3_8_2 (fun bison =>
-    store.bind pkgs.make_4_4_1 (fun make =>
-    store.bind pkgs.coreutils_9_7 (fun coreutils =>
-    store.bind pkgs.sed_4_9 (fun sed =>
-    store.bind pkgs.grep_3_12 (fun grep =>
-    store.bind pkgs.gzip_1_14 (fun gzip =>
-    store.bind pkgs.tar_1_35 (fun tar =>
-    store.bind pkgs.patch_2_8 (fun patch =>
-    store.bind pkgs.findutils_4_10_0 (fun findutils =>
-    store.bind pkgs.diffutils_3_12 (fun diffutils =>
-    store.bind pkgs.m4_1_4_20 (fun m4 =>
-    store.bind pkgs.python_gen1_3_13_7 (fun python_gen1 =>
-    store.image "build-image-2" {
+    recipe.image "build-image-2" {
       mode = "bootstrap",
     } null [
-      base_filesystem,
-      linux_headers,
-      glibc,
-      binutils,
-      gcc,
-      bash,
-      gawk,
-      bison,
-      make,
-      coreutils,
-      sed,
-      grep,
-      gzip,
-      tar,
-      patch,
-      findutils,
-      diffutils,
-      m4,
-      python_gen1,
-    ])))))))))))))))))))
+      pkgs.base_filesystem,
+      pkgs.linux_headers_6_18_10,
+      pkgs.glibc_2_42,
+      pkgs.binutils_2_45,
+      pkgs.gcc_15_2_0,
+      pkgs.bash_5_3,
+      pkgs.gawk_5_3_2,
+      pkgs.bison_3_8_2,
+      pkgs.make_4_4_1,
+      pkgs.coreutils_9_7,
+      pkgs.sed_4_9,
+      pkgs.grep_3_12,
+      pkgs.gzip_1_14,
+      pkgs.tar_1_35,
+      pkgs.patch_2_8,
+      pkgs.findutils_4_10_0,
+      pkgs.diffutils_3_12,
+      pkgs.m4_1_4_20,
+      pkgs.python_gen1_3_13_7,
+    ]
   in
 
   {

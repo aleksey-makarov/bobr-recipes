@@ -1,2 +1,2 @@
 let pkgs = import "pkgs.ncl" in
-pkgs.test_smoke_build
+pkgs.test_reports

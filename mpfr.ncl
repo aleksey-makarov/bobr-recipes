@@ -1,6 +1,8 @@
-fun _pkgs =>
+let recipe = import "recipe-lib.ncl" in
+
+fun pkgs =>
   let mpfr_src_4_2_2 =
-    store.fetch "mpfr-src-4.2.2" {
+    recipe.fetch "mpfr-src-4.2.2" {
       url = [
         "https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz",
         "https://mirrors.kernel.org/gnu/mpfr/mpfr-4.2.2.tar.xz",

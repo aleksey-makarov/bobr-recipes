@@ -1,8 +1,10 @@
+let recipe = import "recipe-lib.ncl" in
+
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
   let glibc_fhs_patch_2_42 =
-    store.fetch "glibc-fhs-patch-2.42" {
+    recipe.fetch "glibc-fhs-patch-2.42" {
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch",
       hash = "md5:9a5997c3452909b1769918c759eff8a2",
       unpack = false,
@@ -10,7 +12,7 @@ fun pkgs =>
   in
 
   let glibc_src_2_42 =
-    store.fetch "glibc-src-2.42" {
+    recipe.fetch "glibc-src-2.42" {
       url = [
         "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz",
         "https://mirrors.kernel.org/gnu/glibc/glibc-2.42.tar.xz",
@@ -20,7 +22,7 @@ fun pkgs =>
   in
 
   let buildscript_glibc_gen1_2_42 =
-    store.text "buildscript-glibc-gen1-2.42" {
+    recipe.text "buildscript-glibc-gen1-2.42" {
       kind = "build-script",
       source = m%"
         #!/usr/bin/env bash
@@ -63,23 +65,16 @@ fun pkgs =>
   in
 
   let glibc_gen1_build_image =
-    store.bind pkgs.host_image (fun host_image =>
-    store.bind pkgs.gawk_gen1_5_3_2 (fun gawk_gen1 =>
-    store.bind pkgs.bison_gen1_3_8_2 (fun bison_gen1 =>
-    store.image "glibc-gen1-build-image" {
+    recipe.image "glibc-gen1-build-image" {
       mode = "layered",
-    } host_image [gawk_gen1, bison_gen1])))
+    } pkgs.host_image [pkgs.gawk_gen1_5_3_2, pkgs.bison_gen1_3_8_2]
   in
 
   let glibc_gen1_2_42 =
-    store.bind glibc_src_2_42 (fun glibc_src =>
-    store.bind glibc_fhs_patch_2_42 (fun glibc_fhs_patch =>
-    store.bind buildscript_glibc_gen1_2_42 (fun script =>
-    store.bind glibc_gen1_build_image (fun image =>
-    store.binary "glibc-gen1-2.42" {
+    recipe.binary "glibc-gen1-2.42" {
       kind = "binary-output",
       optimize = "size",
-    } image script [glibc_src, glibc_fhs_patch]))))
+    } glibc_gen1_build_image buildscript_glibc_gen1_2_42 [glibc_src_2_42, glibc_fhs_patch_2_42]
   in
 
   let glibc_2_42 =

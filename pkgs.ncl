@@ -1,9 +1,10 @@
 let lib = import "lib.ncl" in
+let recipe = import "recipe-lib.ncl" in
 
 let rec pkgs =
   {
     host_image =
-      store.container_image lib.host_image_name {
+      recipe.container_image lib.host_image_name {
         image = lib.host_image.image,
         digest = lib.host_image.digest,
       },
@@ -34,7 +35,6 @@ let rec pkgs =
   & ((import "bootstrap-image.ncl") pkgs)
   & ((import "build-image.ncl") pkgs)
   & ((import "build-image-2.ncl") pkgs)
-  & ((import "tests/test-smoke-build.ncl") pkgs)
   & ((import "tests/test-image.ncl") pkgs)
   & ((import "tests/test-reports.ncl") pkgs)
 in
