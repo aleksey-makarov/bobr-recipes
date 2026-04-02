@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ "$#" -ne 1 ]; then
-  echo "usage: $0 <pkgs-attr>" >&2
+if [ "$#" -gt 1 ]; then
+  echo "usage: $0 [pkgs-attr]" >&2
   exit 1
 fi
 
-attr="$1"
+attr="${1:-test_reports}"
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 workspace_root="$(cd "${repo_root}/.." && pwd)"
 pkgs_file="${repo_root}/pkgs.ncl"
