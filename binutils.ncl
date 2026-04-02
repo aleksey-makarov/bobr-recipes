@@ -9,7 +9,7 @@ fun pkgs =>
   let source_name = "%{pkg_name}-src-%{pkg_version}" in
   let gen1_name = "%{pkg_name}-gen1-%{pkg_version}" in
 
-  let binutils_src_2_45 =
+  let binutils_src =
     recipe.fetch source_name {
       url = [
         "https://sourceware.org/pub/binutils/releases/binutils-2.45.tar.xz",
@@ -19,7 +19,7 @@ fun pkgs =>
     }
   in
 
-  let binutils_gen1_2_45 =
+  let binutils_gen1 =
     recipe.binary gen1_name {
       kind = "binary-output",
       optimize = "size",
@@ -34,13 +34,13 @@ fun pkgs =>
           "--enable-default-hash-style=gnu",
         ],
       },
-    } pkgs.host_image pkgs.buildscript_autotools [binutils_src_2_45]
+    } pkgs.host_image pkgs.buildscript_autotools [binutils_src]
   in
 
-  let binutils_2_45 =
+  let binutils =
     build.build_bootstrap_autotools {
       name = "binutils-2.45",
-      sources = [binutils_src_2_45],
+      sources = [binutils_src],
       script_config = {
         build_dir = "build",
         configure_args = [
@@ -60,8 +60,8 @@ fun pkgs =>
 
   {
     include [
-      binutils_src_2_45,
-      binutils_gen1_2_45,
-      binutils_2_45,
+      binutils_src,
+      binutils_gen1,
+      binutils,
     ],
   }

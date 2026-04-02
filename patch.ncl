@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let patch_src_2_8 =
+  let patch_src =
     recipe.fetch "patch-src-2.8" {
       url = [
         "https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz",
@@ -13,20 +13,20 @@ fun pkgs =>
     }
   in
 
-  let patch_gen1_2_8 =
+  let patch_gen1 =
     recipe.binary "patch-gen1-2.8" {
       kind = "binary-output",
       optimize = "size",
       script_config = {
         configure_args = ["--disable-nls"],
       },
-    } pkgs.host_image pkgs.buildscript_autotools [patch_src_2_8]
+    } pkgs.host_image pkgs.buildscript_autotools [patch_src]
   in
 
-  let patch_2_8 =
+  let patch =
     build.build_autotools {
       name = "patch-2.8",
-      sources = [patch_src_2_8],
+      sources = [patch_src],
       script_config = {
         configure_args = ["--disable-nls"],
       },
@@ -35,8 +35,8 @@ fun pkgs =>
 
   {
     include [
-      patch_src_2_8,
-      patch_gen1_2_8,
-      patch_2_8,
+      patch_src,
+      patch_gen1,
+      patch,
     ],
   }

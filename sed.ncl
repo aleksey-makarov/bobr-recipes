@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let sed_src_4_9 =
+  let sed_src =
     recipe.fetch "sed-src-4.9" {
       url = [
         "https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz",
@@ -13,20 +13,20 @@ fun pkgs =>
     }
   in
 
-  let sed_gen1_4_9 =
+  let sed_gen1 =
     recipe.binary "sed-gen1-4.9" {
       kind = "binary-output",
       optimize = "size",
       script_config = {
         configure_args = ["--disable-nls", "--without-selinux"],
       },
-    } pkgs.host_image pkgs.buildscript_autotools [sed_src_4_9]
+    } pkgs.host_image pkgs.buildscript_autotools [sed_src]
   in
 
-  let sed_4_9 =
+  let sed =
     build.build_autotools {
       name = "sed-4.9",
-      sources = [sed_src_4_9],
+      sources = [sed_src],
       script_config = {
         configure_args = ["--disable-nls", "--without-selinux"],
       },
@@ -35,8 +35,8 @@ fun pkgs =>
 
   {
     include [
-      sed_src_4_9,
-      sed_gen1_4_9,
-      sed_4_9,
+      sed_src,
+      sed_gen1,
+      sed,
     ],
   }

@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let gcc_src_15_2_0 =
+  let gcc_src =
     recipe.fetch "gcc-src-15.2.0" {
       url = [
         "https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz",
@@ -13,7 +13,7 @@ fun pkgs =>
     }
   in
 
-  let gcc_gen1_15_2_0 =
+  let gcc_gen1 =
     recipe.binary "gcc-gen1-15.2.0" {
       kind = "binary-output",
       optimize = "size",
@@ -35,21 +35,21 @@ fun pkgs =>
         ],
       },
     } pkgs.host_image pkgs.buildscript_autotools [
-      gcc_src_15_2_0,
-      pkgs.gmp_src_6_3_0,
-      pkgs.mpfr_src_4_2_2,
-      pkgs.mpc_src_1_3_1,
+      gcc_src,
+      pkgs.gmp_src,
+      pkgs.mpfr_src,
+      pkgs.mpc_src,
     ]
   in
 
-  let gcc_15_2_0 =
+  let gcc =
     build.build_bootstrap_autotools {
       name = "gcc-15.2.0",
       sources = [
-        gcc_src_15_2_0,
-        pkgs.gmp_src_6_3_0,
-        pkgs.mpfr_src_4_2_2,
-        pkgs.mpc_src_1_3_1,
+        gcc_src,
+        pkgs.gmp_src,
+        pkgs.mpfr_src,
+        pkgs.mpc_src,
       ],
       script_config = {
         build_dir = "build",
@@ -76,8 +76,8 @@ fun pkgs =>
 
   {
     include [
-      gcc_src_15_2_0,
-      gcc_gen1_15_2_0,
-      gcc_15_2_0,
+      gcc_src,
+      gcc_gen1,
+      gcc,
     ],
   }

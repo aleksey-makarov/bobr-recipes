@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let findutils_src_4_10_0 =
+  let findutils_src =
     recipe.fetch "findutils-src-4.10.0" {
       url = [
         "https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz",
@@ -13,7 +13,7 @@ fun pkgs =>
     }
   in
 
-  let findutils_gen1_4_10_0 =
+  let findutils_gen1 =
     recipe.binary "findutils-gen1-4.10.0" {
       kind = "binary-output",
       optimize = "size",
@@ -24,13 +24,13 @@ fun pkgs =>
           "--localstatedir=/var/lib/locate",
         ],
       },
-    } pkgs.host_image pkgs.buildscript_autotools [findutils_src_4_10_0]
+    } pkgs.host_image pkgs.buildscript_autotools [findutils_src]
   in
 
-  let findutils_4_10_0 =
+  let findutils =
     build.build_autotools {
       name = "findutils-4.10.0",
-      sources = [findutils_src_4_10_0],
+      sources = [findutils_src],
       script_config = {
         configure_args = [
           "--disable-nls",
@@ -43,8 +43,8 @@ fun pkgs =>
 
   {
     include [
-      findutils_src_4_10_0,
-      findutils_gen1_4_10_0,
-      findutils_4_10_0,
+      findutils_src,
+      findutils_gen1,
+      findutils,
     ],
   }

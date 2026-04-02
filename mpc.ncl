@@ -1,7 +1,7 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let mpc_src_1_3_1 =
+  let mpc_src =
     recipe.fetch "mpc-src-1.3.1" {
       url = [
         "https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz",
@@ -12,5 +12,5 @@ fun pkgs =>
   in
 
   {
-    include [mpc_src_1_3_1],
+    include [mpc_src],
   }

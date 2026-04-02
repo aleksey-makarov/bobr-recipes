@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let tar_src_1_35 =
+  let tar_src =
     recipe.fetch "tar-src-1.35" {
       url = [
         "https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz",
@@ -13,7 +13,7 @@ fun pkgs =>
     }
   in
 
-  let tar_gen1_1_35 =
+  let tar_gen1 =
     recipe.binary "tar-gen1-1.35" {
       kind = "binary-output",
       optimize = "size",
@@ -23,13 +23,13 @@ fun pkgs =>
           "--without-selinux",
         ],
       },
-    } pkgs.host_image pkgs.buildscript_autotools [tar_src_1_35]
+    } pkgs.host_image pkgs.buildscript_autotools [tar_src]
   in
 
-  let tar_1_35 =
+  let tar =
     build.build_autotools {
       name = "tar-1.35",
-      sources = [tar_src_1_35],
+      sources = [tar_src],
       script_config = {
         configure_args = [
           "--disable-nls",
@@ -41,8 +41,8 @@ fun pkgs =>
 
   {
     include [
-      tar_src_1_35,
-      tar_gen1_1_35,
-      tar_1_35,
+      tar_src,
+      tar_gen1,
+      tar,
     ],
   }

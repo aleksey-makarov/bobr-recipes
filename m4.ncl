@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let m4_src_1_4_20 =
+  let m4_src =
     recipe.fetch "m4-src-1.4.20" {
       url = [
         "https://ftp.gnu.org/gnu/m4/m4-1.4.20.tar.xz",
@@ -13,26 +13,26 @@ fun pkgs =>
     }
   in
 
-  let m4_gen1_1_4_20 =
+  let m4_gen1 =
     recipe.binary "m4-gen1-1.4.20" {
       kind = "binary-output",
       optimize = "size",
       script_config = {},
-    } pkgs.host_image pkgs.buildscript_autotools [m4_src_1_4_20]
+    } pkgs.host_image pkgs.buildscript_autotools [m4_src]
   in
 
-  let m4_1_4_20 =
+  let m4 =
     build.build_autotools {
       name = "m4-1.4.20",
-      sources = [m4_src_1_4_20],
+      sources = [m4_src],
       script_config = {},
     }
   in
 
   {
     include [
-      m4_src_1_4_20,
-      m4_gen1_1_4_20,
-      m4_1_4_20,
+      m4_src,
+      m4_gen1,
+      m4,
     ],
   }

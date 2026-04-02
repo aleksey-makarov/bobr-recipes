@@ -1,7 +1,7 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let gmp_src_6_3_0 =
+  let gmp_src =
     recipe.fetch "gmp-src-6.3.0" {
       url = [
         "https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz",
@@ -12,5 +12,5 @@ fun pkgs =>
   in
 
   {
-    include [gmp_src_6_3_0],
+    include [gmp_src],
   }

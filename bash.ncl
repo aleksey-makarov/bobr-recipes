@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let bash_src_5_3 =
+  let bash_src =
     recipe.fetch "bash-src-5.3" {
       url = [
         "https://ftp.gnu.org/gnu/bash/bash-5.3.tar.gz",
@@ -13,7 +13,7 @@ fun pkgs =>
     }
   in
 
-  let bash_gen1_5_3 =
+  let bash_gen1 =
     recipe.binary "bash-gen1-5.3" {
       kind = "binary-output",
       optimize = "size",
@@ -24,13 +24,13 @@ fun pkgs =>
         ],
         post_install = "ln -svf bash \"/out/${out}/usr/bin/sh\"",
       },
-    } pkgs.host_image pkgs.buildscript_autotools [bash_src_5_3]
+    } pkgs.host_image pkgs.buildscript_autotools [bash_src]
   in
 
-  let bash_5_3 =
+  let bash =
     build.build_autotools {
       name = "bash-5.3",
-      sources = [bash_src_5_3],
+      sources = [bash_src],
       script_config = {
         configure_args = [
           "--without-bash-malloc",
@@ -42,8 +42,8 @@ fun pkgs =>
 
   {
     include [
-      bash_src_5_3,
-      bash_gen1_5_3,
-      bash_5_3,
+      bash_src,
+      bash_gen1,
+      bash,
     ],
   }

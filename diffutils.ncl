@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let diffutils_src_3_12 =
+  let diffutils_src =
     recipe.fetch "diffutils-src-3.12" {
       url = [
         "https://ftp.gnu.org/gnu/diffutils/diffutils-3.12.tar.xz",
@@ -13,7 +13,7 @@ fun pkgs =>
     }
   in
 
-  let diffutils_gen1_3_12 =
+  let diffutils_gen1 =
     recipe.binary "diffutils-gen1-3.12" {
       kind = "binary-output",
       optimize = "size",
@@ -21,13 +21,13 @@ fun pkgs =>
         configure_args = ["--disable-nls"],
         env = { gl_cv_func_strcasecmp_works = "y" },
       },
-    } pkgs.host_image pkgs.buildscript_autotools [diffutils_src_3_12]
+    } pkgs.host_image pkgs.buildscript_autotools [diffutils_src]
   in
 
-  let diffutils_3_12 =
+  let diffutils =
     build.build_autotools {
       name = "diffutils-3.12",
-      sources = [diffutils_src_3_12],
+      sources = [diffutils_src],
       script_config = {
         configure_args = ["--disable-nls"],
         env = { gl_cv_func_strcasecmp_works = "y" },
@@ -37,8 +37,8 @@ fun pkgs =>
 
   {
     include [
-      diffutils_src_3_12,
-      diffutils_gen1_3_12,
-      diffutils_3_12,
+      diffutils_src,
+      diffutils_gen1,
+      diffutils,
     ],
   }

@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let coreutils_src_9_7 =
+  let coreutils_src =
     recipe.fetch "coreutils-src-9.7" {
       url = [
         "https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz",
@@ -13,7 +13,7 @@ fun pkgs =>
     }
   in
 
-  let coreutils_gen1_9_7 =
+  let coreutils_gen1 =
     recipe.binary "coreutils-gen1-9.7" {
       kind = "binary-output",
       optimize = "size",
@@ -37,13 +37,13 @@ fun pkgs =>
                      "/out/${out}/usr/share/man/man8/chroot.8"
             "%,
       },
-    } pkgs.host_image pkgs.buildscript_autotools [coreutils_src_9_7]
+    } pkgs.host_image pkgs.buildscript_autotools [coreutils_src]
   in
 
-  let coreutils_9_7 =
+  let coreutils =
     build.build_autotools {
       name = "coreutils-9.7",
-      sources = [coreutils_src_9_7],
+      sources = [coreutils_src],
       script_config = {
         configure_args = [
           "--disable-nls",
@@ -69,8 +69,8 @@ fun pkgs =>
 
   {
     include [
-      coreutils_src_9_7,
-      coreutils_gen1_9_7,
-      coreutils_9_7,
+      coreutils_src,
+      coreutils_gen1,
+      coreutils,
     ],
   }

@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let grep_src_3_12 =
+  let grep_src =
     recipe.fetch "grep-src-3.12" {
       url = [
         "https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz",
@@ -13,20 +13,20 @@ fun pkgs =>
     }
   in
 
-  let grep_gen1_3_12 =
+  let grep_gen1 =
     recipe.binary "grep-gen1-3.12" {
       kind = "binary-output",
       optimize = "size",
       script_config = {
         configure_args = ["--disable-nls", "--disable-perl-regexp"],
       },
-    } pkgs.host_image pkgs.buildscript_autotools [grep_src_3_12]
+    } pkgs.host_image pkgs.buildscript_autotools [grep_src]
   in
 
-  let grep_3_12 =
+  let grep =
     build.build_autotools {
       name = "grep-3.12",
-      sources = [grep_src_3_12],
+      sources = [grep_src],
       script_config = {
         configure_args = ["--disable-nls", "--disable-perl-regexp"],
       },
@@ -35,8 +35,8 @@ fun pkgs =>
 
   {
     include [
-      grep_src_3_12,
-      grep_gen1_3_12,
-      grep_3_12,
+      grep_src,
+      grep_gen1,
+      grep,
     ],
   }

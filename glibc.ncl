@@ -11,7 +11,7 @@ fun pkgs =>
     }
   in
 
-  let glibc_src_2_42 =
+  let glibc_src =
     recipe.fetch "glibc-src-2.42" {
       url = [
         "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz",
@@ -24,10 +24,10 @@ fun pkgs =>
   let glibc_gen1_build_image =
     recipe.image "glibc-gen1-build-image" {
       mode = "layered",
-    } pkgs.host_image [pkgs.gawk_gen1_5_3_2, pkgs.bison_gen1_3_8_2]
+    } pkgs.host_image [pkgs.gawk_gen1, pkgs.bison_gen1]
   in
 
-  let glibc_gen1_2_42 =
+  let glibc_gen1 =
     recipe.binary "glibc-gen1-2.42" {
       kind = "binary-output",
       optimize = "size",
@@ -44,13 +44,13 @@ fun pkgs =>
           "--enable-kernel=5.4",
         ],
       },
-    } glibc_gen1_build_image pkgs.buildscript_autotools [glibc_src_2_42, glibc_fhs_patch_2_42]
+    } glibc_gen1_build_image pkgs.buildscript_autotools [glibc_src, glibc_fhs_patch_2_42]
   in
 
-  let glibc_2_42 =
+  let glibc =
     build.build_bootstrap_autotools {
       name = "glibc-2.42",
-      sources = [glibc_src_2_42, glibc_fhs_patch_2_42],
+      sources = [glibc_src, glibc_fhs_patch_2_42],
       script_config = {
         build_dir = "build",
         pre_configure = m%"
@@ -71,10 +71,9 @@ fun pkgs =>
 
   {
     include [
-      glibc_fhs_patch_2_42,
-      glibc_src_2_42,
+      glibc_src,
       glibc_gen1_build_image,
-      glibc_gen1_2_42,
-      glibc_2_42,
+      glibc_gen1,
+      glibc,
     ],
   }

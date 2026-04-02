@@ -8,14 +8,14 @@ fun pkgs =>
   let headers_script_name = "buildscript-linux-headers-%{pkg_version}" in
   let headers_name = "linux-headers-%{pkg_version}" in
 
-  let linux_src_6_18_10 =
+  let linux_src =
     recipe.fetch source_name {
       url = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-6.18.10.tar.xz",
       hash = "md5:660e706a43f634b1fcd911f8839d2f61",
     }
   in
 
-  let buildscript_linux_headers_6_18_10 =
+  let buildscript_linux_headers =
     recipe.text headers_script_name {
       kind = "build-script",
       source = m%"
@@ -49,16 +49,16 @@ fun pkgs =>
     }
   in
 
-  let linux_headers_6_18_10 =
+  let linux_headers =
     recipe.binary headers_name {
       kind = "binary-output",
       optimize = "size",
-    } pkgs.host_image buildscript_linux_headers_6_18_10 [linux_src_6_18_10]
+    } pkgs.host_image buildscript_linux_headers [linux_src]
   in
 
   {
     include [
-      linux_src_6_18_10,
-      linux_headers_6_18_10,
+      linux_src,
+      linux_headers,
     ],
   }

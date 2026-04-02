@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let make_src_4_4_1 =
+  let make_src =
     recipe.fetch "make-src-4.4.1" {
       url = [
         "https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz",
@@ -13,20 +13,20 @@ fun pkgs =>
     }
   in
 
-  let make_gen1_4_4_1 =
+  let make_gen1 =
     recipe.binary "make-gen1-4.4.1" {
       kind = "binary-output",
       optimize = "size",
       script_config = {
         configure_args = ["--disable-nls"],
       },
-    } pkgs.host_image pkgs.buildscript_autotools [make_src_4_4_1]
+    } pkgs.host_image pkgs.buildscript_autotools [make_src]
   in
 
-  let make_4_4_1 =
+  let make =
     build.build_autotools {
       name = "make-4.4.1",
-      sources = [make_src_4_4_1],
+      sources = [make_src],
       script_config = {
         configure_args = ["--disable-nls"],
       },
@@ -35,8 +35,8 @@ fun pkgs =>
 
   {
     include [
-      make_src_4_4_1,
-      make_gen1_4_4_1,
-      make_4_4_1,
+      make_src,
+      make_gen1,
+      make,
     ],
   }

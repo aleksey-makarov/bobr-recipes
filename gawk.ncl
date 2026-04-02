@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let build = (import "build-lib.ncl") pkgs in
 
-  let gawk_src_5_3_2 =
+  let gawk_src =
     recipe.fetch "gawk-src-5.3.2" {
       url = [
         "https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz",
@@ -13,7 +13,7 @@ fun pkgs =>
     }
   in
 
-  let gawk_gen1_5_3_2 =
+  let gawk_gen1 =
     recipe.binary "gawk-gen1-5.3.2" {
       kind = "binary-output",
       optimize = "size",
@@ -21,13 +21,13 @@ fun pkgs =>
         pre_configure = "sed -i 's/extras//' Makefile.in",
         configure_args = ["--without-readline"],
       },
-    } pkgs.host_image pkgs.buildscript_autotools [gawk_src_5_3_2]
+    } pkgs.host_image pkgs.buildscript_autotools [gawk_src]
   in
 
-  let gawk_5_3_2 =
+  let gawk =
     build.build_autotools {
       name = "gawk-5.3.2",
-      sources = [gawk_src_5_3_2],
+      sources = [gawk_src],
       script_config = {
         pre_configure = "sed -i 's/extras//' Makefile.in",
         configure_args = ["--without-readline"],
@@ -37,8 +37,8 @@ fun pkgs =>
 
   {
     include [
-      gawk_src_5_3_2,
-      gawk_gen1_5_3_2,
-      gawk_5_3_2,
+      gawk_src,
+      gawk_gen1,
+      gawk,
     ],
   }

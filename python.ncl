@@ -1,7 +1,7 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let python_src_3_13_7 =
+  let python_src =
     recipe.fetch "python-src-3.13.7" {
       url = [
         "https://www.python.org/ftp/python/3.13.7/Python-3.13.7.tar.xz",
@@ -10,7 +10,7 @@ fun pkgs =>
     }
   in
 
-  let python_gen1_3_13_7 =
+  let python_gen1 =
     recipe.binary "python-gen1-3.13.7" {
       kind = "binary-output",
       optimize = "size",
@@ -42,12 +42,12 @@ fun pkgs =>
         ],
         post_install = "ln -svf python3 \"/out/${out}/usr/bin/python\"",
       },
-    } pkgs.host_image pkgs.buildscript_autotools [python_src_3_13_7]
+    } pkgs.host_image pkgs.buildscript_autotools [python_src]
   in
 
   {
     include [
-      python_src_3_13_7,
-      python_gen1_3_13_7,
+      python_src,
+      python_gen1,
     ],
   }
