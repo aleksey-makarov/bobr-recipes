@@ -21,8 +21,8 @@ fun pkgs =>
     }
   in
 
-  let glibc_gen1_build_image =
-    recipe.image "glibc-gen1-build-image" {
+  let glibc_bootstrap_image =
+    recipe.image "glibc-bootstrap-image" {
       mode = "layered",
     } pkgs.host_image [pkgs.gawk_gen1, pkgs.bison_gen1]
   in
@@ -44,7 +44,7 @@ fun pkgs =>
           "--enable-kernel=5.4",
         ],
       },
-    } glibc_gen1_build_image pkgs.buildscript_autotools [glibc_src, glibc_fhs_patch_2_42]
+    } glibc_bootstrap_image pkgs.buildscript_autotools [glibc_src, glibc_fhs_patch_2_42]
   in
 
   let glibc =
@@ -72,7 +72,7 @@ fun pkgs =>
   {
     include [
       glibc_src,
-      glibc_gen1_build_image,
+      glibc_bootstrap_image,
       glibc_gen1,
       glibc,
     ],

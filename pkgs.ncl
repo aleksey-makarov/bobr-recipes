@@ -32,9 +32,9 @@ let rec pkgs =
   & ((import "gcc.ncl") pkgs)
   & ((import "glibc.ncl") pkgs)
   & ((import "base-filesystem.ncl") pkgs)
-  & ((import "bootstrap-image.ncl") pkgs)
-  & ((import "build-image.ncl") pkgs)
-  & ((import "build-image-2.ncl") pkgs)
+  & ((import "system-image-0.ncl") pkgs)
+  & ((import "system-image-1.ncl") pkgs)
+  & ((import "system-image.ncl") pkgs)
   & ((import "tests/test-image.ncl") pkgs)
   & ((import "tests/test-reports.ncl") pkgs)
 in

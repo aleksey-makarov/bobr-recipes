@@ -13,9 +13,9 @@ fun pkgs =>
       kind = "binary-output",
       optimize = "size",
     } pkgs.host_image buildscript_test_reports [
-      pkgs.test_bootstrap_image,
-      pkgs.test_build_image_2,
-      pkgs.test_build_image,
+      pkgs.test_system_image_0,
+      pkgs.test_system_image,
+      pkgs.test_system_image_1,
     ]
   in
 

@@ -1,8 +1,8 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build_image_2 =
-    recipe.image "build-image-2" {
+  let system_image =
+    recipe.image "system-image" {
       mode = "bootstrap",
     } null [
       pkgs.base_filesystem,
@@ -28,5 +28,5 @@ fun pkgs =>
   in
 
   {
-    include [build_image_2],
+    include [system_image],
   }

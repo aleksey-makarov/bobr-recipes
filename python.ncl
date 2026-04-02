@@ -19,7 +19,7 @@ fun pkgs =>
           cat > Modules/Setup.local <<'EOF_INNER'
           # Minimal bootstrap Python: keep a self-contained interpreter and
           # disable optional extension modules that would otherwise auto-detect
-          # host libraries and leak them into bootstrap-image.
+          # host libraries and leak them into system-image-0.
           *disabled*
           _uuid
           _ssl

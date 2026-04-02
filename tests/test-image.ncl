@@ -8,36 +8,36 @@ fun pkgs =>
     }
   in
 
-  let test_build_image =
-    recipe.binary "test-build-image" {
+  let test_system_image_1 =
+    recipe.binary "test-system-image-1" {
       kind = "binary-output",
       optimize = "size",
       script_config = {
-        name = "build-image",
+        name = "system-image-1",
       },
-    } pkgs.build_image buildscript_test_image []
+    } pkgs.system_image_1 buildscript_test_image []
   in
 
-  let test_build_image_2 =
-    recipe.binary "test-build-image-2" {
+  let test_system_image =
+    recipe.binary "test-system-image" {
       kind = "binary-output",
       optimize = "size",
       script_config = {
-        name = "build-image-2",
+        name = "system-image",
       },
-    } pkgs.build_image_2 buildscript_test_image []
+    } pkgs.system_image buildscript_test_image []
   in
 
-  let test_bootstrap_image =
-    recipe.binary "test-bootstrap-image" {
+  let test_system_image_0 =
+    recipe.binary "test-system-image-0" {
       kind = "binary-output",
       optimize = "size",
       script_config = {
-        name = "bootstrap-image",
+        name = "system-image-0",
       },
-    } pkgs.bootstrap_image buildscript_test_image []
+    } pkgs.system_image_0 buildscript_test_image []
   in
 
   {
-    include [test_build_image, test_build_image_2, test_bootstrap_image],
+    include [test_system_image_1, test_system_image, test_system_image_0],
   }

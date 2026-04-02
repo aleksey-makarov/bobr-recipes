@@ -12,11 +12,11 @@ fun pkgs =>
   in
 
   let build_autotools =
-    build_autotools_with pkgs.build_image
+    build_autotools_with pkgs.system_image_1
   in
 
   let build_bootstrap_autotools =
-    build_autotools_with pkgs.bootstrap_image
+    build_autotools_with pkgs.system_image_0
   in
 
   {
