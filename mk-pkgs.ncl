@@ -1,8 +1,8 @@
 let lib = import "lib.ncl" in
 let recipe = import "recipe-lib.ncl" in
 
-let base_layers = [
-  (fun final => fun prev =>
+let base_modules = [
+  (fun _pkgs =>
     {
       host_image =
         recipe.container_image lib.host_image_name {
@@ -10,34 +10,34 @@ let base_layers = [
           digest = lib.host_image.digest,
         },
     }),
-  (fun final => fun prev => (import "buildscripts/autotools.ncl") final),
-  (fun final => fun prev => (import "binutils.ncl") final),
-  (fun final => fun prev => (import "linux.ncl") final),
-  (fun final => fun prev => (import "make.ncl") final),
-  (fun final => fun prev => (import "coreutils.ncl") final),
-  (fun final => fun prev => (import "sed.ncl") final),
-  (fun final => fun prev => (import "grep.ncl") final),
-  (fun final => fun prev => (import "gzip.ncl") final),
-  (fun final => fun prev => (import "tar.ncl") final),
-  (fun final => fun prev => (import "patch.ncl") final),
-  (fun final => fun prev => (import "findutils.ncl") final),
-  (fun final => fun prev => (import "diffutils.ncl") final),
-  (fun final => fun prev => (import "m4.ncl") final),
-  (fun final => fun prev => (import "python.ncl") final),
-  (fun final => fun prev => (import "bash.ncl") final),
-  (fun final => fun prev => (import "gawk.ncl") final),
-  (fun final => fun prev => (import "bison.ncl") final),
-  (fun final => fun prev => (import "gmp.ncl") final),
-  (fun final => fun prev => (import "mpfr.ncl") final),
-  (fun final => fun prev => (import "mpc.ncl") final),
-  (fun final => fun prev => (import "gcc.ncl") final),
-  (fun final => fun prev => (import "glibc.ncl") final),
-  (fun final => fun prev => (import "base-filesystem.ncl") final),
-  (fun final => fun prev => (import "system-image-0.ncl") final),
-  (fun final => fun prev => (import "system-image-1.ncl") final),
-  (fun final => fun prev => (import "system-image.ncl") final),
-  (fun final => fun prev => (import "tests/test-image.ncl") final),
-  (fun final => fun prev => (import "tests/test-reports.ncl") final),
+  import "buildscripts/autotools.ncl",
+  import "binutils.ncl",
+  import "linux.ncl",
+  import "make.ncl",
+  import "coreutils.ncl",
+  import "sed.ncl",
+  import "grep.ncl",
+  import "gzip.ncl",
+  import "tar.ncl",
+  import "patch.ncl",
+  import "findutils.ncl",
+  import "diffutils.ncl",
+  import "m4.ncl",
+  import "python.ncl",
+  import "bash.ncl",
+  import "gawk.ncl",
+  import "bison.ncl",
+  import "gmp.ncl",
+  import "mpfr.ncl",
+  import "mpc.ncl",
+  import "gcc.ncl",
+  import "glibc.ncl",
+  import "base-filesystem.ncl",
+  import "system-image-0.ncl",
+  import "system-image-1.ncl",
+  import "system-image.ncl",
+  import "tests/test-image.ncl",
+  import "tests/test-reports.ncl",
 ] in
 
 let replace_fields =
@@ -62,13 +62,18 @@ let replace_fields =
 in
 
 fun overlays =>
-  let layers = std.array.concat base_layers overlays in
-
   let rec final =
+    let base =
+      std.array.fold_left
+        (fun acc module => acc & (module final))
+        {}
+        base_modules
+    in
+
     std.array.fold_left
-      (fun prev layer => replace_fields prev (layer final prev))
-      {}
-      layers
+      (fun prev overlay => replace_fields prev (overlay final prev))
+      base
+      overlays
   in
 
   final
