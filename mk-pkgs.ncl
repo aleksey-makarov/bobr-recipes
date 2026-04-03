@@ -1,15 +1,5 @@
-let lib = import "lib.ncl" in
-let recipe = import "recipe-lib.ncl" in
-
 let base_modules = [
-  (fun _pkgs =>
-    {
-      host_image =
-        recipe.container_image lib.host_image_name {
-          image = lib.host_image.image,
-          digest = lib.host_image.digest,
-        },
-    }),
+  import "host-image.ncl",
   import "buildscripts/autotools.ncl",
   import "binutils.ncl",
   import "linux.ncl",
