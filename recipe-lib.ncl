@@ -34,7 +34,7 @@
   image = fun recipe_name => fun recipe_config => fun base_input => fun layer_inputs => {
     name = recipe_name,
     tag = "Image",
-    config = recipe_config,
+    config = { ref_name | default = recipe_name } & recipe_config,
     inputs = {
       base = base_input,
       inputs = layer_inputs,
