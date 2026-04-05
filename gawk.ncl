@@ -16,7 +16,6 @@ fun pkgs =>
   let gawk_gen1 =
     recipe.binary "gawk-gen1-5.3.2" {
       kind = "binary-output",
-      optimize = "size",
       script_config = {
         pre_configure = "sed -i 's/extras//' Makefile.in",
         configure_args = ["--without-readline"],

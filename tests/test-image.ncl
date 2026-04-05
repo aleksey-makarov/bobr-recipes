@@ -11,7 +11,6 @@ fun pkgs =>
   let test_system_image_1 =
     recipe.binary "test-system-image-1" {
       kind = "binary-output",
-      optimize = "size",
       script_config = {
         name = "system-image-1",
       },
@@ -21,7 +20,6 @@ fun pkgs =>
   let test_system_image =
     recipe.binary "test-system-image" {
       kind = "binary-output",
-      optimize = "size",
       script_config = {
         name = "system-image",
       },
@@ -31,7 +29,6 @@ fun pkgs =>
   let test_system_image_0 =
     recipe.binary "test-system-image-0" {
       kind = "binary-output",
-      optimize = "size",
       script_config = {
         name = "system-image-0",
       },

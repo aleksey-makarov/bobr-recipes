@@ -16,7 +16,6 @@ fun pkgs =>
   let bash_gen1 =
     recipe.binary "bash-gen1-5.3" {
       kind = "binary-output",
-      optimize = "size",
       script_config = {
         configure_args = [
           "--without-bash-malloc",

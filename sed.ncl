@@ -16,7 +16,6 @@ fun pkgs =>
   let sed_gen1 =
     recipe.binary "sed-gen1-4.9" {
       kind = "binary-output",
-      optimize = "size",
       script_config = {
         configure_args = ["--disable-nls", "--without-selinux"],
       },

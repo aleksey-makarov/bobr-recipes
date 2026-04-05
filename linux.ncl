@@ -52,7 +52,6 @@ fun pkgs =>
   let linux_headers =
     recipe.binary headers_name {
       kind = "binary-output",
-      optimize = "size",
     } pkgs.host_image buildscript_linux_headers [linux_src]
   in
 

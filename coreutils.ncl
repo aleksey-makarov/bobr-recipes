@@ -16,7 +16,6 @@ fun pkgs =>
   let coreutils_gen1 =
     recipe.binary "coreutils-gen1-9.7" {
       kind = "binary-output",
-      optimize = "size",
       script_config = {
         configure_args = [
           "--disable-nls",

@@ -49,7 +49,6 @@ fun pkgs =>
   let base_filesystem =
     recipe.binary "base-filesystem" {
       kind = "binary-output",
-      optimize = "size",
     } pkgs.host_image buildscript_base_filesystem []
   in
 

@@ -16,7 +16,6 @@ fun pkgs =>
   let tar_gen1 =
     recipe.binary "tar-gen1-1.35" {
       kind = "binary-output",
-      optimize = "size",
       script_config = {
         configure_args = [
           "--disable-nls",

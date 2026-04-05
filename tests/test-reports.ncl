@@ -11,7 +11,6 @@ fun pkgs =>
   let test_reports =
     recipe.binary "test-reports" {
       kind = "binary-output",
-      optimize = "size",
     } pkgs.host_image buildscript_test_reports [
       pkgs.test_system_image_0,
       pkgs.test_system_image,

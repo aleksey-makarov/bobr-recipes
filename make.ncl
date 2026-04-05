@@ -16,7 +16,6 @@ fun pkgs =>
   let make_gen1 =
     recipe.binary "make-gen1-4.4.1" {
       kind = "binary-output",
-      optimize = "size",
       script_config = {
         configure_args = ["--disable-nls"],
       },
