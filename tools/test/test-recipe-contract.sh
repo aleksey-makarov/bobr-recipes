@@ -35,6 +35,7 @@ run_case "text" pass '{"name":"hello","tag":"Text","config":{"source":"hi","exec
 run_case "fetch" pass '{"name":"src","tag":"Fetch","config":{"url":"https://example.invalid/src.tar.xz","hash":"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"inputs":{}}'
 run_case "container-image" pass '{"name":"img","tag":"ContainerImage","config":{"image":"docker.io/library/alpine:latest","digest":"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},"inputs":{}}'
 run_case "binary" pass '{"name":"bin","tag":"Binary","config":{},"inputs":{"image":{"name":"img","tag":"ContainerImage","config":{"image":"docker.io/library/alpine:latest","digest":"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},"inputs":{}},"script":{"name":"script","tag":"Text","config":{"source":"#!/bin/sh\n","executable":true},"inputs":{}},"sources":[]}}'
+run_case "ext4-rootfs" pass '{"name":"rootfs","tag":"Ext4Rootfs","config":{"size_mib":256,"label":"rootfs"},"inputs":{"inputs":[{"name":"bin","tag":"Binary","config":{},"inputs":{"image":{"name":"img","tag":"ContainerImage","config":{"image":"docker.io/library/alpine:latest","digest":"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},"inputs":{}},"script":{"name":"script","tag":"Text","config":{"source":"#!/bin/sh\n","executable":true},"inputs":{}},"sources":[]}}]}}'
 run_case "image" pass '{"name":"img2","tag":"Image","config":{"mode":"bootstrap"},"inputs":{"base":null,"inputs":[]}}'
 
 run_case "unknown-tag" fail '{"name":"bad","tag":"Demo","config":{},"inputs":{}}'
@@ -42,6 +43,7 @@ run_case "missing-input-slot" fail '{"name":"bin","tag":"Binary","config":{},"in
 run_case "extra-top-level-field" fail '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{},"extra":true}'
 run_case "wrong-many-shape" fail '{"name":"img2","tag":"Image","config":{"mode":"bootstrap"},"inputs":{"base":null,"inputs":{}}}'
 run_case "bad-fetch-archive-format" fail '{"name":"src","tag":"Fetch","config":{"url":"https://example.invalid/src.tar.xz","hash":"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","archive_format":"tar-zst"},"inputs":{}}'
+run_case "bad-ext4-rootfs-size" fail '{"name":"rootfs","tag":"Ext4Rootfs","config":{"label":"rootfs"},"inputs":{"inputs":[]}}'
 
 real_recipe="${tmpdir}/real-recipe.json"
 nickel export "${repo_root}/tests/test-recipe.ncl" --format json > "${real_recipe}"

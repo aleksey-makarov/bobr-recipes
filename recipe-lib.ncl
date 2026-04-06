@@ -40,4 +40,13 @@
       inputs = layer_inputs,
     },
   },
+
+  ext4_rootfs = fun recipe_name => fun recipe_config => fun tree_inputs => {
+    name = recipe_name,
+    tag = "Ext4Rootfs",
+    config = recipe_config,
+    inputs = {
+      inputs = tree_inputs,
+    },
+  },
 }

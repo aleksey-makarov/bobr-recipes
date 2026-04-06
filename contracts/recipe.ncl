@@ -3,6 +3,7 @@ let KnownTags = [
   "Text",
   "ContainerImage",
   "Binary",
+  "Ext4Rootfs",
   "Image",
 ]
 in
@@ -85,6 +86,16 @@ let ImageConfig = {
     | doc "Optional image build mode selector.",
 }
 in
+let Ext4RootfsConfig = {
+  size_mib
+    | Number
+    | doc "Explicit size of the resulting ext4 rootfs image in MiB.",
+  label
+    | String
+    | optional
+    | doc "Optional ext4 volume label.",
+}
+in
 let FetchInputs = {
 }
 in
@@ -113,6 +124,12 @@ let ImageInputsShape = {
   inputs
     | Array Dyn
     | doc "Repeated recipe nodes providing image layer inputs.",
+}
+in
+let Ext4RootfsInputsShape = {
+  inputs
+    | Array Dyn
+    | doc "Repeated recipe nodes providing installable filesystem tree inputs.",
 }
 in
 let rec ValidateRecipe = fun recipe =>
@@ -145,6 +162,12 @@ let rec ValidateRecipe = fun recipe =>
       inputs = std.array.map ValidateRecipe checked.inputs,
     }
   in
+  let validate_ext4_rootfs_inputs = fun inputs =>
+    let checked = inputs | Ext4RootfsInputsShape in
+    checked & {
+      inputs = std.array.map ValidateRecipe checked.inputs,
+    }
+  in
   if checked.tag == "Fetch" then
     checked & {
       config = checked.config | FetchConfig,
@@ -164,6 +187,11 @@ let rec ValidateRecipe = fun recipe =>
     checked & {
       config = checked.config | BinaryConfig,
       inputs = validate_binary_inputs checked.inputs,
+    }
+  else if checked.tag == "Ext4Rootfs" then
+    checked & {
+      config = checked.config | Ext4RootfsConfig,
+      inputs = validate_ext4_rootfs_inputs checked.inputs,
     }
   else
     checked & {
@@ -191,6 +219,9 @@ in
   binary_config
     | doc "Config contract for `Binary` recipe nodes."
     = BinaryConfig,
+  ext4_rootfs_config
+    | doc "Config contract for `Ext4Rootfs` recipe nodes."
+    = Ext4RootfsConfig,
   image_config
     | doc "Config contract for `Image` recipe nodes."
     = ImageConfig,
