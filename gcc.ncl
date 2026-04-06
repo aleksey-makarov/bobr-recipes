@@ -15,7 +15,6 @@ fun pkgs =>
 
   let gcc_gen1 =
     recipe.binary "gcc-gen1-15.2.0" {
-      kind = "binary-output",
       script_config = {
         build_dir = "build",
         pre_configure = m%"

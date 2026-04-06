@@ -15,7 +15,6 @@ fun pkgs =>
 
   let findutils_gen1 =
     recipe.binary "findutils-gen1-4.10.0" {
-      kind = "binary-output",
       script_config = {
         configure_args = [
           "--disable-nls",

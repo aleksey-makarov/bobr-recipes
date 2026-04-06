@@ -5,7 +5,6 @@ fun pkgs =>
     fun image =>
     fun { name, sources, script_config } =>
       recipe.binary name {
-        kind = "binary-output",
           include script_config,
       } image pkgs.buildscript_autotools sources
   in

@@ -15,7 +15,6 @@ fun pkgs =>
 
   let diffutils_gen1 =
     recipe.binary "diffutils-gen1-3.12" {
-      kind = "binary-output",
       script_config = {
         configure_args = ["--disable-nls"],
         env = { gl_cv_func_strcasecmp_works = "y" },

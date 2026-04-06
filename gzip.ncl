@@ -15,7 +15,6 @@ fun pkgs =>
 
   let gzip_gen1 =
     recipe.binary "gzip-gen1-1.14" {
-      kind = "binary-output",
       script_config = {
         configure_args = ["--disable-nls"],
       },

@@ -31,15 +31,15 @@ EOF_INNER
   fi
 }
 
-run_case "text" pass '{"name":"hello","tag":"Text","config":{"kind":"plain-text","source":"hi"},"inputs":{}}'
+run_case "text" pass '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{}}'
 run_case "fetch" pass '{"name":"src","tag":"Fetch","config":{"url":"https://example.invalid/src.tar.xz","hash":"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"inputs":{}}'
 run_case "container-image" pass '{"name":"img","tag":"ContainerImage","config":{"image":"docker.io/library/alpine:latest","digest":"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},"inputs":{}}'
-run_case "binary" pass '{"name":"bin","tag":"Binary","config":{"kind":"binary-output"},"inputs":{"image":{"name":"img","tag":"ContainerImage","config":{"image":"docker.io/library/alpine:latest","digest":"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},"inputs":{}},"script":{"name":"script","tag":"Text","config":{"kind":"build-script","source":"#!/bin/sh\n"},"inputs":{}},"sources":[]}}'
+run_case "binary" pass '{"name":"bin","tag":"Binary","config":{},"inputs":{"image":{"name":"img","tag":"ContainerImage","config":{"image":"docker.io/library/alpine:latest","digest":"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},"inputs":{}},"script":{"name":"script","tag":"Text","config":{"source":"#!/bin/sh\n","executable":true},"inputs":{}},"sources":[]}}'
 run_case "image" pass '{"name":"img2","tag":"Image","config":{"mode":"bootstrap"},"inputs":{"base":null,"inputs":[]}}'
 
 run_case "unknown-tag" fail '{"name":"bad","tag":"Demo","config":{},"inputs":{}}'
-run_case "missing-input-slot" fail '{"name":"bin","tag":"Binary","config":{"kind":"binary-output"},"inputs":{"image":{"name":"img","tag":"ContainerImage","config":{"image":"docker.io/library/alpine:latest","digest":"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},"inputs":{}},"sources":[]}}'
-run_case "extra-top-level-field" fail '{"name":"hello","tag":"Text","config":{"kind":"plain-text","source":"hi"},"inputs":{},"extra":true}'
+run_case "missing-input-slot" fail '{"name":"bin","tag":"Binary","config":{},"inputs":{"image":{"name":"img","tag":"ContainerImage","config":{"image":"docker.io/library/alpine:latest","digest":"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},"inputs":{}},"sources":[]}}'
+run_case "extra-top-level-field" fail '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{},"extra":true}'
 run_case "wrong-many-shape" fail '{"name":"img2","tag":"Image","config":{"mode":"bootstrap"},"inputs":{"base":null,"inputs":{}}}'
 run_case "bad-fetch-archive-format" fail '{"name":"src","tag":"Fetch","config":{"url":"https://example.invalid/src.tar.xz","hash":"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","archive_format":"tar-zst"},"inputs":{}}'
 

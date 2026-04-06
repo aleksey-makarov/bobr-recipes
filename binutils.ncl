@@ -21,7 +21,6 @@ fun pkgs =>
 
   let binutils_gen1 =
     recipe.binary gen1_name {
-      kind = "binary-output",
       script_config = {
         build_dir = "build",
         configure_args = [

@@ -17,7 +17,7 @@ fun pkgs =>
 
   let buildscript_linux_headers =
     recipe.text headers_script_name {
-      kind = "build-script",
+      executable = true,
       source = m%"
         #!/usr/bin/env bash
         set -euo pipefail
@@ -51,7 +51,6 @@ fun pkgs =>
 
   let linux_headers =
     recipe.binary headers_name {
-      kind = "binary-output",
     } pkgs.host_image buildscript_linux_headers [linux_src]
   in
 

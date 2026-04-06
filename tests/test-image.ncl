@@ -3,14 +3,13 @@ let recipe = import "../recipe-lib.ncl" in
 fun pkgs =>
   let buildscript_test_image =
     recipe.text "buildscript-test-image" {
-      kind = "build-script",
+      executable = true,
       source = import "test-image.sh" as 'Text,
     }
   in
 
   let test_system_image_1 =
     recipe.binary "test-system-image-1" {
-      kind = "binary-output",
       script_config = {
         name = "system-image-1",
       },
@@ -19,7 +18,6 @@ fun pkgs =>
 
   let test_system_image =
     recipe.binary "test-system-image" {
-      kind = "binary-output",
       script_config = {
         name = "system-image",
       },
@@ -28,7 +26,6 @@ fun pkgs =>
 
   let test_system_image_0 =
     recipe.binary "test-system-image-0" {
-      kind = "binary-output",
       script_config = {
         name = "system-image-0",
       },

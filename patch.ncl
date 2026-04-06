@@ -15,7 +15,6 @@ fun pkgs =>
 
   let patch_gen1 =
     recipe.binary "patch-gen1-2.8" {
-      kind = "binary-output",
       script_config = {
         configure_args = ["--disable-nls"],
       },

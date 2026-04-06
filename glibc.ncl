@@ -29,7 +29,6 @@ fun pkgs =>
 
   let glibc_gen1 =
     recipe.binary "glibc-gen1-2.42" {
-      kind = "binary-output",
       script_config = {
         build_dir = "build",
         pre_configure = m%"

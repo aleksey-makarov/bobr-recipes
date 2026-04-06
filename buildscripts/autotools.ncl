@@ -3,7 +3,7 @@ let recipe = import "../recipe-lib.ncl" in
 fun pkgs =>
   let buildscript_autotools =
     recipe.text "buildscript-autotools" {
-      kind = "build-script",
+      executable = true,
       source = import "autotools.sh" as 'Text,
     }
   in

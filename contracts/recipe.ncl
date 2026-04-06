@@ -32,12 +32,13 @@ let BaseRecipe = {
 }
 in
 let TextConfig = {
-  kind
-    | String
-    | doc "Requested output kind for the text builder.",
   source
     | String
     | doc "Literal text payload to stage into the output object.",
+  executable
+    | Bool
+    | optional
+    | doc "Whether the resulting staged file should be executable.",
 }
 in
 let FetchConfig = {
@@ -55,10 +56,6 @@ let FetchConfig = {
     | ArchiveFormat
     | optional
     | doc "Optional explicit archive format override.",
-  kind
-    | String
-    | optional
-    | doc "Optional explicit output kind override for the fetch builder.",
 }
 in
 let ContainerImageConfig = {
@@ -71,9 +68,6 @@ let ContainerImageConfig = {
 }
 in
 let BinaryConfig = {
-  kind
-    | String
-    | doc "Requested output kind for the binary builder.",
   script_config
     | Dyn
     | optional

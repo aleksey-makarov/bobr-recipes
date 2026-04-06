@@ -15,7 +15,6 @@ fun pkgs =>
 
   let m4_gen1 =
     recipe.binary "m4-gen1-1.4.20" {
-      kind = "binary-output",
       script_config = {},
     } pkgs.host_image pkgs.buildscript_autotools [m4_src]
   in

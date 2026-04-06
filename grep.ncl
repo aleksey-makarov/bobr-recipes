@@ -15,7 +15,6 @@ fun pkgs =>
 
   let grep_gen1 =
     recipe.binary "grep-gen1-3.12" {
-      kind = "binary-output",
       script_config = {
         configure_args = ["--disable-nls", "--disable-perl-regexp"],
       },

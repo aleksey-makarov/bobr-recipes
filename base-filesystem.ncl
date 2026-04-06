@@ -3,7 +3,7 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let buildscript_base_filesystem =
     recipe.text "buildscript-base-filesystem" {
-      kind = "build-script",
+      executable = true,
       source = m%"
         #!/usr/bin/env bash
         set -euo pipefail
@@ -48,7 +48,6 @@ fun pkgs =>
 
   let base_filesystem =
     recipe.binary "base-filesystem" {
-      kind = "binary-output",
     } pkgs.host_image buildscript_base_filesystem []
   in
 

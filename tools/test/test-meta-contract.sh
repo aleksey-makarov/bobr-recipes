@@ -31,17 +31,14 @@ EOF_INNER
   fi
 }
 
-run_case "plain-text" pass '{"kind":"plain-text"}'
-run_case "build-script" pass '{"kind":"build-script"}'
-run_case "source-tree" pass '{"kind":"source-tree"}'
-run_case "fetched-file" pass '{"kind":"fetched-file"}'
-run_case "container-image" pass '{"kind":"container-image","manifest_digest":"sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}'
-run_case "binary-output" pass '{"kind":"binary-output","install":{"owners":[{"path":"**","uid":0,"gid":0}]}}'
+run_case "empty" pass '{}'
+run_case "container-image" pass '{"manifest_digest":"sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}'
+run_case "binary-output" pass '{"install":{"owners":[{"path":"**","uid":0,"gid":0}]}}'
 
-run_case "unknown-kind" fail '{"kind":"demo"}'
-run_case "missing-kind" fail '{}'
-run_case "extra-field" fail '{"kind":"plain-text","extra":true}'
-run_case "bad-manifest-digest" fail '{"kind":"container-image","manifest_digest":"sha256:short"}'
-run_case "bad-install-owner" fail '{"kind":"binary-output","install":{"owners":[{"path":"**","uid":"0","gid":0}]}}'
+run_case "extra-field" fail '{"extra":true}'
+run_case "bad-manifest-digest" fail '{"manifest_digest":"sha256:short"}'
+run_case "bad-install-owner" fail '{"install":{"owners":[{"path":"**","uid":"0","gid":0}]}}'
+run_case "mixed-shapes" fail '{"install":{"owners":[{"path":"**","uid":0,"gid":0}]},"manifest_digest":"sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}'
+run_case "old-kind" fail '{"kind":"plain-text"}'
 
 echo "meta contract smoke tests passed"

@@ -12,7 +12,6 @@ fun pkgs =>
 
   let python_gen1 =
     recipe.binary "python-gen1-3.13.7" {
-      kind = "binary-output",
       script_config = {
         pre_configure = m%"
           cat > Modules/Setup.local <<'EOF_INNER'
