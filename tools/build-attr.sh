@@ -12,8 +12,12 @@ workspace_root="$(cd "${repo_root}/.." && pwd)"
 pkgs_file="${repo_root}/pkgs.ncl"
 recipe_json="${workspace_root}/.mbuild/recipe.json"
 mbuild_bin="${workspace_root}/mbuild/target/debug/mbuild"
+tree_generator="${repo_root}/tools/generate-tree-modules.py"
 
 mkdir -p "$(dirname "${recipe_json}")"
+
+echo "==> regenerate tree modules" >&2
+python3 "${tree_generator}"
 
 expr=$(cat <<EOF_INNER
 let pkgs = import "${pkgs_file}" in

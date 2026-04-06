@@ -1,0 +1,11 @@
+#!/bin/bash
+set -euo pipefail
+
+export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+export HOME=/root
+export USER=root
+export SHELL=/bin/bash
+cd /root
+
+echo "mbuild qemu rootfs booted"
+exec /bin/bash -l

@@ -13,6 +13,13 @@
     inputs = {},
   },
 
+  tree = fun recipe_name => fun recipe_config => {
+    name = recipe_name,
+    tag = "Tree",
+    config = recipe_config,
+    inputs = {},
+  },
+
   container_image = fun recipe_name => fun recipe_config => {
     name = recipe_name,
     tag = "ContainerImage",

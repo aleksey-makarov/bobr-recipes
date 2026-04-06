@@ -1,6 +1,7 @@
 let KnownTags = [
   "Fetch",
   "Text",
+  "Tree",
   "ContainerImage",
   "Binary",
   "Ext4Rootfs",
@@ -59,6 +60,59 @@ let FetchConfig = {
     | doc "Optional explicit archive format override.",
 }
 in
+let TreeFileEntry = {
+  type
+    | std.contract.Equal "file"
+    | doc "Discriminator for one text file entry.",
+  path
+    | String
+    | doc "Relative file path inside the staged object.",
+  text
+    | String
+    | doc "Literal UTF-8 text payload for the staged file.",
+  executable
+    | Bool
+    | doc "Whether the staged file should carry executable bits.",
+}
+in
+let TreeDirEntry = {
+  type
+    | std.contract.Equal "dir"
+    | doc "Discriminator for one explicit directory entry.",
+  path
+    | String
+    | doc "Relative directory path inside the staged object.",
+}
+in
+let TreePayload = {
+  entries
+    | Array Dyn
+    | doc "Generated tree entries describing text files and explicit empty directories.",
+}
+in
+let TreeEntryKind =
+  std.contract.from_predicate (fun value => std.array.elem value [ "file", "dir" ])
+in
+let InstallMeta = {
+  owners
+    | Array {
+        path | String,
+        uid | Number,
+        gid | Number,
+      }
+    | doc "Install ownership rules applied when the tree result is used as an installable directory object.",
+}
+in
+let TreeConfig = {
+  tree
+    | TreePayload
+    | doc "Generated tree description imported from a committed `*-tree.ncl` module.",
+  install
+    | InstallMeta
+    | optional
+    | doc "Manual install metadata for directory output only.",
+}
+in
 let ContainerImageConfig = {
   image
     | String
@@ -102,6 +156,9 @@ in
 let TextInputs = {
 }
 in
+let TreeInputs = {
+}
+in
 let ContainerImageInputs = {
 }
 in
@@ -134,14 +191,32 @@ let Ext4RootfsInputsShape = {
 in
 let rec ValidateRecipe = fun recipe =>
   let checked = recipe | BaseRecipe in
+  let validate_tree_entry = fun entry =>
+    let checked = entry | { type | TreeEntryKind, .. } in
+    if checked.type == "file" then
+      checked | TreeFileEntry
+    else
+      checked | TreeDirEntry
+  in
   let validate_fetch_inputs = fun inputs =>
     inputs | FetchInputs
   in
   let validate_text_inputs = fun inputs =>
     inputs | TextInputs
   in
+  let validate_tree_inputs = fun inputs =>
+    inputs | TreeInputs
+  in
   let validate_container_image_inputs = fun inputs =>
     inputs | ContainerImageInputs
+  in
+  let validate_tree_config = fun config =>
+    let checked = config | TreeConfig in
+    checked & {
+      tree = checked.tree & {
+        entries = std.array.map validate_tree_entry checked.tree.entries,
+      },
+    }
   in
   let validate_binary_inputs = fun inputs =>
     let checked = inputs | BinaryInputsShape in
@@ -178,6 +253,11 @@ let rec ValidateRecipe = fun recipe =>
       config = checked.config | TextConfig,
       inputs = validate_text_inputs checked.inputs,
     }
+  else if checked.tag == "Tree" then
+    checked & {
+      config = validate_tree_config checked.config,
+      inputs = validate_tree_inputs checked.inputs,
+    }
   else if checked.tag == "ContainerImage" then
     checked & {
       config = checked.config | ContainerImageConfig,
@@ -210,6 +290,9 @@ in
   text_config
     | doc "Config contract for `Text` recipe nodes."
     = TextConfig,
+  tree_config
+    | doc "Config contract for `Tree` recipe nodes."
+    = TreeConfig,
   fetch_config
     | doc "Config contract for `Fetch` recipe nodes."
     = FetchConfig,
