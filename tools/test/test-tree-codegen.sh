@@ -25,11 +25,17 @@ generated="${fixture_repo}/pkg-tree.ncl"
 test -f "${generated}"
 grep -F 'path = "etc/hostname"' "${generated}" >/dev/null
 grep -F 'path = "init"' "${generated}" >/dev/null
+grep -F 'text = import "pkg-tree-src/etc/hostname" as '\''Text,' "${generated}" >/dev/null
+grep -F 'text = import "pkg-tree-src/init" as '\''Text,' "${generated}" >/dev/null
 grep -F 'executable = true' "${generated}" >/dev/null
 grep -F 'type = "dir"' "${generated}" >/dev/null
 grep -F 'path = "dev"' "${generated}" >/dev/null
 if grep -F '.gitkeep' "${generated}" >/dev/null; then
   echo "expected generator to ignore .gitkeep placeholders" >&2
+  exit 1
+fi
+if grep -F 'hello tree' "${generated}" >/dev/null; then
+  echo "expected generator to import file text instead of embedding literals" >&2
   exit 1
 fi
 grep -F 'type = "symlink"' "${generated}" >/dev/null

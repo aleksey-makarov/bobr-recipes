@@ -52,11 +52,12 @@ def emit_entries_from_source(source_path: pathlib.Path):
         )
 
     if source_path.is_file():
+        is_utf8_text(source_path)
         return [
             {
                 "type": "file",
                 "path": source_path.name.removesuffix("-tree-src"),
-                "text": is_utf8_text(source_path),
+                "source_path": source_path,
                 "executable": executable_bit(source_path),
             }
         ]
@@ -112,11 +113,12 @@ def emit_entries_from_source(source_path: pathlib.Path):
                 continue
             if not path.is_file():
                 raise ValueError(f"unsupported filesystem entry in tree source: {path}")
+            is_utf8_text(path)
             entries.append(
                 {
                     "type": "file",
                     "path": path.relative_to(source_path).as_posix(),
-                    "text": is_utf8_text(path),
+                    "source_path": path,
                     "executable": executable_bit(path),
                 }
             )
@@ -128,16 +130,21 @@ def emit_entries_from_source(source_path: pathlib.Path):
     return entries
 
 
-def render_module(entries):
+def import_path_for(target_path: pathlib.Path, source_path: pathlib.Path) -> str:
+    return pathlib.Path(os.path.relpath(source_path, target_path.parent)).as_posix()
+
+
+def render_module(entries, target_path: pathlib.Path):
     lines = ["{", "  entries = ["]
     for entry in entries:
         if entry["type"] == "file":
+            import_path = import_path_for(target_path, entry["source_path"])
             lines.extend(
                 [
                     "    {",
                     '      type = "file",',
                     f'      path = {json.dumps(entry["path"], ensure_ascii=False)},',
-                    f'      text = {json.dumps(entry["text"], ensure_ascii=False)},',
+                    f"      text = import {json.dumps(import_path, ensure_ascii=False)} as 'Text,",
                     f'      executable = {"true" if entry["executable"] else "false"},',
                     "    },",
                 ]
@@ -183,7 +190,7 @@ def main() -> int:
 
     for source_path in sources:
         target_path = generated_path_for(source_path)
-        rendered = render_module(emit_entries_from_source(source_path))
+        rendered = render_module(emit_entries_from_source(source_path), target_path)
         current = target_path.read_text(encoding="utf-8") if target_path.exists() else None
 
         if args.check:

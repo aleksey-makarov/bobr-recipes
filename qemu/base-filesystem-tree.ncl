@@ -12,25 +12,25 @@
     {
       type = "file",
       path = "etc/group",
-      text = "root:x:0:\nbin:x:1:\nsys:x:2:\nkmem:x:9:\nwheel:x:10:\nnobody:x:65534:\n",
+      text = import "base-filesystem-tree-src/etc/group" as 'Text,
       executable = false,
     },
     {
       type = "file",
       path = "etc/hostname",
-      text = "mbuild-qemu\n",
+      text = import "base-filesystem-tree-src/etc/hostname" as 'Text,
       executable = false,
     },
     {
       type = "file",
       path = "etc/issue",
-      text = "mbuild qemu rootfs\n",
+      text = import "base-filesystem-tree-src/etc/issue" as 'Text,
       executable = false,
     },
     {
       type = "file",
       path = "etc/ld.so.conf",
-      text = "/usr/lib\n/usr/lib64\n",
+      text = import "base-filesystem-tree-src/etc/ld.so.conf" as 'Text,
       executable = false,
     },
     {
@@ -41,7 +41,7 @@
     {
       type = "file",
       path = "etc/passwd",
-      text = "root:x:0:0:root:/root:/bin/bash\nnobody:x:65534:65534:nobody:/nonexistent:/usr/bin/false\n",
+      text = import "base-filesystem-tree-src/etc/passwd" as 'Text,
       executable = false,
     },
     {
@@ -51,7 +51,7 @@
     {
       type = "file",
       path = "init",
-      text = "#!/bin/bash\nset -euo pipefail\n\nexport PATH=/usr/bin:/usr/sbin:/bin:/sbin\nexport HOME=/root\nexport USER=root\nexport SHELL=/bin/bash\ncd /root\n\necho \"mbuild qemu rootfs booted\"\nexec /bin/bash -l\n",
+      text = import "base-filesystem-tree-src/init" as 'Text,
       executable = true,
     },
     {
