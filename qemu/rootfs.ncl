@@ -7,7 +7,6 @@ fun pkgs =>
       label = "qemu-rootfs",
     } [
       pkgs.qemu_base_filesystem,
-      pkgs.qemu_runtime_files,
       pkgs.glibc,
       pkgs.bash,
       pkgs.coreutils,

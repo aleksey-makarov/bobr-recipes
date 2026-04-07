@@ -10,7 +10,9 @@ python3 "${generator}" --check
 
 fixture_repo="${tmpdir}/fixtures"
 mkdir -p "${fixture_repo}/pkg-tree-src/etc" "${fixture_repo}/pkg-tree-src/dev"
+touch "${fixture_repo}/pkg-tree-src/dev/.gitkeep"
 printf 'hello tree\n' > "${fixture_repo}/pkg-tree-src/etc/hostname"
+touch "${fixture_repo}/pkg-tree-src/etc/.gitkeep"
 printf '#!/bin/sh\nexit 0\n' > "${fixture_repo}/pkg-tree-src/init"
 chmod 0755 "${fixture_repo}/pkg-tree-src/init"
 ln -s usr/bin "${fixture_repo}/pkg-tree-src/bin"
@@ -26,6 +28,10 @@ grep -F 'path = "init"' "${generated}" >/dev/null
 grep -F 'executable = true' "${generated}" >/dev/null
 grep -F 'type = "dir"' "${generated}" >/dev/null
 grep -F 'path = "dev"' "${generated}" >/dev/null
+if grep -F '.gitkeep' "${generated}" >/dev/null; then
+  echo "expected generator to ignore .gitkeep placeholders" >&2
+  exit 1
+fi
 grep -F 'type = "symlink"' "${generated}" >/dev/null
 grep -F 'path = "bin"' "${generated}" >/dev/null
 grep -F 'target = "usr/bin"' "${generated}" >/dev/null
@@ -33,6 +39,10 @@ grep -F 'path = "etc/mtab"' "${generated}" >/dev/null
 grep -F 'target = "/proc/self/mounts"' "${generated}" >/dev/null
 grep -F 'path = "etc/broken"' "${generated}" >/dev/null
 grep -F 'target = "missing-target"' "${generated}" >/dev/null
+if grep -F 'path = "etc"' "${generated}" >/dev/null; then
+  echo "expected directory with real files and .gitkeep not to be treated as empty" >&2
+  exit 1
+fi
 
 mkdir -p "${fixture_repo}/empty-tree-src"
 if python3 "${generator}" --repo-root "${fixture_repo}" >/dev/null 2>&1; then

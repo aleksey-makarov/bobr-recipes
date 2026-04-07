@@ -7,6 +7,7 @@ import sys
 
 
 SKIP_DIRS = {".git", "old", "target"}
+PLACEHOLDER_FILES = {".gitkeep"}
 
 
 def iter_tree_sources(repo_root: pathlib.Path):
@@ -41,7 +42,7 @@ def executable_bit(path: pathlib.Path) -> bool:
 
 
 def dir_is_effectively_empty(path: pathlib.Path) -> bool:
-    return not any(path.iterdir())
+    return not any(entry.name not in PLACEHOLDER_FILES for entry in path.iterdir())
 
 
 def emit_entries_from_source(source_path: pathlib.Path):
@@ -77,7 +78,9 @@ def emit_entries_from_source(source_path: pathlib.Path):
             )
 
         dirnames.sort()
-        filenames.sort()
+        filenames = sorted(
+            filename for filename in filenames if filename not in PLACEHOLDER_FILES
+        )
 
         symlink_dirs = []
         kept_dirs = []

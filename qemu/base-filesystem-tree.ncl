@@ -6,9 +6,25 @@
       target = "usr/bin",
     },
     {
+      type = "dir",
+      path = "dev",
+    },
+    {
       type = "file",
       path = "etc/group",
       text = "root:x:0:\nbin:x:1:\nsys:x:2:\nkmem:x:9:\nwheel:x:10:\nnobody:x:65534:\n",
+      executable = false,
+    },
+    {
+      type = "file",
+      path = "etc/hostname",
+      text = "mbuild-qemu\n",
+      executable = false,
+    },
+    {
+      type = "file",
+      path = "etc/issue",
+      text = "mbuild qemu rootfs\n",
       executable = false,
     },
     {
@@ -33,6 +49,12 @@
       path = "home",
     },
     {
+      type = "file",
+      path = "init",
+      text = "#!/bin/bash\nset -euo pipefail\n\nexport PATH=/usr/bin:/usr/sbin:/bin:/sbin\nexport HOME=/root\nexport USER=root\nexport SHELL=/bin/bash\ncd /root\n\necho \"mbuild qemu rootfs booted\"\nexec /bin/bash -l\n",
+      executable = true,
+    },
+    {
       type = "symlink",
       path = "lib",
       target = "usr/lib",
@@ -40,6 +62,10 @@
     {
       type = "dir",
       path = "lib64",
+    },
+    {
+      type = "dir",
+      path = "proc",
     },
     {
       type = "dir",
@@ -53,6 +79,10 @@
       type = "symlink",
       path = "sbin",
       target = "usr/sbin",
+    },
+    {
+      type = "dir",
+      path = "sys",
     },
     {
       type = "dir",
