@@ -45,6 +45,11 @@ def dir_is_effectively_empty(path: pathlib.Path) -> bool:
 
 
 def emit_entries_from_source(source_path: pathlib.Path):
+    if source_path.is_symlink():
+        raise ValueError(
+            f"single-file symlink tree sources are not supported: {source_path}"
+        )
+
     if source_path.is_file():
         return [
             {
@@ -74,10 +79,34 @@ def emit_entries_from_source(source_path: pathlib.Path):
         dirnames.sort()
         filenames.sort()
 
+        symlink_dirs = []
+        kept_dirs = []
+        for dirname in dirnames:
+            path = current / dirname
+            if path.is_symlink():
+                symlink_dirs.append(
+                    {
+                        "type": "symlink",
+                        "path": path.relative_to(source_path).as_posix(),
+                        "target": os.readlink(path),
+                    }
+                )
+            else:
+                kept_dirs.append(dirname)
+        dirnames[:] = kept_dirs
+        entries.extend(symlink_dirs)
+
         for filename in filenames:
             path = current / filename
             if path.is_symlink():
-                raise ValueError(f"symlinks are not supported in tree sources: {path}")
+                entries.append(
+                    {
+                        "type": "symlink",
+                        "path": path.relative_to(source_path).as_posix(),
+                        "target": os.readlink(path),
+                    }
+                )
+                continue
             if not path.is_file():
                 raise ValueError(f"unsupported filesystem entry in tree source: {path}")
             entries.append(
@@ -116,6 +145,16 @@ def render_module(entries):
                     "    {",
                     '      type = "dir",',
                     f'      path = {json.dumps(entry["path"], ensure_ascii=False)},',
+                    "    },",
+                ]
+            )
+        elif entry["type"] == "symlink":
+            lines.extend(
+                [
+                    "    {",
+                    '      type = "symlink",',
+                    f'      path = {json.dumps(entry["path"], ensure_ascii=False)},',
+                    f'      target = {json.dumps(entry["target"], ensure_ascii=False)},',
                     "    },",
                 ]
             )

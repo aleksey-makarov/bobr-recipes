@@ -84,14 +84,26 @@ let TreeDirEntry = {
     | doc "Relative directory path inside the staged object.",
 }
 in
+let TreeSymlinkEntry = {
+  type
+    | std.contract.Equal "symlink"
+    | doc "Discriminator for one symlink entry.",
+  path
+    | String
+    | doc "Relative symlink path inside the staged object.",
+  target
+    | String
+    | doc "Literal symlink target stored in the staged object.",
+}
+in
 let TreePayload = {
   entries
     | Array Dyn
-    | doc "Generated tree entries describing text files and explicit empty directories.",
+    | doc "Generated tree entries describing text files, explicit directories, and symlinks.",
 }
 in
 let TreeEntryKind =
-  std.contract.from_predicate (fun value => std.array.elem value [ "file", "dir" ])
+  std.contract.from_predicate (fun value => std.array.elem value [ "file", "dir", "symlink" ])
 in
 let InstallMeta = {
   owners
@@ -195,6 +207,8 @@ let rec ValidateRecipe = fun recipe =>
     let checked = entry | { type | TreeEntryKind, .. } in
     if checked.type == "file" then
       checked | TreeFileEntry
+    else if checked.type == "symlink" then
+      checked | TreeSymlinkEntry
     else
       checked | TreeDirEntry
   in
