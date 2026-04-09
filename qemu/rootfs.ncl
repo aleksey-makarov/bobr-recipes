@@ -6,7 +6,8 @@ fun pkgs =>
       size_mib = 512,
       label = "qemu-rootfs",
     } [
-      pkgs.qemu_base_filesystem,
+      pkgs.base_filesystem,
+      pkgs.qemu_runtime_files,
       pkgs.glibc,
       pkgs.bash,
       pkgs.coreutils,

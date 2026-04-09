@@ -1,9 +1,9 @@
 let recipe = import "../recipe-lib.ncl" in
-let tree_data = import "base-filesystem-tree.ncl" in
+let tree_data = import "runtime-files-tree.ncl" in
 
 fun _pkgs =>
-  let qemu_base_filesystem =
-    recipe.tree "qemu-base-filesystem" {
+  let qemu_runtime_files =
+    recipe.tree "qemu-runtime-files" {
       tree = tree_data,
       install = {
         owners = [
@@ -15,6 +15,6 @@ fun _pkgs =>
 
   {
     include [
-      qemu_base_filesystem,
+      qemu_runtime_files,
     ],
   }

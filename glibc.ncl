@@ -37,6 +37,7 @@ fun pkgs =>
           echo "rootsbindir=/usr/sbin" > build/configparms
         "%,
         configure_args = [
+          "libc_cv_slibdir=/usr/lib64",
           "--disable-nscd",
           "--without-selinux",
           "--enable-kernel=5.4",
@@ -57,6 +58,7 @@ fun pkgs =>
           echo "rootsbindir=/usr/sbin" > build/configparms
         "%,
         configure_args = [
+          "libc_cv_slibdir=/usr/lib64",
           "--disable-werror",
           "--enable-kernel=4.19",
           "--enable-stack-protector=strong",

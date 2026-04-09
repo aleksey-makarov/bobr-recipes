@@ -27,7 +27,7 @@ let base_modules = [
   import "gcc.ncl",
   import "glibc.ncl",
   import "base-filesystem.ncl",
-  import "qemu/base-filesystem.ncl",
+  import "qemu/runtime-files.ncl",
   import "qemu/kernel.ncl",
   import "qemu/rootfs.ncl",
   import "system-image-0.ncl",

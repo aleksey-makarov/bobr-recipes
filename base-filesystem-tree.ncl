@@ -6,25 +6,9 @@
       target = "usr/bin",
     },
     {
-      type = "dir",
-      path = "dev",
-    },
-    {
       type = "file",
       path = "etc/group",
       text = import "base-filesystem-tree-src/etc/group" as 'Text,
-      executable = false,
-    },
-    {
-      type = "file",
-      path = "etc/hostname",
-      text = import "base-filesystem-tree-src/etc/hostname" as 'Text,
-      executable = false,
-    },
-    {
-      type = "file",
-      path = "etc/issue",
-      text = import "base-filesystem-tree-src/etc/issue" as 'Text,
       executable = false,
     },
     {
@@ -49,23 +33,14 @@
       path = "home",
     },
     {
-      type = "file",
-      path = "init",
-      text = import "base-filesystem-tree-src/init" as 'Text,
-      executable = true,
-    },
-    {
       type = "symlink",
       path = "lib",
       target = "usr/lib",
     },
     {
-      type = "dir",
+      type = "symlink",
       path = "lib64",
-    },
-    {
-      type = "dir",
-      path = "proc",
+      target = "usr/lib64",
     },
     {
       type = "dir",
@@ -79,10 +54,6 @@
       type = "symlink",
       path = "sbin",
       target = "usr/sbin",
-    },
-    {
-      type = "dir",
-      path = "sys",
     },
     {
       type = "dir",
