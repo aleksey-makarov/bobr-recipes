@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let findutils_src =
     recipe.fetch "findutils-src-4.10.0" {
       url = [
@@ -26,9 +24,7 @@ fun pkgs =>
   in
 
   let findutils =
-    build.build_autotools {
-      name = "findutils-4.10.0",
-      sources = [findutils_src],
+    recipe.binary "findutils-4.10.0" {
       script_config = {
         configure_args = [
           "--disable-nls",
@@ -36,7 +32,7 @@ fun pkgs =>
           "--localstatedir=/var/lib/locate",
         ],
       },
-    }
+    } pkgs.system_image_1 pkgs.buildscript_autotools [findutils_src]
   in
 
   {

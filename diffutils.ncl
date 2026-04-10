@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let diffutils_src =
     recipe.fetch "diffutils-src-3.12" {
       url = [
@@ -23,14 +21,12 @@ fun pkgs =>
   in
 
   let diffutils =
-    build.build_autotools {
-      name = "diffutils-3.12",
-      sources = [diffutils_src],
+    recipe.binary "diffutils-3.12" {
       script_config = {
         configure_args = ["--disable-nls"],
         env = { gl_cv_func_strcasecmp_works = "y" },
       },
-    }
+    } pkgs.system_image_1 pkgs.buildscript_autotools [diffutils_src]
   in
 
   {

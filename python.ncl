@@ -10,6 +10,13 @@ fun pkgs =>
     }
   in
 
+  let python_build_image =
+    recipe.image "python-build-image" {} pkgs.system_image [
+      pkgs.expat,
+      pkgs.libffi,
+    ]
+  in
+
   let python_gen1 =
     recipe.binary "python-gen1-3.13.7" {
       script_config = {
@@ -43,9 +50,24 @@ fun pkgs =>
     } pkgs.host_image pkgs.buildscript_autotools [python_src]
   in
 
+  let python =
+    recipe.binary "python-3.13.7" {
+      script_config = {
+        configure_args = [
+          "--enable-shared",
+          "--with-system-expat",
+          "--enable-optimizations",
+          "--without-static-libpython",
+        ],
+        post_install = "ln -svf python3 \"/out/${out}/usr/bin/python\"",
+      },
+    } python_build_image pkgs.buildscript_autotools [python_src]
+  in
+
   {
     include [
       python_src,
       python_gen1,
+      python,
     ],
   }

@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let pkg_name = "binutils" in
   let pkg_version = "2.45" in
 
@@ -36,9 +34,7 @@ fun pkgs =>
   in
 
   let binutils =
-    build.build_bootstrap_autotools {
-      name = "binutils-2.45",
-      sources = [binutils_src],
+    recipe.binary "binutils-2.45" {
       script_config = {
         build_dir = "build",
         configure_args = [
@@ -53,7 +49,7 @@ fun pkgs =>
           "--without-zstd",
         ],
       },
-    }
+    } pkgs.system_image_0 pkgs.buildscript_autotools [binutils_src]
   in
 
   {

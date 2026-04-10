@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let coreutils_src =
     recipe.fetch "coreutils-src-9.7" {
       url = [
@@ -39,9 +37,7 @@ fun pkgs =>
   in
 
   let coreutils =
-    build.build_autotools {
-      name = "coreutils-9.7",
-      sources = [coreutils_src],
+    recipe.binary "coreutils-9.7" {
       script_config = {
         configure_args = [
           "--disable-nls",
@@ -62,7 +58,7 @@ fun pkgs =>
                      "/out/${out}/usr/share/man/man8/chroot.8"
             "%,
       },
-    }
+    } pkgs.system_image_1 pkgs.buildscript_autotools [coreutils_src]
   in
 
   {

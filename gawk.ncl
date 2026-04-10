@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let gawk_src =
     recipe.fetch "gawk-src-5.3.2" {
       url = [
@@ -23,14 +21,12 @@ fun pkgs =>
   in
 
   let gawk =
-    build.build_autotools {
-      name = "gawk-5.3.2",
-      sources = [gawk_src],
+    recipe.binary "gawk-5.3.2" {
       script_config = {
         pre_configure = "sed -i 's/extras//' Makefile.in",
         configure_args = ["--without-readline"],
       },
-    }
+    } pkgs.system_image_1 pkgs.buildscript_autotools [gawk_src]
   in
 
   {

@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let patch_src =
     recipe.fetch "patch-src-2.8" {
       url = [
@@ -22,13 +20,11 @@ fun pkgs =>
   in
 
   let patch =
-    build.build_autotools {
-      name = "patch-2.8",
-      sources = [patch_src],
+    recipe.binary "patch-2.8" {
       script_config = {
         configure_args = ["--disable-nls"],
       },
-    }
+    } pkgs.system_image_1 pkgs.buildscript_autotools [patch_src]
   in
 
   {

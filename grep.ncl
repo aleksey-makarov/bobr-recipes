@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let grep_src =
     recipe.fetch "grep-src-3.12" {
       url = [
@@ -22,13 +20,11 @@ fun pkgs =>
   in
 
   let grep =
-    build.build_autotools {
-      name = "grep-3.12",
-      sources = [grep_src],
+    recipe.binary "grep-3.12" {
       script_config = {
         configure_args = ["--disable-nls", "--disable-perl-regexp"],
       },
-    }
+    } pkgs.system_image_1 pkgs.buildscript_autotools [grep_src]
   in
 
   {

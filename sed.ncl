@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let sed_src =
     recipe.fetch "sed-src-4.9" {
       url = [
@@ -22,13 +20,11 @@ fun pkgs =>
   in
 
   let sed =
-    build.build_autotools {
-      name = "sed-4.9",
-      sources = [sed_src],
+    recipe.binary "sed-4.9" {
       script_config = {
         configure_args = ["--disable-nls", "--without-selinux"],
       },
-    }
+    } pkgs.system_image_1 pkgs.buildscript_autotools [sed_src]
   in
 
   {

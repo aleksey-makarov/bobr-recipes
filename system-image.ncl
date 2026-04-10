@@ -23,7 +23,6 @@ fun pkgs =>
       pkgs.findutils,
       pkgs.diffutils,
       pkgs.m4,
-      pkgs.python_gen1,
       pkgs.bc,
       pkgs.flex,
       pkgs.zlib,

@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let gzip_src =
     recipe.fetch "gzip-src-1.14" {
       url = [
@@ -22,13 +20,11 @@ fun pkgs =>
   in
 
   let gzip =
-    build.build_autotools {
-      name = "gzip-1.14",
-      sources = [gzip_src],
+    recipe.binary "gzip-1.14" {
       script_config = {
         configure_args = ["--disable-nls"],
       },
-    }
+    } pkgs.system_image_1 pkgs.buildscript_autotools [gzip_src]
   in
 
   {

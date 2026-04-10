@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let gcc_src =
     recipe.fetch "gcc-src-15.2.0" {
       url = [
@@ -41,14 +39,7 @@ fun pkgs =>
   in
 
   let gcc =
-    build.build_bootstrap_autotools {
-      name = "gcc-15.2.0",
-      sources = [
-        gcc_src,
-        pkgs.gmp_src,
-        pkgs.mpfr_src,
-        pkgs.mpc_src,
-      ],
+    recipe.binary "gcc-15.2.0" {
       script_config = {
         build_dir = "build",
         pre_configure = m%"
@@ -69,7 +60,12 @@ fun pkgs =>
         ],
         post_install = "ln -sv gcc \"/out/${out}/usr/bin/cc\"",
       },
-    }
+    } pkgs.system_image_0 pkgs.buildscript_autotools [
+      gcc_src,
+      pkgs.gmp_src,
+      pkgs.mpfr_src,
+      pkgs.mpc_src,
+    ]
   in
 
   {

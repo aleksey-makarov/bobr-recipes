@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let tar_src =
     recipe.fetch "tar-src-1.35" {
       url = [
@@ -25,16 +23,14 @@ fun pkgs =>
   in
 
   let tar =
-    build.build_autotools {
-      name = "tar-1.35",
-      sources = [tar_src],
+    recipe.binary "tar-1.35" {
       script_config = {
         configure_args = [
           "--disable-nls",
           "--without-selinux",
         ],
       },
-    }
+    } pkgs.system_image_1 pkgs.buildscript_autotools [tar_src]
   in
 
   {

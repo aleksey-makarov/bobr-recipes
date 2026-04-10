@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let m4_src =
     recipe.fetch "m4-src-1.4.20" {
       url = [
@@ -20,11 +18,9 @@ fun pkgs =>
   in
 
   let m4 =
-    build.build_autotools {
-      name = "m4-1.4.20",
-      sources = [m4_src],
+    recipe.binary "m4-1.4.20" {
       script_config = {},
-    }
+    } pkgs.system_image_1 pkgs.buildscript_autotools [m4_src]
   in
 
   {

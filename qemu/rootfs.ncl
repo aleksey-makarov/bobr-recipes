@@ -16,6 +16,8 @@ fun pkgs =>
       pkgs.findutils,
       pkgs.gzip,
       pkgs.tar,
+      pkgs.gperf,
+      pkgs.libcap,
     ]
   in
 

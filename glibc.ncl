@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let glibc_fhs_patch_2_42 =
     recipe.fetch "glibc-fhs-patch-2.42" {
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch",
@@ -47,9 +45,7 @@ fun pkgs =>
   in
 
   let glibc =
-    build.build_bootstrap_autotools {
-      name = "glibc-2.42",
-      sources = [glibc_src, glibc_fhs_patch_2_42],
+    recipe.binary "glibc-2.42" {
       script_config = {
         build_dir = "build",
         pre_configure = m%"
@@ -66,7 +62,7 @@ fun pkgs =>
           "--without-selinux",
         ],
       },
-    }
+    } pkgs.system_image_0 pkgs.buildscript_autotools [glibc_src, glibc_fhs_patch_2_42]
   in
 
   {

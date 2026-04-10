@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let bison_src =
     recipe.fetch "bison-src-3.8.2" {
       url = [
@@ -20,11 +18,9 @@ fun pkgs =>
   in
 
   let bison =
-    build.build_autotools {
-      name = "bison-3.8.2",
-      sources = [bison_src],
+    recipe.binary "bison-3.8.2" {
       script_config = {},
-    }
+    } pkgs.system_image_1 pkgs.buildscript_autotools [bison_src]
   in
 
   {
