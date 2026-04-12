@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let lz4_src =
     recipe.fetch "lz4-src-1.10.0" {
       url = "https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz",
@@ -11,16 +9,14 @@ fun pkgs =>
   in
 
   let lz4 =
-    build.build_make {
-      name = "lz4-1.10.0",
-      sources = [lz4_src],
+    recipe.binary "lz4-1.10.0" {
       script_config = {
         make_args = [
           "BUILD_STATIC=no",
           "PREFIX=/usr",
         ],
       },
-    }
+    } pkgs.system_image_2 pkgs.buildscript_gnu_make [lz4_src]
   in
 
   {

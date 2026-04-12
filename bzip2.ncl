@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let bzip2_src =
     recipe.fetch "bzip2-src-1.0.8" {
       url = "https://www.sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
@@ -19,9 +17,7 @@ fun pkgs =>
   in
 
   let bzip2 =
-    build.build_make {
-      name = "bzip2-1.0.8",
-      sources = [bzip2_src, bzip2_install_docs_patch],
+    recipe.binary "bzip2-1.0.8" {
       script_config = {
         pre_build = m%"
           patch -Np1 -i /in/sources1
@@ -43,7 +39,7 @@ fun pkgs =>
           rm -fv "/out/${out}/usr/lib/libbz2.a"
         "%,
       },
-    }
+    } pkgs.system_image_2 pkgs.buildscript_gnu_make [bzip2_src, bzip2_install_docs_patch]
   in
 
   {

@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let zstd_src =
     recipe.fetch "zstd-src-1.5.7" {
       url = "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz",
@@ -11,16 +9,14 @@ fun pkgs =>
   in
 
   let zstd =
-    build.build_make {
-      name = "zstd-1.5.7",
-      sources = [zstd_src],
+    recipe.binary "zstd-1.5.7" {
       script_config = {
         make_args = [
           "prefix=/usr",
         ],
         post_install = "rm -fv \"/out/${out}/usr/lib/libzstd.a\"",
       },
-    }
+    } pkgs.system_image_2 pkgs.buildscript_gnu_make [zstd_src]
   in
 
   {

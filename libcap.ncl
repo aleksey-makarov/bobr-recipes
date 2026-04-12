@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let libcap_src =
     recipe.fetch "libcap-src-2.76" {
       url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.76.tar.xz",
@@ -11,9 +9,7 @@ fun pkgs =>
   in
 
   let libcap =
-    build.build_make {
-      name = "libcap-2.76",
-      sources = [libcap_src],
+    recipe.binary "libcap-2.76" {
       script_config = {
         pre_build = "sed -i '/install -m.*STA/d' libcap/Makefile",
         make_args = [
@@ -21,7 +17,7 @@ fun pkgs =>
           "lib=lib",
         ],
       },
-    }
+    } pkgs.system_image_2 pkgs.buildscript_gnu_make [libcap_src]
   in
 
   {
