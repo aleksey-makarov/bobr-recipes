@@ -14,7 +14,7 @@ fun pkgs =>
       pkgs.test_system_image_0,
       pkgs.test_system_image,
       pkgs.test_system_image_1,
-      pkgs.test_binary_live_usr_system_image,
+      pkgs.test_system_image_python,
     ]
   in
 

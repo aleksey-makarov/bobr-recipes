@@ -20,6 +20,7 @@ fun pkgs =>
     recipe.binary "test-system-image" {
       script_config = {
         name = "system-image",
+        check_live_usr = "true",
       },
     } pkgs.system_image buildscript_test_image []
   in
@@ -32,6 +33,26 @@ fun pkgs =>
     } pkgs.system_image_0 buildscript_test_image []
   in
 
+  let test_system_image_python_image =
+    recipe.image "test-system-image-python-image" {} pkgs.system_image [
+      pkgs.python,
+    ]
+  in
+
+  let test_system_image_python =
+    recipe.binary "test-system-image-python" {
+      script_config = {
+        name = "system-image-python",
+        check_python = "true",
+      },
+    } test_system_image_python_image buildscript_test_image []
+  in
+
   {
-    include [test_system_image_1, test_system_image, test_system_image_0],
+    include [
+      test_system_image_1,
+      test_system_image,
+      test_system_image_0,
+      test_system_image_python,
+    ],
   }

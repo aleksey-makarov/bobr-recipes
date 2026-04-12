@@ -19,6 +19,34 @@ status="ok"
 tmp_report="${dest}/report-${name}.tmp"
 have_ldd="yes"
 
+log_check() {
+  local msg="$1"
+  echo "CHECK ${msg}"
+}
+
+log_ok() {
+  local msg="$1"
+  echo "OK    ${msg}"
+}
+
+log_fail() {
+  local msg="$1"
+  failures=$((failures + 1))
+  echo "FAIL  ${msg}"
+}
+
+config_flag() {
+  local key="$1"
+  if [ -f "${cfg}/${key}" ]; then
+    case "$(cat "${cfg}/${key}")" in
+      true|TRUE|1|yes|YES)
+        return 0
+        ;;
+    esac
+  fi
+  return 1
+}
+
 has_elf_magic() {
   local path="$1"
   local magic
@@ -38,9 +66,7 @@ check_broken_symlink() {
   local path="$1"
 
   if [ -L "$path" ] && [ ! -e "$path" ]; then
-    failures=$((failures + 1))
-    echo
-    echo "FAIL broken symlink $path -> $(readlink "$path" 2>/dev/null || echo '?')"
+    log_fail "broken symlink $path -> $(readlink "$path" 2>/dev/null || echo '?')"
     return 0
   fi
 
@@ -54,21 +80,111 @@ check_shebang_interpreter() {
   header="$(dd if="$path" bs=2 count=1 2>/dev/null || true)"
   [ "$header" = "#!" ] || return 1
 
-  interpreter="$(
+  interpreter="$({
     head -n 1 "$path" 2>/dev/null \
       | sed -e 's/^#![[:space:]]*//' -e 's/[[:space:]].*$//'
-  )"
+  })"
   [ -n "$interpreter" ] || return 1
 
   if [ ! -e "$interpreter" ]; then
-    failures=$((failures + 1))
-    echo
-    echo "FAIL missing shebang interpreter for $path"
-    echo "interpreter: $interpreter"
+    log_fail "missing shebang interpreter for $path (interpreter: $interpreter)"
     return 0
   fi
 
   return 1
+}
+
+run_live_usr_check() {
+  local marker="/usr/bin/mbuild-live-usr-smoke"
+  local output=""
+
+  log_check "live /usr is writable and executable"
+
+  cat > "${marker}" <<'EOF_INNER'
+#!/bin/sh
+printf '%s\n' "mbuild live usr smoke ok"
+EOF_INNER
+  chmod 0755 "${marker}"
+
+  output="$("${marker}")"
+  if [ "${output}" = "mbuild live usr smoke ok" ]; then
+    log_ok "live /usr smoke marker created and executed (${marker})"
+    echo "INFO  live-usr output: ${output}"
+  else
+    log_fail "live /usr smoke marker returned unexpected output (${output})"
+  fi
+}
+
+run_python_check() {
+  local cmd version import_output
+
+  log_check "python toolchain commands are present"
+  for cmd in python3 pip3 meson ninja; do
+    if command -v "$cmd" >/dev/null 2>&1; then
+      log_ok "command available: $cmd -> $(command -v "$cmd")"
+    else
+      log_fail "command missing: $cmd"
+    fi
+  done
+
+  log_check "python toolchain commands execute successfully"
+  if version="$(python3 --version 2>&1)"; then
+    log_ok "python3 --version"
+    echo "INFO  ${version}"
+  else
+    log_fail "python3 --version failed"
+  fi
+
+  if version="$(python3 -m pip --version 2>&1)"; then
+    log_ok "python3 -m pip --version"
+    echo "INFO  ${version}"
+  else
+    log_fail "python3 -m pip --version failed"
+  fi
+
+  if version="$(meson --version 2>&1)"; then
+    log_ok "meson --version"
+    echo "INFO  meson ${version}"
+  else
+    log_fail "meson --version failed"
+  fi
+
+  if version="$(ninja --version 2>&1)"; then
+    log_ok "ninja --version"
+    echo "INFO  ninja ${version}"
+  else
+    log_fail "ninja --version failed"
+  fi
+
+  log_check "python modules import successfully"
+  if import_output="$(python3 - <<'EOF_INNER'
+import flit_core
+import packaging
+import wheel
+import setuptools
+import markupsafe
+import jinja2
+import mesonbuild
+
+print('flit_core=' + flit_core.__file__)
+print('packaging=' + packaging.__file__)
+print('wheel=' + wheel.__file__)
+print('setuptools=' + setuptools.__file__)
+print('markupsafe=' + markupsafe.__file__)
+print('jinja2=' + jinja2.__file__)
+print('mesonbuild=' + mesonbuild.__file__)
+EOF_INNER
+ 2>&1)"; then
+    log_ok "python module imports"
+    while IFS= read -r line; do
+      echo "INFO  ${line}"
+    done <<< "${import_output}"
+  else
+    log_fail "python module imports failed"
+    while IFS= read -r line; do
+      [ -n "$line" ] && echo "INFO  ${line}"
+    done <<< "${import_output}"
+  fi
 }
 
 if ! command -v ldd >/dev/null 2>&1; then
@@ -84,9 +200,11 @@ fi
 
   if [ "$have_ldd" = "no" ]; then
     echo
-    echo "error: ldd is required for ELF dependency checks"
+    log_fail "ldd is required for ELF dependency checks"
   fi
 
+  echo
+  log_check "filesystem and runtime references"
   while IFS= read -r -d '' path; do
     checked=$((checked + 1))
 
@@ -113,13 +231,28 @@ fi
 
     case "$ldd_out" in
       *"not found"*|*"error while loading shared libraries:"*)
-        failures=$((failures + 1))
-        echo
-        echo "FAIL $path"
-        echo "$ldd_out"
+        log_fail "$path has unresolved shared libraries"
+        while IFS= read -r line; do
+          [ -n "$line" ] && echo "INFO  ${line}"
+        done <<< "$ldd_out"
         ;;
     esac
   done < <(enumerate_paths)
+  log_ok "filesystem scan complete (checked: ${checked})"
+
+  echo
+  if config_flag check_live_usr; then
+    run_live_usr_check
+  else
+    echo "INFO  live /usr check disabled"
+  fi
+
+  echo
+  if config_flag check_python; then
+    run_python_check
+  else
+    echo "INFO  python check disabled"
+  fi
 
   if [ "$failures" -ne 0 ]; then
     status="error"

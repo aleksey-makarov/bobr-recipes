@@ -53,7 +53,6 @@ let base_modules = [
   import "system-image-0.ncl",
   import "system-image-1.ncl",
   import "system-image.ncl",
-  import "tests/test-binary-live-usr.ncl",
   import "tests/test-image.ncl",
   import "tests/test-reports.ncl",
 ] in
