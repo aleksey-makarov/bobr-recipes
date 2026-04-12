@@ -1,6 +1,8 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let iproute2_src =
     recipe.fetch "iproute2-src-6.16.0" {
       url = "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-6.16.0.tar.xz",
@@ -9,7 +11,9 @@ fun pkgs =>
   in
 
   let iproute2 =
-    recipe.binary "iproute2-6.16.0" {
+    build.build_make {
+      name = "iproute2-6.16.0",
+      sources = [iproute2_src],
       script_config = {
         pre_build = m%"
           sed -i /ARPD/d Makefile
@@ -23,7 +27,7 @@ fun pkgs =>
           install -vDm644 COPYING README* -t "/out/${out}/usr/share/doc/iproute2-6.16.0"
         "%,
       },
-    } pkgs.system_image pkgs.buildscript_gnu_make [iproute2_src]
+    }
   in
 
   {

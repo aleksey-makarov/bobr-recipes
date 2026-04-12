@@ -21,13 +21,13 @@ fun pkgs =>
     build_autotools_with pkgs.system_image
   in
 
-  # let build_make =
-  #   build_make_with pkgs.system_image_2
-  # in
+  let build_make =
+    build_make_with pkgs.system_image
+  in
 
   {
     include [
       build_autotools,
-      # build_make,
+      build_make,
     ],
   }
