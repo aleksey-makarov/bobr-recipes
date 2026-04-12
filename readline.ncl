@@ -12,7 +12,7 @@ fun pkgs =>
   in
 
   let readline_build_image =
-    recipe.image "readline-build-image" {} pkgs.system_image [
+    recipe.image "readline-build-image" {} pkgs.system_image_2 [
       pkgs.ncurses,
     ]
   in

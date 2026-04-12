@@ -16,7 +16,7 @@ fun pkgs =>
   in
 
   let perl_build_image =
-    recipe.image "perl-build-image" {} pkgs.system_image [
+    recipe.image "perl-build-image" {} pkgs.system_image_2 [
       pkgs.zlib,
       pkgs.bzip2,
       pkgs.less,

@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let ncurses_src =
     recipe.fetch "ncurses-src-6.6" {
       url = [
@@ -13,9 +11,7 @@ fun pkgs =>
   in
 
   let ncurses =
-    build.build_autotools {
-      name = "ncurses-6.6",
-      sources = [ncurses_src],
+    recipe.binary "ncurses-6.6" {
       script_config = {
         configure_args = [
           "--mandir=/usr/share/man",
@@ -38,7 +34,7 @@ fun pkgs =>
           cp -v -R doc -T "/out/${out}/usr/share/doc/ncurses-6.6"
         "%,
       },
-    }
+    } pkgs.system_image_2 pkgs.buildscript_autotools [ncurses_src]
   in
 
   {

@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let pkgconf_src =
     recipe.fetch "pkgconf-src-2.5.1" {
       url = "https://distfiles.ariadne.space/pkgconf/pkgconf-2.5.1.tar.xz",
@@ -11,9 +9,7 @@ fun pkgs =>
   in
 
   let pkgconf =
-    build.build_autotools {
-      name = "pkgconf-2.5.1",
-      sources = [pkgconf_src],
+    recipe.binary "pkgconf-2.5.1" {
       script_config = {
         configure_args = [
           "--disable-static",
@@ -24,7 +20,7 @@ fun pkgs =>
           ln -sv pkgconf.1 "/out/${out}/usr/share/man/man1/pkg-config.1"
         "%,
       },
-    }
+    } pkgs.system_image_2 pkgs.buildscript_autotools [pkgconf_src]
   in
 
   {

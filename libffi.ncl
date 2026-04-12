@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let libffi_src =
     recipe.fetch "libffi-src-3.5.2" {
       url = "https://github.com/libffi/libffi/releases/download/v3.5.2/libffi-3.5.2.tar.gz",
@@ -11,16 +9,14 @@ fun pkgs =>
   in
 
   let libffi =
-    build.build_autotools {
-      name = "libffi-3.5.2",
-      sources = [libffi_src],
+    recipe.binary "libffi-3.5.2" {
       script_config = {
         configure_args = [
           "--disable-static",
           "--with-gcc-arch=native",
         ],
       },
-    }
+    } pkgs.system_image_2 pkgs.buildscript_autotools [libffi_src]
   in
 
   {

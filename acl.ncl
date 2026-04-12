@@ -9,7 +9,7 @@ fun pkgs =>
   in
 
   let acl_build_image =
-    recipe.image "acl-build-image" {} pkgs.system_image [
+    recipe.image "acl-build-image" {} pkgs.system_image_2 [
       pkgs.attr,
     ]
   in

@@ -9,7 +9,7 @@ fun pkgs =>
   in
 
   let file_build_image =
-    recipe.image "file-build-image" {} pkgs.system_image [
+    recipe.image "file-build-image" {} pkgs.system_image_2 [
       pkgs.bzip2,
       pkgs.xz,
     ]

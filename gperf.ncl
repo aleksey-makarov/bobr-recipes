@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let gperf_src =
     recipe.fetch "gperf-src-3.3" {
       url = [
@@ -14,13 +12,11 @@ fun pkgs =>
   in
 
   let gperf =
-    build.build_autotools {
-      name = "gperf-3.3",
-      sources = [gperf_src],
+    recipe.binary "gperf-3.3" {
       script_config = {
         configure_args = ["--docdir=/usr/share/doc/gperf-3.3"],
       },
-    }
+    } pkgs.system_image_2 pkgs.buildscript_autotools [gperf_src]
   in
 
   {

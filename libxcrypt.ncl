@@ -11,7 +11,7 @@ fun pkgs =>
   in
 
   let libxcrypt_build_image =
-    recipe.image "libxcrypt-build-image" {} pkgs.system_image [
+    recipe.image "libxcrypt-build-image" {} pkgs.system_image_2 [
       pkgs.perl,
     ]
   in

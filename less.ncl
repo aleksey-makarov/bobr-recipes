@@ -9,7 +9,7 @@ fun pkgs =>
   in
 
   let less_build_image =
-    recipe.image "less-build-image" {} pkgs.system_image [
+    recipe.image "less-build-image" {} pkgs.system_image_2 [
       pkgs.ncurses,
     ]
   in

@@ -89,7 +89,7 @@ fun pkgs =>
   in
 
   let python_build_image =
-    recipe.image "python-build-image" {} pkgs.system_image [
+    recipe.image "python-build-image" {} pkgs.system_image_2 [
       pkgs.expat,
       pkgs.libffi,
     ]

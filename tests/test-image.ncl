@@ -16,13 +16,13 @@ fun pkgs =>
     } pkgs.system_image_1 buildscript_test_image []
   in
 
-  let test_system_image =
-    recipe.binary "test-system-image" {
+  let test_system_image_2 =
+    recipe.binary "test-system-image-2" {
       script_config = {
-        name = "system-image",
+        name = "system-image-2",
         check_live_usr = "true",
       },
-    } pkgs.system_image buildscript_test_image []
+    } pkgs.system_image_2 buildscript_test_image []
   in
 
   let test_system_image_0 =
@@ -33,28 +33,28 @@ fun pkgs =>
     } pkgs.system_image_0 buildscript_test_image []
   in
 
-  let test_system_image_python_image =
-    recipe.image "test-system-image-python-image" {} pkgs.system_image [
+  let test_system_image_2_python_image =
+    recipe.image "test-system-image-2-python-image" {} pkgs.system_image_2 [
       pkgs.python,
       pkgs.expat,
       pkgs.libffi,
     ]
   in
 
-  let test_system_image_python =
-    recipe.binary "test-system-image-python" {
+  let test_system_image_2_python =
+    recipe.binary "test-system-image-2-python" {
       script_config = {
-        name = "system-image-python",
+        name = "system-image-2-python",
         check_python = "true",
       },
-    } test_system_image_python_image buildscript_test_image []
+    } test_system_image_2_python_image buildscript_test_image []
   in
 
   {
     include [
       test_system_image_1,
-      test_system_image,
+      test_system_image_2,
       test_system_image_0,
-      test_system_image_python,
+      test_system_image_2_python,
     ],
   }

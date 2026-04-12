@@ -18,7 +18,7 @@ fun pkgs =>
   let qemu_kernel =
     recipe.binary "qemu-kernel" {
       script_config = {},
-    } pkgs.system_image qemu_kernel_buildscript [
+    } pkgs.system_image_2 qemu_kernel_buildscript [
       pkgs.linux_src,
       qemu_kernel_config,
     ]

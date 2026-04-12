@@ -9,7 +9,7 @@ fun pkgs =>
   in
 
   let shadow_build_image =
-    recipe.image "shadow-build-image" {} pkgs.system_image [
+    recipe.image "shadow-build-image" {} pkgs.system_image_2 [
       pkgs.libxcrypt,
     ]
   in
