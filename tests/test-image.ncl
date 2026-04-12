@@ -36,6 +36,8 @@ fun pkgs =>
   let test_system_image_python_image =
     recipe.image "test-system-image-python-image" {} pkgs.system_image [
       pkgs.python,
+      pkgs.expat,
+      pkgs.libffi,
     ]
   in
 

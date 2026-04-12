@@ -36,7 +36,7 @@ install_python_module() {
   rm -rf dist
   "${live_pip[@]}" wheel -w dist --no-cache-dir --no-build-isolation --no-deps "$PWD"
   "${live_pip[@]}" install --no-index --find-links dist "${install_name}"
-  "${live_pip[@]}" install --root "${output_root}" --prefix /usr --no-index --find-links dist "${install_name}"
+  "${live_pip[@]}" install --ignore-installed --no-deps --root "${output_root}" --prefix /usr --no-index --find-links dist "${install_name}"
 
   if [ "${install_name}" = "meson" ]; then
     install -vDm644 data/shell-completions/bash/meson /usr/share/bash-completion/completions/meson

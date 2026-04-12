@@ -166,6 +166,7 @@ import markupsafe
 import jinja2
 import mesonbuild
 
+print('IMPORTS_OK')
 print('flit_core=' + flit_core.__file__)
 print('packaging=' + packaging.__file__)
 print('wheel=' + wheel.__file__)
@@ -175,10 +176,17 @@ print('jinja2=' + jinja2.__file__)
 print('mesonbuild=' + mesonbuild.__file__)
 EOF_INNER
  2>&1)"; then
-    log_ok "python module imports"
-    while IFS= read -r line; do
-      echo "INFO  ${line}"
-    done <<< "${import_output}"
+    if grep -qx 'IMPORTS_OK' <<< "${import_output}"; then
+      log_ok "python module imports"
+      while IFS= read -r line; do
+        echo "INFO  ${line}"
+      done <<< "${import_output}"
+    else
+      log_fail "python module imports did not emit success marker"
+      while IFS= read -r line; do
+        [ -n "$line" ] && echo "INFO  ${line}"
+      done <<< "${import_output}"
+    fi
   else
     log_fail "python module imports failed"
     while IFS= read -r line; do
