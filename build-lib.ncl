@@ -17,9 +17,9 @@ fun pkgs =>
       } image pkgs.buildscript_gnu_make sources
   in
 
-  # let build_autotools =
-  #   build_autotools_with pkgs.system_image_2
-  # in
+  let build_autotools =
+    build_autotools_with pkgs.system_image
+  in
 
   let build_make =
     build_make_with pkgs.system_image_2
@@ -27,7 +27,7 @@ fun pkgs =>
 
   {
     include [
-      # build_autotools,
+      build_autotools,
       build_make,
     ],
   }

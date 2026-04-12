@@ -82,6 +82,14 @@ fun pkgs =>
     ]
   in
 
+  let system_image =
+    recipe.image "system-image" {} pkgs.system_image_2 [
+      pkgs.python,
+      pkgs.expat,
+      pkgs.libffi,
+    ]
+  in
+
   {
-    include [system_image_0, system_image_1, system_image_2],
+    include [system_image_0, system_image_1, system_image_2, system_image],
   }
