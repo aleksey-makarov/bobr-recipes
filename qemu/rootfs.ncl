@@ -32,11 +32,17 @@ fun pkgs =>
       pkgs.diffutils,
       pkgs.elfutils,
       pkgs.flex,
+      pkgs.gdbm,
       pkgs.gawk,
       pkgs.gcc,
+      pkgs.gettext,
       pkgs.gperf,
       pkgs.grep,
+      pkgs.groff,
       pkgs.less,
+      pkgs.inetutils,
+      pkgs.iproute2,
+      pkgs.libpipeline,
       pkgs.m4,
       pkgs.make,
       pkgs.patch,
@@ -48,6 +54,8 @@ fun pkgs =>
       pkgs.findutils,
       pkgs.gzip,
       pkgs.tar,
+      pkgs.texinfo,
+      pkgs.vim,
     ]
   in
 

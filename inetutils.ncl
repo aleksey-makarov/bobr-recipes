@@ -1,0 +1,48 @@
+let recipe = import "recipe-lib.ncl" in
+
+fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
+  let inetutils_src =
+    recipe.fetch "inetutils-src-2.6" {
+      url = [
+        "https://ftp.gnu.org/gnu/inetutils/inetutils-2.6.tar.xz",
+        "https://mirrors.kernel.org/gnu/inetutils/inetutils-2.6.tar.xz",
+      ],
+      hash = "md5:401d7d07682a193960bcdecafd03de94",
+    }
+  in
+
+  let inetutils =
+    build.build_autotools {
+      name = "inetutils-2.6",
+      sources = [inetutils_src],
+      script_config = {
+        pre_configure = "sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c",
+        configure_args = [
+          "--bindir=/usr/bin",
+          "--localstatedir=/var",
+          "--disable-logger",
+          "--disable-whois",
+          "--disable-rcp",
+          "--disable-rexec",
+          "--disable-rlogin",
+          "--disable-rsh",
+          "--disable-servers",
+        ],
+        post_install = m%"
+          mkdir -p "/out/${out}/usr/sbin"
+          if [ -f "/out/${out}/usr/bin/ifconfig" ]; then
+            mv -v "/out/${out}/usr/bin/ifconfig" "/out/${out}/usr/sbin/ifconfig"
+          fi
+        "%,
+      },
+    }
+  in
+
+  {
+    include [
+      inetutils_src,
+      inetutils,
+    ],
+  }
