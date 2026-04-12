@@ -10,6 +10,84 @@ fun pkgs =>
     }
   in
 
+  let flit_core_src =
+    recipe.fetch "flit-core-src-3.12.0" {
+      url = [
+        "https://pypi.org/packages/source/f/flit-core/flit_core-3.12.0.tar.gz",
+      ],
+      hash = "md5:c538415c1f27bd69cbbbf3cdd5135d39",
+    }
+  in
+
+  let packaging_src =
+    recipe.fetch "packaging-src-25.0" {
+      url = [
+        "https://files.pythonhosted.org/packages/source/p/packaging/packaging-25.0.tar.gz",
+      ],
+      hash = "md5:ab0ef21ddebe09d1803575120d3f99f8",
+    }
+  in
+
+  let wheel_src =
+    recipe.fetch "wheel-src-0.46.1" {
+      url = [
+        "https://pypi.org/packages/source/w/wheel/wheel-0.46.1.tar.gz",
+      ],
+      hash = "md5:65e09ee84af36821e3b1e9564aa91bd5",
+    }
+  in
+
+  let setuptools_src =
+    recipe.fetch "setuptools-src-80.9.0" {
+      url = [
+        "https://pypi.org/packages/source/s/setuptools/setuptools-80.9.0.tar.gz",
+      ],
+      hash = "md5:82e1d67883b713f9493659b50d13b436",
+    }
+  in
+
+  let markupsafe_src =
+    recipe.fetch "markupsafe-src-3.0.2" {
+      url = [
+        "https://pypi.org/packages/source/M/MarkupSafe/markupsafe-3.0.2.tar.gz",
+      ],
+      hash = "md5:cb0071711b573b155cc8f86e1de72167",
+    }
+  in
+
+  let jinja2_src =
+    recipe.fetch "jinja2-src-3.1.6" {
+      url = [
+        "https://pypi.org/packages/source/J/Jinja2/jinja2-3.1.6.tar.gz",
+      ],
+      hash = "md5:66d4c25ff43d1deaf9637ccda523dec8",
+    }
+  in
+
+  let meson_src =
+    recipe.fetch "meson-src-1.8.3" {
+      url = [
+        "https://github.com/mesonbuild/meson/releases/download/1.8.3/meson-1.8.3.tar.gz",
+      ],
+      hash = "md5:08221d2f515e759686f666ff6409a903",
+    }
+  in
+
+  let ninja_src =
+    recipe.fetch "ninja-src-1.13.1" {
+      url = [
+        "https://github.com/ninja-build/ninja/archive/v1.13.1/ninja-1.13.1.tar.gz",
+      ],
+      hash = "md5:c35f8f55f4cf60f1a916068d8f45a0f8",
+    }
+  in
+
+  let python_modules_helper =
+    recipe.text "buildscript-python-modules" {
+      source = import "python-modules.sh" as 'Text,
+    }
+  in
+
   let python_build_image =
     recipe.image "python-build-image" {} pkgs.system_image [
       pkgs.expat,
@@ -59,9 +137,55 @@ fun pkgs =>
           "--enable-optimizations",
           "--without-static-libpython",
         ],
-        post_install = "ln -svf python3 \"/out/${out}/usr/bin/python\"",
+        python_modules = [
+          {
+            source_input = "sources2",
+            install_name = "flit_core",
+          },
+          {
+            source_input = "sources3",
+            install_name = "packaging",
+          },
+          {
+            source_input = "sources4",
+            install_name = "wheel",
+          },
+          {
+            source_input = "sources5",
+            install_name = "setuptools",
+          },
+          {
+            source_input = "sources6",
+            install_name = "Markupsafe",
+          },
+          {
+            source_input = "sources7",
+            install_name = "Jinja2",
+          },
+          {
+            source_input = "sources8",
+            install_name = "meson",
+          },
+        ],
+        ninja_source_input = "sources9",
+        post_install = m%"
+          source /in/sources1
+          ln -svf python3 /usr/bin/python
+          ln -svf python3 "/out/${out}/usr/bin/python"
+        "%,
       },
-    } python_build_image pkgs.buildscript_autotools [python_src]
+    } python_build_image pkgs.buildscript_autotools [
+      python_src,
+      python_modules_helper,
+      flit_core_src,
+      packaging_src,
+      wheel_src,
+      setuptools_src,
+      markupsafe_src,
+      jinja2_src,
+      meson_src,
+      ninja_src,
+    ]
   in
 
   {
