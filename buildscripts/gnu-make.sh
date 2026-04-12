@@ -43,18 +43,10 @@ if [ -d "${cfg}/make_args" ]; then
   done < <(find "${cfg}/make_args" -mindepth 1 -maxdepth 1 -type f -print0 | sort -z)
 fi
 
-install_args=(install)
-if [ -d "${cfg}/install_args" ]; then
-  install_args=()
-  while IFS= read -r -d '' path; do
-    install_args+=("$(cat "$path")")
-  done < <(find "${cfg}/install_args" -mindepth 1 -maxdepth 1 -type f -print0 | sort -z)
-fi
-
 jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
 make -j"$jobs" "${make_args[@]}"
 mkdir -p "/out/${out}"
-make DESTDIR="/out/${out}" "${make_args[@]}" "${install_args[@]}"
+make DESTDIR="/out/${out}" "${make_args[@]}" install
 
 if [ -f "${cfg}/post_install" ]; then
   source "${cfg}/post_install"

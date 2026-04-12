@@ -30,15 +30,13 @@ fun pkgs =>
           make -f Makefile-libbz2_so
           make clean
         "%,
-        install_args = [
-          "PREFIX=/usr",
-          "install",
-        ],
         post_install = m%"
-          mkdir -p "/out/${out}/usr/lib" "/out/${out}/usr/bin"
+          make PREFIX="/out/${out}/usr" install
+          mkdir -p "/out/${out}/usr/lib" "/out/${out}/usr/bin" "/out/${out}/usr/include"
           cp -av libbz2.so.* "/out/${out}/usr/lib/"
           ln -svf libbz2.so.1.0.8 "/out/${out}/usr/lib/libbz2.so"
           cp -v bzip2-shared "/out/${out}/usr/bin/bzip2"
+          cp -v bzlib.h "/out/${out}/usr/include/"
           for i in "/out/${out}/usr/bin"/{bzcat,bunzip2}; do
             ln -sfv bzip2 "$i"
           done

@@ -10,10 +10,14 @@ fun pkgs =>
     }
   in
 
+  let libxcrypt_build_image =
+    recipe.image "libxcrypt-build-image" {} pkgs.system_image [
+      pkgs.perl,
+    ]
+  in
+
   let libxcrypt =
-    build.build_autotools {
-      name = "libxcrypt-4.4.38",
-      sources = [libxcrypt_src],
+    recipe.binary "libxcrypt-4.4.38" {
       script_config = {
         configure_args = [
           "--enable-hashes=strong,glibc",
@@ -22,7 +26,7 @@ fun pkgs =>
           "--disable-failure-tokens",
         ],
       },
-    }
+    } libxcrypt_build_image pkgs.buildscript_autotools [libxcrypt_src]
   in
 
   {

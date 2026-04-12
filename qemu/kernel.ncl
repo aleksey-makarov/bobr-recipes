@@ -26,8 +26,6 @@ fun pkgs =>
 
   {
     include [
-      qemu_kernel_config,
-      qemu_kernel_buildscript,
       qemu_kernel,
     ],
   }

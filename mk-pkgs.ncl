@@ -26,6 +26,7 @@ let base_modules = [
   import "gzip.ncl",
   import "tar.ncl",
   import "patch.ncl",
+  import "perl.ncl",
   import "findutils.ncl",
   import "diffutils.ncl",
   import "m4.ncl",
