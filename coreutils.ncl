@@ -19,8 +19,7 @@ fun pkgs =>
           "--without-selinux",
           "--without-openssl",
           "--without-libgmp",
-          "--enable-install-program=hostname",
-          "--enable-no-install-program=kill,uptime",
+          "--enable-no-install-program=hostname,kill,uptime",
         ],
         post_install = m%"
               mkdir -pv "/out/${out}/usr/sbin"
@@ -44,8 +43,7 @@ fun pkgs =>
           "--without-selinux",
           "--without-openssl",
           "--without-libgmp",
-          "--enable-install-program=hostname",
-          "--enable-no-install-program=kill,uptime",
+          "--enable-no-install-program=hostname,kill,uptime",
         ],
         post_install = m%"
               mkdir -pv "/out/${out}/usr/sbin"

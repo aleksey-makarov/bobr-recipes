@@ -75,23 +75,41 @@ check_broken_symlink() {
 
 check_shebang_interpreter() {
   local path="$1"
-  local header interpreter
+  local header first_line interpreter rest env_cmd
 
   header="$(dd if="$path" bs=2 count=1 2>/dev/null || true)"
   [ "$header" = "#!" ] || return 1
 
-  interpreter="$({
+  first_line="$({
     head -n 1 "$path" 2>/dev/null \
-      | sed -e 's/^#![[:space:]]*//' -e 's/[[:space:]].*$//'
+      | sed -e 's/^#![[:space:]]*//'
   })"
+  interpreter="$(printf '%s\n' "$first_line" | sed -e 's/[[:space:]].*$//')"
   [ -n "$interpreter" ] || return 1
 
-  if [ ! -e "$interpreter" ]; then
-    log_fail "missing shebang interpreter for $path (interpreter: $interpreter)"
-    return 0
-  fi
+  case "$interpreter" in
+    /usr/bin/env|/bin/env)
+      rest="$(printf '%s\n' "$first_line" | sed -e 's/^[^[:space:]]*[[:space:]]*//')"
+      env_cmd="$(printf '%s\n' "$rest" | sed -e 's/[[:space:]].*$//')"
+      [ -n "$env_cmd" ] || return 1
 
-  return 1
+      if ! command -v "$env_cmd" >/dev/null 2>&1; then
+        log_fail "missing env shebang command for $path (command: $env_cmd)"
+        return 0
+      fi
+      return 1
+      ;;
+    /*)
+      if [ ! -e "$interpreter" ]; then
+        log_fail "missing shebang interpreter for $path (interpreter: $interpreter)"
+        return 0
+      fi
+      return 1
+      ;;
+    *)
+      return 1
+      ;;
+  esac
 }
 
 run_live_usr_check() {

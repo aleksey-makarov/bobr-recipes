@@ -36,6 +36,10 @@ fun pkgs =>
           for i in "/out/${out}/usr/bin"/{bzcat,bunzip2}; do
             ln -sfv bzip2 "$i"
           done
+          ln -sfv bzdiff "/out/${out}/usr/bin/bzcmp"
+          ln -sfv bzgrep "/out/${out}/usr/bin/bzegrep"
+          ln -sfv bzgrep "/out/${out}/usr/bin/bzfgrep"
+          ln -sfv bzmore "/out/${out}/usr/bin/bzless"
           rm -fv "/out/${out}/usr/lib/libbz2.a"
         "%,
       },
