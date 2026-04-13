@@ -9,7 +9,7 @@ fi
 attr="${1:-test_reports}"
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 workspace_root="$(cd "${repo_root}/.." && pwd)"
-pkgs_file="${repo_root}/pkgs.ncl"
+request_file="${repo_root}/request.ncl"
 recipe_json="${workspace_root}/.mbuild/recipe.json"
 mbuild_bin="${workspace_root}/mbuild/target/debug/mbuild"
 tree_generator="${repo_root}/tools/generate-tree-modules.py"
@@ -20,15 +20,15 @@ echo "==> regenerate tree modules" >&2
 python3 "${tree_generator}"
 
 expr=$(cat <<EOF_INNER
-let pkgs = import "${pkgs_file}" in
-pkgs.${attr}
+let request = import "${request_file}" in
+request "${attr}"
 EOF_INNER
 )
 
-echo "==> export pkgs.${attr}" >&2
+echo "==> export request for ${attr}" >&2
 printf '%s\n' "${expr}" | nickel export --format json > "${recipe_json}"
 
-echo "==> build pkgs.${attr}" >&2
+echo "==> build ${attr}" >&2
 (
   cd "${workspace_root}"
   "${mbuild_bin}" build "${recipe_json}"

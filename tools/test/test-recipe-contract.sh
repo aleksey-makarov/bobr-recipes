@@ -51,13 +51,23 @@ run_case "wrong-many-shape" fail '{"name":"img2","tag":"Image","config":{"mode":
 run_case "bad-fetch-archive-format" fail '{"name":"src","tag":"Fetch","config":{"url":"https://example.invalid/src.tar.xz","hash":"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","archive_format":"tar-zst"},"inputs":{}}'
 run_case "bad-ext4-rootfs-size" fail '{"name":"rootfs","tag":"Ext4Rootfs","config":{"label":"rootfs"},"inputs":{"inputs":[]}}'
 
-real_recipe="${tmpdir}/real-recipe.json"
-nickel export "${repo_root}/tests/test-recipe.ncl" --format json > "${real_recipe}"
-cat > "${tmpdir}/check-real.ncl" <<EOF_INNER
-let contracts = import "${contract_file}" in
-let recipe = import "./real-recipe.json" in
-contracts.validate_recipe recipe
+cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER
+let raw_pkgs = (import "${repo_root}/mk-pkgs.ncl") [] in
+std.record.fields raw_pkgs
 EOF_INNER
-(cd "${tmpdir}" && nickel export check-real.ncl --format json >/dev/null)
+attr_count="$(
+  cd "${tmpdir}" &&
+    nickel export list-raw-pkgs.ncl --format json | jq 'length'
+)"
 
-echo "recipe contract smoke tests passed"
+cat > "${tmpdir}/check-shallow-raw-pkgs.ncl" <<EOF_INNER
+let contracts = import "${contract_file}" in
+let raw_pkgs = (import "${repo_root}/mk-pkgs.ncl") [] in
+std.record.map
+  (fun _ recipe => let checked = recipe | contracts.shallow_recipe in checked.tag)
+  raw_pkgs
+EOF_INNER
+
+(cd "${tmpdir}" && nickel export check-shallow-raw-pkgs.ncl --format json >/dev/null)
+
+echo "recipe contract smoke tests passed (${attr_count} raw recipes shallow-validated)"

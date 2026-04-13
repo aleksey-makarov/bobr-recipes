@@ -33,6 +33,22 @@ let BaseRecipe = {
     | doc "Builder-specific input object.",
 }
 in
+let ShallowBaseRecipe = {
+  name
+    | String
+    | doc "Publication name of the recipe node.",
+  tag
+    | String
+    | KnownTag
+    | doc "Builder tag selected for this recipe node.",
+  config
+    | Dyn
+    | doc "Builder-specific config payload.",
+  inputs
+    | Dyn
+    | doc "Builder-specific input object left unvalidated in shallow mode.",
+}
+in
 let TextConfig = {
   source
     | String
@@ -201,6 +217,58 @@ let Ext4RootfsInputsShape = {
     | doc "Repeated recipe nodes providing installable filesystem tree inputs.",
 }
 in
+let ValidateRecipeShallow = fun recipe =>
+  let checked = recipe | ShallowBaseRecipe in
+  let validate_tree_entry = fun entry =>
+    let checked = entry | { type | TreeEntryKind, .. } in
+    if checked.type == "file" then
+      checked | TreeFileEntry
+    else if checked.type == "symlink" then
+      checked | TreeSymlinkEntry
+    else
+      checked | TreeDirEntry
+  in
+  let validate_tree_config = fun config =>
+    let checked = config | TreeConfig in
+    checked & {
+      tree = checked.tree & {
+        entries = std.array.map validate_tree_entry checked.tree.entries,
+      },
+    }
+  in
+  if checked.tag == "Fetch" then
+    checked & {
+      config = checked.config | FetchConfig,
+    }
+  else if checked.tag == "Text" then
+    checked & {
+      config = checked.config | TextConfig,
+    }
+  else if checked.tag == "Tree" then
+    checked & {
+      config = validate_tree_config checked.config,
+    }
+  else if checked.tag == "ContainerImage" then
+    checked & {
+      config = checked.config | ContainerImageConfig,
+    }
+  else if checked.tag == "Binary" then
+    checked & {
+      config = checked.config | BinaryConfig,
+    }
+  else if checked.tag == "Ext4Rootfs" then
+    checked & {
+      config = checked.config | Ext4RootfsConfig,
+    }
+  else
+    checked & {
+      config = checked.config | ImageConfig,
+    }
+in
+# WARNING:
+# `ValidateRecipe` performs a deep recursive traversal of the entire nested
+# raw recipe graph. It is intentionally expensive and should only be used for
+# small smoke cases, not for full-package-set validation.
 let rec ValidateRecipe = fun recipe =>
   let checked = recipe | BaseRecipe in
   let validate_tree_entry = fun entry =>
@@ -322,7 +390,14 @@ in
   image_config
     | doc "Config contract for `Image` recipe nodes."
     = ImageConfig,
+  shallow_recipe
+    | doc "Validate one recipe node shallowly: full top-level shape and tag-specific config, but leave `inputs` as `Dyn`."
+    = std.contract.from_predicate (
+      fun recipe =>
+        let _ = ValidateRecipeShallow recipe in
+        true
+    ),
   validate_recipe
-    | doc "Recursively validate one exported recipe graph value."
+    | doc "WARNING: deep recursive validation. This walks the entire nested recipe graph and is expensive on large raw package sets."
     = ValidateRecipe,
 }
