@@ -84,6 +84,7 @@ fun pkgs =>
 
   let system_image =
     recipe.image "system-image" {} pkgs.system_image_2 [
+      pkgs.autoconf,
       pkgs.bzip2,
       pkgs.ncurses,
       pkgs.perl,

@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let inetutils_src =
     recipe.fetch "inetutils-src-2.6" {
       url = [
@@ -13,10 +11,14 @@ fun pkgs =>
     }
   in
 
+  let inetutils_build_image =
+    recipe.image "inetutils-build-image" {} pkgs.system_image_2 [
+      pkgs.ncurses,
+    ]
+  in
+
   let inetutils =
-    build.build_autotools {
-      name = "inetutils-2.6",
-      sources = [inetutils_src],
+    recipe.binary "inetutils-2.6" {
       script_config = {
         pre_configure = "sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c",
         configure_args = [
@@ -37,7 +39,7 @@ fun pkgs =>
           fi
         "%,
       },
-    }
+    } inetutils_build_image pkgs.buildscript_autotools [inetutils_src]
   in
 
   {
