@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+# Validate every JSON build result under .mbuild/meta-refs against the
+# build-result contract.
+# Run this after local builds when you want to check stored result metadata
+# rather than recipe definitions.
+
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

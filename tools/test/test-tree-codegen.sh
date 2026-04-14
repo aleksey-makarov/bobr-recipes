@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+
+# Verify tree module code generation and generator invariants.
+# Run this when editing generate-tree-modules.py or any logic around
+# *-tree-src to *-tree.ncl conversion.
+
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

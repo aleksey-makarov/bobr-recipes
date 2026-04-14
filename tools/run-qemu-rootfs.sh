@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+
+# Boot the locally built qemu rootfs artifact under qemu-system-x86_64.
+# Use this after qemu-rootfs and qemu-kernel have already been built and
+# you want an interactive runtime smoke check of the image.
+
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

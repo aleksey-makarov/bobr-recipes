@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+
+# Build a single recipe attribute from mbuild-recipes/request.ncl.
+# Regenerates tree modules, exports the target request into
+# .mbuild/recipe.json, and then invokes mbuild on that request.
+
 set -euo pipefail
 
 if [ "$#" -gt 1 ]; then

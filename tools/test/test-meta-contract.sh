@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# Smoke-test the meta contract with small positive and negative fixtures.
+# Run this when editing contracts/meta.ncl or the runtime metadata shape.
+
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

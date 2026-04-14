@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+# Generate *-tree.ncl modules from sibling *-tree-src files/directories.
+# Converts checked-in tree sources into Nickel tree-entry modules and can
+# also verify that generated files are up to date with --check.
+
 import argparse
 import json
 import os

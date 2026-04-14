@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+
+# Smoke-test the recipe contract with synthetic cases and then shallow-
+# validate every raw recipe from mk-pkgs.ncl.
+# Run this when editing recipe contracts, mk-pkgs wiring, or recipe shapes.
+
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
