@@ -47,6 +47,7 @@ fun pkgs =>
       pkgs.autoconf,
       pkgs.automake,
       pkgs.dbus,
+      pkgs.systemd,
       pkgs.tcl,
       pkgs.expect,
       pkgs.dejagnu,

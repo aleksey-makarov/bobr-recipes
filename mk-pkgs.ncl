@@ -36,6 +36,7 @@ let base_modules = [
   import "inetutils.ncl",
   import "iproute2.ncl",
   import "dbus.ncl",
+  import "systemd.ncl",
   import "tar.ncl",
   import "patch.ncl",
   import "perl.ncl",

@@ -1,5 +1,4 @@
 let recipe = import "recipe-lib.ncl" in
-let build = import "build-lib.ncl" in
 
 fun pkgs =>
   let procps_ng_src =
@@ -12,19 +11,25 @@ fun pkgs =>
     }
   in
 
+  let procps_ng_build_image =
+    recipe.image "procps-ng-build-image" {} pkgs.system_image [
+      pkgs.libcap,
+      pkgs.systemd,
+    ]
+  in
+
   let procps_ng =
-    (build pkgs).build_autotools {
-      name = "procps-ng-4.0.5",
-      sources = [procps_ng_src],
+    recipe.binary "procps-ng-4.0.5" {
       script_config = {
         configure_args = [
           "--docdir=/usr/share/doc/procps-ng-4.0.5",
           "--disable-static",
           "--disable-kill",
           "--enable-watch8bit",
+          "--with-systemd",
         ],
       },
-    }
+    } procps_ng_build_image pkgs.buildscript_autotools [procps_ng_src]
   in
 
   {
