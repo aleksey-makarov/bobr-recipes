@@ -8,6 +8,8 @@ fun pkgs =>
     } [
       pkgs.base_filesystem,
       pkgs.qemu_runtime_files,
+      pkgs.man_pages,
+      pkgs.iana_etc,
       pkgs.linux_headers,
       pkgs.glibc,
       pkgs.zlib,
@@ -27,6 +29,9 @@ fun pkgs =>
       pkgs.bash,
       pkgs.bc,
       pkgs.binutils,
+      pkgs.gmp,
+      pkgs.mpfr,
+      pkgs.mpc,
       pkgs.bison,
       pkgs.coreutils,
       pkgs.diffutils,

@@ -11,6 +11,27 @@ fun pkgs =>
     }
   in
 
+  let mpc_build_image =
+    recipe.image "mpc-build-image" {} pkgs.system_image [
+      pkgs.gmp,
+      pkgs.mpfr,
+    ]
+  in
+
+  let mpc =
+    recipe.binary "mpc-1.3.1" {
+      script_config = {
+        configure_args = [
+          "--disable-static",
+          "--docdir=/usr/share/doc/mpc-1.3.1",
+        ],
+      },
+    } mpc_build_image pkgs.buildscript_autotools [mpc_src]
+  in
+
   {
-    include [mpc_src],
+    include [
+      mpc_src,
+      mpc,
+    ],
   }

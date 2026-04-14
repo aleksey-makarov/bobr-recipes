@@ -11,6 +11,27 @@ fun pkgs =>
     }
   in
 
+  let mpfr_build_image =
+    recipe.image "mpfr-build-image" {} pkgs.system_image [
+      pkgs.gmp,
+    ]
+  in
+
+  let mpfr =
+    recipe.binary "mpfr-4.2.2" {
+      script_config = {
+        configure_args = [
+          "--disable-static",
+          "--enable-thread-safe",
+          "--docdir=/usr/share/doc/mpfr-4.2.2",
+        ],
+      },
+    } mpfr_build_image pkgs.buildscript_autotools [mpfr_src]
+  in
+
   {
-    include [mpfr_src],
+    include [
+      mpfr_src,
+      mpfr,
+    ],
   }

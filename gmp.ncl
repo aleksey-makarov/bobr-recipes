@@ -1,6 +1,8 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
+  let build = (import "build-lib.ncl") pkgs in
+
   let gmp_src =
     recipe.fetch "gmp-src-6.3.0" {
       url = [
@@ -11,6 +13,24 @@ fun pkgs =>
     }
   in
 
+  let gmp =
+    build.build_autotools {
+      name = "gmp-6.3.0",
+      sources = [gmp_src],
+      script_config = {
+        pre_configure = "sed -i '/long long t1;/,+1s/()/(...)/' configure",
+        configure_args = [
+          "--enable-cxx",
+          "--disable-static",
+          "--docdir=/usr/share/doc/gmp-6.3.0",
+        ],
+      },
+    }
+  in
+
   {
-    include [gmp_src],
+    include [
+      gmp_src,
+      gmp,
+    ],
   }

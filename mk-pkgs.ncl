@@ -1,5 +1,6 @@
 let base_modules = [
   import "host-image.ncl",
+  import "iana-etc.ncl",
   import "buildscripts/autotools.ncl",
   import "buildscripts/gnu-make.ncl",
   import "buildscripts/meson.ncl",
@@ -52,6 +53,7 @@ let base_modules = [
   import "libffi.ncl",
   import "pkgconf.ncl",
   import "gmp.ncl",
+  import "man-pages.ncl",
   import "mpfr.ncl",
   import "mpc.ncl",
   import "libcap.ncl",
