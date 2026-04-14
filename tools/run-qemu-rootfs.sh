@@ -13,7 +13,7 @@ kernel_path="${workspace_root}/.mbuild/object-refs/qemu-kernel/boot/bzImage"
 qemu_bin="$(command -v qemu-system-x86_64 || true)"
 mem_mb="${QEMU_MEM_MB:-1024}"
 smp_count="${QEMU_SMP:-2}"
-append="root=/dev/vda rw console=ttyS0 init=/init"
+append="root=/dev/vda rw console=ttyS0 net.ifnames=0"
 
 if [ -z "${qemu_bin}" ]; then
   echo "qemu-system-x86_64 not found in PATH" >&2
@@ -35,6 +35,7 @@ exec "${qemu_bin}" \
   -smp "${smp_count}" \
   -kernel "${kernel_path}" \
   -drive "file=${rootfs_path},format=raw,if=virtio" \
+  -nic user,model=virtio-net-pci \
   -append "${append}" \
   -nographic \
   -no-reboot \

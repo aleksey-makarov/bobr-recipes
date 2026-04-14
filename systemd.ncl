@@ -20,7 +20,6 @@ fun pkgs =>
     recipe.image "systemd-build-image" {} pkgs.system_image [
       pkgs.attr,
       pkgs.acl,
-      pkgs.dbus,
       pkgs.gperf,
       pkgs.kmod,
       pkgs.libcap,
@@ -47,7 +46,6 @@ fun pkgs =>
           "-Dfirstboot=false",
           "-Dinstall-tests=false",
           "-Dldconfig=false",
-          "-Dsysusers=false",
           "-Drpmmacrosdir=no",
           "-Dhomed=disabled",
           "-Duserdb=false",
