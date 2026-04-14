@@ -20,7 +20,9 @@ fun pkgs =>
   let inetutils =
     recipe.binary "inetutils-2.6" {
       script_config = {
-        pre_configure = "sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c",
+        pre_configure = m%"
+          sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c
+        "%,
         configure_args = [
           "--bindir=/usr/bin",
           "--localstatedir=/var",

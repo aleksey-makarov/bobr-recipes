@@ -88,6 +88,7 @@ fun pkgs =>
       pkgs.bzip2,
       pkgs.ncurses,
       pkgs.perl,
+      pkgs.pkgconf,
       pkgs.python,
       pkgs.expat,
       pkgs.libffi,

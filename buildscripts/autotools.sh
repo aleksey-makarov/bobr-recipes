@@ -32,6 +32,9 @@ if [ ! -x ./configure ]; then
   exit 1
 fi
 
+mkdir -p .tmp
+export TMPDIR="${TMPDIR:-$PWD/.tmp}"
+
 if [ -f "${cfg}/pre_configure" ]; then
   source "${cfg}/pre_configure"
 fi

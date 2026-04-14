@@ -118,13 +118,10 @@ run_live_usr_check() {
 
   log_check "live /usr is writable and executable"
 
-  cat > "${marker}" <<'EOF_INNER'
-#!/bin/sh
-printf '%s\n' "mbuild live usr smoke ok"
-EOF_INNER
+  cp -f /bin/sh "${marker}"
   chmod 0755 "${marker}"
 
-  output="$("${marker}")"
+  output="$("${marker}" -c "printf '%s\n' 'mbuild live usr smoke ok'")"
   if [ "${output}" = "mbuild live usr smoke ok" ]; then
     log_ok "live /usr smoke marker created and executed (${marker})"
     echo "INFO  live-usr output: ${output}"

@@ -26,6 +26,7 @@ fun pkgs =>
           make -f Makefile-libbz2_so
           make clean
         "%,
+        skip_install = "true",
         post_install = m%"
           make PREFIX="/out/${out}/usr" install
           mkdir -p "/out/${out}/usr/lib" "/out/${out}/usr/bin" "/out/${out}/usr/include"

@@ -32,6 +32,9 @@ if [ ! -f Makefile ] && [ ! -f makefile ] && [ ! -f GNUmakefile ]; then
   exit 1
 fi
 
+mkdir -p .tmp
+export TMPDIR="${TMPDIR:-$PWD/.tmp}"
+
 if [ -f "${cfg}/pre_build" ]; then
   source "${cfg}/pre_build"
 fi
@@ -46,7 +49,15 @@ fi
 jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
 make -j"$jobs" "${make_args[@]}"
 mkdir -p "/out/${out}"
-make DESTDIR="/out/${out}" "${make_args[@]}" install
+
+skip_install="false"
+if [ -f "${cfg}/skip_install" ]; then
+  skip_install="$(cat "${cfg}/skip_install")"
+fi
+
+if [ "${skip_install}" != "true" ]; then
+  make DESTDIR="/out/${out}" "${make_args[@]}" install
+fi
 
 if [ -f "${cfg}/post_install" ]; then
   source "${cfg}/post_install"

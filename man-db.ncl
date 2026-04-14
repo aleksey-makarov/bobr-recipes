@@ -11,8 +11,8 @@ fun pkgs =>
   let man_db_build_image =
     recipe.image "man-db-build-image" {} pkgs.system_image [
       pkgs.gdbm,
+      pkgs.groff,
       pkgs.libpipeline,
-      pkgs.pkgconf,
     ]
   in
 
@@ -24,6 +24,8 @@ fun pkgs =>
           "--sysconfdir=/etc",
           "--disable-setuid",
           "--enable-cache-owner=bin",
+          "--with-systemdsystemunitdir=/usr/lib/systemd/system",
+          "--with-systemdtmpfilesdir=/usr/lib/tmpfiles.d",
           "--with-browser=/usr/bin/lynx",
           "--with-vgrind=/usr/bin/vgrind",
           "--with-grap=/usr/bin/grap",
