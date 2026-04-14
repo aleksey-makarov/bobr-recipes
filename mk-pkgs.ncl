@@ -42,6 +42,8 @@ let base_modules = [
   import "xml-parser.ncl",
   import "intltool.ncl",
   import "openssl.ncl",
+  import "kmod.ncl",
+  import "procps-ng.ncl",
   import "psmisc.ncl",
   import "findutils.ncl",
   import "diffutils.ncl",
