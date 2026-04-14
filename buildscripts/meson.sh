@@ -3,6 +3,7 @@ set -euo pipefail
 
 src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
 out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+cfg="${MBUILD_SCRIPT_CONFIG_DIR:?MBUILD_SCRIPT_CONFIG_DIR is required}"
 meson_src_dir="/in/sources1"
 
 cd "/in/${src}"
@@ -24,6 +25,20 @@ if [ ! -f meson.build ]; then
   fi
 fi
 
+if [ -d "${cfg}/env" ]; then
+  while IFS= read -r -d '' path; do
+    export "$(basename "$path")=$(cat "$path")"
+  done < <(find "${cfg}/env" -mindepth 1 -maxdepth 1 -type f -print0 | sort -z)
+fi
+
+mkdir -p .tmp
+export TMPDIR="${TMPDIR:-$PWD/.tmp}"
+
+if [ -f "${cfg}/pre_configure" ]; then
+  source "${cfg}/pre_configure"
+fi
+
+meson_cmd=(meson)
 if [ ! -f "${meson_src_dir}/meson.py" ]; then
   candidates=""
   for d in "${meson_src_dir}"/*; do
@@ -38,12 +53,27 @@ if [ ! -f "${meson_src_dir}/meson.py" ]; then
   fi
 fi
 
-if [ ! -f "${meson_src_dir}/meson.py" ]; then
-  echo "meson build-script: meson.py not found in /in/sources1" >&2
-  exit 1
+if [ -f "${meson_src_dir}/meson.py" ]; then
+  meson_cmd=(python3 "${meson_src_dir}/meson.py")
+fi
+
+setup_args=()
+if [ -d "${cfg}/setup_args" ]; then
+  while IFS= read -r -d '' path; do
+    setup_args+=("$(cat "$path")")
+  done < <(find "${cfg}/setup_args" -mindepth 1 -maxdepth 1 -type f -print0 | sort -z)
+fi
+
+build_dir="build"
+if [ -f "${cfg}/build_dir" ]; then
+  build_dir="$(cat "${cfg}/build_dir")"
 fi
 
 jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-python3 "${meson_src_dir}/meson.py" setup build --prefix=/usr
-python3 "${meson_src_dir}/meson.py" compile -C build -j"$jobs"
-DESTDIR="/out/${out}" python3 "${meson_src_dir}/meson.py" install -C build
+"${meson_cmd[@]}" setup "${build_dir}" --prefix=/usr "${setup_args[@]}"
+"${meson_cmd[@]}" compile -C "${build_dir}" -j"$jobs"
+DESTDIR="/out/${out}" "${meson_cmd[@]}" install -C "${build_dir}"
+
+if [ -f "${cfg}/post_install" ]; then
+  source "${cfg}/post_install"
+fi
