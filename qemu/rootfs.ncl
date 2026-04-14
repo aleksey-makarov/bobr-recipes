@@ -54,6 +54,7 @@ fun pkgs =>
       pkgs.inetutils,
       pkgs.iproute2,
       pkgs.intltool,
+      pkgs.openssl,
       pkgs.libtool,
       pkgs.libpipeline,
       pkgs.m4,
