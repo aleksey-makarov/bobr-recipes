@@ -20,7 +20,7 @@ fun pkgs =>
         pre_configure = m%"
           sed -i 's:\\${:\\$\\{:' intltool-update.in
         "%,
-        post_install = "install -v -Dm644 doc/I18N-HOWTO /out/${out}/usr/share/doc/intltool-0.51.0/I18N-HOWTO",
+        post_install = "install -v -Dm644 doc/I18N-HOWTO ${MBUILD_INSTALL_DIR}/usr/share/doc/intltool-0.51.0/I18N-HOWTO",
       },
     } intltool_build_image pkgs.buildscript_autotools [intltool_src]
   in

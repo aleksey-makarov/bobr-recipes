@@ -24,7 +24,7 @@ fun pkgs =>
           "SBINDIR=/usr/sbin",
         ],
         post_install = m%"
-          install -vDm644 COPYING README* -t "/out/${out}/usr/share/doc/iproute2-6.16.0"
+          install -vDm644 COPYING README* -t "${MBUILD_INSTALL_DIR}/usr/share/doc/iproute2-6.16.0"
         "%,
       },
     }

@@ -28,20 +28,20 @@ fun pkgs =>
         "%,
         skip_install = "true",
         post_install = m%"
-          make PREFIX="/out/${out}/usr" install
-          mkdir -p "/out/${out}/usr/lib" "/out/${out}/usr/bin" "/out/${out}/usr/include"
-          cp -av libbz2.so.* "/out/${out}/usr/lib/"
-          ln -svf libbz2.so.1.0.8 "/out/${out}/usr/lib/libbz2.so"
-          cp -v bzip2-shared "/out/${out}/usr/bin/bzip2"
-          cp -v bzlib.h "/out/${out}/usr/include/"
-          for i in "/out/${out}/usr/bin"/{bzcat,bunzip2}; do
+          make PREFIX="${MBUILD_INSTALL_DIR}/usr" install
+          mkdir -p "${MBUILD_INSTALL_DIR}/usr/lib" "${MBUILD_INSTALL_DIR}/usr/bin" "${MBUILD_INSTALL_DIR}/usr/include"
+          cp -av libbz2.so.* "${MBUILD_INSTALL_DIR}/usr/lib/"
+          ln -svf libbz2.so.1.0.8 "${MBUILD_INSTALL_DIR}/usr/lib/libbz2.so"
+          cp -v bzip2-shared "${MBUILD_INSTALL_DIR}/usr/bin/bzip2"
+          cp -v bzlib.h "${MBUILD_INSTALL_DIR}/usr/include/"
+          for i in "${MBUILD_INSTALL_DIR}/usr/bin"/{bzcat,bunzip2}; do
             ln -sfv bzip2 "$i"
           done
-          ln -sfv bzdiff "/out/${out}/usr/bin/bzcmp"
-          ln -sfv bzgrep "/out/${out}/usr/bin/bzegrep"
-          ln -sfv bzgrep "/out/${out}/usr/bin/bzfgrep"
-          ln -sfv bzmore "/out/${out}/usr/bin/bzless"
-          rm -fv "/out/${out}/usr/lib/libbz2.a"
+          ln -sfv bzdiff "${MBUILD_INSTALL_DIR}/usr/bin/bzcmp"
+          ln -sfv bzgrep "${MBUILD_INSTALL_DIR}/usr/bin/bzegrep"
+          ln -sfv bzgrep "${MBUILD_INSTALL_DIR}/usr/bin/bzfgrep"
+          ln -sfv bzmore "${MBUILD_INSTALL_DIR}/usr/bin/bzless"
+          rm -fv "${MBUILD_INSTALL_DIR}/usr/lib/libbz2.a"
         "%,
       },
     } pkgs.system_image_2 pkgs.buildscript_gnu_make [bzip2_src, bzip2_install_docs_patch]

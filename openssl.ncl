@@ -15,11 +15,8 @@ fun pkgs =>
         #!/usr/bin/env bash
         set -euo pipefail
 
-        src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-        out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
-
-        cd "/in/${src}"
-        mkdir -p .tmp "/out/${out}"
+        cd "${MBUILD_SOURCE_DIR}"
+        mkdir -p .tmp "${MBUILD_INSTALL_DIR}"
         export TMPDIR="${TMPDIR:-$PWD/.tmp}"
 
         ./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib shared zlib-dynamic
@@ -28,15 +25,15 @@ fun pkgs =>
         make -j"$jobs"
 
         sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
-        make DESTDIR="/out/${out}" MANSUFFIX=ssl install
+        make DESTDIR="${MBUILD_INSTALL_DIR}" MANSUFFIX=ssl install
 
-        if [ -d "/out/${out}/usr/share/doc/openssl" ]; then
-          mv -v "/out/${out}/usr/share/doc/openssl" "/out/${out}/usr/share/doc/openssl-3.5.2"
+        if [ -d "${MBUILD_INSTALL_DIR}/usr/share/doc/openssl" ]; then
+          mv -v "${MBUILD_INSTALL_DIR}/usr/share/doc/openssl" "${MBUILD_INSTALL_DIR}/usr/share/doc/openssl-3.5.2"
         else
-          install -vdm755 "/out/${out}/usr/share/doc/openssl-3.5.2"
+          install -vdm755 "${MBUILD_INSTALL_DIR}/usr/share/doc/openssl-3.5.2"
         fi
 
-        cp -vfr doc/* "/out/${out}/usr/share/doc/openssl-3.5.2"
+        cp -vfr doc/* "${MBUILD_INSTALL_DIR}/usr/share/doc/openssl-3.5.2"
       "%,
     }
   in

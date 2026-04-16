@@ -27,11 +27,11 @@ fun pkgs =>
           "--disable-werror",
         ],
         post_install = m%"
-          install -vdm755 /out/${out}/usr/share/bash-completion/completions
-          if [ -f /out/${out}/etc/bash_completion.d/grub ]; then
-            mv -v /out/${out}/etc/bash_completion.d/grub \
-                  /out/${out}/usr/share/bash-completion/completions/grub
-            rmdir -p --ignore-fail-on-non-empty /out/${out}/etc/bash_completion.d 2>/dev/null || true
+          install -vdm755 ${MBUILD_INSTALL_DIR}/usr/share/bash-completion/completions
+          if [ -f ${MBUILD_INSTALL_DIR}/etc/bash_completion.d/grub ]; then
+            mv -v ${MBUILD_INSTALL_DIR}/etc/bash_completion.d/grub \
+                  ${MBUILD_INSTALL_DIR}/usr/share/bash-completion/completions/grub
+            rmdir -p --ignore-fail-on-non-empty ${MBUILD_INSTALL_DIR}/etc/bash_completion.d 2>/dev/null || true
           fi
         "%,
       },

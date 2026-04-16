@@ -18,7 +18,7 @@ fun pkgs =>
           "--without-bash-malloc",
           "--disable-readline",
         ],
-        post_install = "ln -svf bash \"/out/${out}/usr/bin/sh\"",
+        post_install = "ln -svf bash \"${MBUILD_INSTALL_DIR}/usr/bin/sh\"",
       },
     } pkgs.host_image pkgs.buildscript_autotools [bash_src]
   in
@@ -29,7 +29,7 @@ fun pkgs =>
         configure_args = [
           "--without-bash-malloc",
         ],
-        post_install = "ln -svf bash \"/out/${out}/usr/bin/sh\"",
+        post_install = "ln -svf bash \"${MBUILD_INSTALL_DIR}/usr/bin/sh\"",
       },
     } pkgs.system_image_1 pkgs.buildscript_autotools [bash_src]
   in

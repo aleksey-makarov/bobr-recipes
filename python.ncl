@@ -98,6 +98,7 @@ fun pkgs =>
   let python_gen1 =
     recipe.binary "python-gen1-3.13.7" {
       script_config = {
+        build_layout = "in-tree",
         pre_configure = m%"
           cat > Modules/Setup.local <<'EOF_INNER'
           # Minimal bootstrap Python: keep a self-contained interpreter and
@@ -123,7 +124,7 @@ fun pkgs =>
         configure_args = [
           "--without-ensurepip",
         ],
-        post_install = "ln -svf python3 \"/out/${out}/usr/bin/python\"",
+        post_install = "ln -svf python3 \"${MBUILD_INSTALL_DIR}/usr/bin/python\"",
       },
     } pkgs.host_image pkgs.buildscript_autotools [python_src]
   in
@@ -171,7 +172,7 @@ fun pkgs =>
         post_install = m%"
           source /in/sources1
           ln -svf python3 /usr/bin/python
-          ln -svf python3 "/out/${out}/usr/bin/python"
+          ln -svf python3 "${MBUILD_INSTALL_DIR}/usr/bin/python"
         "%,
       },
     } python_build_image pkgs.buildscript_autotools [

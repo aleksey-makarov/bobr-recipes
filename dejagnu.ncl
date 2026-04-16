@@ -23,13 +23,10 @@ fun pkgs =>
         #!/usr/bin/env bash
         set -euo pipefail
 
-        src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-        out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
-
-        cd "/in/${src}"
+        cd "${MBUILD_SOURCE_DIR}"
         mkdir -pv build
         cd build
-        mkdir -p .tmp doc "/out/${out}/usr/share/doc/dejagnu-1.6.3"
+        mkdir -p .tmp doc "${MBUILD_INSTALL_DIR}/usr/share/doc/dejagnu-1.6.3"
         export TMPDIR="${TMPDIR:-$PWD/.tmp}"
 
         ../configure --prefix=/usr
@@ -38,9 +35,9 @@ fun pkgs =>
 
         jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
         make -j"$jobs"
-        make DESTDIR="/out/${out}" install
-        rm -f "/out/${out}/usr/share/info/dir"
-        install -v -m644 doc/dejagnu.html doc/dejagnu.txt "/out/${out}/usr/share/doc/dejagnu-1.6.3"
+        make DESTDIR="${MBUILD_INSTALL_DIR}" install
+        rm -f "${MBUILD_INSTALL_DIR}/usr/share/info/dir"
+        install -v -m644 doc/dejagnu.html doc/dejagnu.txt "${MBUILD_INSTALL_DIR}/usr/share/doc/dejagnu-1.6.3"
       "%,
     }
   in

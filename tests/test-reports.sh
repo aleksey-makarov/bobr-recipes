@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
-dest="/out/${out}"
+phase="${MBUILD_PHASE:?MBUILD_PHASE is required}"
+dest="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
+
+if [ "$phase" != "post_install" ]; then
+  exit 0
+fi
 
 mkdir -p "$dest"
 

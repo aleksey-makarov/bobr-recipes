@@ -20,17 +20,17 @@ fun pkgs =>
         pre_configure = "echo '#define SYS_VIMRC_FILE \"/etc/vimrc\"' >> src/feature.h",
         configure_args = [],
         post_install = m%"
-          mkdir -p "/out/${out}/usr/bin"
-          mkdir -p "/out/${out}/usr/share/doc"
-          mkdir -p "/out/${out}/etc"
-          ln -svf vim "/out/${out}/usr/bin/vi"
-          for L in /out/${out}/usr/share/man/{,*/}man1/vim.1; do
+          mkdir -p "${MBUILD_INSTALL_DIR}/usr/bin"
+          mkdir -p "${MBUILD_INSTALL_DIR}/usr/share/doc"
+          mkdir -p "${MBUILD_INSTALL_DIR}/etc"
+          ln -svf vim "${MBUILD_INSTALL_DIR}/usr/bin/vi"
+          for L in ${MBUILD_INSTALL_DIR}/usr/share/man/{,*/}man1/vim.1; do
             if [ -e "$L" ]; then
               ln -svf vim.1 "$(dirname "$L")/vi.1"
             fi
           done
-          ln -svf ../vim/vim91/doc "/out/${out}/usr/share/doc/vim-9.1.1629"
-          cat > "/out/${out}/etc/vimrc" <<'EOF_INNER'
+          ln -svf ../vim/vim91/doc "${MBUILD_INSTALL_DIR}/usr/share/doc/vim-9.1.1629"
+          cat > "${MBUILD_INSTALL_DIR}/etc/vimrc" <<'EOF_INNER'
           " Begin /etc/vimrc
 
           source $VIMRUNTIME/defaults.vim

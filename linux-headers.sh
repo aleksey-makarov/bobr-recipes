@@ -1,26 +1,64 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+phase="${MBUILD_PHASE:?MBUILD_PHASE is required}"
+source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
+install_dir="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
 
-cd "/in/${src}"
+resolve_source_dir() {
+  if [ -f "$source_dir/Makefile" ]; then
+    printf '%s\n' "$source_dir"
+    return
+  fi
 
-if [ ! -f Makefile ]; then
-  candidates=()
-  for d in ./*; do
+  local candidates=()
+  local d
+  for d in "$source_dir"/*; do
     if [ -d "$d" ] && [ -f "$d/Makefile" ]; then
       candidates+=("$d")
     fi
   done
   if [ "${#candidates[@]}" -eq 1 ]; then
-    cd "${candidates[0]}"
+    printf '%s\n' "${candidates[0]}"
+    return
   fi
-fi
 
-make mrproper
-make headers
-find usr/include -type f ! -name '*.h' -delete
+  echo "linux-headers build-script: Makefile not found in ${source_dir}" >&2
+  exit 1
+}
 
-mkdir -p "/out/${out}/usr"
-cp -rv usr/include "/out/${out}/usr"
+phase_configure() {
+  :
+}
+
+phase_build() {
+  local project_source_dir
+  project_source_dir="$(resolve_source_dir)"
+  cd "$project_source_dir"
+  make mrproper
+  make headers
+  find usr/include -type f ! -name '*.h' -delete
+}
+
+phase_install() {
+  local project_source_dir
+  project_source_dir="$(resolve_source_dir)"
+  cd "$project_source_dir"
+  mkdir -p "$install_dir/usr"
+  cp -rv usr/include "$install_dir/usr"
+}
+
+phase_post_install() {
+  :
+}
+
+case "$phase" in
+  configure) phase_configure ;;
+  build) phase_build ;;
+  install) phase_install ;;
+  post_install) phase_post_install ;;
+  *)
+    echo "linux-headers build-script: unsupported phase '$phase'" >&2
+    exit 1
+    ;;
+esac

@@ -31,8 +31,8 @@ fun pkgs =>
           "--disable-vlock",
         ],
         post_install = m%"
-          install -vdm755 /out/${out}/usr/share/doc
-          cp -R -v docs/doc -T /out/${out}/usr/share/doc/kbd-2.8.0
+          install -vdm755 ${MBUILD_INSTALL_DIR}/usr/share/doc
+          cp -R -v docs/doc -T ${MBUILD_INSTALL_DIR}/usr/share/doc/kbd-2.8.0
         "%,
       },
     }

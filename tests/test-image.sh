@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
+phase="${MBUILD_PHASE:?MBUILD_PHASE is required}"
 cfg="${MBUILD_SCRIPT_CONFIG_DIR:?MBUILD_SCRIPT_CONFIG_DIR is required}"
 name="$(cat "${cfg}/name")"
-dest="/out/${out}"
+dest="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
+
+if [ "$phase" != "post_install" ]; then
+  exit 0
+fi
 
 if [ -z "$name" ]; then
   echo "test-image: config name must not be empty" >&2

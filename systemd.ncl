@@ -59,12 +59,12 @@ fun pkgs =>
           "-Ddocdir=/usr/share/doc/systemd-257.8",
         ],
         post_install = m%"
-          install -vdm755 /out/${out}/usr/share/man
+          install -vdm755 ${MBUILD_INSTALL_DIR}/usr/share/man
           tar -xf /in/sources1 \
               --no-same-owner --strip-components=1 \
-              -C /out/${out}/usr/share/man
-          install -vdm755 /out/${out}/etc
-          : > /out/${out}/etc/machine-id
+              -C ${MBUILD_INSTALL_DIR}/usr/share/man
+          install -vdm755 ${MBUILD_INSTALL_DIR}/etc
+          : > ${MBUILD_INSTALL_DIR}/etc/machine-id
         "%,
       },
     } systemd_build_image pkgs.buildscript_meson [systemd_src, systemd_man_pages_src]

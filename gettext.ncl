@@ -22,7 +22,7 @@ fun pkgs =>
           "--disable-static",
           "--docdir=/usr/share/doc/gettext-0.26",
         ],
-        post_install = "chmod -v 0755 \"/out/${out}/usr/lib/preloadable_libintl.so\"",
+        post_install = "chmod -v 0755 \"${MBUILD_INSTALL_DIR}/usr/lib/preloadable_libintl.so\"",
       },
     }
   in

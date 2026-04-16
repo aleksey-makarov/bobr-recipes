@@ -14,7 +14,7 @@ fun pkgs =>
         make_args = [
           "prefix=/usr",
         ],
-        post_install = "rm -fv \"/out/${out}/usr/lib/libzstd.a\"",
+        post_install = "rm -fv \"${MBUILD_INSTALL_DIR}/usr/lib/libzstd.a\"",
       },
     } pkgs.system_image_2 pkgs.buildscript_gnu_make [zstd_src]
   in

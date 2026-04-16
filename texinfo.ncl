@@ -20,7 +20,7 @@ fun pkgs =>
       script_config = {
         pre_configure = "sed 's/! $output_file eq/$output_file ne/' -i tp/Texinfo/Convert/*.pm",
         configure_args = [],
-        post_install = "make DESTDIR=\"/out/${out}\" TEXMF=/usr/share/texmf install-tex",
+        post_install = "make DESTDIR=\"${MBUILD_INSTALL_DIR}\" TEXMF=/usr/share/texmf install-tex",
       },
     }
   in

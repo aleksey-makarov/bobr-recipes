@@ -16,8 +16,8 @@ fun pkgs =>
           "--docdir=/usr/share/doc/pkgconf-2.5.1",
         ],
         post_install = m%"
-          ln -sv pkgconf "/out/${out}/usr/bin/pkg-config"
-          ln -sv pkgconf.1 "/out/${out}/usr/share/man/man1/pkg-config.1"
+          ln -sv pkgconf "${MBUILD_INSTALL_DIR}/usr/bin/pkg-config"
+          ln -sv pkgconf.1 "${MBUILD_INSTALL_DIR}/usr/share/man/man1/pkg-config.1"
         "%,
       },
     } pkgs.system_image_2 pkgs.buildscript_autotools [pkgconf_src]

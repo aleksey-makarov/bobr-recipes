@@ -19,7 +19,7 @@ fun pkgs =>
       sources = [libtool_src],
       script_config = {
         post_install = m%"
-          rm -fv "/out/${out}/usr/lib/libltdl.a"
+          rm -fv "${MBUILD_INSTALL_DIR}/usr/lib/libltdl.a"
         "%,
       },
     }

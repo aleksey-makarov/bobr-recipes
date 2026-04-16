@@ -36,7 +36,7 @@ fun pkgs =>
           "--mandir=/usr/share/man",
           "--with-tclinclude=/usr/include",
         ],
-        post_install = "ln -sfv expect5.45.4/libexpect5.45.4.so /out/${out}/usr/lib/libexpect5.45.4.so",
+        post_install = "ln -sfv expect5.45.4/libexpect5.45.4.so ${MBUILD_INSTALL_DIR}/usr/lib/libexpect5.45.4.so",
       },
     } expect_build_image pkgs.buildscript_autotools [expect_src, expect_gcc15_patch]
   in

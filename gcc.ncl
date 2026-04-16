@@ -58,7 +58,7 @@ fun pkgs =>
           "--disable-nls",
           "--without-zstd",
         ],
-        post_install = "ln -sv gcc \"/out/${out}/usr/bin/cc\"",
+        post_install = "ln -sv gcc \"${MBUILD_INSTALL_DIR}/usr/bin/cc\"",
       },
     } pkgs.system_image_0 pkgs.buildscript_autotools [
       gcc_src,

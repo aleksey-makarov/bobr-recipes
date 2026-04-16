@@ -23,15 +23,15 @@ fun pkgs =>
           "--with-pkg-config-libdir=/usr/lib/pkgconfig",
         ],
         post_install = m%"
-          sed -e 's/^#if.*XOPEN.*$/#if 1/' -i "/out/${out}/usr/include/curses.h"
-          mkdir -p "/out/${out}/usr/lib/pkgconfig"
-          mkdir -p "/out/${out}/usr/share/doc"
+          sed -e 's/^#if.*XOPEN.*$/#if 1/' -i "${MBUILD_INSTALL_DIR}/usr/include/curses.h"
+          mkdir -p "${MBUILD_INSTALL_DIR}/usr/lib/pkgconfig"
+          mkdir -p "${MBUILD_INSTALL_DIR}/usr/share/doc"
           for lib in ncurses form panel menu; do
-            ln -sfv "lib${lib}w.so" "/out/${out}/usr/lib/lib${lib}.so"
-            ln -sfv "${lib}w.pc" "/out/${out}/usr/lib/pkgconfig/${lib}.pc"
+            ln -sfv "lib${lib}w.so" "${MBUILD_INSTALL_DIR}/usr/lib/lib${lib}.so"
+            ln -sfv "${lib}w.pc" "${MBUILD_INSTALL_DIR}/usr/lib/pkgconfig/${lib}.pc"
           done
-          ln -sfv libncursesw.so "/out/${out}/usr/lib/libcurses.so"
-          cp -v -R doc -T "/out/${out}/usr/share/doc/ncurses-6.6"
+          ln -sfv libncursesw.so "${MBUILD_INSTALL_DIR}/usr/lib/libcurses.so"
+          cp -v -R "${MBUILD_SOURCE_DIR}/doc" -T "${MBUILD_INSTALL_DIR}/usr/share/doc/ncurses-6.6"
         "%,
       },
     } pkgs.system_image_2 pkgs.buildscript_autotools [ncurses_src]

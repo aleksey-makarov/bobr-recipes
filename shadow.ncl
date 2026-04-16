@@ -38,7 +38,7 @@ fun pkgs =>
           "--with-group-name-max-length=32",
         ],
         make_args = ["exec_prefix=/usr"],
-        post_install = "make DESTDIR=\"/out/${out}\" -C man install-man",
+        post_install = "make DESTDIR=\"${MBUILD_INSTALL_DIR}\" -C man install-man",
       },
     } shadow_build_image pkgs.buildscript_autotools [shadow_src]
   in

@@ -15,15 +15,12 @@ fun pkgs =>
         #!/usr/bin/env bash
         set -euo pipefail
 
-        src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-        out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
-
-        cd "/in/${src}"
-        mkdir -p "/out/${out}"
+        cd "${MBUILD_SOURCE_DIR}"
+        mkdir -p "${MBUILD_INSTALL_DIR}"
         rm -fv man3/crypt*
         rm -fv man3/getspnam.3 man3/getspent.3 man3/lckpwdf.3
         rm -fv man5/passwd.5
-        make -R GIT=false prefix=/usr DESTDIR="/out/${out}" install
+        make -R GIT=false prefix=/usr DESTDIR="${MBUILD_INSTALL_DIR}" install
       "%,
     }
   in

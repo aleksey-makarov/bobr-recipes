@@ -15,13 +15,10 @@ fun pkgs =>
         #!/usr/bin/env bash
         set -euo pipefail
 
-        src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-        out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
-
-        cd "/in/${src}"
-        mkdir -p "/out/${out}/etc"
-        install -m 0644 services "/out/${out}/etc/services"
-        install -m 0644 protocols "/out/${out}/etc/protocols"
+        cd "${MBUILD_SOURCE_DIR}"
+        mkdir -p "${MBUILD_INSTALL_DIR}/etc"
+        install -m 0644 services "${MBUILD_INSTALL_DIR}/etc/services"
+        install -m 0644 protocols "${MBUILD_INSTALL_DIR}/etc/protocols"
       "%,
     }
   in

@@ -35,9 +35,9 @@ fun pkgs =>
           "--disable-servers",
         ],
         post_install = m%"
-          mkdir -p "/out/${out}/usr/sbin"
-          if [ -f "/out/${out}/usr/bin/ifconfig" ]; then
-            mv -v "/out/${out}/usr/bin/ifconfig" "/out/${out}/usr/sbin/ifconfig"
+          mkdir -p "${MBUILD_INSTALL_DIR}/usr/sbin"
+          if [ -f "${MBUILD_INSTALL_DIR}/usr/bin/ifconfig" ]; then
+            mv -v "${MBUILD_INSTALL_DIR}/usr/bin/ifconfig" "${MBUILD_INSTALL_DIR}/usr/sbin/ifconfig"
           fi
         "%,
       },

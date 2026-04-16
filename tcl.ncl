@@ -18,9 +18,7 @@ fun pkgs =>
         #!/usr/bin/env bash
         set -euo pipefail
 
-        src="${MBUILD_SOURCE_INPUT:?MBUILD_SOURCE_INPUT is required}"
-        out="${MBUILD_PRIMARY_OUTPUT:?MBUILD_PRIMARY_OUTPUT is required}"
-        src_root="/in/${src}"
+        src_root="${MBUILD_SOURCE_DIR}"
 
         cd "${src_root}/unix"
         mkdir -p .tmp
@@ -46,13 +44,13 @@ fun pkgs =>
             -e "s|${src_root}/pkgs/itcl4.3.2|/usr/include|" \
             -i pkgs/itcl4.3.2/itclConfig.sh
 
-        mkdir -p "/out/${out}"
-        make INSTALL_ROOT="/out/${out}" install
-        chmod 644 "/out/${out}/usr/lib/libtclstub8.6.a"
-        chmod u+w "/out/${out}/usr/lib/libtcl8.6.so"
-        make INSTALL_ROOT="/out/${out}" install-private-headers
-        ln -sfv tclsh8.6 "/out/${out}/usr/bin/tclsh"
-        mv "/out/${out}/usr/share/man/man3/Thread.3" "/out/${out}/usr/share/man/man3/Tcl_Thread.3"
+        mkdir -p "${MBUILD_INSTALL_DIR}"
+        make INSTALL_ROOT="${MBUILD_INSTALL_DIR}" install
+        chmod 644 "${MBUILD_INSTALL_DIR}/usr/lib/libtclstub8.6.a"
+        chmod u+w "${MBUILD_INSTALL_DIR}/usr/lib/libtcl8.6.so"
+        make INSTALL_ROOT="${MBUILD_INSTALL_DIR}" install-private-headers
+        ln -sfv tclsh8.6 "${MBUILD_INSTALL_DIR}/usr/bin/tclsh"
+        mv "${MBUILD_INSTALL_DIR}/usr/share/man/man3/Thread.3" "${MBUILD_INSTALL_DIR}/usr/share/man/man3/Tcl_Thread.3"
       "%,
     }
   in
