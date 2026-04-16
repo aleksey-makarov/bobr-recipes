@@ -16,6 +16,17 @@ fun pkgs =>
 
   let shadow =
     recipe.binary "shadow-4.18.0" {
+      steps = [
+        recipe.steps.step "prepare_live_usr" "root" "${build_dir}" [
+          "/bin/sh",
+          "-ec",
+          "mkdir -p /usr/bin && touch /usr/bin/passwd",
+        ],
+        recipe.steps.step "configure" "build-user" "${build_dir}" ["${script}", "configure"],
+        recipe.steps.step "build" "build-user" "${build_dir}" ["${script}", "build"],
+        recipe.steps.step "install" "root" "${build_dir}" ["${script}", "install"],
+        recipe.steps.step "post_install" "root" "${build_dir}" ["${script}", "post_install"],
+      ],
       script_config = {
         pre_configure = m%"
           sed -i 's/groups$(EXEEXT) //' src/Makefile.in
@@ -26,8 +37,6 @@ fun pkgs =>
               -e 's:/var/spool/mail:/var/mail:' \
               -e '/PATH=/{s@/sbin:@@;s@/bin:@@}' \
               -i etc/login.defs
-          mkdir -p /usr/bin
-          touch /usr/bin/passwd
         "%,
         configure_args = [
           "--sysconfdir=/etc",

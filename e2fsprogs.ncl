@@ -70,6 +70,9 @@ fun pkgs =>
 
   let e2fsprogs =
     recipe.binary "e2fsprogs-1.47.3" {
+      steps = [
+        recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
+      ],
       script_config = {},
     } e2fsprogs_build_image buildscript_e2fsprogs [e2fsprogs_src]
   in

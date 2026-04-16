@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-phase="${MBUILD_PHASE:?MBUILD_PHASE is required}"
+mode="${1:-${MBUILD_STEP_NAME:-}}"
+mode="${mode:?step name is required}"
 cfg="${MBUILD_SCRIPT_CONFIG_DIR:?MBUILD_SCRIPT_CONFIG_DIR is required}"
 install_dir="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
 
@@ -35,15 +36,7 @@ install_python_module() {
   popd >/dev/null
 }
 
-phase_configure() {
-  :
-}
-
-phase_build() {
-  :
-}
-
-phase_install() {
+install_extras() {
   make install
   hash -r
 
@@ -84,17 +77,18 @@ phase_install() {
   popd >/dev/null
 }
 
-phase_post_install() {
+noop() {
   :
 }
 
-case "$phase" in
-  configure) phase_configure ;;
-  build) phase_build ;;
-  install) phase_install ;;
-  post_install) phase_post_install ;;
+case "$mode" in
+  configure) noop ;;
+  build) noop ;;
+  install) install_extras ;;
+  post_install) noop ;;
+  install-extras) install_extras ;;
   *)
-    echo "python-modules build-script: unsupported phase '$phase'" >&2
+    echo "python-modules build-script: unsupported command '$mode'" >&2
     exit 1
     ;;
 esac

@@ -27,6 +27,9 @@ fun pkgs =>
 
   let man_pages =
     recipe.binary "man-pages-6.15" {
+      steps = [
+        recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
+      ],
       script_config = {},
     } pkgs.system_image buildscript_man_pages [man_pages_src]
   in

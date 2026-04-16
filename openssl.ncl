@@ -40,6 +40,9 @@ fun pkgs =>
 
   let openssl =
     recipe.binary "openssl-3.5.2" {
+      steps = [
+        recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
+      ],
       script_config = {},
     } pkgs.system_image buildscript_openssl [openssl_src]
   in

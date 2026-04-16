@@ -131,6 +131,17 @@ fun pkgs =>
 
   let python =
     recipe.binary "python-3.13.7" {
+      steps = [
+        recipe.steps.step "configure" "build-user" "${source}" ["${script}", "configure"],
+        recipe.steps.step "build" "build-user" "${build_dir}" ["${script}", "build"],
+        recipe.steps.step "install" "root" "${build_dir}" ["${script}", "install"],
+        recipe.steps.step "install_python_modules" "root" "${build_dir}" [
+          "/bin/bash",
+          "${source1}",
+          "install-extras",
+        ],
+        recipe.steps.step "post_install" "root" "${build_dir}" ["${script}", "post_install"],
+      ],
       script_config = {
         configure_args = [
           "--enable-shared",
@@ -170,7 +181,6 @@ fun pkgs =>
         ],
         ninja_source_input = "sources9",
         post_install = m%"
-          source /in/sources1
           ln -svf python3 /usr/bin/python
           ln -svf python3 "${MBUILD_INSTALL_DIR}/usr/bin/python"
         "%,

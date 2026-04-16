@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-phase="${MBUILD_PHASE:?MBUILD_PHASE is required}"
+phase="${1:-${MBUILD_STEP_NAME:-}}"
+phase="${phase:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
 install_dir="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
 

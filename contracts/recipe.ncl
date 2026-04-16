@@ -167,6 +167,15 @@ let ContainerImageConfig = {
 }
 in
 let BinaryConfig = {
+  steps
+    | Array {
+        name | String,
+        run_as | std.contract.from_predicate (fun value => std.array.elem value [ "build-user", "root" ]),
+        cwd | String,
+        argv | Array String,
+        env | { _: String, .. } | optional,
+      }
+    | doc "Execution plan steps for the generic Binary executor.",
   script_config
     | Dyn
     | optional

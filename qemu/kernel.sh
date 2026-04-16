@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-phase="${MBUILD_PHASE:?MBUILD_PHASE is required}"
+phase="${1:-${MBUILD_STEP_NAME:-}}"
+phase="${phase:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
 install_dir="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
 
@@ -36,10 +37,19 @@ resolve_source_dir() {
   exit 1
 }
 
+ensure_tmpdir() {
+  local project_source_dir tmpdir
+  project_source_dir="$(resolve_source_dir)"
+  tmpdir="${project_source_dir}/.tmp"
+  mkdir -p "$tmpdir"
+  export TMPDIR="$tmpdir"
+}
+
 phase_configure() {
   local project_source_dir
   project_source_dir="$(resolve_source_dir)"
   cd "$project_source_dir"
+  ensure_tmpdir
   make mrproper
   cp /in/sources1 .config
   make olddefconfig
@@ -49,6 +59,7 @@ phase_build() {
   local project_source_dir jobs
   project_source_dir="$(resolve_source_dir)"
   cd "$project_source_dir"
+  ensure_tmpdir
   jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
   make -j"${jobs}" bzImage
 }
@@ -57,6 +68,7 @@ phase_install() {
   local project_source_dir
   project_source_dir="$(resolve_source_dir)"
   cd "$project_source_dir"
+  ensure_tmpdir
   mkdir -p "$install_dir/boot"
   install -m0644 arch/x86/boot/bzImage "$install_dir/boot/bzImage"
   install -m0644 System.map "$install_dir/boot/System.map"

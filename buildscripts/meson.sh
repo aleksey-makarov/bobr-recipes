@@ -2,7 +2,8 @@
 set -euo pipefail
 
 cfg="${MBUILD_SCRIPT_CONFIG_DIR:?MBUILD_SCRIPT_CONFIG_DIR is required}"
-phase="${MBUILD_PHASE:?MBUILD_PHASE is required}"
+phase="${1:-${MBUILD_STEP_NAME:-}}"
+phase="${phase:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:-}"
 install_dir="${MBUILD_INSTALL_DIR:-}"
 default_build_dir="${MBUILD_BUILD_DIR:-}"

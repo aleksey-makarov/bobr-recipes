@@ -1,3 +1,29 @@
+let default_binary_sequence = [
+  {
+    name = "configure",
+    run_as = "build-user",
+    cwd = "${build_dir}",
+    argv = ["${script}", "configure"],
+  },
+  {
+    name = "build",
+    run_as = "build-user",
+    cwd = "${build_dir}",
+    argv = ["${script}", "build"],
+  },
+  {
+    name = "install",
+    run_as = "root",
+    cwd = "${build_dir}",
+    argv = ["${script}", "install"],
+  },
+  {
+    name = "post_install",
+    run_as = "root",
+    cwd = "${build_dir}",
+    argv = ["${script}", "post_install"],
+  },
+] in
 {
   install = {
     root_default_attrs = {
@@ -22,6 +48,34 @@
       }
       in
       { path = "**", attrs = default_attrs },
+  },
+
+  steps = {
+    step =
+      fun step_name =>
+      fun step_run_as =>
+      fun step_cwd =>
+      fun step_argv => {
+        name = step_name,
+        run_as = step_run_as,
+        cwd = step_cwd,
+        argv = step_argv,
+      },
+
+    env_step =
+      fun step_name =>
+      fun step_run_as =>
+      fun step_cwd =>
+      fun step_argv =>
+      fun step_env => {
+        name = step_name,
+        run_as = step_run_as,
+        cwd = step_cwd,
+        argv = step_argv,
+        env = step_env,
+      },
+
+    default_binary_sequence = default_binary_sequence,
   },
 
   to_request =
@@ -143,7 +197,7 @@
   binary = fun recipe_name => fun recipe_config => fun image_input => fun script_input => fun source_inputs => {
     name = recipe_name,
     tag = "Binary",
-    config = recipe_config,
+    config = { steps | default = default_binary_sequence } & recipe_config,
     inputs = {
       image = image_input,
       script = script_input,

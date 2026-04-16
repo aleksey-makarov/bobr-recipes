@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-phase="${MBUILD_PHASE:?MBUILD_PHASE is required}"
+phase="${1:-${MBUILD_STEP_NAME:-}}"
+phase="${phase:?step name is required}"
 cfg="${MBUILD_SCRIPT_CONFIG_DIR:?MBUILD_SCRIPT_CONFIG_DIR is required}"
 name="$(cat "${cfg}/name")"
 dest="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"

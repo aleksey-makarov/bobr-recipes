@@ -25,6 +25,9 @@ fun pkgs =>
 
   let iana_etc =
     recipe.binary "iana-etc-20250807" {
+      steps = [
+        recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
+      ],
       script_config = {},
     } pkgs.system_image buildscript_iana_etc [iana_etc_src]
   in

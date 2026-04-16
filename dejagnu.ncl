@@ -44,6 +44,9 @@ fun pkgs =>
 
   let dejagnu =
     recipe.binary "dejagnu-1.6.3" {
+      steps = [
+        recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
+      ],
       script_config = {},
     } dejagnu_build_image buildscript_dejagnu [dejagnu_src]
   in

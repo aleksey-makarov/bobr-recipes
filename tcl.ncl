@@ -57,6 +57,9 @@ fun pkgs =>
 
   let tcl =
     recipe.binary "tcl-8.6.16" {
+      steps = [
+        recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
+      ],
       script_config = {},
     } pkgs.system_image buildscript_tcl [tcl_src]
   in

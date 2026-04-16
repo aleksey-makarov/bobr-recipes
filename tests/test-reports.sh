@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-phase="${MBUILD_PHASE:?MBUILD_PHASE is required}"
+phase="${1:-${MBUILD_STEP_NAME:-}}"
+phase="${phase:?step name is required}"
 dest="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
 
 if [ "$phase" != "post_install" ]; then

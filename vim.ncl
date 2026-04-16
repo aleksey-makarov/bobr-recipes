@@ -17,6 +17,7 @@ fun pkgs =>
       name = "vim-9.1.1629",
       sources = [vim_src],
       script_config = {
+        build_layout = "in-tree",
         pre_configure = "echo '#define SYS_VIMRC_FILE \"/etc/vimrc\"' >> src/feature.h",
         configure_args = [],
         post_install = m%"
