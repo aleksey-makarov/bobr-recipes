@@ -4,22 +4,46 @@ in
 let EmptyRecord =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
-let InstallOwner = {
-  path
-    | String
-    | doc "Install path selector for matching output paths.",
+let InstallAttrs = {
   uid
     | Number
+    | optional
     | doc "Target user id for matching installed paths.",
   gid
     | Number
+    | optional
     | doc "Target group id for matching installed paths.",
+  directory_mode
+    | Number
+    | optional
+    | doc "Final unix mode for matching installed directories.",
+  regular_file_mode
+    | Number
+    | optional
+    | doc "Final unix mode for matching non-executable regular files.",
+  executable_file_mode
+    | Number
+    | optional
+    | doc "Final unix mode for matching executable regular files.",
+  symlink_mode
+    | Number
+    | optional
+    | doc "Final unix mode for matching symlinks.",
+}
+in
+let InstallRule = {
+  path
+    | String
+    | doc "Install path selector for matching output paths.",
+  attrs
+    | InstallAttrs
+    | doc "Install attributes overridden for matching output paths.",
 }
 in
 let InstallMetadata = {
-  owners
-    | Array InstallOwner
-    | doc "Ownership rules applied when the object is installed.",
+  rules
+    | Array InstallRule
+    | doc "Path rules applied when the object is installed.",
 }
 in
 let InstallMeta = {

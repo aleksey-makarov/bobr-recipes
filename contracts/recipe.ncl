@@ -59,6 +59,28 @@ let TextConfig = {
     | doc "Whether the resulting staged file should be executable.",
 }
 in
+let InstallAttrs = {
+  uid | Number | optional,
+  gid | Number | optional,
+  directory_mode | Number | optional,
+  regular_file_mode | Number | optional,
+  executable_file_mode | Number | optional,
+  symlink_mode | Number | optional,
+}
+in
+let InstallRule = {
+  path | String,
+  attrs
+    | InstallAttrs
+    | doc "Install attributes overridden for matching installed paths.",
+}
+in
+let InstallMeta = {
+  rules
+    | Array InstallRule
+    | doc "Install rules applied when the result is used as an installable object.",
+}
+in
 let FetchConfig = {
   url
     | UrlField
@@ -74,6 +96,10 @@ let FetchConfig = {
     | ArchiveFormat
     | optional
     | doc "Optional explicit archive format override.",
+  install
+    | InstallMeta
+    | optional
+    | doc "Optional install metadata for unpacked directory output.",
 }
 in
 let TreeFileEntry = {
@@ -121,16 +147,6 @@ in
 let TreeEntryKind =
   std.contract.from_predicate (fun value => std.array.elem value [ "file", "dir", "symlink" ])
 in
-let InstallMeta = {
-  owners
-    | Array {
-        path | String,
-        uid | Number,
-        gid | Number,
-      }
-    | doc "Install ownership rules applied when the tree result is used as an installable directory object.",
-}
-in
 let TreeConfig = {
   tree
     | TreePayload
@@ -155,6 +171,10 @@ let BinaryConfig = {
     | Dyn
     | optional
     | doc "Optional script configuration payload passed through to the build script.",
+  install
+    | InstallMeta
+    | optional
+    | doc "Optional install metadata for the published directory output.",
 }
 in
 let ImageConfig = {
@@ -237,8 +257,13 @@ let ValidateRecipeShallow = fun recipe =>
     }
   in
   if checked.tag == "Fetch" then
+    let config = checked.config | FetchConfig in
     checked & {
-      config = checked.config | FetchConfig,
+      config =
+        if std.record.has_field "install" config then
+          config & { install = config.install | InstallMeta }
+        else
+          config,
     }
   else if checked.tag == "Text" then
     checked & {

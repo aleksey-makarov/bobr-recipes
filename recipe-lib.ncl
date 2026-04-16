@@ -1,4 +1,29 @@
 {
+  install = {
+    root_default_attrs = {
+      uid = 0,
+      gid = 0,
+      directory_mode = 0o755,
+      regular_file_mode = 0o644,
+      executable_file_mode = 0o755,
+      symlink_mode = 0o777,
+    },
+
+    rule = fun path => fun attrs => { path, attrs },
+
+    root_default_rule =
+      let default_attrs = {
+        uid = 0,
+        gid = 0,
+        directory_mode = 0o755,
+        regular_file_mode = 0o644,
+        executable_file_mode = 0o755,
+        symlink_mode = 0o777,
+      }
+      in
+      { path = "**", attrs = default_attrs },
+  },
+
   to_request =
     fun root_node =>
       let rec collect =

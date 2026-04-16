@@ -6,8 +6,8 @@ fun _pkgs =>
     recipe.tree "qemu-runtime-files" {
       tree = tree_data,
       install = {
-        owners = [
-          { path = "**", uid = 0, gid = 0 },
+        rules = [
+          recipe.install.root_default_rule,
         ],
       },
     }

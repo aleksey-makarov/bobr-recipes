@@ -37,12 +37,12 @@ EOF_INNER
 
 run_case "empty" pass '{}'
 run_case "container-image" pass '{"manifest_digest":"sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}'
-run_case "binary-output" pass '{"install":{"owners":[{"path":"**","uid":0,"gid":0}]}}'
+run_case "binary-output" pass '{"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}}'
 
 run_case "extra-field" fail '{"extra":true}'
 run_case "bad-manifest-digest" fail '{"manifest_digest":"sha256:short"}'
-run_case "bad-install-owner" fail '{"install":{"owners":[{"path":"**","uid":"0","gid":0}]}}'
-run_case "mixed-shapes" fail '{"install":{"owners":[{"path":"**","uid":0,"gid":0}]},"manifest_digest":"sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}'
+run_case "bad-install-rule" fail '{"install":{"rules":[{"path":"**","attrs":{"uid":"0","gid":0}}]}}'
+run_case "mixed-shapes" fail '{"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]},"manifest_digest":"sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}'
 run_case "old-kind" fail '{"kind":"plain-text"}'
 
 echo "meta contract smoke tests passed"
