@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let psmisc_src =
     recipe.fetch "psmisc-src-23.7" {
       url = [
@@ -14,11 +12,11 @@ fun pkgs =>
   in
 
   let psmisc =
-    build.build_autotools {
-      name = "psmisc-23.7",
-      sources = [psmisc_src],
-      script_config = {},
-    }
+    let script_config = {}
+    in
+    recipe.binary "psmisc-23.7" {
+      include script_config,
+    } pkgs.system_image pkgs.buildscript_autotools [psmisc_src]
   in
 
   {

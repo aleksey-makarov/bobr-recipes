@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let gdbm_src =
     recipe.fetch "gdbm-src-1.26" {
       url = [
@@ -14,16 +12,16 @@ fun pkgs =>
   in
 
   let gdbm =
-    build.build_autotools {
-      name = "gdbm-1.26",
-      sources = [gdbm_src],
-      script_config = {
+    let script_config = {
         configure_args = [
           "--disable-static",
           "--enable-libgdbm-compat",
         ],
-      },
-    }
+      }
+    in
+    recipe.binary "gdbm-1.26" {
+      include script_config,
+    } pkgs.system_image pkgs.buildscript_autotools [gdbm_src]
   in
 
   {

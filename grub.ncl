@@ -1,7 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
   let grub_src =
     recipe.fetch "grub-src-2.12" {
       url = [
@@ -13,10 +12,7 @@ fun pkgs =>
   in
 
   let grub =
-    build.build_autotools {
-      name = "grub-2.12",
-      sources = [grub_src],
-      script_config = {
+    let script_config = {
         pre_configure = m%"
           unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
           echo 'depends bli part_gpt' > grub-core/extra_deps.lst
@@ -34,8 +30,11 @@ fun pkgs =>
             rmdir -p --ignore-fail-on-non-empty ${MBUILD_INSTALL_DIR}/etc/bash_completion.d 2>/dev/null || true
           fi
         "%,
-      },
-    }
+      }
+    in
+    recipe.binary "grub-2.12" {
+      include script_config,
+    } pkgs.system_image pkgs.buildscript_autotools [grub_src]
   in
 
   {

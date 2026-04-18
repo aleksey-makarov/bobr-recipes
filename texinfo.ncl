@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let texinfo_src =
     recipe.fetch "texinfo-src-7.2" {
       url = [
@@ -14,15 +12,15 @@ fun pkgs =>
   in
 
   let texinfo =
-    build.build_autotools {
-      name = "texinfo-7.2",
-      sources = [texinfo_src],
-      script_config = {
+    let script_config = {
         pre_configure = "sed 's/! $output_file eq/$output_file ne/' -i tp/Texinfo/Convert/*.pm",
         configure_args = [],
         post_install = "make DESTDIR=\"${MBUILD_INSTALL_DIR}\" TEXMF=/usr/share/texmf install-tex",
-      },
-    }
+      }
+    in
+    recipe.binary "texinfo-7.2" {
+      include script_config,
+    } pkgs.system_image pkgs.buildscript_autotools [texinfo_src]
   in
 
   {

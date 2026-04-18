@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let libtool_src =
     recipe.fetch "libtool-src-2.5.4" {
       url = [
@@ -14,15 +12,15 @@ fun pkgs =>
   in
 
   let libtool =
-    build.build_autotools {
-      name = "libtool-2.5.4",
-      sources = [libtool_src],
-      script_config = {
+    let script_config = {
         post_install = m%"
           rm -fv "${MBUILD_INSTALL_DIR}/usr/lib/libltdl.a"
         "%,
-      },
-    }
+      }
+    in
+    recipe.binary "libtool-2.5.4" {
+      include script_config,
+    } pkgs.system_image pkgs.buildscript_autotools [libtool_src]
   in
 
   {

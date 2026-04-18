@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let libpipeline_src =
     recipe.fetch "libpipeline-src-1.5.8" {
       url = "https://download.savannah.gnu.org/releases/libpipeline/libpipeline-1.5.8.tar.gz",
@@ -11,13 +9,13 @@ fun pkgs =>
   in
 
   let libpipeline =
-    build.build_autotools {
-      name = "libpipeline-1.5.8",
-      sources = [libpipeline_src],
-      script_config = {
+    let script_config = {
         configure_args = [],
-      },
-    }
+      }
+    in
+    recipe.binary "libpipeline-1.5.8" {
+      include script_config,
+    } pkgs.system_image pkgs.buildscript_autotools [libpipeline_src]
   in
 
   {

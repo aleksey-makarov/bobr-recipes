@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let groff_src =
     recipe.fetch "groff-src-1.23.0" {
       url = [
@@ -14,16 +12,16 @@ fun pkgs =>
   in
 
   let groff =
-    build.build_autotools {
-      name = "groff-1.23.0",
-      sources = [groff_src],
-      script_config = {
+    let script_config = {
         configure_args = [],
         env = {
           PAGE = "A4",
         },
-      },
-    }
+      }
+    in
+    recipe.binary "groff-1.23.0" {
+      include script_config,
+    } pkgs.system_image pkgs.buildscript_autotools [groff_src]
   in
 
   {

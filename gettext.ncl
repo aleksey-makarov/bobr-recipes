@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let gettext_src =
     recipe.fetch "gettext-src-0.26" {
       url = [
@@ -14,17 +12,17 @@ fun pkgs =>
   in
 
   let gettext =
-    build.build_autotools {
-      name = "gettext-0.26",
-      sources = [gettext_src],
-      script_config = {
+    let script_config = {
         configure_args = [
           "--disable-static",
           "--docdir=/usr/share/doc/gettext-0.26",
         ],
         post_install = "chmod -v 0755 \"${MBUILD_INSTALL_DIR}/usr/lib/preloadable_libintl.so\"",
-      },
-    }
+      }
+    in
+    recipe.binary "gettext-0.26" {
+      include script_config,
+    } pkgs.system_image pkgs.buildscript_autotools [gettext_src]
   in
 
   {

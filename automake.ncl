@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let automake_src =
     recipe.fetch "automake-src-1.18.1" {
       url = [
@@ -14,15 +12,15 @@ fun pkgs =>
   in
 
   let automake =
-    build.build_autotools {
-      name = "automake-1.18.1",
-      sources = [automake_src],
-      script_config = {
+    let script_config = {
         configure_args = [
           "--docdir=/usr/share/doc/automake-1.18.1",
         ],
-      },
-    }
+      }
+    in
+    recipe.binary "automake-1.18.1" {
+      include script_config,
+    } pkgs.system_image pkgs.buildscript_autotools [automake_src]
   in
 
   {

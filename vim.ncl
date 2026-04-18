@@ -1,8 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
-
   let vim_src =
     recipe.fetch "vim-src-9.1.1629" {
       url = [
@@ -13,10 +11,7 @@ fun pkgs =>
   in
 
   let vim =
-    build.build_autotools {
-      name = "vim-9.1.1629",
-      sources = [vim_src],
-      script_config = {
+    let script_config = {
         build_layout = "in-tree",
         pre_configure = "echo '#define SYS_VIMRC_FILE \"/etc/vimrc\"' >> src/feature.h",
         configure_args = [],
@@ -48,8 +43,11 @@ fun pkgs =>
           " End /etc/vimrc
           EOF_INNER
         "%,
-      },
-    }
+      }
+    in
+    recipe.binary "vim-9.1.1629" {
+      include script_config,
+    } pkgs.system_image pkgs.buildscript_autotools [vim_src]
   in
 
   {

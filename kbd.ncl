@@ -1,7 +1,6 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let build = (import "build-lib.ncl") pkgs in
   let kbd_src =
     recipe.fetch "kbd-src-2.8.0" {
       url = "https://www.kernel.org/pub/linux/utils/kbd/kbd-2.8.0.tar.xz",
@@ -18,10 +17,7 @@ fun pkgs =>
   in
 
   let kbd =
-    build.build_autotools {
-      name = "kbd-2.8.0",
-      sources = [kbd_src, kbd_backspace_patch],
-      script_config = {
+    let script_config = {
         pre_configure = m%"
           patch -Np1 -i /in/sources1
           sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
@@ -34,8 +30,11 @@ fun pkgs =>
           install -vdm755 ${MBUILD_INSTALL_DIR}/usr/share/doc
           cp -R -v ${MBUILD_SOURCE_DIR}/docs/doc -T ${MBUILD_INSTALL_DIR}/usr/share/doc/kbd-2.8.0
         "%,
-      },
-    }
+      }
+    in
+    recipe.binary "kbd-2.8.0" {
+      include script_config,
+    } pkgs.system_image pkgs.buildscript_autotools [kbd_src, kbd_backspace_patch]
   in
 
   {
