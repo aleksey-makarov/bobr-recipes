@@ -12,9 +12,8 @@ fun pkgs =>
   in
 
   let bison_gen1 =
-    recipe.binary "bison-gen1-3.8.2" {
-      script_config = {},
-    } pkgs.host_image pkgs.buildscript_autotools [bison_src]
+    recipe.autotools.binary "bison-gen1-3.8.2" {
+    } pkgs.host_image [bison_src]
   in
 
   let bison =

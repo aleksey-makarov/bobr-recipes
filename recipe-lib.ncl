@@ -24,6 +24,76 @@ let default_binary_sequence = [
     argv = ["${script}", "post_install"],
   },
 ] in
+let autotools_default_steps = [
+  {
+    name = "configure",
+    run_as = "build-user",
+    cwd = "${build}",
+    argv = ["${in0}", "configure"],
+  },
+  {
+    name = "build",
+    run_as = "build-user",
+    cwd = "${build}",
+    argv = ["${in0}", "build"],
+  },
+  {
+    name = "install",
+    run_as = "root",
+    cwd = "${build}",
+    argv = ["${in0}", "install"],
+  },
+] in
+let buildscript_autotools = {
+  name = "buildscript-autotools",
+  tag = "Text",
+  config = {
+    executable = true,
+    source = import "buildscripts/autotools.sh" as 'Text,
+  },
+  inputs = {},
+} in
+let identity = fun x => x in
+let append_steps_fn =
+  fun new_steps =>
+  fun steps => steps @ new_steps
+in
+let prepend_steps_fn =
+  fun new_steps =>
+  fun steps => new_steps @ steps
+in
+let insert_before_step_fn =
+  fun target_name =>
+  fun new_steps =>
+  fun steps =>
+    std.array.fold_right
+      (
+        fun step =>
+        fun acc =>
+          if step.name == target_name then
+            new_steps @ [step] @ acc
+          else
+            [step] @ acc
+      )
+      []
+      steps
+in
+let insert_after_step_fn =
+  fun target_name =>
+  fun new_steps =>
+  fun steps =>
+    std.array.fold_right
+      (
+        fun step =>
+        fun acc =>
+          if step.name == target_name then
+            [step] @ new_steps @ acc
+          else
+            [step] @ acc
+      )
+      []
+      steps
+in
 {
   install = {
     root_default_attrs = {
@@ -74,6 +144,11 @@ let default_binary_sequence = [
         argv = step_argv,
         env = step_env,
       },
+
+    append = append_steps_fn,
+    prepend = prepend_steps_fn,
+    insert_before_step = insert_before_step_fn,
+    insert_after_step = insert_after_step_fn,
 
     default_binary_sequence = default_binary_sequence,
   },
@@ -194,15 +269,64 @@ let default_binary_sequence = [
     inputs = {},
   },
 
-  binary = fun recipe_name => fun recipe_config => fun image_input => fun script_input => fun source_inputs => {
+  binary = fun recipe_name => fun recipe_config => fun image_input => fun input_nodes => {
     name = recipe_name,
     tag = "Binary",
-    config = { steps | default = default_binary_sequence } & recipe_config,
+    config = recipe_config,
     inputs = {
       image = image_input,
-      script = script_input,
-      sources = source_inputs,
+      "in" = input_nodes,
     },
+  },
+
+  autotools = {
+    binary =
+      fun recipe_name =>
+      fun recipe_config =>
+      fun image_input =>
+      fun source_inputs =>
+        let step_transform =
+          if std.record.has_field "step_transform" recipe_config then
+            std.record.get "step_transform" recipe_config
+          else
+            identity
+        in
+        let script_config =
+          if std.record.has_field "script_config" recipe_config then
+            std.record.get "script_config" recipe_config
+          else
+            {}
+        in
+        let in_tree =
+          if std.record.has_field "in-tree" recipe_config then
+            std.record.get "in-tree" recipe_config
+          else
+            false
+        in
+        let final_script_config =
+          if in_tree then
+            std.record.insert "in-tree" "true" script_config
+          else
+            script_config
+        in
+        {
+          name = recipe_name,
+          tag = "Binary",
+          config = ({
+            steps = step_transform autotools_default_steps,
+            script_config = final_script_config,
+          } &
+          (
+            if std.record.has_field "install" recipe_config then
+              { install = recipe_config.install }
+            else
+              {}
+          )),
+          inputs = {
+            image = image_input,
+            "in" = [buildscript_autotools] @ source_inputs,
+          },
+        },
   },
 
   image = fun recipe_name => fun recipe_config => fun base_input => fun layer_inputs => {

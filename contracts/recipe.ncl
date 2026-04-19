@@ -173,7 +173,7 @@ let BinaryConfig = {
         run_as | std.contract.from_predicate (fun value => std.array.elem value [ "build-user", "root" ]),
         cwd | String,
         argv | Array String,
-        env | { _: String, .. } | optional,
+        env | Dyn | optional,
       }
     | doc "Execution plan steps for the generic Binary executor.",
   script_config
@@ -219,7 +219,7 @@ in
 let ContainerImageInputs = {
 }
 in
-let BinaryInputsShape = {
+let BinaryLegacyInputsShape = {
   image
     | Dyn
     | doc "Single recipe node for the container image input.",
@@ -230,6 +230,21 @@ let BinaryInputsShape = {
     | Array Dyn
     | doc "Repeated recipe nodes for source inputs.",
 }
+in
+let BinaryV2InputsShape = {
+  image
+    | Dyn
+    | doc "Single recipe node for the container image input.",
+  "in"
+    | Array Dyn
+    | doc "Ordered repeated recipe nodes for generic input mounts.",
+}
+in
+let BinaryInputsShape =
+  std.contract.any_of [
+    BinaryLegacyInputsShape,
+    BinaryV2InputsShape,
+  ]
 in
 let ImageInputsShape = {
   base
@@ -336,11 +351,17 @@ let rec ValidateRecipe = fun recipe =>
   in
   let validate_binary_inputs = fun inputs =>
     let checked = inputs | BinaryInputsShape in
-    checked & {
-      image = ValidateRecipe checked.image,
-      script = ValidateRecipe checked.script,
-      sources = std.array.map ValidateRecipe checked.sources,
-    }
+    if std.record.has_field "in" checked then
+      checked & {
+        image = ValidateRecipe checked.image,
+        "in" = std.array.map ValidateRecipe checked."in",
+      }
+    else
+      checked & {
+        image = ValidateRecipe checked.image,
+        script = ValidateRecipe checked.script,
+        sources = std.array.map ValidateRecipe checked.sources,
+      }
   in
   let validate_image_inputs = fun inputs =>
     let checked = inputs | ImageInputsShape in

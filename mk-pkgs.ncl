@@ -1,7 +1,6 @@
 let base_modules = [
   import "host-image.ncl",
   import "iana-etc.ncl",
-  import "buildscripts/autotools.ncl",
   import "buildscripts/gnu-make.ncl",
   import "buildscripts/meson.ncl",
   import "buildscripts/perl-module.ncl",

@@ -12,12 +12,19 @@ fun pkgs =>
   in
 
   let gawk_gen1 =
-    recipe.binary "gawk-gen1-5.3.2" {
+    recipe.autotools.binary "gawk-gen1-5.3.2" {
+      step_transform =
+        recipe.steps.insert_before_step "configure" [
+          recipe.steps.step "prepare_source" "build-user" "${in1}" [
+            "/bin/sh",
+            "-ec",
+            "sed -i 's/extras//' Makefile.in",
+          ],
+        ],
       script_config = {
-        pre_configure = "sed -i 's/extras//' Makefile.in",
         configure_args = ["--without-readline"],
       },
-    } pkgs.host_image pkgs.buildscript_autotools [gawk_src]
+    } pkgs.host_image [gawk_src]
   in
 
   let gawk =

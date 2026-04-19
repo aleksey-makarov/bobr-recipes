@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cfg="${MBUILD_SCRIPT_CONFIG_DIR:?MBUILD_SCRIPT_CONFIG_DIR is required}"
-phase="${1:-${MBUILD_STEP_NAME:-}}"
-phase="${phase:?step name is required}"
-source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
-install_dir="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
-default_build_dir="${MBUILD_BUILD_DIR:-$source_dir/build}"
+cfg="${MBUILD_CONFIG_DIR:?MBUILD_CONFIG_DIR is required}"
+step="${1:-${MBUILD_STEP_NAME:-}}"
+step="${step:?step name is required}"
+source_dir="${MBUILD_IN1:?MBUILD_IN1 is required}"
+out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
+default_build_dir="${MBUILD_BUILD_DIR:?MBUILD_BUILD_DIR is required}"
 
 load_env_files() {
   if [ -d "${cfg}/env" ]; then
@@ -28,6 +28,11 @@ append_dir_files_to_array() {
 }
 
 resolve_project_source_dir() {
+  if [ ! -d "$source_dir" ]; then
+    echo "autotools build-script: source input is not a directory: ${source_dir}" >&2
+    exit 1
+  fi
+
   if [ -x "$source_dir/configure" ]; then
     printf '%s\n' "$source_dir"
     return
@@ -50,29 +55,25 @@ resolve_project_source_dir() {
   exit 1
 }
 
-resolve_build_layout() {
-  if [ -f "${cfg}/build_layout" ]; then
-    cat "${cfg}/build_layout"
-  else
-    printf 'out-of-tree\n'
+resolve_in_tree() {
+  if [ ! -f "${cfg}/in-tree" ]; then
+    return 1
   fi
+
+  case "$(cat "${cfg}/in-tree")" in
+    true|1|yes|on) return 0 ;;
+    false|0|no|off|"") return 1 ;;
+    *)
+      echo "autotools build-script: invalid boolean in ${cfg}/in-tree" >&2
+      exit 1
+      ;;
+  esac
 }
 
 resolve_build_dir() {
   local project_source_dir="$1"
-  local layout="$2"
-  if [ "$layout" = "in-tree" ]; then
+  if resolve_in_tree; then
     printf '%s\n' "$project_source_dir"
-    return
-  fi
-  if [ -f "${cfg}/build_dir" ]; then
-    local configured_build_dir
-    configured_build_dir="$(cat "${cfg}/build_dir")"
-    if [[ "$configured_build_dir" = /* ]]; then
-      printf '%s\n' "$configured_build_dir"
-    else
-      printf '%s\n' "$project_source_dir/$configured_build_dir"
-    fi
     return
   fi
   printf '%s\n' "$default_build_dir"
@@ -84,22 +85,18 @@ prepare_tmpdir() {
   export TMPDIR="${TMPDIR:-$cwd/.tmp}"
 }
 
-phase_configure() {
-  local project_source_dir layout build_dir configure_cmd
+step_configure() {
+  local project_source_dir build_dir configure_cmd
   local configure_args=()
   project_source_dir="$(resolve_project_source_dir)"
-  layout="$(resolve_build_layout)"
-  build_dir="$(resolve_build_dir "$project_source_dir" "$layout")"
+  build_dir="$(resolve_build_dir "$project_source_dir")"
 
   cd "$project_source_dir"
   prepare_tmpdir "$project_source_dir"
-  if [ -f "${cfg}/pre_configure" ]; then
-    source "${cfg}/pre_configure"
-  fi
 
   append_dir_files_to_array "${cfg}/configure_args" configure_args
   configure_cmd="$project_source_dir/configure"
-  if [ "$layout" = "out-of-tree" ]; then
+  if [ "$build_dir" != "$project_source_dir" ]; then
     mkdir -p "$build_dir"
     cd "$build_dir"
     prepare_tmpdir "$build_dir"
@@ -110,12 +107,11 @@ phase_configure() {
   "$configure_cmd" --prefix=/usr "${configure_args[@]}"
 }
 
-phase_build() {
-  local project_source_dir layout build_dir jobs
+step_build() {
+  local project_source_dir build_dir jobs
   local make_args=()
   project_source_dir="$(resolve_project_source_dir)"
-  layout="$(resolve_build_layout)"
-  build_dir="$(resolve_build_dir "$project_source_dir" "$layout")"
+  build_dir="$(resolve_build_dir "$project_source_dir")"
   cd "$build_dir"
   prepare_tmpdir "$build_dir"
   append_dir_files_to_array "${cfg}/make_args" make_args
@@ -123,40 +119,26 @@ phase_build() {
   make -j"$jobs" "${make_args[@]}"
 }
 
-phase_install() {
-  local project_source_dir layout build_dir
+step_install() {
+  local project_source_dir build_dir
   local make_args=()
   project_source_dir="$(resolve_project_source_dir)"
-  layout="$(resolve_build_layout)"
-  build_dir="$(resolve_build_dir "$project_source_dir" "$layout")"
+  build_dir="$(resolve_build_dir "$project_source_dir")"
   cd "$build_dir"
   prepare_tmpdir "$build_dir"
   append_dir_files_to_array "${cfg}/make_args" make_args
-  mkdir -p "$install_dir"
-  make DESTDIR="$install_dir" "${make_args[@]}" install
-}
-
-phase_post_install() {
-  local project_source_dir layout build_dir
-  project_source_dir="$(resolve_project_source_dir)"
-  layout="$(resolve_build_layout)"
-  build_dir="$(resolve_build_dir "$project_source_dir" "$layout")"
-  cd "$build_dir"
-  prepare_tmpdir "$build_dir"
-  if [ -f "${cfg}/post_install" ]; then
-    source "${cfg}/post_install"
-  fi
+  mkdir -p "$out_dir"
+  make DESTDIR="$out_dir" "${make_args[@]}" install
 }
 
 load_env_files
 
-case "$phase" in
-  configure) phase_configure ;;
-  build) phase_build ;;
-  install) phase_install ;;
-  post_install) phase_post_install ;;
+case "$step" in
+  configure) step_configure ;;
+  build) step_build ;;
+  install) step_install ;;
   *)
-    echo "autotools build-script: unsupported phase '$phase'" >&2
+    echo "autotools build-script: unsupported step '$step'" >&2
     exit 1
     ;;
 esac
