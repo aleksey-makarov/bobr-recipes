@@ -2,12 +2,17 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let readline_src =
-    recipe.fetch "readline-src-8.3" {
+    {
+      name = "readline-src-8.3",
+      tag = "Fetch",
+      config = {
       url = [
         "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz",
         "https://mirrors.kernel.org/gnu/readline/readline-8.3.tar.gz",
       ],
       hash = "md5:25a73bfb2a3ad7146c5e9d4408d9f6cd",
+      },
+      inputs = {},
     }
   in
 

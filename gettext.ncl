@@ -2,12 +2,17 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let gettext_src =
-    recipe.fetch "gettext-src-0.26" {
+    {
+      name = "gettext-src-0.26",
+      tag = "Fetch",
+      config = {
       url = [
         "https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.xz",
         "https://mirrors.kernel.org/gnu/gettext/gettext-0.26.tar.xz",
       ],
       hash = "md5:8e14e926f088e292f5f2bce95b81d10e",
+      },
+      inputs = {},
     }
   in
 

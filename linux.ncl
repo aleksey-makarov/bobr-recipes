@@ -9,9 +9,14 @@ fun pkgs =>
   let headers_name = "linux-headers-%{pkg_version}" in
 
   let linux_src =
-    recipe.fetch source_name {
+    {
+      name = source_name,
+      tag = "Fetch",
+      config = {
       url = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-6.18.10.tar.xz",
       hash = "md5:660e706a43f634b1fcd911f8839d2f61",
+      },
+      inputs = {},
     }
   in
 

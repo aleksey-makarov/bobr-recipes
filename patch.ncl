@@ -2,12 +2,17 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let patch_src =
-    recipe.fetch "patch-src-2.8" {
+    {
+      name = "patch-src-2.8",
+      tag = "Fetch",
+      config = {
       url = [
         "https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz",
         "https://mirrors.kernel.org/gnu/patch/patch-2.8.tar.xz",
       ],
       hash = "md5:149327a021d41c8f88d034eab41c039f",
+      },
+      inputs = {},
     }
   in
 

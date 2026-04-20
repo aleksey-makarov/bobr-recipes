@@ -2,12 +2,17 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let tcl_src =
-    recipe.fetch "tcl-src-8.6.16" {
+    {
+      name = "tcl-src-8.6.16",
+      tag = "Fetch",
+      config = {
       url = [
         "https://downloads.sourceforge.net/project/tcl/Tcl/8.6.16/tcl8.6.16-src.tar.gz",
         "https://sourceforge.net/projects/tcl/files/Tcl/8.6.16/tcl8.6.16-src.tar.gz/download",
       ],
       hash = "md5:eaef5d0a27239fb840f04af8ec608242",
+      },
+      inputs = {},
     }
   in
 

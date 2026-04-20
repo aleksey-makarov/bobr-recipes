@@ -2,20 +2,30 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let glibc_fhs_patch_2_42 =
-    recipe.fetch "glibc-fhs-patch-2.42" {
+    {
+      name = "glibc-fhs-patch-2.42",
+      tag = "Fetch",
+      config = {
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch",
       hash = "md5:9a5997c3452909b1769918c759eff8a2",
       unpack = false,
+      },
+      inputs = {},
     }
   in
 
   let glibc_src =
-    recipe.fetch "glibc-src-2.42" {
+    {
+      name = "glibc-src-2.42",
+      tag = "Fetch",
+      config = {
       url = [
         "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz",
         "https://mirrors.kernel.org/gnu/glibc/glibc-2.42.tar.xz",
       ],
       hash = "md5:23c6f5a27932b435cae94e087cb8b1f5",
+      },
+      inputs = {},
     }
   in
 

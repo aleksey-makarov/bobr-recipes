@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let openssl_src =
-    recipe.fetch "openssl-src-3.5.2" {
+    {
+      name = "openssl-src-3.5.2",
+      tag = "Fetch",
+      config = {
       url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz",
       hash = "md5:890fc59f86fc21b5e4d1c031a698dbde",
+      },
+      inputs = {},
     }
   in
 

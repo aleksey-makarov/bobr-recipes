@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let dbus_src =
-    recipe.fetch "dbus-src-1.16.2" {
+    {
+      name = "dbus-src-1.16.2",
+      tag = "Fetch",
+      config = {
       url = "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz",
       hash = "md5:97832e6f0a260936d28536e5349c22e5",
+      },
+      inputs = {},
     }
   in
 

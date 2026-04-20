@@ -2,12 +2,17 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let bash_src =
-    recipe.fetch "bash-src-5.3" {
+    {
+      name = "bash-src-5.3",
+      tag = "Fetch",
+      config = {
       url = [
         "https://ftp.gnu.org/gnu/bash/bash-5.3.tar.gz",
         "https://mirrors.kernel.org/gnu/bash/bash-5.3.tar.gz",
       ],
       hash = "md5:977c8c0c5ae6309191e7768e28ebc951",
+      },
+      inputs = {},
     }
   in
 

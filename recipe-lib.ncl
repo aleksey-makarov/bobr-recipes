@@ -241,13 +241,6 @@ in
             ordered_names
         ),
 
-  fetch = fun recipe_name => fun recipe_config => {
-    name = recipe_name,
-    tag = "Fetch",
-    config = recipe_config,
-    inputs = {},
-  },
-
   text = fun recipe_name => fun recipe_config => {
     name = recipe_name,
     tag = "Text",

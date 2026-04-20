@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let man_db_src =
-    recipe.fetch "man-db-src-2.13.1" {
+    {
+      name = "man-db-src-2.13.1",
+      tag = "Fetch",
+      config = {
       url = "https://download.savannah.gnu.org/releases/man-db/man-db-2.13.1.tar.xz",
       hash = "md5:b6335533cbeac3b24cd7be31fdee8c83",
+      },
+      inputs = {},
     }
   in
 

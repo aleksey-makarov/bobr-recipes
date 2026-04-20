@@ -2,17 +2,27 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let systemd_src =
-    recipe.fetch "systemd-src-257.8" {
+    {
+      name = "systemd-src-257.8",
+      tag = "Fetch",
+      config = {
       url = "https://github.com/systemd/systemd/archive/v257.8/systemd-257.8.tar.gz",
       hash = "md5:25fe5d328e22641254761f1baa74cee0",
+      },
+      inputs = {},
     }
   in
 
   let systemd_man_pages_src =
-    recipe.fetch "systemd-man-pages-src-257.8" {
+    {
+      name = "systemd-man-pages-src-257.8",
+      tag = "Fetch",
+      config = {
       url = "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-257.8.tar.xz",
       hash = "md5:a44063e2ec0cf4adfd2ed5c9e9e095c5",
       unpack = false,
+      },
+      inputs = {},
     }
   in
 

@@ -2,11 +2,16 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let ncurses_src =
-    recipe.fetch "ncurses-src-6.6" {
+    {
+      name = "ncurses-src-6.6",
+      tag = "Fetch",
+      config = {
       url = [
         "https://invisible-mirror.net/archives/ncurses/ncurses-6.6.tar.gz",
       ],
       hash = "md5:dd45bf6854430af403452a7a6a40652c",
+      },
+      inputs = {},
     }
   in
 

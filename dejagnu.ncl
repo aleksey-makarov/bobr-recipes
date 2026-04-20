@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let dejagnu_src =
-    recipe.fetch "dejagnu-src-1.6.3" {
+    {
+      name = "dejagnu-src-1.6.3",
+      tag = "Fetch",
+      config = {
       url = "https://ftp.gnu.org/gnu/dejagnu/dejagnu-1.6.3.tar.gz",
       hash = "md5:68c5208c58236eba447d7d6d1326b821",
+      },
+      inputs = {},
     }
   in
 

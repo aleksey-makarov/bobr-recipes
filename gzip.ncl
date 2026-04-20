@@ -2,12 +2,17 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let gzip_src =
-    recipe.fetch "gzip-src-1.14" {
+    {
+      name = "gzip-src-1.14",
+      tag = "Fetch",
+      config = {
       url = [
         "https://ftp.gnu.org/gnu/gzip/gzip-1.14.tar.xz",
         "https://mirrors.kernel.org/gnu/gzip/gzip-1.14.tar.xz",
       ],
       hash = "md5:4bf5a10f287501ee8e8ebe00ef62b2c2",
+      },
+      inputs = {},
     }
   in
 

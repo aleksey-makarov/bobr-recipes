@@ -2,12 +2,17 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let procps_ng_src =
-    recipe.fetch "procps-ng-src-4.0.5" {
+    {
+      name = "procps-ng-src-4.0.5",
+      tag = "Fetch",
+      config = {
       url = [
         "https://downloads.sourceforge.net/project/procps-ng/Production/procps-ng-4.0.5.tar.xz",
         "https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-4.0.5.tar.xz/download",
       ],
       hash = "md5:90803e64f51f192f3325d25c3335d057",
+      },
+      inputs = {},
     }
   in
 

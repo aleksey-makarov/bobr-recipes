@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let shadow_src =
-    recipe.fetch "shadow-src-4.18.0" {
+    {
+      name = "shadow-src-4.18.0",
+      tag = "Fetch",
+      config = {
       url = "https://github.com/shadow-maint/shadow/releases/download/4.18.0/shadow-4.18.0.tar.xz",
       hash = "md5:30ef46f54363db1d624587be68794ef2",
+      },
+      inputs = {},
     }
   in
 

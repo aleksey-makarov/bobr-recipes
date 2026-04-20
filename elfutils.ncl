@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let elfutils_src =
-    recipe.fetch "elfutils-src-0.193" {
+    {
+      name = "elfutils-src-0.193",
+      tag = "Fetch",
+      config = {
       url = "https://sourceware.org/ftp/elfutils/0.193/elfutils-0.193.tar.bz2",
       hash = "md5:ceefa052ded950a4c523688799193a44",
+      },
+      inputs = {},
     }
   in
 

@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let intltool_src =
-    recipe.fetch "intltool-src-0.51.0" {
+    {
+      name = "intltool-src-0.51.0",
+      tag = "Fetch",
+      config = {
       url = "https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz",
       hash = "md5:12e517cac2b57a0121cda351570f1e63",
+      },
+      inputs = {},
     }
   in
 

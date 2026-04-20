@@ -2,12 +2,17 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let texinfo_src =
-    recipe.fetch "texinfo-src-7.2" {
+    {
+      name = "texinfo-src-7.2",
+      tag = "Fetch",
+      config = {
       url = [
         "https://ftp.gnu.org/gnu/texinfo/texinfo-7.2.tar.xz",
         "https://mirrors.kernel.org/gnu/texinfo/texinfo-7.2.tar.xz",
       ],
       hash = "md5:11939a7624572814912a18e76c8d8972",
+      },
+      inputs = {},
     }
   in
 

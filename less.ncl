@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let less_src =
-    recipe.fetch "less-src-679" {
+    {
+      name = "less-src-679",
+      tag = "Fetch",
+      config = {
       url = "https://www.greenwoodsoftware.com/less/less-679.tar.gz",
       hash = "md5:0386dc14f6a081a94dfb4c2413864eed",
+      },
+      inputs = {},
     }
   in
 

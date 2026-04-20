@@ -2,83 +2,128 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let python_src =
-    recipe.fetch "python-src-3.13.7" {
+    {
+      name = "python-src-3.13.7",
+      tag = "Fetch",
+      config = {
       url = [
         "https://www.python.org/ftp/python/3.13.7/Python-3.13.7.tar.xz",
       ],
       hash = "md5:256cdb3bbf45cdce7499e52ba6c36ea3",
+      },
+      inputs = {},
     }
   in
 
   let flit_core_src =
-    recipe.fetch "flit-core-src-3.12.0" {
+    {
+      name = "flit-core-src-3.12.0",
+      tag = "Fetch",
+      config = {
       url = [
         "https://pypi.org/packages/source/f/flit-core/flit_core-3.12.0.tar.gz",
       ],
       hash = "md5:c538415c1f27bd69cbbbf3cdd5135d39",
+      },
+      inputs = {},
     }
   in
 
   let packaging_src =
-    recipe.fetch "packaging-src-25.0" {
+    {
+      name = "packaging-src-25.0",
+      tag = "Fetch",
+      config = {
       url = [
         "https://files.pythonhosted.org/packages/source/p/packaging/packaging-25.0.tar.gz",
       ],
       hash = "md5:ab0ef21ddebe09d1803575120d3f99f8",
+      },
+      inputs = {},
     }
   in
 
   let wheel_src =
-    recipe.fetch "wheel-src-0.46.1" {
+    {
+      name = "wheel-src-0.46.1",
+      tag = "Fetch",
+      config = {
       url = [
         "https://pypi.org/packages/source/w/wheel/wheel-0.46.1.tar.gz",
       ],
       hash = "md5:65e09ee84af36821e3b1e9564aa91bd5",
+      },
+      inputs = {},
     }
   in
 
   let setuptools_src =
-    recipe.fetch "setuptools-src-80.9.0" {
+    {
+      name = "setuptools-src-80.9.0",
+      tag = "Fetch",
+      config = {
       url = [
         "https://pypi.org/packages/source/s/setuptools/setuptools-80.9.0.tar.gz",
       ],
       hash = "md5:82e1d67883b713f9493659b50d13b436",
+      },
+      inputs = {},
     }
   in
 
   let markupsafe_src =
-    recipe.fetch "markupsafe-src-3.0.2" {
+    {
+      name = "markupsafe-src-3.0.2",
+      tag = "Fetch",
+      config = {
       url = [
         "https://pypi.org/packages/source/M/MarkupSafe/markupsafe-3.0.2.tar.gz",
       ],
       hash = "md5:cb0071711b573b155cc8f86e1de72167",
+      },
+      inputs = {},
     }
   in
 
   let jinja2_src =
-    recipe.fetch "jinja2-src-3.1.6" {
+    {
+      name = "jinja2-src-3.1.6",
+      tag = "Fetch",
+      config = {
       url = [
         "https://pypi.org/packages/source/J/Jinja2/jinja2-3.1.6.tar.gz",
       ],
       hash = "md5:66d4c25ff43d1deaf9637ccda523dec8",
+      },
+      inputs = {},
     }
   in
 
   let meson_src =
-    recipe.fetch "meson-src-1.8.3" {
+    {
+      name = "meson-src-1.8.3",
+      tag = "Fetch",
+      config = {
       url = [
         "https://github.com/mesonbuild/meson/releases/download/1.8.3/meson-1.8.3.tar.gz",
       ],
       hash = "md5:08221d2f515e759686f666ff6409a903",
+      },
+      inputs = {},
     }
   in
 
   let ninja_src =
-    recipe.fetch "ninja-src-1.13.1" {
+    {
+      name = "ninja-src-1.13.1",
+      tag = "Fetch",
+      config = {
       url = [
         "https://github.com/ninja-build/ninja/archive/v1.13.1/ninja-1.13.1.tar.gz",
       ],
       hash = "md5:c35f8f55f4cf60f1a916068d8f45a0f8",
+      },
+      inputs = {},
     }
   in
 

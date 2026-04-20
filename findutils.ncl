@@ -2,12 +2,17 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let findutils_src =
-    recipe.fetch "findutils-src-4.10.0" {
+    {
+      name = "findutils-src-4.10.0",
+      tag = "Fetch",
+      config = {
       url = [
         "https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz",
         "https://mirrors.kernel.org/gnu/findutils/findutils-4.10.0.tar.xz",
       ],
       hash = "md5:870cfd71c07d37ebe56f9f4aaf4ad872",
+      },
+      inputs = {},
     }
   in
 

@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let libpipeline_src =
-    recipe.fetch "libpipeline-src-1.5.8" {
+    {
+      name = "libpipeline-src-1.5.8",
+      tag = "Fetch",
+      config = {
       url = "https://download.savannah.gnu.org/releases/libpipeline/libpipeline-1.5.8.tar.gz",
       hash = "md5:17ac6969b2015386bcb5d278a08a40b5",
+      },
+      inputs = {},
     }
   in
 

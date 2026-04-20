@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let pkgconf_src =
-    recipe.fetch "pkgconf-src-2.5.1" {
+    {
+      name = "pkgconf-src-2.5.1",
+      tag = "Fetch",
+      config = {
       url = "https://distfiles.ariadne.space/pkgconf/pkgconf-2.5.1.tar.xz",
       hash = "md5:3291128c917fdb8fccd8c9e7784b643b",
+      },
+      inputs = {},
     }
   in
 

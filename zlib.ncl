@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let zlib_src =
-    recipe.fetch "zlib-src-1.3.1" {
+    {
+      name = "zlib-src-1.3.1",
+      tag = "Fetch",
+      config = {
       url = "https://zlib.net/fossils/zlib-1.3.1.tar.gz",
       hash = "md5:9855b6d802d7fe5b7bd5b196a2271655",
+      },
+      inputs = {},
     }
   in
 

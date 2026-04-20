@@ -2,17 +2,27 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let bzip2_src =
-    recipe.fetch "bzip2-src-1.0.8" {
+    {
+      name = "bzip2-src-1.0.8",
+      tag = "Fetch",
+      config = {
       url = "https://www.sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
       hash = "md5:67e051268d0c475ea773822f7500d0e5",
+      },
+      inputs = {},
     }
   in
 
   let bzip2_install_docs_patch =
-    recipe.fetch "bzip2-install-docs-patch-1.0.8" {
+    {
+      name = "bzip2-install-docs-patch-1.0.8",
+      tag = "Fetch",
+      config = {
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/bzip2-1.0.8-install_docs-1.patch",
       hash = "md5:6a5ac7e89b791aae556de0f745916f7f",
       unpack = false,
+      },
+      inputs = {},
     }
   in
 

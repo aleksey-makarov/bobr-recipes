@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let expat_src =
-    recipe.fetch "expat-src-2.7.1" {
+    {
+      name = "expat-src-2.7.1",
+      tag = "Fetch",
+      config = {
       url = "https://github.com/libexpat/libexpat/releases/download/R_2_7_1/expat-2.7.1.tar.xz",
       hash = "md5:9f0c266ff4b9720beae0c6bd53ae4469",
+      },
+      inputs = {},
     }
   in
 

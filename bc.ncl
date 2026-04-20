@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let bc_src =
-    recipe.fetch "bc-src-7.0.3" {
+    {
+      name = "bc-src-7.0.3",
+      tag = "Fetch",
+      config = {
       url = "https://github.com/gavinhoward/bc/archive/c8dabac65d39fd527a9264a5e505a99b1d8df3d8.tar.gz",
       hash = "sha256:efc1df54c5378be62a93662e34f6829af1738a858211bd51c8d9b6c0892825ac",
+      },
+      inputs = {},
     }
   in
 

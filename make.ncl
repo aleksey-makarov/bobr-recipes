@@ -2,12 +2,17 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let make_src =
-    recipe.fetch "make-src-4.4.1" {
+    {
+      name = "make-src-4.4.1",
+      tag = "Fetch",
+      config = {
       url = [
         "https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz",
         "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",
       ],
       hash = "md5:c8469a3713cbbe04d955d4ae4be23eeb",
+      },
+      inputs = {},
     }
   in
 

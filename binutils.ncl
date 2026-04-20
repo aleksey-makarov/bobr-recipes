@@ -8,12 +8,17 @@ fun pkgs =>
   let gen1_name = "%{pkg_name}-gen1-%{pkg_version}" in
 
   let binutils_src =
-    recipe.fetch source_name {
+    {
+      name = source_name,
+      tag = "Fetch",
+      config = {
       url = [
         "https://sourceware.org/pub/binutils/releases/binutils-2.45.tar.xz",
         "https://mirrors.kernel.org/gnu/binutils/binutils-2.45.tar.xz",
       ],
       hash = "md5:dee5b4267e0305a99a3c9d6131f45759",
+      },
+      inputs = {},
     }
   in
 

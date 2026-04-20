@@ -2,11 +2,16 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let vim_src =
-    recipe.fetch "vim-src-9.1.1629" {
+    {
+      name = "vim-src-9.1.1629",
+      tag = "Fetch",
+      config = {
       url = [
         "https://github.com/vim/vim/archive/v9.1.1629/vim-9.1.1629.tar.gz",
       ],
       hash = "md5:4f856c3233c1c4570bc17572e4f9e8e4",
+      },
+      inputs = {},
     }
   in
 
