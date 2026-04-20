@@ -21,7 +21,10 @@ fun pkgs =>
   in
 
   let buildscript_e2fsprogs =
-    recipe.text "buildscript-e2fsprogs" {
+    {
+      name = "buildscript-e2fsprogs",
+      tag = "Text",
+      config = {
       executable = true,
       source = m%"
         #!/usr/bin/env bash
@@ -70,6 +73,8 @@ fun pkgs =>
           fi
         done
       "%,
+      },
+      inputs = {},
     }
   in
 

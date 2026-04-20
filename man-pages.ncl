@@ -14,7 +14,10 @@ fun pkgs =>
   in
 
   let buildscript_man_pages =
-    recipe.text "buildscript-man-pages" {
+    {
+      name = "buildscript-man-pages",
+      tag = "Text",
+      config = {
       executable = true,
       source = m%"
         #!/usr/bin/env bash
@@ -27,6 +30,8 @@ fun pkgs =>
         rm -fv man5/passwd.5
         make -R GIT=false prefix=/usr DESTDIR="${MBUILD_INSTALL_DIR}" install
       "%,
+      },
+      inputs = {},
     }
   in
 

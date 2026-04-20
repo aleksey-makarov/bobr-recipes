@@ -14,7 +14,10 @@ fun pkgs =>
   in
 
   let buildscript_iana_etc =
-    recipe.text "buildscript-iana-etc" {
+    {
+      name = "buildscript-iana-etc",
+      tag = "Text",
+      config = {
       executable = true,
       source = m%"
         #!/usr/bin/env bash
@@ -25,6 +28,8 @@ fun pkgs =>
         install -m 0644 services "${MBUILD_INSTALL_DIR}/etc/services"
         install -m 0644 protocols "${MBUILD_INSTALL_DIR}/etc/protocols"
       "%,
+      },
+      inputs = {},
     }
   in
 

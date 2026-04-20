@@ -3,13 +3,18 @@ let tree_data = import "runtime-files-tree.ncl" in
 
 fun _pkgs =>
   let qemu_runtime_files =
-    recipe.tree "qemu-runtime-files" {
+    {
+      name = "qemu-runtime-files",
+      tag = "Tree",
+      config = {
       tree = tree_data,
       install = {
         rules = [
           recipe.install.root_default_rule,
         ],
       },
+      },
+      inputs = {},
     }
   in
 

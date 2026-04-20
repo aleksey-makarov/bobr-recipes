@@ -2,9 +2,14 @@ let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let buildscript_test_reports =
-    recipe.text "buildscript-test-reports" {
+    {
+      name = "buildscript-test-reports",
+      tag = "Text",
+      config = {
       executable = true,
       source = import "test-reports.sh" as 'Text,
+      },
+      inputs = {},
     }
   in
 

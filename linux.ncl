@@ -21,9 +21,14 @@ fun pkgs =>
   in
 
   let buildscript_linux_headers =
-    recipe.text headers_script_name {
+    {
+      name = headers_script_name,
+      tag = "Text",
+      config = {
       executable = true,
       source = import "linux-headers.sh" as 'Text,
+      },
+      inputs = {},
     }
   in
 

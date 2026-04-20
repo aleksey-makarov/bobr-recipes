@@ -2,9 +2,14 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let buildscript_perl_configure =
-    recipe.text "buildscript-perl-configure" {
+    {
+      name = "buildscript-perl-configure",
+      tag = "Text",
+      config = {
       executable = true,
       source = import "perl-configure.sh" as 'Text,
+      },
+      inputs = {},
     }
   in
 

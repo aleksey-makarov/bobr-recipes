@@ -17,7 +17,10 @@ fun pkgs =>
   in
 
   let buildscript_tcl =
-    recipe.text "buildscript-tcl" {
+    {
+      name = "buildscript-tcl",
+      tag = "Text",
+      config = {
       executable = true,
       source = m%"
         #!/usr/bin/env bash
@@ -57,6 +60,8 @@ fun pkgs =>
         ln -sfv tclsh8.6 "${MBUILD_INSTALL_DIR}/usr/bin/tclsh"
         mv "${MBUILD_INSTALL_DIR}/usr/share/man/man3/Thread.3" "${MBUILD_INSTALL_DIR}/usr/share/man/man3/Tcl_Thread.3"
       "%,
+      },
+      inputs = {},
     }
   in
 

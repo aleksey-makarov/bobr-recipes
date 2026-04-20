@@ -128,8 +128,13 @@ fun pkgs =>
   in
 
   let python_modules_helper =
-    recipe.text "buildscript-python-modules" {
+    {
+      name = "buildscript-python-modules",
+      tag = "Text",
+      config = {
       source = import "python-modules.sh" as 'Text,
+      },
+      inputs = {},
     }
   in
 

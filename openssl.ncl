@@ -14,7 +14,10 @@ fun pkgs =>
   in
 
   let buildscript_openssl =
-    recipe.text "buildscript-openssl" {
+    {
+      name = "buildscript-openssl",
+      tag = "Text",
+      config = {
       executable = true,
       source = m%"
         #!/usr/bin/env bash
@@ -40,6 +43,8 @@ fun pkgs =>
 
         cp -vfr doc/* "${MBUILD_INSTALL_DIR}/usr/share/doc/openssl-3.5.2"
       "%,
+      },
+      inputs = {},
     }
   in
 

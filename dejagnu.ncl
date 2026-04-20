@@ -22,7 +22,10 @@ fun pkgs =>
   in
 
   let buildscript_dejagnu =
-    recipe.text "buildscript-dejagnu" {
+    {
+      name = "buildscript-dejagnu",
+      tag = "Text",
+      config = {
       executable = true,
       source = m%"
         #!/usr/bin/env bash
@@ -44,6 +47,8 @@ fun pkgs =>
         rm -f "${MBUILD_INSTALL_DIR}/usr/share/info/dir"
         install -v -m644 doc/dejagnu.html doc/dejagnu.txt "${MBUILD_INSTALL_DIR}/usr/share/doc/dejagnu-1.6.3"
       "%,
+      },
+      inputs = {},
     }
   in
 
