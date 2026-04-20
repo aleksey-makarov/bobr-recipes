@@ -17,10 +17,18 @@ fun pkgs =>
   in
 
   let procps_ng_build_image =
-    recipe.image "procps-ng-build-image" {} pkgs.system_image [
+    {
+      name = "procps-ng-build-image",
+      tag = "Image",
+      config = { ref_name | default = "procps-ng-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image,
+        inputs = [
       pkgs.libcap,
       pkgs.systemd,
-    ]
+    ],
+      },
+    }
   in
 
   let procps_ng =

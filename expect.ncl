@@ -30,9 +30,17 @@ fun pkgs =>
   in
 
   let expect_build_image =
-    recipe.image "expect-build-image" {} pkgs.system_image [
+    {
+      name = "expect-build-image",
+      tag = "Image",
+      config = { ref_name | default = "expect-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image,
+        inputs = [
       pkgs.tcl,
-    ]
+    ],
+      },
+    }
   in
 
   let expect =

@@ -14,11 +14,19 @@ fun pkgs =>
   in
 
   let dejagnu_build_image =
-    recipe.image "dejagnu-build-image" {} pkgs.system_image [
+    {
+      name = "dejagnu-build-image",
+      tag = "Image",
+      config = { ref_name | default = "dejagnu-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image,
+        inputs = [
       pkgs.tcl,
       pkgs.expect,
       pkgs.texinfo,
-    ]
+    ],
+      },
+    }
   in
 
   let buildscript_dejagnu =

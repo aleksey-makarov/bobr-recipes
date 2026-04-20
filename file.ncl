@@ -14,10 +14,18 @@ fun pkgs =>
   in
 
   let file_build_image =
-    recipe.image "file-build-image" {} pkgs.system_image_2 [
+    {
+      name = "file-build-image",
+      tag = "Image",
+      config = { ref_name | default = "file-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image_2,
+        inputs = [
       pkgs.bzip2,
       pkgs.xz,
-    ]
+    ],
+      },
+    }
   in
 
   let file =

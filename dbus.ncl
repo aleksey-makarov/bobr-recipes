@@ -14,10 +14,18 @@ fun pkgs =>
   in
 
   let dbus_build_image =
-    recipe.image "dbus-build-image" {} pkgs.system_image [
+    {
+      name = "dbus-build-image",
+      tag = "Image",
+      config = { ref_name | default = "dbus-build-image" } & {},
+       inputs = {
+        base = pkgs.system_image,
+        inputs = [
       pkgs.libcap,
       pkgs.systemd,
-    ]
+    ],
+      },
+    }
   in
 
   let dbus =

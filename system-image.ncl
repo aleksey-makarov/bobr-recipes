@@ -2,9 +2,15 @@ let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let system_image_0 =
-    recipe.image "system-image-0" {
+    {
+      name = "system-image-0",
+      tag = "Image",
+      config = { ref_name | default = "system-image-0" } & {
       mode = "bootstrap",
-    } null [
+    },
+      inputs = {
+        base = null,
+        inputs = [
       pkgs.base_filesystem,
       pkgs.linux_headers,
       pkgs.glibc_gen1,
@@ -24,13 +30,21 @@ fun pkgs =>
       pkgs.diffutils_gen1,
       pkgs.m4_gen1,
       pkgs.python_gen1,
-    ]
+    ],
+      },
+    }
   in
 
   let system_image_1 =
-    recipe.image "system-image-1" {
+    {
+      name = "system-image-1",
+      tag = "Image",
+      config = { ref_name | default = "system-image-1" } & {
       mode = "bootstrap",
-    } null [
+    },
+      inputs = {
+        base = null,
+        inputs = [
       pkgs.base_filesystem,
       pkgs.linux_headers,
       pkgs.glibc,
@@ -50,13 +64,21 @@ fun pkgs =>
       pkgs.diffutils_gen1,
       pkgs.m4_gen1,
       pkgs.python_gen1,
-    ]
+    ],
+      },
+    }
   in
 
   let system_image_2 =
-    recipe.image "system-image-2" {
+    {
+      name = "system-image-2",
+      tag = "Image",
+      config = { ref_name | default = "system-image-2" } & {
       mode = "bootstrap",
-    } null [
+    },
+      inputs = {
+        base = null,
+        inputs = [
       pkgs.base_filesystem,
       pkgs.linux_headers,
       pkgs.glibc,
@@ -79,11 +101,19 @@ fun pkgs =>
       pkgs.flex,
       pkgs.zlib,
       pkgs.elfutils,
-    ]
+    ],
+      },
+    }
   in
 
   let system_image =
-    recipe.image "system-image" {} pkgs.system_image_2 [
+    {
+      name = "system-image",
+      tag = "Image",
+      config = { ref_name | default = "system-image" } & {},
+      inputs = {
+        base = pkgs.system_image_2,
+        inputs = [
       pkgs.autoconf,
       pkgs.bzip2,
       pkgs.ncurses,
@@ -92,7 +122,9 @@ fun pkgs =>
       pkgs.python,
       pkgs.expat,
       pkgs.libffi,
-    ]
+    ],
+      },
+    }
   in
 
   {

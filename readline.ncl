@@ -17,9 +17,17 @@ fun pkgs =>
   in
 
   let readline_build_image =
-    recipe.image "readline-build-image" {} pkgs.system_image_2 [
+    {
+      name = "readline-build-image",
+      tag = "Image",
+      config = { ref_name | default = "readline-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image_2,
+        inputs = [
       pkgs.ncurses,
-    ]
+    ],
+      },
+    }
   in
 
   let readline =

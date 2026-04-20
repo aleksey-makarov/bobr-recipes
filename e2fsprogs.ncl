@@ -14,10 +14,18 @@ fun pkgs =>
   in
 
   let e2fsprogs_build_image =
-    recipe.image "e2fsprogs-build-image" {} pkgs.system_image [
+    {
+      name = "e2fsprogs-build-image",
+      tag = "Image",
+      config = { ref_name | default = "e2fsprogs-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image,
+        inputs = [
       pkgs.util_linux,
       pkgs.texinfo,
-    ]
+    ],
+      },
+    }
   in
 
   let buildscript_e2fsprogs =

@@ -14,11 +14,19 @@ fun pkgs =>
   in
 
   let kmod_build_image =
-    recipe.image "kmod-build-image" {} pkgs.system_image [
+    {
+      name = "kmod-build-image",
+      tag = "Image",
+      config = { ref_name | default = "kmod-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image,
+        inputs = [
       pkgs.openssl,
       pkgs.xz,
       pkgs.zstd,
-    ]
+    ],
+      },
+    }
   in
 
   let kmod =

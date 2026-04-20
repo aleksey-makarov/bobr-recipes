@@ -17,10 +17,18 @@ fun pkgs =>
   in
 
   let autoconf_build_image =
-    recipe.image "autoconf-build-image" {} pkgs.system_image_2 [
+    {
+      name = "autoconf-build-image",
+      tag = "Image",
+      config = { ref_name | default = "autoconf-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image_2,
+        inputs = [
       pkgs.perl,
       pkgs.inetutils,
-    ]
+    ],
+      },
+    }
   in
 
   let autoconf =

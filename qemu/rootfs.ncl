@@ -2,10 +2,15 @@ let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let qemu_rootfs =
-    recipe.ext4_rootfs "qemu-rootfs" {
+    {
+      name = "qemu-rootfs",
+      tag = "Ext4Rootfs",
+      config = {
       size_mib = 4096,
       label = "qemu-rootfs",
-    } [
+    },
+      inputs = {
+        inputs = [
       pkgs.base_filesystem,
       pkgs.qemu_runtime_files,
       pkgs.man_pages,
@@ -80,7 +85,9 @@ fun pkgs =>
       pkgs.util_linux,
       pkgs.e2fsprogs,
       pkgs.vim,
-    ]
+    ],
+      },
+    }
   in
 
   {

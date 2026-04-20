@@ -14,9 +14,17 @@ fun pkgs =>
   in
 
   let acl_build_image =
-    recipe.image "acl-build-image" {} pkgs.system_image_2 [
+    {
+      name = "acl-build-image",
+      tag = "Image",
+      config = { ref_name | default = "acl-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image_2,
+        inputs = [
       pkgs.attr,
-    ]
+    ],
+      },
+    }
   in
 
   let acl =

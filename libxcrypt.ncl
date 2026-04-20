@@ -14,9 +14,17 @@ fun pkgs =>
   in
 
   let libxcrypt_build_image =
-    recipe.image "libxcrypt-build-image" {} pkgs.system_image_2 [
+    {
+      name = "libxcrypt-build-image",
+      tag = "Image",
+      config = { ref_name | default = "libxcrypt-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image_2,
+        inputs = [
       pkgs.perl,
-    ]
+    ],
+      },
+    }
   in
 
   let libxcrypt =

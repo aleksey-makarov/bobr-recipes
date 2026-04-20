@@ -14,9 +14,17 @@ fun pkgs =>
   in
 
   let intltool_build_image =
-    recipe.image "intltool-build-image" {} pkgs.system_image [
+    {
+      name = "intltool-build-image",
+      tag = "Image",
+      config = { ref_name | default = "intltool-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image,
+        inputs = [
       pkgs.xml_parser,
-    ]
+    ],
+      },
+    }
   in
 
   let intltool =

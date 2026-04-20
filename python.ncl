@@ -139,10 +139,18 @@ fun pkgs =>
   in
 
   let python_build_image =
-    recipe.image "python-build-image" {} pkgs.system_image_2 [
+    {
+      name = "python-build-image",
+      tag = "Image",
+      config = { ref_name | default = "python-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image_2,
+        inputs = [
       pkgs.expat,
       pkgs.libffi,
-    ]
+    ],
+      },
+    }
   in
 
   let python_gen1 =

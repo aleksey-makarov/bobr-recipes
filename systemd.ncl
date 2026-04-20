@@ -27,7 +27,13 @@ fun pkgs =>
   in
 
   let systemd_build_image =
-    recipe.image "systemd-build-image" {} pkgs.system_image [
+    {
+      name = "systemd-build-image",
+      tag = "Image",
+      config = { ref_name | default = "systemd-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image,
+        inputs = [
       pkgs.attr,
       pkgs.acl,
       pkgs.gperf,
@@ -37,7 +43,9 @@ fun pkgs =>
       pkgs.openssl,
       pkgs.util_linux,
       pkgs.xz,
-    ]
+    ],
+      },
+    }
   in
 
   let systemd =

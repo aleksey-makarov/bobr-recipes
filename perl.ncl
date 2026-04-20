@@ -26,11 +26,19 @@ fun pkgs =>
   in
 
   let perl_build_image =
-    recipe.image "perl-build-image" {} pkgs.system_image_2 [
+    {
+      name = "perl-build-image",
+      tag = "Image",
+      config = { ref_name | default = "perl-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image_2,
+        inputs = [
       pkgs.zlib,
       pkgs.bzip2,
       pkgs.less,
-    ]
+    ],
+      },
+    }
   in
 
   let perl =

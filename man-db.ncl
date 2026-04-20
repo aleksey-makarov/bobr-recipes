@@ -14,11 +14,19 @@ fun pkgs =>
   in
 
   let man_db_build_image =
-    recipe.image "man-db-build-image" {} pkgs.system_image [
+    {
+      name = "man-db-build-image",
+      tag = "Image",
+      config = { ref_name | default = "man-db-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image,
+        inputs = [
       pkgs.gdbm,
       pkgs.groff,
       pkgs.libpipeline,
-    ]
+    ],
+      },
+    }
   in
 
   let man_db =

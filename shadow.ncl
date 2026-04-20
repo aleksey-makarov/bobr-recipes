@@ -14,9 +14,17 @@ fun pkgs =>
   in
 
   let shadow_build_image =
-    recipe.image "shadow-build-image" {} pkgs.system_image_2 [
+    {
+      name = "shadow-build-image",
+      tag = "Image",
+      config = { ref_name | default = "shadow-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image_2,
+        inputs = [
       pkgs.libxcrypt,
-    ]
+    ],
+      },
+    }
   in
 
   let shadow =

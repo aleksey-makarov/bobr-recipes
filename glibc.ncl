@@ -30,9 +30,17 @@ fun pkgs =>
   in
 
   let glibc_bootstrap_image =
-    recipe.image "glibc-bootstrap-image" {
+    {
+      name = "glibc-bootstrap-image",
+      tag = "Image",
+      config = { ref_name | default = "glibc-bootstrap-image" } & {
       mode = "layered",
-    } pkgs.host_image [pkgs.gawk_gen1, pkgs.bison_gen1]
+    },
+      inputs = {
+        base = pkgs.host_image,
+        inputs = [pkgs.gawk_gen1, pkgs.bison_gen1],
+      },
+    }
   in
 
   let glibc_gen1 =

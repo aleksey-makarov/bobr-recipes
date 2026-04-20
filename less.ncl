@@ -14,9 +14,17 @@ fun pkgs =>
   in
 
   let less_build_image =
-    recipe.image "less-build-image" {} pkgs.system_image_2 [
+    {
+      name = "less-build-image",
+      tag = "Image",
+      config = { ref_name | default = "less-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image_2,
+        inputs = [
       pkgs.ncurses,
-    ]
+    ],
+      },
+    }
   in
 
   let less =

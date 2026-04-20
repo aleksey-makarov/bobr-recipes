@@ -17,9 +17,17 @@ fun pkgs =>
   in
 
   let mpfr_build_image =
-    recipe.image "mpfr-build-image" {} pkgs.system_image [
+    {
+      name = "mpfr-build-image",
+      tag = "Image",
+      config = { ref_name | default = "mpfr-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image,
+        inputs = [
       pkgs.gmp,
-    ]
+    ],
+      },
+    }
   in
 
   let mpfr =

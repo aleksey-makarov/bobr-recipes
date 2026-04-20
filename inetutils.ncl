@@ -17,9 +17,17 @@ fun pkgs =>
   in
 
   let inetutils_build_image =
-    recipe.image "inetutils-build-image" {} pkgs.system_image_2 [
+    {
+      name = "inetutils-build-image",
+      tag = "Image",
+      config = { ref_name | default = "inetutils-build-image" } & {},
+      inputs = {
+        base = pkgs.system_image_2,
+        inputs = [
       pkgs.ncurses,
-    ]
+    ],
+      },
+    }
   in
 
   let inetutils =
