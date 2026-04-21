@@ -25,27 +25,6 @@ let default_binary_sequence = [
   },
 ]
 in
-let autotools_default_steps = [
-  {
-    name = "configure",
-    run_as = "build-user",
-    cwd = "${build}",
-    argv = ["${in0}", "configure"],
-  },
-  {
-    name = "build",
-    run_as = "build-user",
-    cwd = "${build}",
-    argv = ["${in0}", "build"],
-  },
-  {
-    name = "install",
-    run_as = "root",
-    cwd = "${build}",
-    argv = ["${in0}", "install"],
-  },
-]
-in
 let buildscript_autotools = {
   name = "buildscript-autotools",
   tag = "Text",
@@ -56,7 +35,125 @@ let buildscript_autotools = {
   inputs = {},
 }
 in
-let identity = fun x => x in
+let record_get_or = fun field =>
+  fun fallback =>
+    fun record =>
+      if std.record.has_field field record then
+        std.record.get field record
+      else
+        fallback
+in
+let autotools_source_root_expr = fun node_config =>
+  if std.record.has_field "source_subdir" node_config then
+    "${source}/" ++ node_config.source_subdir
+  else
+    "${source}"
+in
+let lower_autotools_node = fun node =>
+  let node_config = node.config in
+  let source_root_expr = autotools_source_root_expr node_config in
+  let normalize_step = fun pre_configure_step =>
+    if std.record.has_field "cwd" pre_configure_step then
+      pre_configure_step
+    else
+      std.record.insert "cwd" source_root_expr pre_configure_step
+  in
+  let pre_configure_steps =
+    if std.record.has_field "pre_configure" node_config then
+      if std.is_array node_config.pre_configure then
+        std.array.map normalize_step node_config.pre_configure
+      else
+        [normalize_step node_config.pre_configure]
+    else
+      []
+  in
+  let lowered_script_config =
+    let with_configure_args =
+      if std.record.has_field "configure_args" node_config then
+        { configure_args = node_config.configure_args }
+      else
+        {}
+    in
+    let with_make_args =
+      if std.record.has_field "make_args" node_config then
+        std.record.insert "make_args" node_config.make_args with_configure_args
+      else
+        with_configure_args
+    in
+    let with_env =
+      if std.record.has_field "env" node_config then
+        std.record.insert "env" node_config.env with_make_args
+      else
+        with_make_args
+    in
+    let with_source_subdir =
+      if std.record.has_field "source_subdir" node_config then
+        std.record.insert "source_subdir" node_config.source_subdir with_env
+      else
+        with_env
+    in
+    if record_get_or "in-tree" false node_config then
+      std.record.insert "in-tree" "true" with_source_subdir
+    else
+      with_source_subdir
+  in
+  let autotools_step_env = {
+    MBUILD_SOURCE_DIR = "${source}",
+    MBUILD_IN1 = "${source}",
+  }
+  in
+  {
+    name = node.name,
+    tag = "Binary",
+    config = (
+      {
+        steps =
+          pre_configure_steps
+          @ [
+            {
+              name = "configure",
+              run_as = "build-user",
+              cwd = "${build}",
+              argv = ["${script}", "configure"],
+              env = autotools_step_env,
+            },
+            {
+              name = "build",
+              run_as = "build-user",
+              cwd = "${build}",
+              argv = ["${script}", "build"],
+              env = autotools_step_env,
+            },
+            {
+              name = "install",
+              run_as = "root",
+              cwd = "${build}",
+              argv = ["${script}", "install"],
+              env = autotools_step_env,
+            },
+          ],
+        script_config = lowered_script_config,
+      }
+      & (
+        if std.record.has_field "install" node_config then
+          { install = node_config.install }
+        else
+          {}
+      )
+    ),
+    inputs =
+      std.record.insert
+        "script"
+        buildscript_autotools
+        node.inputs,
+  }
+in
+let lower_node = fun node =>
+  if node.tag == "Autotools" then
+    lower_autotools_node node
+  else
+    node
+in
 let append_steps_fn = fun new_steps =>
   fun steps => steps @ new_steps
 in
@@ -151,16 +248,18 @@ in
   },
 
   to_request = fun root_node =>
+    let lowered_root_node = lower_node root_node in
     let rec collect = fun seen =>
       fun node =>
-        if std.record.has_field node.name seen then
+        let lowered_node = lower_node node in
+        if std.record.has_field lowered_node.name seen then
           seen
         else
-          let seen_with_node = std.record.insert node.name node seen in
+          let seen_with_node = std.record.insert lowered_node.name lowered_node seen in
           std.array.fold_left
             (fun acc =>
               fun slot_name =>
-                let input = std.record.get slot_name node.inputs in
+                let input = std.record.get slot_name lowered_node.inputs in
                 if input == null then
                   acc
                 else if std.is_array input then
@@ -172,11 +271,11 @@ in
                   collect acc input
             )
             seen_with_node
-            (std.record.fields node.inputs)
+            (std.record.fields lowered_node.inputs)
     in
 
-    let unique_nodes = collect {} root_node in
-    let root_name = root_node.name in
+    let unique_nodes = collect {} lowered_root_node in
+    let root_name = lowered_root_node.name in
     let other_names =
       std.array.sort
         std.string.compare
@@ -214,7 +313,7 @@ in
     std.record.from_array (
       std.array.map
         (fun name =>
-          let node = std.record.get name unique_nodes in
+          let node = lower_node (std.record.get name unique_nodes) in
           {
             field = std.record.get name name_to_id,
             value = {
@@ -244,55 +343,4 @@ in
               "in" = input_nodes,
             },
           },
-
-  autotools = {
-    binary = fun recipe_name =>
-      fun recipe_config =>
-        fun image_input =>
-          fun source_inputs =>
-            let step_transform =
-              if std.record.has_field "step_transform" recipe_config then
-                std.record.get "step_transform" recipe_config
-              else
-                identity
-            in
-            let script_config =
-              if std.record.has_field "script_config" recipe_config then
-                std.record.get "script_config" recipe_config
-              else
-                {}
-            in
-            let in_tree =
-              if std.record.has_field "in-tree" recipe_config then
-                std.record.get "in-tree" recipe_config
-              else
-                false
-            in
-            let final_script_config =
-              if in_tree then
-                std.record.insert "in-tree" "true" script_config
-              else
-                script_config
-            in
-            {
-              name = recipe_name,
-              tag = "Binary",
-              config = (
-                {
-                  steps = step_transform autotools_default_steps,
-                  script_config = final_script_config,
-                }
-                & (
-                  if std.record.has_field "install" recipe_config then
-                    { install = recipe_config.install }
-                  else
-                    {}
-                )
-              ),
-              inputs = {
-                image = image_input,
-                "in" = [buildscript_autotools] @ source_inputs,
-              },
-            },
-  },
 }

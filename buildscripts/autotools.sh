@@ -28,31 +28,39 @@ append_dir_files_to_array() {
 }
 
 resolve_project_source_dir() {
+  local source_subdir=""
+
   if [ ! -d "$source_dir" ]; then
     echo "autotools build-script: source input is not a directory: ${source_dir}" >&2
     exit 1
   fi
 
-  if [ -x "$source_dir/configure" ]; then
-    printf '%s\n' "$source_dir"
-    return
+  if [ -f "${cfg}/source_subdir" ]; then
+    source_subdir="$(cat "${cfg}/source_subdir")"
+    case "$source_subdir" in
+      ""|/*|*"/../"*|../*|*"./"*|*"/.."|"..")
+        echo "autotools build-script: invalid source_subdir '${source_subdir}'" >&2
+        exit 1
+        ;;
+    esac
   fi
 
-  local candidates=()
-  local d
-  for d in "$source_dir"/*; do
-    if [ -d "$d" ] && [ -x "$d/configure" ]; then
-      candidates+=("$d")
-    fi
-  done
-
-  if [ "${#candidates[@]}" -eq 1 ]; then
-    printf '%s\n' "${candidates[0]}"
-    return
+  local project_source_dir="$source_dir"
+  if [ -n "$source_subdir" ]; then
+    project_source_dir="${source_dir}/${source_subdir}"
   fi
 
-  echo "autotools build-script: ./configure not found in ${source_dir}" >&2
-  exit 1
+  if [ ! -d "$project_source_dir" ]; then
+    echo "autotools build-script: project source dir is not a directory: ${project_source_dir}" >&2
+    exit 1
+  fi
+
+  if [ ! -x "$project_source_dir/configure" ]; then
+    echo "autotools build-script: ./configure not found in ${project_source_dir}" >&2
+    exit 1
+  fi
+
+  printf '%s\n' "$project_source_dir"
 }
 
 resolve_in_tree() {

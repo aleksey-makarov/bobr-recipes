@@ -37,33 +37,50 @@ fun pkgs =>
       },
     inputs = {
       base = pkgs.host_image,
-      inputs = [pkgs.gawk_gen1, pkgs.bison_gen1],
+      in000 = pkgs.gawk_gen1,
+      in001 = pkgs.bison_gen1,
     },
   }
   in
 
-  let glibc_gen1 =
-    recipe.binary
-      "glibc-gen1-2.42"
-      {
-        script_config = {
-          build_dir = "build",
-          pre_configure = m%"
-          patch -Np1 -i /in/sources1
-          mkdir -p build
-          echo "rootsbindir=/usr/sbin" > build/configparms
-        "%,
-          configure_args = [
-            "libc_cv_slibdir=/usr/lib64",
-            "--disable-nscd",
-            "--without-selinux",
-            "--enable-kernel=5.4",
+  let glibc_gen1 = {
+    name = "glibc-gen1-2.42",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "libc_cv_slibdir=/usr/lib64",
+        "--disable-nscd",
+        "--without-selinux",
+        "--enable-kernel=5.4",
+      ],
+      pre_configure = [
+        {
+          name = "apply_fhs_patch",
+          run_as = "build-user",
+          argv = [
+            "patch",
+            "-Np1",
+            "-i",
+            "${fhs_patch}",
           ],
         },
-      }
-      glibc_bootstrap_image
-      pkgs.buildscript_autotools
-      [glibc_src, glibc_fhs_patch_2_42]
+        {
+          name = "write_configparms",
+          run_as = "build-user",
+          argv = [
+            "/bin/sh",
+            "-ec",
+            "echo \"rootsbindir=/usr/sbin\" > \"${build}/configparms\"",
+          ],
+        },
+      ],
+    },
+    inputs = {
+      image = glibc_bootstrap_image,
+      source = glibc_src,
+      fhs_patch = glibc_fhs_patch_2_42,
+    },
+  }
   in
 
   let glibc =

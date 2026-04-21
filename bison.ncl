@@ -15,12 +15,15 @@ fun pkgs =>
   }
   in
 
-  let bison_gen1 =
-    recipe.autotools.binary
-      "bison-gen1-3.8.2"
-      {}
-      pkgs.host_image
-      [bison_src]
+  let bison_gen1 = {
+    name = "bison-gen1-3.8.2",
+    tag = "Autotools",
+    config = {},
+    inputs = {
+      image = pkgs.host_image,
+      source = bison_src,
+    },
+  }
   in
 
   let bison =
