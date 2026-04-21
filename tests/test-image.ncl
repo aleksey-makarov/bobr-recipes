@@ -12,18 +12,28 @@ fun pkgs =>
   }
   in
 
-  let test_system_image_0 =
-    recipe.binary
-      "test-system-image-0"
-      {
-        script_config = {
-          check_live_usr = "true",
-          name = "system-image-0",
+  let test_system_image_0 = {
+    name = "test-system-image-0",
+    tag = "Binary",
+    config = {
+      script_config = {
+        check_live_usr = "true",
+        name = "system-image-0",
+      },
+      steps = [
+        {
+          name = "check_image",
+          run_as = "root",
+          cwd = "${out}",
+          argv = ["${script}"],
         },
-      }
-      pkgs.system_image_0
-      buildscript_test_image
-      []
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_0,
+      script = buildscript_test_image,
+    },
+  }
   in
 
   let test_system_image_1 =

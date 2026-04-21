@@ -21,25 +21,24 @@ fun pkgs =>
   }
   in
 
-  let binutils_gen1 =
-    recipe.binary
-      gen1_name
-      {
-        script_config = {
-          build_dir = "build",
-          configure_args = [
-            "--disable-nls",
-            "--without-zstd",
-            "--enable-gprofng=no",
-            "--disable-werror",
-            "--enable-new-dtags",
-            "--enable-default-hash-style=gnu",
-          ],
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [binutils_src]
+  let binutils_gen1 = {
+    name = gen1_name,
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-nls",
+        "--without-zstd",
+        "--enable-gprofng=no",
+        "--disable-werror",
+        "--enable-new-dtags",
+        "--enable-default-hash-style=gnu",
+      ],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = binutils_src,
+    },
+  }
   in
 
   let binutils =

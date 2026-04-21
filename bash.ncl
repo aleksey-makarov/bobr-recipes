@@ -15,21 +15,30 @@ fun pkgs =>
   }
   in
 
-  let bash_gen1 =
-    recipe.binary
-      "bash-gen1-5.3"
-      {
-        script_config = {
-          configure_args = [
-            "--without-bash-malloc",
-            "--disable-readline",
-          ],
-          post_install = "ln -svf bash \"${MBUILD_INSTALL_DIR}/usr/bin/sh\"",
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [bash_src]
+  let bash_gen1 = {
+    name = "bash-gen1-5.3",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--without-bash-malloc",
+        "--disable-readline",
+      ],
+      post_install = {
+        name = "link_sh",
+        run_as = "root",
+        argv = [
+          "ln",
+          "-svf",
+          "bash",
+          "${out}/usr/bin/sh",
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = bash_src,
+    },
+  }
   in
 
   let bash =

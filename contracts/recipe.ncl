@@ -3,6 +3,7 @@ let KnownTags = [
   "Text",
   "Tree",
   "ContainerImage",
+  "Autotools",
   "Binary",
   "Ext4Rootfs",
   "Image",
@@ -185,6 +186,31 @@ let BinaryConfig = {
     | doc "Optional install metadata for the published directory output.",
 }
 in
+let HookStep = {
+  name | String,
+  run_as | std.contract.from_predicate (fun value => std.array.elem value ["build-user", "root"]),
+  cwd | String | optional,
+  argv | Array String,
+  env | Dyn | optional,
+}
+in
+let AutotoolsHook =
+  std.contract.any_of [
+    HookStep,
+    Array HookStep,
+  ]
+in
+let AutotoolsConfig = {
+  configure_args | Array String | optional,
+  make_args | Array String | optional,
+  env | Dyn | optional,
+  "in-tree" | Bool | optional,
+  source_subdir | String | optional,
+  pre_configure | AutotoolsHook | optional,
+  post_install | AutotoolsHook | optional,
+  install | InstallMeta | optional,
+}
+in
 let ImageConfig = {
   ref_name
     | String
@@ -214,46 +240,27 @@ let TreeInputs = {}
 in
 let ContainerImageInputs = {}
 in
-let BinaryLegacyInputsShape = {
+let BinaryInputsShape = {
   image
     | Dyn
     | doc "Single recipe node for the container image input.",
-  script
-    | Dyn
-    | doc "Single recipe node for the build script input.",
-  sources
-    | Array Dyn
-    | doc "Repeated recipe nodes for source inputs.",
+  ..
 }
-in
-let BinaryV2InputsShape = {
-  image
-    | Dyn
-    | doc "Single recipe node for the container image input.",
-  "in"
-    | Array Dyn
-    | doc "Ordered repeated recipe nodes for generic input mounts.",
-}
-in
-let BinaryInputsShape =
-  std.contract.any_of [
-    BinaryLegacyInputsShape,
-    BinaryV2InputsShape,
-  ]
 in
 let ImageInputsShape = {
   base
     | Dyn
-    | doc "Optional base image recipe node or null.",
-  inputs
-    | Array Dyn
-    | doc "Repeated recipe nodes providing image layer inputs.",
+    | optional
+    | doc "Optional base image recipe node.",
+  ..
 }
 in
-let Ext4RootfsInputsShape = {
-  inputs
-    | Array Dyn
-    | doc "Repeated recipe nodes providing installable filesystem tree inputs.",
+let Ext4RootfsInputsShape = { .. }
+in
+let AutotoolsInputsShape = {
+  image | Dyn,
+  source | Dyn,
+  ..
 }
 in
 let ValidateRecipeShallow = fun recipe =>
@@ -303,6 +310,11 @@ let ValidateRecipeShallow = fun recipe =>
     & {
       config = checked.config | ContainerImageConfig,
     }
+  else if checked.tag == "Autotools" then
+    checked
+    & {
+      config = checked.config | AutotoolsConfig,
+    }
   else if checked.tag == "Binary" then
     checked
     & {
@@ -346,6 +358,12 @@ let rec ValidateRecipe = fun recipe =>
   let validate_container_image_inputs = fun inputs =>
     inputs | ContainerImageInputs
   in
+  let validate_autotools_inputs = fun inputs =>
+    let checked = inputs | AutotoolsInputsShape in
+    std.record.map
+      (fun _ input => ValidateRecipe input)
+      checked
+  in
   let validate_tree_config = fun config =>
     let checked = config | TreeConfig in
     checked
@@ -359,38 +377,21 @@ let rec ValidateRecipe = fun recipe =>
   in
   let validate_binary_inputs = fun inputs =>
     let checked = inputs | BinaryInputsShape in
-    if std.record.has_field "in" checked then
+    std.record.map
+      (fun _ input => ValidateRecipe input)
       checked
-      & {
-        image = ValidateRecipe checked.image,
-        "in" = std.array.map ValidateRecipe checked."in",
-      }
-    else
-      checked
-      & {
-        image = ValidateRecipe checked.image,
-        script = ValidateRecipe checked.script,
-        sources = std.array.map ValidateRecipe checked.sources,
-      }
   in
   let validate_image_inputs = fun inputs =>
     let checked = inputs | ImageInputsShape in
-    checked
-    & {
-      base =
-        if checked.base == null then
-          null
-        else
-          ValidateRecipe checked.base,
-      inputs = std.array.map ValidateRecipe checked.inputs,
-    }
+    std.record.map
+      (fun _ input => ValidateRecipe input)
+      checked
   in
   let validate_ext4_rootfs_inputs = fun inputs =>
     let checked = inputs | Ext4RootfsInputsShape in
-    checked
-    & {
-      inputs = std.array.map ValidateRecipe checked.inputs,
-    }
+    std.record.map
+      (fun _ input => ValidateRecipe input)
+      checked
   in
   if checked.tag == "Fetch" then
     checked
@@ -415,6 +416,12 @@ let rec ValidateRecipe = fun recipe =>
     & {
       config = checked.config | ContainerImageConfig,
       inputs = validate_container_image_inputs checked.inputs,
+    }
+  else if checked.tag == "Autotools" then
+    checked
+    & {
+      config = checked.config | AutotoolsConfig,
+      inputs = validate_autotools_inputs checked.inputs,
     }
   else if checked.tag == "Binary" then
     checked
@@ -455,6 +462,9 @@ in
   container_image_config
     | doc "Config contract for `ContainerImage` recipe nodes."
     = ContainerImageConfig,
+  autotools_config
+    | doc "Config contract for synthetic `Autotools` recipe nodes."
+    = AutotoolsConfig,
   binary_config
     | doc "Config contract for `Binary` recipe nodes."
     = BinaryConfig,

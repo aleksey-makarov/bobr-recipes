@@ -52,20 +52,27 @@ in
 let lower_autotools_node = fun node =>
   let node_config = node.config in
   let source_root_expr = autotools_source_root_expr node_config in
-  let normalize_step = fun pre_configure_step =>
-    if std.record.has_field "cwd" pre_configure_step then
-      pre_configure_step
-    else
-      std.record.insert "cwd" source_root_expr pre_configure_step
+  let normalize_steps = fun field_name =>
+    fun default_cwd =>
+      if std.record.has_field field_name node_config then
+        let normalize_step = fun step =>
+          if std.record.has_field "cwd" step then
+            step
+          else
+            std.record.insert "cwd" default_cwd step
+        in
+        if std.is_array (std.record.get field_name node_config) then
+          std.array.map normalize_step (std.record.get field_name node_config)
+        else
+          [normalize_step (std.record.get field_name node_config)]
+      else
+        []
   in
   let pre_configure_steps =
-    if std.record.has_field "pre_configure" node_config then
-      if std.is_array node_config.pre_configure then
-        std.array.map normalize_step node_config.pre_configure
-      else
-        [normalize_step node_config.pre_configure]
-    else
-      []
+    normalize_steps "pre_configure" source_root_expr
+  in
+  let post_install_steps =
+    normalize_steps "post_install" "${out}"
   in
   let lowered_script_config =
     let with_configure_args =
@@ -131,7 +138,8 @@ let lower_autotools_node = fun node =>
               argv = ["${script}", "install"],
               env = autotools_step_env,
             },
-          ],
+          ]
+          @ post_install_steps,
         script_config = lowered_script_config,
       }
       & (

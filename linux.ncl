@@ -30,13 +30,50 @@ fun pkgs =>
   }
   in
 
-  let linux_headers =
-    recipe.binary
-      headers_name
-      {}
-      pkgs.host_image
-      buildscript_linux_headers
-      [linux_src]
+  let linux_headers = {
+    name = headers_name,
+    tag = "Binary",
+    config = {
+      steps = [
+        {
+          name = "configure",
+          run_as = "build-user",
+          cwd = "${build}",
+          argv = ["${script}", "configure"],
+          env = {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+        },
+        {
+          name = "build",
+          run_as = "build-user",
+          cwd = "${build}",
+          argv = ["${script}", "build"],
+          env = {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+        },
+        {
+          name = "install",
+          run_as = "root",
+          cwd = "${build}",
+          argv = ["${script}", "install"],
+          env = {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+        },
+      ],
+      script_config = {},
+    },
+    inputs = {
+      image = pkgs.host_image,
+      script = buildscript_linux_headers,
+      source = linux_src,
+    },
+  }
   in
 
   {

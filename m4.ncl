@@ -15,15 +15,15 @@ fun pkgs =>
   }
   in
 
-  let m4_gen1 =
-    recipe.binary
-      "m4-gen1-1.4.20"
-      {
-        script_config = {},
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [m4_src]
+  let m4_gen1 = {
+    name = "m4-gen1-1.4.20",
+    tag = "Autotools",
+    config = {},
+    inputs = {
+      image = pkgs.host_image,
+      source = m4_src,
+    },
+  }
   in
 
   let m4 =

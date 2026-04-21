@@ -15,17 +15,17 @@ fun pkgs =>
   }
   in
 
-  let patch_gen1 =
-    recipe.binary
-      "patch-gen1-2.8"
-      {
-        script_config = {
-          configure_args = ["--disable-nls"],
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [patch_src]
+  let patch_gen1 = {
+    name = "patch-gen1-2.8",
+    tag = "Autotools",
+    config = {
+      configure_args = ["--disable-nls"],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = patch_src,
+    },
+  }
   in
 
   let patch =

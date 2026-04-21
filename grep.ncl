@@ -15,17 +15,17 @@ fun pkgs =>
   }
   in
 
-  let grep_gen1 =
-    recipe.binary
-      "grep-gen1-3.12"
-      {
-        script_config = {
-          configure_args = ["--disable-nls", "--disable-perl-regexp"],
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [grep_src]
+  let grep_gen1 = {
+    name = "grep-gen1-3.12",
+    tag = "Autotools",
+    config = {
+      configure_args = ["--disable-nls", "--disable-perl-regexp"],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = grep_src,
+    },
+  }
   in
 
   let grep =

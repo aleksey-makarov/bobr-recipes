@@ -15,20 +15,20 @@ fun pkgs =>
   }
   in
 
-  let tar_gen1 =
-    recipe.binary
-      "tar-gen1-1.35"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-nls",
-            "--without-selinux",
-          ],
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [tar_src]
+  let tar_gen1 = {
+    name = "tar-gen1-1.35",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-nls",
+        "--without-selinux",
+      ],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = tar_src,
+    },
+  }
   in
 
   let tar =

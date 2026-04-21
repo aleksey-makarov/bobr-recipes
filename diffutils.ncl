@@ -15,18 +15,18 @@ fun pkgs =>
   }
   in
 
-  let diffutils_gen1 =
-    recipe.binary
-      "diffutils-gen1-3.12"
-      {
-        script_config = {
-          configure_args = ["--disable-nls"],
-          env = { gl_cv_func_strcasecmp_works = "y" },
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [diffutils_src]
+  let diffutils_gen1 = {
+    name = "diffutils-gen1-3.12",
+    tag = "Autotools",
+    config = {
+      configure_args = ["--disable-nls"],
+      env = { gl_cv_func_strcasecmp_works = "y" },
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = diffutils_src,
+    },
+  }
   in
 
   let diffutils =

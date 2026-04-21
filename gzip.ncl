@@ -15,17 +15,17 @@ fun pkgs =>
   }
   in
 
-  let gzip_gen1 =
-    recipe.binary
-      "gzip-gen1-1.14"
-      {
-        script_config = {
-          configure_args = ["--disable-nls"],
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [gzip_src]
+  let gzip_gen1 = {
+    name = "gzip-gen1-1.14",
+    tag = "Autotools",
+    config = {
+      configure_args = ["--disable-nls"],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = gzip_src,
+    },
+  }
   in
 
   let gzip =

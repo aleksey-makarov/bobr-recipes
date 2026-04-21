@@ -15,17 +15,17 @@ fun pkgs =>
   }
   in
 
-  let make_gen1 =
-    recipe.binary
-      "make-gen1-4.4.1"
-      {
-        script_config = {
-          configure_args = ["--disable-nls"],
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [make_src]
+  let make_gen1 = {
+    name = "make-gen1-4.4.1",
+    tag = "Autotools",
+    config = {
+      configure_args = ["--disable-nls"],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = make_src,
+    },
+  }
   in
 
   let make =

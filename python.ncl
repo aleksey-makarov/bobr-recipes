@@ -142,43 +142,60 @@ fun pkgs =>
   }
   in
 
-  let python_gen1 =
-    recipe.binary
-      "python-gen1-3.13.7"
-      {
-        script_config = {
-          build_layout = "in-tree",
-          pre_configure = m%"
-          cat > Modules/Setup.local <<'EOF_INNER'
-          # Minimal bootstrap Python: keep a self-contained interpreter and
-          # disable optional extension modules that would otherwise auto-detect
-          # host libraries and leak them into system-image-0.
-          *disabled*
-          _uuid
-          _ssl
-          _hashlib
-          _lzma
-          binascii
-          zlib
-          _gdbm
-          _ctypes
-          _sqlite3
-          _bz2
-          _curses_panel
-          _dbm
-          readline
-          _curses
-          EOF_INNER
-        "%,
-          configure_args = [
-            "--without-ensurepip",
-          ],
-          post_install = "ln -svf python3 \"${MBUILD_INSTALL_DIR}/usr/bin/python\"",
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [python_src]
+  let python_gen1 = {
+    name = "python-gen1-3.13.7",
+    tag = "Autotools",
+    config = {
+      in-tree = true,
+      pre_configure = {
+        name = "write_setup_local",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            cat > Modules/Setup.local <<'EOF_INNER'
+            # Minimal bootstrap Python: keep a self-contained interpreter and
+            # disable optional extension modules that would otherwise auto-detect
+            # host libraries and leak them into system-image-0.
+            *disabled*
+            _uuid
+            _ssl
+            _hashlib
+            _lzma
+            binascii
+            zlib
+            _gdbm
+            _ctypes
+            _sqlite3
+            _bz2
+            _curses_panel
+            _dbm
+            readline
+            _curses
+            EOF_INNER
+          "%,
+        ],
+      },
+      configure_args = [
+        "--without-ensurepip",
+      ],
+      post_install = {
+        name = "link_python",
+        run_as = "root",
+        argv = [
+          "ln",
+          "-svf",
+          "python3",
+          "${out}/usr/bin/python",
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = python_src,
+    },
+  }
   in
 
   let python =

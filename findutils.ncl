@@ -15,21 +15,21 @@ fun pkgs =>
   }
   in
 
-  let findutils_gen1 =
-    recipe.binary
-      "findutils-gen1-4.10.0"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-nls",
-            "--without-selinux",
-            "--localstatedir=/var/lib/locate",
-          ],
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [findutils_src]
+  let findutils_gen1 = {
+    name = "findutils-gen1-4.10.0",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-nls",
+        "--without-selinux",
+        "--localstatedir=/var/lib/locate",
+      ],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = findutils_src,
+    },
+  }
   in
 
   let findutils =
