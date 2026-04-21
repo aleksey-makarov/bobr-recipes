@@ -1,28 +1,32 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let attr_src =
-    {
-      name = "attr-src-2.5.2",
-      tag = "Fetch",
-      config = {
+  let attr_src = {
+    name = "attr-src-2.5.2",
+    tag = "Fetch",
+    config = {
       url = "https://download.savannah.gnu.org/releases/attr/attr-2.5.2.tar.gz",
       hash = "md5:227043ec2f6ca03c0948df5517f9c927",
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
   let attr =
-    recipe.binary "attr-2.5.2" {
-      script_config = {
-        configure_args = [
-          "--disable-static",
-          "--sysconfdir=/etc",
-          "--docdir=/usr/share/doc/attr-2.5.2",
-        ],
-      },
-    } pkgs.system_image_2 pkgs.buildscript_autotools [attr_src]
+    recipe.binary
+      "attr-2.5.2"
+      {
+        script_config = {
+          configure_args = [
+            "--disable-static",
+            "--sysconfdir=/etc",
+            "--docdir=/usr/share/doc/attr-2.5.2",
+          ],
+        },
+      }
+      pkgs.system_image_2
+      pkgs.buildscript_autotools
+      [attr_src]
   in
 
   {

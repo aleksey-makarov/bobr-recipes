@@ -1,43 +1,43 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let dbus_src =
-    {
-      name = "dbus-src-1.16.2",
-      tag = "Fetch",
-      config = {
+  let dbus_src = {
+    name = "dbus-src-1.16.2",
+    tag = "Fetch",
+    config = {
       url = "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz",
       hash = "md5:97832e6f0a260936d28536e5349c22e5",
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
-  let dbus_build_image =
-    {
-      name = "dbus-build-image",
-      tag = "Image",
-      config = { ref_name | default = "dbus-build-image" } & {},
-       inputs = {
-        base = pkgs.system_image,
-        inputs = [
-      pkgs.libcap,
-      pkgs.systemd,
-    ],
-      },
-    }
+  let dbus_build_image = {
+    name = "dbus-build-image",
+    tag = "Image",
+    config = { ref_name | default = "dbus-build-image" } & {},
+    inputs = {
+      base = pkgs.system_image,
+      inputs = [
+        pkgs.libcap,
+        pkgs.systemd,
+      ],
+    },
+  }
   in
 
   let dbus =
-    recipe.binary "dbus-1.16.2" {
-      script_config = {
-        setup_args = [
-          "--buildtype=release",
-          "--wrap-mode=nofallback",
-          "-Dsystemd=enabled",
-          "-Dsystemd_system_unitdir=/usr/lib/systemd/system",
-        ],
-        post_install = m%"
+    recipe.binary
+      "dbus-1.16.2"
+      {
+        script_config = {
+          setup_args = [
+            "--buildtype=release",
+            "--wrap-mode=nofallback",
+            "-Dsystemd=enabled",
+            "-Dsystemd_system_unitdir=/usr/lib/systemd/system",
+          ],
+          post_install = m%"
           dbus_src_root=/in/sources0
 
           install -vdm755 \
@@ -76,8 +76,11 @@ fun pkgs =>
           install -vdm755 ${MBUILD_INSTALL_DIR}/var/lib/dbus
           ln -sfv /etc/machine-id ${MBUILD_INSTALL_DIR}/var/lib/dbus/machine-id
         "%,
-      },
-    } dbus_build_image pkgs.buildscript_meson [dbus_src]
+        },
+      }
+      dbus_build_image
+      pkgs.buildscript_meson
+      [dbus_src]
   in
 
   {

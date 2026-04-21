@@ -1,45 +1,49 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let util_linux_src =
-    {
-      name = "util-linux-src-2.41.1",
-      tag = "Fetch",
-      config = {
+  let util_linux_src = {
+    name = "util-linux-src-2.41.1",
+    tag = "Fetch",
+    config = {
       url = "https://www.kernel.org/pub/linux/utils/util-linux/v2.41/util-linux-2.41.1.tar.xz",
       hash = "md5:7e5e68845e2f347cf96f5448165f1764",
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
   let util_linux =
-    recipe.binary "util-linux-2.41.1" {
-      script_config = {
-        pre_configure = m%"
+    recipe.binary
+      "util-linux-2.41.1"
+      {
+        script_config = {
+          pre_configure = m%"
           sed -i 's#chgrp tty $(DESTDIR)$(usrbin_execdir)/wall#chgrp root $(DESTDIR)$(usrbin_execdir)/wall#' Makefile.in
           sed -i 's#chgrp tty $(DESTDIR)$(usrbin_execdir)/write#chgrp root $(DESTDIR)$(usrbin_execdir)/write#' Makefile.in
         "%,
-        configure_args = [
-          "--bindir=/usr/bin",
-          "--libdir=/usr/lib",
-          "--runstatedir=/run",
-          "--sbindir=/usr/sbin",
-          "--disable-chfn-chsh",
-          "--disable-login",
-          "--disable-nologin",
-          "--disable-su",
-          "--disable-setpriv",
-          "--disable-runuser",
-          "--disable-pylibmount",
-          "--disable-liblastlog2",
-          "--disable-static",
-          "--without-python",
-          "ADJTIME_PATH=/var/lib/hwclock/adjtime",
-          "--docdir=/usr/share/doc/util-linux-2.41.1",
-        ],
-      },
-    } pkgs.system_image pkgs.buildscript_autotools [util_linux_src]
+          configure_args = [
+            "--bindir=/usr/bin",
+            "--libdir=/usr/lib",
+            "--runstatedir=/run",
+            "--sbindir=/usr/sbin",
+            "--disable-chfn-chsh",
+            "--disable-login",
+            "--disable-nologin",
+            "--disable-su",
+            "--disable-setpriv",
+            "--disable-runuser",
+            "--disable-pylibmount",
+            "--disable-liblastlog2",
+            "--disable-static",
+            "--without-python",
+            "ADJTIME_PATH=/var/lib/hwclock/adjtime",
+            "--docdir=/usr/share/doc/util-linux-2.41.1",
+          ],
+        },
+      }
+      pkgs.system_image
+      pkgs.buildscript_autotools
+      [util_linux_src]
   in
 
   {

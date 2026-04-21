@@ -1,26 +1,24 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let tcl_src =
-    {
-      name = "tcl-src-8.6.16",
-      tag = "Fetch",
-      config = {
+  let tcl_src = {
+    name = "tcl-src-8.6.16",
+    tag = "Fetch",
+    config = {
       url = [
         "https://downloads.sourceforge.net/project/tcl/Tcl/8.6.16/tcl8.6.16-src.tar.gz",
         "https://sourceforge.net/projects/tcl/files/Tcl/8.6.16/tcl8.6.16-src.tar.gz/download",
       ],
       hash = "md5:eaef5d0a27239fb840f04af8ec608242",
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
-  let buildscript_tcl =
-    {
-      name = "buildscript-tcl",
-      tag = "Text",
-      config = {
+  let buildscript_tcl = {
+    name = "buildscript-tcl",
+    tag = "Text",
+    config = {
       executable = true,
       source = m%"
         #!/usr/bin/env bash
@@ -60,18 +58,23 @@ fun pkgs =>
         ln -sfv tclsh8.6 "${MBUILD_INSTALL_DIR}/usr/bin/tclsh"
         mv "${MBUILD_INSTALL_DIR}/usr/share/man/man3/Thread.3" "${MBUILD_INSTALL_DIR}/usr/share/man/man3/Tcl_Thread.3"
       "%,
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
   let tcl =
-    recipe.binary "tcl-8.6.16" {
-      steps = [
-        recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
-      ],
-      script_config = {},
-    } pkgs.system_image buildscript_tcl [tcl_src]
+    recipe.binary
+      "tcl-8.6.16"
+      {
+        steps = [
+          recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
+        ],
+        script_config = {},
+      }
+      pkgs.system_image
+      buildscript_tcl
+      [tcl_src]
   in
 
   {

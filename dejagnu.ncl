@@ -1,39 +1,36 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let dejagnu_src =
-    {
-      name = "dejagnu-src-1.6.3",
-      tag = "Fetch",
-      config = {
+  let dejagnu_src = {
+    name = "dejagnu-src-1.6.3",
+    tag = "Fetch",
+    config = {
       url = "https://ftp.gnu.org/gnu/dejagnu/dejagnu-1.6.3.tar.gz",
       hash = "md5:68c5208c58236eba447d7d6d1326b821",
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
-  let dejagnu_build_image =
-    {
-      name = "dejagnu-build-image",
-      tag = "Image",
-      config = { ref_name | default = "dejagnu-build-image" } & {},
-      inputs = {
-        base = pkgs.system_image,
-        inputs = [
-      pkgs.tcl,
-      pkgs.expect,
-      pkgs.texinfo,
-    ],
-      },
-    }
+  let dejagnu_build_image = {
+    name = "dejagnu-build-image",
+    tag = "Image",
+    config = { ref_name | default = "dejagnu-build-image" } & {},
+    inputs = {
+      base = pkgs.system_image,
+      inputs = [
+        pkgs.tcl,
+        pkgs.expect,
+        pkgs.texinfo,
+      ],
+    },
+  }
   in
 
-  let buildscript_dejagnu =
-    {
-      name = "buildscript-dejagnu",
-      tag = "Text",
-      config = {
+  let buildscript_dejagnu = {
+    name = "buildscript-dejagnu",
+    tag = "Text",
+    config = {
       executable = true,
       source = m%"
         #!/usr/bin/env bash
@@ -55,18 +52,23 @@ fun pkgs =>
         rm -f "${MBUILD_INSTALL_DIR}/usr/share/info/dir"
         install -v -m644 doc/dejagnu.html doc/dejagnu.txt "${MBUILD_INSTALL_DIR}/usr/share/doc/dejagnu-1.6.3"
       "%,
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
   let dejagnu =
-    recipe.binary "dejagnu-1.6.3" {
-      steps = [
-        recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
-      ],
-      script_config = {},
-    } dejagnu_build_image buildscript_dejagnu [dejagnu_src]
+    recipe.binary
+      "dejagnu-1.6.3"
+      {
+        steps = [
+          recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
+        ],
+        script_config = {},
+      }
+      dejagnu_build_image
+      buildscript_dejagnu
+      [dejagnu_src]
   in
 
   {

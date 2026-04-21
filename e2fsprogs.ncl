@@ -1,38 +1,35 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let e2fsprogs_src =
-    {
-      name = "e2fsprogs-src-1.47.3",
-      tag = "Fetch",
-      config = {
+  let e2fsprogs_src = {
+    name = "e2fsprogs-src-1.47.3",
+    tag = "Fetch",
+    config = {
       url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.3/e2fsprogs-1.47.3.tar.gz",
       hash = "md5:113d7a7ee0710d2a670a44692a35fd2e",
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
-  let e2fsprogs_build_image =
-    {
-      name = "e2fsprogs-build-image",
-      tag = "Image",
-      config = { ref_name | default = "e2fsprogs-build-image" } & {},
-      inputs = {
-        base = pkgs.system_image,
-        inputs = [
-      pkgs.util_linux,
-      pkgs.texinfo,
-    ],
-      },
-    }
+  let e2fsprogs_build_image = {
+    name = "e2fsprogs-build-image",
+    tag = "Image",
+    config = { ref_name | default = "e2fsprogs-build-image" } & {},
+    inputs = {
+      base = pkgs.system_image,
+      inputs = [
+        pkgs.util_linux,
+        pkgs.texinfo,
+      ],
+    },
+  }
   in
 
-  let buildscript_e2fsprogs =
-    {
-      name = "buildscript-e2fsprogs",
-      tag = "Text",
-      config = {
+  let buildscript_e2fsprogs = {
+    name = "buildscript-e2fsprogs",
+    tag = "Text",
+    config = {
       executable = true,
       source = m%"
         #!/usr/bin/env bash
@@ -81,18 +78,23 @@ fun pkgs =>
           fi
         done
       "%,
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
   let e2fsprogs =
-    recipe.binary "e2fsprogs-1.47.3" {
-      steps = [
-        recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
-      ],
-      script_config = {},
-    } e2fsprogs_build_image buildscript_e2fsprogs [e2fsprogs_src]
+    recipe.binary
+      "e2fsprogs-1.47.3"
+      {
+        steps = [
+          recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
+        ],
+        script_config = {},
+      }
+      e2fsprogs_build_image
+      buildscript_e2fsprogs
+      [e2fsprogs_src]
   in
 
   {

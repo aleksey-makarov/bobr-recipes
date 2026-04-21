@@ -12,8 +12,7 @@ let KnownTag =
   std.contract.from_predicate (fun value => std.array.elem value KnownTags)
 in
 let ArchiveFormat =
-  std.contract.from_predicate (
-    fun value => std.array.elem value [ "tar-gz", "tar-xz", "tar-bz2", "zip" ]
+  std.contract.from_predicate (fun value => std.array.elem value ["tar-gz", "tar-xz", "tar-bz2", "zip"]
   )
 in
 let UrlField = std.contract.any_of [ String, Array String ] in
@@ -145,7 +144,7 @@ let TreePayload = {
 }
 in
 let TreeEntryKind =
-  std.contract.from_predicate (fun value => std.array.elem value [ "file", "dir", "symlink" ])
+  std.contract.from_predicate (fun value => std.array.elem value ["file", "dir", "symlink"])
 in
 let TreeConfig = {
   tree
@@ -169,12 +168,12 @@ in
 let BinaryConfig = {
   steps
     | Array {
-        name | String,
-        run_as | std.contract.from_predicate (fun value => std.array.elem value [ "build-user", "root" ]),
-        cwd | String,
-        argv | Array String,
-        env | Dyn | optional,
-      }
+      name | String,
+      run_as | std.contract.from_predicate (fun value => std.array.elem value ["build-user", "root"]),
+      cwd | String,
+      argv | Array String,
+      env | Dyn | optional,
+    }
     | doc "Execution plan steps for the generic Binary executor.",
   script_config
     | Dyn
@@ -207,17 +206,13 @@ let Ext4RootfsConfig = {
     | doc "Optional ext4 volume label.",
 }
 in
-let FetchInputs = {
-}
+let FetchInputs = {}
 in
-let TextInputs = {
-}
+let TextInputs = {}
 in
-let TreeInputs = {
-}
+let TreeInputs = {}
 in
-let ContainerImageInputs = {
-}
+let ContainerImageInputs = {}
 in
 let BinaryLegacyInputsShape = {
   image
@@ -274,15 +269,19 @@ let ValidateRecipeShallow = fun recipe =>
   in
   let validate_tree_config = fun config =>
     let checked = config | TreeConfig in
-    checked & {
-      tree = checked.tree & {
-        entries = std.array.map validate_tree_entry checked.tree.entries,
-      },
+    checked
+    & {
+      tree =
+        checked.tree
+        & {
+          entries = std.array.map validate_tree_entry checked.tree.entries,
+        },
     }
   in
   if checked.tag == "Fetch" then
     let config = checked.config | FetchConfig in
-    checked & {
+    checked
+    & {
       config =
         if std.record.has_field "install" config then
           config & { install = config.install | InstallMeta }
@@ -290,27 +289,33 @@ let ValidateRecipeShallow = fun recipe =>
           config,
     }
   else if checked.tag == "Text" then
-    checked & {
+    checked
+    & {
       config = checked.config | TextConfig,
     }
   else if checked.tag == "Tree" then
-    checked & {
+    checked
+    & {
       config = validate_tree_config checked.config,
     }
   else if checked.tag == "ContainerImage" then
-    checked & {
+    checked
+    & {
       config = checked.config | ContainerImageConfig,
     }
   else if checked.tag == "Binary" then
-    checked & {
+    checked
+    & {
       config = checked.config | BinaryConfig,
     }
   else if checked.tag == "Ext4Rootfs" then
-    checked & {
+    checked
+    & {
       config = checked.config | Ext4RootfsConfig,
     }
   else
-    checked & {
+    checked
+    & {
       config = checked.config | ImageConfig,
     }
 in
@@ -343,21 +348,26 @@ let rec ValidateRecipe = fun recipe =>
   in
   let validate_tree_config = fun config =>
     let checked = config | TreeConfig in
-    checked & {
-      tree = checked.tree & {
-        entries = std.array.map validate_tree_entry checked.tree.entries,
-      },
+    checked
+    & {
+      tree =
+        checked.tree
+        & {
+          entries = std.array.map validate_tree_entry checked.tree.entries,
+        },
     }
   in
   let validate_binary_inputs = fun inputs =>
     let checked = inputs | BinaryInputsShape in
     if std.record.has_field "in" checked then
-      checked & {
+      checked
+      & {
         image = ValidateRecipe checked.image,
         "in" = std.array.map ValidateRecipe checked."in",
       }
     else
-      checked & {
+      checked
+      & {
         image = ValidateRecipe checked.image,
         script = ValidateRecipe checked.script,
         sources = std.array.map ValidateRecipe checked.sources,
@@ -365,7 +375,8 @@ let rec ValidateRecipe = fun recipe =>
   in
   let validate_image_inputs = fun inputs =>
     let checked = inputs | ImageInputsShape in
-    checked & {
+    checked
+    & {
       base =
         if checked.base == null then
           null
@@ -376,42 +387,50 @@ let rec ValidateRecipe = fun recipe =>
   in
   let validate_ext4_rootfs_inputs = fun inputs =>
     let checked = inputs | Ext4RootfsInputsShape in
-    checked & {
+    checked
+    & {
       inputs = std.array.map ValidateRecipe checked.inputs,
     }
   in
   if checked.tag == "Fetch" then
-    checked & {
+    checked
+    & {
       config = checked.config | FetchConfig,
       inputs = validate_fetch_inputs checked.inputs,
     }
   else if checked.tag == "Text" then
-    checked & {
+    checked
+    & {
       config = checked.config | TextConfig,
       inputs = validate_text_inputs checked.inputs,
     }
   else if checked.tag == "Tree" then
-    checked & {
+    checked
+    & {
       config = validate_tree_config checked.config,
       inputs = validate_tree_inputs checked.inputs,
     }
   else if checked.tag == "ContainerImage" then
-    checked & {
+    checked
+    & {
       config = checked.config | ContainerImageConfig,
       inputs = validate_container_image_inputs checked.inputs,
     }
   else if checked.tag == "Binary" then
-    checked & {
+    checked
+    & {
       config = checked.config | BinaryConfig,
       inputs = validate_binary_inputs checked.inputs,
     }
   else if checked.tag == "Ext4Rootfs" then
-    checked & {
+    checked
+    & {
       config = checked.config | Ext4RootfsConfig,
       inputs = validate_ext4_rootfs_inputs checked.inputs,
     }
   else
-    checked & {
+    checked
+    & {
       config = checked.config | ImageConfig,
       inputs = validate_image_inputs checked.inputs,
     }
@@ -447,11 +466,11 @@ in
     = ImageConfig,
   shallow_recipe
     | doc "Validate one recipe node shallowly: full top-level shape and tag-specific config, but leave `inputs` as `Dyn`."
-    = std.contract.from_predicate (
-      fun recipe =>
+    =
+      std.contract.from_predicate (fun recipe =>
         let _ = ValidateRecipeShallow recipe in
         true
-    ),
+      ),
   validate_recipe
     | doc "WARNING: deep recursive validation. This walks the entire nested recipe graph and is expensive on large raw package sets."
     = ValidateRecipe,

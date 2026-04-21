@@ -1,39 +1,42 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let file_src =
-    {
-      name = "file-src-5.46",
-      tag = "Fetch",
-      config = {
+  let file_src = {
+    name = "file-src-5.46",
+    tag = "Fetch",
+    config = {
       url = "https://astron.com/pub/file/file-5.46.tar.gz",
       hash = "md5:459da2d4b534801e2e2861611d823864",
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
-  let file_build_image =
-    {
-      name = "file-build-image",
-      tag = "Image",
-      config = { ref_name | default = "file-build-image" } & {},
-      inputs = {
-        base = pkgs.system_image_2,
-        inputs = [
-      pkgs.bzip2,
-      pkgs.xz,
-    ],
-      },
-    }
+  let file_build_image = {
+    name = "file-build-image",
+    tag = "Image",
+    config = { ref_name | default = "file-build-image" } & {},
+    inputs = {
+      base = pkgs.system_image_2,
+      inputs = [
+        pkgs.bzip2,
+        pkgs.xz,
+      ],
+    },
+  }
   in
 
   let file =
-    recipe.binary "file-5.46" {
-      script_config = {
-        configure_args = [],
-      },
-    } file_build_image pkgs.buildscript_autotools [file_src]
+    recipe.binary
+      "file-5.46"
+      {
+        script_config = {
+          configure_args = [],
+        },
+      }
+      file_build_image
+      pkgs.buildscript_autotools
+      [file_src]
   in
 
   {

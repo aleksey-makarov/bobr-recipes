@@ -82,21 +82,20 @@ let base_modules = [
   import "tests/test-image.ncl",
   import "tests/test-reports.ncl",
   import "vim.ncl",
-] in
+]
+in
 
-let replace_fields =
-  fun base =>
+let replace_fields = fun base =>
   fun patch =>
     let patch_fields = std.record.fields patch in
 
     let base_without_patch =
       std.array.fold_left
-        (
-          fun acc field =>
-            if std.record.has_field field acc then
-              std.record.remove field acc
-            else
-              acc
+        (fun acc field =>
+          if std.record.has_field field acc then
+            std.record.remove field acc
+          else
+            acc
         )
         base
         patch_fields

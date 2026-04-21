@@ -1,23 +1,21 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let openssl_src =
-    {
-      name = "openssl-src-3.5.2",
-      tag = "Fetch",
-      config = {
+  let openssl_src = {
+    name = "openssl-src-3.5.2",
+    tag = "Fetch",
+    config = {
       url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz",
       hash = "md5:890fc59f86fc21b5e4d1c031a698dbde",
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
-  let buildscript_openssl =
-    {
-      name = "buildscript-openssl",
-      tag = "Text",
-      config = {
+  let buildscript_openssl = {
+    name = "buildscript-openssl",
+    tag = "Text",
+    config = {
       executable = true,
       source = m%"
         #!/usr/bin/env bash
@@ -43,18 +41,23 @@ fun pkgs =>
 
         cp -vfr doc/* "${MBUILD_INSTALL_DIR}/usr/share/doc/openssl-3.5.2"
       "%,
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
   let openssl =
-    recipe.binary "openssl-3.5.2" {
-      steps = [
-        recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
-      ],
-      script_config = {},
-    } pkgs.system_image buildscript_openssl [openssl_src]
+    recipe.binary
+      "openssl-3.5.2"
+      {
+        steps = [
+          recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
+        ],
+        script_config = {},
+      }
+      pkgs.system_image
+      buildscript_openssl
+      [openssl_src]
   in
 
   {

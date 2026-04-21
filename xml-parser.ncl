@@ -1,22 +1,26 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let xml_parser_src =
-    {
-      name = "xml-parser-src-2.47",
-      tag = "Fetch",
-      config = {
+  let xml_parser_src = {
+    name = "xml-parser-src-2.47",
+    tag = "Fetch",
+    config = {
       url = "https://cpan.metacpan.org/authors/id/T/TO/TODDR/XML-Parser-2.47.tar.gz",
       hash = "md5:89a8e82cfd2ad948b349c0a69c494463",
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
   let xml_parser =
-    recipe.binary "xml-parser-2.47" {
-      script_config = {},
-    } pkgs.system_image pkgs.buildscript_perl_module [xml_parser_src]
+    recipe.binary
+      "xml-parser-2.47"
+      {
+        script_config = {},
+      }
+      pkgs.system_image
+      pkgs.buildscript_perl_module
+      [xml_parser_src]
   in
 
   {

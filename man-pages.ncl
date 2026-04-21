@@ -1,23 +1,21 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let man_pages_src =
-    {
-      name = "man-pages-src-6.15",
-      tag = "Fetch",
-      config = {
+  let man_pages_src = {
+    name = "man-pages-src-6.15",
+    tag = "Fetch",
+    config = {
       url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-6.15.tar.xz",
       hash = "md5:16f68d70139dd2bbcae4102be4705753",
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
-  let buildscript_man_pages =
-    {
-      name = "buildscript-man-pages",
-      tag = "Text",
-      config = {
+  let buildscript_man_pages = {
+    name = "buildscript-man-pages",
+    tag = "Text",
+    config = {
       executable = true,
       source = m%"
         #!/usr/bin/env bash
@@ -30,18 +28,23 @@ fun pkgs =>
         rm -fv man5/passwd.5
         make -R GIT=false prefix=/usr DESTDIR="${MBUILD_INSTALL_DIR}" install
       "%,
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
   let man_pages =
-    recipe.binary "man-pages-6.15" {
-      steps = [
-        recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
-      ],
-      script_config = {},
-    } pkgs.system_image buildscript_man_pages [man_pages_src]
+    recipe.binary
+      "man-pages-6.15"
+      {
+        steps = [
+          recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
+        ],
+        script_config = {},
+      }
+      pkgs.system_image
+      buildscript_man_pages
+      [man_pages_src]
   in
 
   {

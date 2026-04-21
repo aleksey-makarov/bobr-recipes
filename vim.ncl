@@ -1,26 +1,25 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let vim_src =
-    {
-      name = "vim-src-9.1.1629",
-      tag = "Fetch",
-      config = {
+  let vim_src = {
+    name = "vim-src-9.1.1629",
+    tag = "Fetch",
+    config = {
       url = [
         "https://github.com/vim/vim/archive/v9.1.1629/vim-9.1.1629.tar.gz",
       ],
       hash = "md5:4f856c3233c1c4570bc17572e4f9e8e4",
-      },
-      inputs = {},
-    }
+    },
+    inputs = {},
+  }
   in
 
   let vim =
     let script_config = {
-        build_layout = "in-tree",
-        pre_configure = "echo '#define SYS_VIMRC_FILE \"/etc/vimrc\"' >> src/feature.h",
-        configure_args = [],
-        post_install = m%"
+      build_layout = "in-tree",
+      pre_configure = "echo '#define SYS_VIMRC_FILE \"/etc/vimrc\"' >> src/feature.h",
+      configure_args = [],
+      post_install = m%"
           mkdir -p "${MBUILD_INSTALL_DIR}/usr/bin"
           mkdir -p "${MBUILD_INSTALL_DIR}/usr/share/doc"
           mkdir -p "${MBUILD_INSTALL_DIR}/etc"
@@ -48,11 +47,16 @@ fun pkgs =>
           " End /etc/vimrc
           EOF_INNER
         "%,
-      }
+    }
     in
-    recipe.binary "vim-9.1.1629" {
-      include script_config,
-    } pkgs.system_image pkgs.buildscript_autotools [vim_src]
+    recipe.binary
+      "vim-9.1.1629"
+      {
+        include script_config,
+      }
+      pkgs.system_image
+      pkgs.buildscript_autotools
+      [vim_src]
   in
 
   {
