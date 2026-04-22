@@ -28,17 +28,17 @@ fun pkgs =>
   }
   in
 
-  let make =
-    recipe.binary
-      "make-4.4.1"
-      {
-        script_config = {
-          configure_args = ["--disable-nls"],
-        },
-      }
-      pkgs.system_image_1
-      pkgs.buildscript_autotools
-      [make_src]
+  let make = {
+    name = "make-4.4.1",
+    tag = "Autotools",
+    config = {
+      configure_args = ["--disable-nls"],
+    },
+    inputs = {
+      image = pkgs.system_image_1,
+      source = make_src,
+    },
+  }
   in
 
   {

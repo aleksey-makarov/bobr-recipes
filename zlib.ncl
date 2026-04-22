@@ -12,19 +12,19 @@ fun pkgs =>
   }
   in
 
-  let zlib =
-    recipe.binary
-      "zlib-1.3.1"
-      {
-        script_config = {
-          configure_args = [
-            "--libdir=/usr/lib64",
-          ],
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [zlib_src]
+  let zlib = {
+    name = "zlib-1.3.1",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--libdir=/usr/lib64",
+      ],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = zlib_src,
+    },
+  }
   in
 
   {

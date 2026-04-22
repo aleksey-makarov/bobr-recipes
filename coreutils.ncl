@@ -52,33 +52,41 @@ fun pkgs =>
   }
   in
 
-  let coreutils =
-    recipe.binary
-      "coreutils-9.7"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-nls",
-            "--without-selinux",
-            "--without-openssl",
-            "--without-libgmp",
-            "--enable-no-install-program=hostname,kill,uptime",
-          ],
-          post_install = m%"
-              mkdir -pv "${MBUILD_INSTALL_DIR}/usr/sbin"
-              mv -v "${MBUILD_INSTALL_DIR}/usr/bin/chroot" \
-                    "${MBUILD_INSTALL_DIR}/usr/sbin/chroot"
-              mkdir -pv "${MBUILD_INSTALL_DIR}/usr/share/man/man8"
-              mv -v "${MBUILD_INSTALL_DIR}/usr/share/man/man1/chroot.1" \
-                    "${MBUILD_INSTALL_DIR}/usr/share/man/man8/chroot.8"
-              sed -i 's/"1"/"8"/' \
-                     "${MBUILD_INSTALL_DIR}/usr/share/man/man8/chroot.8"
-            "%,
-        },
-      }
-      pkgs.system_image_1
-      pkgs.buildscript_autotools
-      [coreutils_src]
+  let coreutils = {
+    name = "coreutils-9.7",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-nls",
+        "--without-selinux",
+        "--without-openssl",
+        "--without-libgmp",
+        "--enable-no-install-program=hostname,kill,uptime",
+      ],
+      post_install = {
+        name = "fixup_chroot_install",
+        run_as = "root",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            mkdir -pv "${out}/usr/sbin"
+            mv -v "${out}/usr/bin/chroot" \
+                  "${out}/usr/sbin/chroot"
+            mkdir -pv "${out}/usr/share/man/man8"
+            mv -v "${out}/usr/share/man/man1/chroot.1" \
+                  "${out}/usr/share/man/man8/chroot.8"
+            sed -i 's/"1"/"8"/' \
+                   "${out}/usr/share/man/man8/chroot.8"
+          "%,
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.system_image_1,
+      source = coreutils_src,
+    },
+  }
   in
 
   {

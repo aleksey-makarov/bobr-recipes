@@ -28,17 +28,17 @@ fun pkgs =>
   }
   in
 
-  let patch =
-    recipe.binary
-      "patch-2.8"
-      {
-        script_config = {
-          configure_args = ["--disable-nls"],
-        },
-      }
-      pkgs.system_image_1
-      pkgs.buildscript_autotools
-      [patch_src]
+  let patch = {
+    name = "patch-2.8",
+    tag = "Autotools",
+    config = {
+      configure_args = ["--disable-nls"],
+    },
+    inputs = {
+      image = pkgs.system_image_1,
+      source = patch_src,
+    },
+  }
   in
 
   {

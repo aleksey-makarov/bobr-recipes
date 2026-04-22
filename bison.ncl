@@ -26,15 +26,15 @@ fun pkgs =>
   }
   in
 
-  let bison =
-    recipe.binary
-      "bison-3.8.2"
-      {
-        script_config = {},
-      }
-      pkgs.system_image_1
-      pkgs.buildscript_autotools
-      [bison_src]
+  let bison = {
+    name = "bison-3.8.2",
+    tag = "Autotools",
+    config = {},
+    inputs = {
+      image = pkgs.system_image_1,
+      source = bison_src,
+    },
+  }
   in
 
   {

@@ -12,25 +12,25 @@ fun pkgs =>
   }
   in
 
-  let elfutils =
-    recipe.binary
-      "elfutils-0.193"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-debuginfod",
-            "--disable-libdebuginfod",
-            "--libdir=/usr/lib64",
-            "--with-zlib",
-            "--without-bzlib",
-            "--without-lzma",
-            "--without-zstd",
-          ],
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [elfutils_src]
+  let elfutils = {
+    name = "elfutils-0.193",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-debuginfod",
+        "--disable-libdebuginfod",
+        "--libdir=/usr/lib64",
+        "--with-zlib",
+        "--without-bzlib",
+        "--without-lzma",
+        "--without-zstd",
+      ],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = elfutils_src,
+    },
+  }
   in
 
   {

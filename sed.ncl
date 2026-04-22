@@ -28,17 +28,17 @@ fun pkgs =>
   }
   in
 
-  let sed =
-    recipe.binary
-      "sed-4.9"
-      {
-        script_config = {
-          configure_args = ["--disable-nls", "--without-selinux"],
-        },
-      }
-      pkgs.system_image_1
-      pkgs.buildscript_autotools
-      [sed_src]
+  let sed = {
+    name = "sed-4.9",
+    tag = "Autotools",
+    config = {
+      configure_args = ["--disable-nls", "--without-selinux"],
+    },
+    inputs = {
+      image = pkgs.system_image_1,
+      source = sed_src,
+    },
+  }
   in
 
   {

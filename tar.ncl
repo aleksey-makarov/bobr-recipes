@@ -31,20 +31,20 @@ fun pkgs =>
   }
   in
 
-  let tar =
-    recipe.binary
-      "tar-1.35"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-nls",
-            "--without-selinux",
-          ],
-        },
-      }
-      pkgs.system_image_1
-      pkgs.buildscript_autotools
-      [tar_src]
+  let tar = {
+    name = "tar-1.35",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-nls",
+        "--without-selinux",
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_1,
+      source = tar_src,
+    },
+  }
   in
 
   {

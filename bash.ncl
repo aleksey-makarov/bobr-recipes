@@ -41,20 +41,29 @@ fun pkgs =>
   }
   in
 
-  let bash =
-    recipe.binary
-      "bash-5.3"
-      {
-        script_config = {
-          configure_args = [
-            "--without-bash-malloc",
-          ],
-          post_install = "ln -svf bash \"${MBUILD_INSTALL_DIR}/usr/bin/sh\"",
-        },
-      }
-      pkgs.system_image_1
-      pkgs.buildscript_autotools
-      [bash_src]
+  let bash = {
+    name = "bash-5.3",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--without-bash-malloc",
+      ],
+      post_install = {
+        name = "link_sh",
+        run_as = "root",
+        argv = [
+          "ln",
+          "-svf",
+          "bash",
+          "${out}/usr/bin/sh",
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.system_image_1,
+      source = bash_src,
+    },
+  }
   in
 
   {

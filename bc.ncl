@@ -12,21 +12,21 @@ fun pkgs =>
   }
   in
 
-  let bc =
-    recipe.binary
-      "bc-7.0.3"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-history",
-            "--disable-man-pages",
-            "--disable-nls",
-          ],
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [bc_src]
+  let bc = {
+    name = "bc-7.0.3",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-history",
+        "--disable-man-pages",
+        "--disable-nls",
+      ],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = bc_src,
+    },
+  }
   in
 
   {

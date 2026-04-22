@@ -26,15 +26,15 @@ fun pkgs =>
   }
   in
 
-  let m4 =
-    recipe.binary
-      "m4-1.4.20"
-      {
-        script_config = {},
-      }
-      pkgs.system_image_1
-      pkgs.buildscript_autotools
-      [m4_src]
+  let m4 = {
+    name = "m4-1.4.20",
+    tag = "Autotools",
+    config = {},
+    inputs = {
+      image = pkgs.system_image_1,
+      source = m4_src,
+    },
+  }
   in
 
   {

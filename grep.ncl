@@ -28,17 +28,17 @@ fun pkgs =>
   }
   in
 
-  let grep =
-    recipe.binary
-      "grep-3.12"
-      {
-        script_config = {
-          configure_args = ["--disable-nls", "--disable-perl-regexp"],
-        },
-      }
-      pkgs.system_image_1
-      pkgs.buildscript_autotools
-      [grep_src]
+  let grep = {
+    name = "grep-3.12",
+    tag = "Autotools",
+    config = {
+      configure_args = ["--disable-nls", "--disable-perl-regexp"],
+    },
+    inputs = {
+      image = pkgs.system_image_1,
+      source = grep_src,
+    },
+  }
   in
 
   {

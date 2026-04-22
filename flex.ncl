@@ -12,19 +12,19 @@ fun pkgs =>
   }
   in
 
-  let flex =
-    recipe.binary
-      "flex-2.6.4"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-nls",
-          ],
-        },
-      }
-      pkgs.host_image
-      pkgs.buildscript_autotools
-      [flex_src]
+  let flex = {
+    name = "flex-2.6.4",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-nls",
+      ],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      source = flex_src,
+    },
+  }
   in
 
   {
