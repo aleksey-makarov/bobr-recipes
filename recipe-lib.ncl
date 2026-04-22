@@ -1,70 +1,9 @@
-let default_binary_sequence = [
-  {
-    name = "configure",
-    run_as = "build-user",
-    cwd = "${build_dir}",
-    argv = ["${script}", "configure"],
-  },
-  {
-    name = "build",
-    run_as = "build-user",
-    cwd = "${build_dir}",
-    argv = ["${script}", "build"],
-  },
-  {
-    name = "install",
-    run_as = "root",
-    cwd = "${build_dir}",
-    argv = ["${script}", "install"],
-  },
-  {
-    name = "post_install",
-    run_as = "root",
-    cwd = "${build_dir}",
-    argv = ["${script}", "post_install"],
-  },
-]
-in
 let synthetic_registry = import "synthetic/registry.ncl" in
 let lower_node = fun node =>
   if std.record.has_field node.tag synthetic_registry then
     (std.record.get node.tag synthetic_registry) node
   else
     node
-in
-let append_steps_fn = fun new_steps =>
-  fun steps => steps @ new_steps
-in
-let prepend_steps_fn = fun new_steps =>
-  fun steps => new_steps @ steps
-in
-let insert_before_step_fn = fun target_name =>
-  fun new_steps =>
-    fun steps =>
-      std.array.fold_right
-        (fun step =>
-          fun acc =>
-            if step.name == target_name then
-              new_steps @ [step] @ acc
-            else
-              [step] @ acc
-        )
-        []
-        steps
-in
-let insert_after_step_fn = fun target_name =>
-  fun new_steps =>
-    fun steps =>
-      std.array.fold_right
-        (fun step =>
-          fun acc =>
-            if step.name == target_name then
-              [step] @ new_steps @ acc
-            else
-              [step] @ acc
-        )
-        []
-        steps
 in
 let pad3 = fun n =>
   let digits = std.string.from_number n in
@@ -123,39 +62,6 @@ in
       }
       in
       { path = "**", attrs = default_attrs },
-  },
-
-  steps = {
-    step = fun step_name =>
-      fun step_run_as =>
-        fun step_cwd =>
-          fun step_argv =>
-            {
-              name = step_name,
-              run_as = step_run_as,
-              cwd = step_cwd,
-              argv = step_argv,
-            },
-
-    env_step = fun step_name =>
-      fun step_run_as =>
-        fun step_cwd =>
-          fun step_argv =>
-            fun step_env =>
-              {
-                name = step_name,
-                run_as = step_run_as,
-                cwd = step_cwd,
-                argv = step_argv,
-                env = step_env,
-              },
-
-    append = append_steps_fn,
-    prepend = prepend_steps_fn,
-    insert_before_step = insert_before_step_fn,
-    insert_after_step = insert_after_step_fn,
-
-    default_binary_sequence = default_binary_sequence,
   },
 
   numbered_inputs = numbered_inputs_fn,

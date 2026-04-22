@@ -42,24 +42,27 @@ fun pkgs =>
     tag = "Binary",
     config = {
       steps = [
-        recipe.steps.env_step
-          "configure"
-          "build-user"
-          "${build}"
-          ["${script}", "configure"]
-          { MBUILD_SOURCE_DIR = "${source}" },
-        recipe.steps.env_step
-          "build"
-          "build-user"
-          "${build}"
-          ["${script}", "build"]
-          { MBUILD_SOURCE_DIR = "${source}" },
-        recipe.steps.env_step
-          "install"
-          "root"
-          "${build}"
-          ["${script}", "install"]
-          { MBUILD_SOURCE_DIR = "${source}" },
+        {
+          name = "configure",
+          run_as = "build-user",
+          cwd = "${build}",
+          argv = ["${script}", "configure"],
+          env = { MBUILD_SOURCE_DIR = "${source}" },
+        },
+        {
+          name = "build",
+          run_as = "build-user",
+          cwd = "${build}",
+          argv = ["${script}", "build"],
+          env = { MBUILD_SOURCE_DIR = "${source}" },
+        },
+        {
+          name = "install",
+          run_as = "root",
+          cwd = "${build}",
+          argv = ["${script}", "install"],
+          env = { MBUILD_SOURCE_DIR = "${source}" },
+        },
       ],
     },
     inputs = {

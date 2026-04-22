@@ -87,15 +87,16 @@ fun pkgs =>
     tag = "Binary",
     config = {
       steps = [
-        recipe.steps.env_step
-          "install"
-          "root"
-          "${build}"
-          ["${script}"]
-          {
+        {
+          name = "install",
+          run_as = "root",
+          cwd = "${build}",
+          argv = ["${script}"],
+          env = {
             MBUILD_SOURCE_DIR = "${source}",
             MBUILD_INSTALL_DIR = "${out}",
           },
+        },
       ],
       script_config = {},
     },
