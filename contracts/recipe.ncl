@@ -4,6 +4,7 @@ let KnownTags = [
   "Tree",
   "ContainerImage",
   "Autotools",
+  "Makefile",
   "Binary",
   "Ext4Rootfs",
   "Image",
@@ -211,6 +212,16 @@ let AutotoolsConfig = {
   install | InstallMeta | optional,
 }
 in
+let MakefileConfig = {
+  make_args | Array String | optional,
+  env | Dyn | optional,
+  source_subdir | String | optional,
+  pre_build | AutotoolsHook | optional,
+  post_install | AutotoolsHook | optional,
+  skip_install | Bool | optional,
+  install | InstallMeta | optional,
+}
+in
 let ImageConfig = {
   ref_name
     | String
@@ -258,6 +269,12 @@ in
 let Ext4RootfsInputsShape = { .. }
 in
 let AutotoolsInputsShape = {
+  image | Dyn,
+  source | Dyn,
+  ..
+}
+in
+let MakefileInputsShape = {
   image | Dyn,
   source | Dyn,
   ..
@@ -315,6 +332,11 @@ let ValidateRecipeShallow = fun recipe =>
     & {
       config = checked.config | AutotoolsConfig,
     }
+  else if checked.tag == "Makefile" then
+    checked
+    & {
+      config = checked.config | MakefileConfig,
+    }
   else if checked.tag == "Binary" then
     checked
     & {
@@ -360,6 +382,12 @@ let rec ValidateRecipe = fun recipe =>
   in
   let validate_autotools_inputs = fun inputs =>
     let checked = inputs | AutotoolsInputsShape in
+    std.record.map
+      (fun _ input => ValidateRecipe input)
+      checked
+  in
+  let validate_makefile_inputs = fun inputs =>
+    let checked = inputs | MakefileInputsShape in
     std.record.map
       (fun _ input => ValidateRecipe input)
       checked
@@ -423,6 +451,12 @@ let rec ValidateRecipe = fun recipe =>
       config = checked.config | AutotoolsConfig,
       inputs = validate_autotools_inputs checked.inputs,
     }
+  else if checked.tag == "Makefile" then
+    checked
+    & {
+      config = checked.config | MakefileConfig,
+      inputs = validate_makefile_inputs checked.inputs,
+    }
   else if checked.tag == "Binary" then
     checked
     & {
@@ -465,6 +499,9 @@ in
   autotools_config
     | doc "Config contract for synthetic `Autotools` recipe nodes."
     = AutotoolsConfig,
+  makefile_config
+    | doc "Config contract for synthetic `Makefile` recipe nodes."
+    = MakefileConfig,
   binary_config
     | doc "Config contract for `Binary` recipe nodes."
     = BinaryConfig,

@@ -24,40 +24,58 @@ fun pkgs =>
   }
   in
 
-  let bzip2 =
-    recipe.binary
-      "bzip2-1.0.8"
-      {
-        script_config = {
-          pre_build = m%"
-          patch -Np1 -i /in/sources1
-          sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' Makefile
-          sed -i 's@(PREFIX)/man@(PREFIX)/share/man@g' Makefile
-          make -f Makefile-libbz2_so
-          make clean
-        "%,
-          skip_install = "true",
-          post_install = m%"
-          make PREFIX="${MBUILD_INSTALL_DIR}/usr" install
-          mkdir -p "${MBUILD_INSTALL_DIR}/usr/lib" "${MBUILD_INSTALL_DIR}/usr/bin" "${MBUILD_INSTALL_DIR}/usr/include"
-          cp -av libbz2.so.* "${MBUILD_INSTALL_DIR}/usr/lib/"
-          ln -svf libbz2.so.1.0.8 "${MBUILD_INSTALL_DIR}/usr/lib/libbz2.so"
-          cp -v bzip2-shared "${MBUILD_INSTALL_DIR}/usr/bin/bzip2"
-          cp -v bzlib.h "${MBUILD_INSTALL_DIR}/usr/include/"
-          for i in "${MBUILD_INSTALL_DIR}/usr/bin"/{bzcat,bunzip2}; do
-            ln -sfv bzip2 "$i"
-          done
-          ln -sfv bzdiff "${MBUILD_INSTALL_DIR}/usr/bin/bzcmp"
-          ln -sfv bzgrep "${MBUILD_INSTALL_DIR}/usr/bin/bzegrep"
-          ln -sfv bzgrep "${MBUILD_INSTALL_DIR}/usr/bin/bzfgrep"
-          ln -sfv bzmore "${MBUILD_INSTALL_DIR}/usr/bin/bzless"
-          rm -fv "${MBUILD_INSTALL_DIR}/usr/lib/libbz2.a"
-        "%,
-        },
-      }
-      pkgs.system_image_2
-      pkgs.buildscript_gnu_make
-      [bzip2_src, bzip2_install_docs_patch]
+  let bzip2 = {
+    name = "bzip2-1.0.8",
+    tag = "Makefile",
+    config = {
+      pre_build = {
+        name = "prepare_source",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            patch -Np1 -i "${install_docs_patch}"
+            sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' Makefile
+            sed -i 's@(PREFIX)/man@(PREFIX)/share/man@g' Makefile
+            make -f Makefile-libbz2_so
+            make clean
+          "%,
+        ],
+      },
+      skip_install = true,
+      post_install = {
+        name = "install_runtime",
+        run_as = "root",
+        cwd = "${source}",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            make PREFIX="${out}/usr" install
+            mkdir -p "${out}/usr/lib" "${out}/usr/bin" "${out}/usr/include"
+            cp -av libbz2.so.* "${out}/usr/lib/"
+            ln -svf libbz2.so.1.0.8 "${out}/usr/lib/libbz2.so"
+            cp -v bzip2-shared "${out}/usr/bin/bzip2"
+            cp -v bzlib.h "${out}/usr/include/"
+            for i in "${out}/usr/bin"/{bzcat,bunzip2}; do
+              ln -sfv bzip2 "$i"
+            done
+            ln -sfv bzdiff "${out}/usr/bin/bzcmp"
+            ln -sfv bzgrep "${out}/usr/bin/bzegrep"
+            ln -sfv bzgrep "${out}/usr/bin/bzfgrep"
+            ln -sfv bzmore "${out}/usr/bin/bzless"
+            rm -fv "${out}/usr/lib/libbz2.a"
+          "%,
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      source = bzip2_src,
+      install_docs_patch = bzip2_install_docs_patch,
+    },
+  }
   in
 
   {

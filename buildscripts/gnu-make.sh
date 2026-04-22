@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cfg="${MBUILD_SCRIPT_CONFIG_DIR:?MBUILD_SCRIPT_CONFIG_DIR is required}"
-phase="${1:-${MBUILD_STEP_NAME:-}}"
-phase="${phase:?step name is required}"
+cfg="${MBUILD_CONFIG_DIR:?MBUILD_CONFIG_DIR is required}"
+step="${1:-${MBUILD_STEP_NAME:-}}"
+step="${step:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
-install_dir="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
+out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
 
 load_env_files() {
   if [ -d "${cfg}/env" ]; then
@@ -26,89 +26,50 @@ append_dir_files_to_array() {
   fi
 }
 
-resolve_make_source_dir() {
-  if [ -f "$source_dir/Makefile" ] || [ -f "$source_dir/makefile" ] || [ -f "$source_dir/GNUmakefile" ]; then
-    printf '%s\n' "$source_dir"
-    return
-  fi
-
-  local candidates=()
-  local d
-  for d in "$source_dir"/*; do
-    if [ -d "$d" ] && { [ -f "$d/Makefile" ] || [ -f "$d/makefile" ] || [ -f "$d/GNUmakefile" ]; }; then
-      candidates+=("$d")
-    fi
-  done
-
-  if [ "${#candidates[@]}" -eq 1 ]; then
-    printf '%s\n' "${candidates[0]}"
-    return
-  fi
-
-  echo "gnu-make build-script: Makefile not found in ${source_dir}" >&2
-  exit 1
-}
-
 prepare_tmpdir() {
   local cwd="$1"
   mkdir -p "$cwd/.tmp"
   export TMPDIR="${TMPDIR:-$cwd/.tmp}"
 }
 
-phase_configure() {
-  :
-}
-
-phase_build() {
-  local project_source_dir jobs
+step_build() {
+  local jobs
   local make_args=()
-  project_source_dir="$(resolve_make_source_dir)"
-  cd "$project_source_dir"
-  prepare_tmpdir "$project_source_dir"
-  if [ -f "${cfg}/pre_build" ]; then
-    source "${cfg}/pre_build"
-  fi
+  cd "$source_dir"
+  prepare_tmpdir "$source_dir"
   append_dir_files_to_array "${cfg}/make_args" make_args
   jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
   make -j"$jobs" "${make_args[@]}"
 }
 
-phase_install() {
-  local project_source_dir skip_install
+step_install() {
+  local skip_install
   local make_args=()
-  project_source_dir="$(resolve_make_source_dir)"
-  cd "$project_source_dir"
-  prepare_tmpdir "$project_source_dir"
+  cd "$source_dir"
+  prepare_tmpdir "$source_dir"
   append_dir_files_to_array "${cfg}/make_args" make_args
-  mkdir -p "$install_dir"
+  mkdir -p "$out_dir"
   skip_install="false"
   if [ -f "${cfg}/skip_install" ]; then
     skip_install="$(cat "${cfg}/skip_install")"
   fi
   if [ "$skip_install" != "true" ]; then
-    make DESTDIR="$install_dir" "${make_args[@]}" install
+    make DESTDIR="$out_dir" "${make_args[@]}" install
   fi
 }
 
-phase_post_install() {
-  local project_source_dir
-  project_source_dir="$(resolve_make_source_dir)"
-  cd "$project_source_dir"
-  prepare_tmpdir "$project_source_dir"
-  if [ -f "${cfg}/post_install" ]; then
-    source "${cfg}/post_install"
-  fi
+step_post_install() {
+  :
 }
 
 load_env_files
 
-case "$phase" in
-  configure) phase_configure ;;
-  build) phase_build ;;
-  install) phase_install ;;
-  post_install) phase_post_install ;;
+case "$step" in
+  build) step_build ;;
+  install) step_install ;;
+  post_install) step_post_install ;;
   *)
-    echo "gnu-make build-script: unsupported phase '$phase'" >&2
+    echo "gnu-make build-script: unsupported step '$step'" >&2
     exit 1
     ;;
 esac

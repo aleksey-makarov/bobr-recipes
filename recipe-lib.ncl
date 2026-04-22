@@ -35,6 +35,16 @@ let buildscript_autotools = {
   inputs = {},
 }
 in
+let buildscript_gnu_make = {
+  name = "buildscript-gnu-make",
+  tag = "Text",
+  config = {
+    executable = true,
+    source = import "buildscripts/gnu-make.sh" as 'Text,
+  },
+  inputs = {},
+}
+in
 let record_get_or = fun field =>
   fun fallback =>
     fun record =>
@@ -49,10 +59,8 @@ let autotools_source_root_expr = fun node_config =>
   else
     "${source}"
 in
-let lower_autotools_node = fun node =>
-  let node_config = node.config in
-  let source_root_expr = autotools_source_root_expr node_config in
-  let normalize_steps = fun field_name =>
+let normalize_hook_steps = fun node_config =>
+  fun field_name =>
     fun default_cwd =>
       if std.record.has_field field_name node_config then
         let normalize_step = fun step =>
@@ -67,12 +75,15 @@ let lower_autotools_node = fun node =>
           [normalize_step (std.record.get field_name node_config)]
       else
         []
-  in
+in
+let lower_autotools_node = fun node =>
+  let node_config = node.config in
+  let source_root_expr = autotools_source_root_expr node_config in
   let pre_configure_steps =
-    normalize_steps "pre_configure" source_root_expr
+    normalize_hook_steps node_config "pre_configure" source_root_expr
   in
   let post_install_steps =
-    normalize_steps "post_install" "${out}"
+    normalize_hook_steps node_config "post_install" "${out}"
   in
   let lowered_script_config =
     let with_configure_args =
@@ -99,10 +110,22 @@ let lower_autotools_node = fun node =>
       else
         with_env
     in
+    let with_python_modules =
+      if std.record.has_field "python_modules" node_config then
+        std.record.insert "python_modules" node_config.python_modules with_source_subdir
+      else
+        with_source_subdir
+    in
+    let with_ninja_source_input =
+      if std.record.has_field "ninja_source_input" node_config then
+        std.record.insert "ninja_source_input" node_config.ninja_source_input with_python_modules
+      else
+        with_python_modules
+    in
     if record_get_or "in-tree" false node_config then
-      std.record.insert "in-tree" "true" with_source_subdir
+      std.record.insert "in-tree" "true" with_ninja_source_input
     else
-      with_source_subdir
+      with_ninja_source_input
   in
   let autotools_step_env = {
     MBUILD_SOURCE_DIR = "${source}",
@@ -156,9 +179,88 @@ let lower_autotools_node = fun node =>
         node.inputs,
   }
 in
+let lower_makefile_node = fun node =>
+  let node_config = node.config in
+  let source_root_expr = autotools_source_root_expr node_config in
+  let pre_build_steps =
+    normalize_hook_steps node_config "pre_build" source_root_expr
+  in
+  let post_install_steps =
+    normalize_hook_steps node_config "post_install" "${out}"
+  in
+  let lowered_script_config =
+    let with_make_args =
+      if std.record.has_field "make_args" node_config then
+        { make_args = node_config.make_args }
+      else
+        {}
+    in
+    let with_env =
+      if std.record.has_field "env" node_config then
+        std.record.insert "env" node_config.env with_make_args
+      else
+        with_make_args
+    in
+    let with_source_subdir =
+      if std.record.has_field "source_subdir" node_config then
+        std.record.insert "source_subdir" node_config.source_subdir with_env
+      else
+        with_env
+    in
+    if record_get_or "skip_install" false node_config then
+      std.record.insert "skip_install" "true" with_source_subdir
+    else
+      with_source_subdir
+  in
+  let makefile_step_env = {
+    MBUILD_SOURCE_DIR = source_root_expr,
+  }
+  in
+  {
+    name = node.name,
+    tag = "Binary",
+    config = (
+      {
+        steps =
+          pre_build_steps
+          @ [
+            {
+              name = "build",
+              run_as = "build-user",
+              cwd = source_root_expr,
+              argv = ["${script}", "build"],
+              env = makefile_step_env,
+            },
+            {
+              name = "install",
+              run_as = "root",
+              cwd = source_root_expr,
+              argv = ["${script}", "install"],
+              env = makefile_step_env,
+            },
+          ]
+          @ post_install_steps,
+        script_config = lowered_script_config,
+      }
+      & (
+        if std.record.has_field "install" node_config then
+          { install = node_config.install }
+        else
+          {}
+      )
+    ),
+    inputs =
+      std.record.insert
+        "script"
+        buildscript_gnu_make
+        node.inputs,
+  }
+in
 let lower_node = fun node =>
   if node.tag == "Autotools" then
     lower_autotools_node node
+  else if node.tag == "Makefile" then
+    lower_makefile_node node
   else
     node
 in

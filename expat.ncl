@@ -12,20 +12,20 @@ fun pkgs =>
   }
   in
 
-  let expat =
-    recipe.binary
-      "expat-2.7.1"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-static",
-            "--docdir=/usr/share/doc/expat-2.7.1",
-          ],
-        },
-      }
-      pkgs.system_image_2
-      pkgs.buildscript_autotools
-      [expat_src]
+  let expat = {
+    name = "expat-2.7.1",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-static",
+        "--docdir=/usr/share/doc/expat-2.7.1",
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      source = expat_src,
+    },
+  }
   in
 
   {

@@ -3,31 +3,30 @@ set -euo pipefail
 
 mode="${1:-${MBUILD_STEP_NAME:-}}"
 mode="${mode:?step name is required}"
-cfg="${MBUILD_SCRIPT_CONFIG_DIR:?MBUILD_SCRIPT_CONFIG_DIR is required}"
-install_dir="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
+cfg="${MBUILD_CONFIG_DIR:?MBUILD_CONFIG_DIR is required}"
+out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
 
 live_python=/usr/bin/python3
 live_pip=(/usr/bin/python3 -m pip)
-output_root="$install_dir"
+output_root="$out_dir"
 
 install_python_module() {
-  local src_mount="$1"
-  local install_name="$2"
-  local src_dir="/in/${src_mount}"
+  local package_name="$1"
+  local src_dir="/__mbuild/inputs/${package_name}"
 
   if [ ! -d "${src_dir}" ]; then
-    echo "python-modules: source input ${src_mount} is not a directory" >&2
+    echo "python-modules: source input ${package_name} is not a directory" >&2
     exit 1
   fi
 
-  echo "python-modules: building ${install_name} from ${src_mount}"
+  echo "python-modules: building ${package_name}"
   pushd "${src_dir}" >/dev/null
   rm -rf dist
   "${live_pip[@]}" wheel -w dist --no-cache-dir --no-build-isolation --no-deps "$PWD"
-  "${live_pip[@]}" install --no-index --find-links dist "${install_name}"
-  "${live_pip[@]}" install --ignore-installed --no-deps --root "${output_root}" --prefix /usr --no-index --find-links dist "${install_name}"
+  "${live_pip[@]}" install --no-index --find-links dist "${package_name}"
+  "${live_pip[@]}" install --ignore-installed --no-deps --root "${output_root}" --prefix /usr --no-index --find-links dist "${package_name}"
 
-  if [ "${install_name}" = "meson" ]; then
+  if [ "${package_name}" = "meson" ]; then
     install -vDm644 data/shell-completions/bash/meson /usr/share/bash-completion/completions/meson
     install -vDm644 data/shell-completions/zsh/_meson /usr/share/zsh/site-functions/_meson
     install -vDm644 data/shell-completions/bash/meson "${output_root}/usr/share/bash-completion/completions/meson"
@@ -51,15 +50,13 @@ install_extras() {
   "${live_python}" -m pip --version
 
   if [ -d "${cfg}/python_modules" ]; then
-    while IFS= read -r -d '' module_dir; do
-      source_input="$(cat "${module_dir}/source_input")"
-      install_name="$(cat "${module_dir}/install_name")"
-      install_python_module "${source_input}" "${install_name}"
-    done < <(find "${cfg}/python_modules" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+    while IFS= read -r -d '' module_file; do
+      install_python_module "$(cat "${module_file}")"
+    done < <(find "${cfg}/python_modules" -mindepth 1 -maxdepth 1 -type f -print0 | sort -z)
   fi
 
   ninja_source_input="$(cat "${cfg}/ninja_source_input")"
-  ninja_src_dir="/in/${ninja_source_input}"
+  ninja_src_dir="/__mbuild/inputs/${ninja_source_input}"
 
   if [ ! -d "${ninja_src_dir}" ]; then
     echo "python-modules: ninja source input ${ninja_source_input} is not a directory" >&2

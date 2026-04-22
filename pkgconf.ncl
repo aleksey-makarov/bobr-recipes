@@ -12,24 +12,42 @@ fun pkgs =>
   }
   in
 
-  let pkgconf =
-    recipe.binary
-      "pkgconf-2.5.1"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-static",
-            "--docdir=/usr/share/doc/pkgconf-2.5.1",
+  let pkgconf = {
+    name = "pkgconf-2.5.1",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-static",
+        "--docdir=/usr/share/doc/pkgconf-2.5.1",
+      ],
+      post_install = [
+        {
+          name = "link_pkg_config",
+          run_as = "root",
+          argv = [
+            "ln",
+            "-sv",
+            "pkgconf",
+            "${out}/usr/bin/pkg-config",
           ],
-          post_install = m%"
-          ln -sv pkgconf "${MBUILD_INSTALL_DIR}/usr/bin/pkg-config"
-          ln -sv pkgconf.1 "${MBUILD_INSTALL_DIR}/usr/share/man/man1/pkg-config.1"
-        "%,
         },
-      }
-      pkgs.system_image_2
-      pkgs.buildscript_autotools
-      [pkgconf_src]
+        {
+          name = "link_pkg_config_manpage",
+          run_as = "root",
+          argv = [
+            "ln",
+            "-sv",
+            "pkgconf.1",
+            "${out}/usr/share/man/man1/pkg-config.1",
+          ],
+        },
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      source = pkgconf_src,
+    },
+  }
   in
 
   {

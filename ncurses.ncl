@@ -48,8 +48,8 @@ fun pkgs =>
             m%"
               mkdir -p "${out}/usr/lib/pkgconfig"
               for lib in ncurses form panel menu; do
-                ln -sfv "lib${lib}w.so" "${out}/usr/lib/lib${lib}.so"
-                ln -sfv "${lib}w.pc" "${out}/usr/lib/pkgconfig/${lib}.pc"
+                ln -sfv "lib"$lib"w.so" "${out}/usr/lib/lib"$lib".so"
+                ln -sfv "$lib"w.pc "${out}/usr/lib/pkgconfig/"$lib".pc"
               done
               ln -sfv libncursesw.so "${out}/usr/lib/libcurses.so"
             "%,

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-phase="${1:-${MBUILD_STEP_NAME:-}}"
-phase="${phase:?step name is required}"
+step="${1:-${MBUILD_STEP_NAME:-}}"
+step="${step:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
-install_dir="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
+out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
 
 resolve_source_dir() {
   if [ -f "$source_dir/Configure" ]; then
@@ -33,7 +33,7 @@ perl_env() {
   export BUILD_BZIP2=0
 }
 
-phase_configure() {
+step_configure() {
   local project_source_dir
   project_source_dir="$(resolve_source_dir)"
   cd "$project_source_dir"
@@ -54,7 +54,7 @@ phase_configure() {
     -D usethreads
 }
 
-phase_build() {
+step_build() {
   local project_source_dir jobs
   project_source_dir="$(resolve_source_dir)"
   cd "$project_source_dir"
@@ -63,26 +63,26 @@ phase_build() {
   make -j"$jobs"
 }
 
-phase_install() {
+step_install() {
   local project_source_dir
   project_source_dir="$(resolve_source_dir)"
   cd "$project_source_dir"
   perl_env
-  mkdir -p "$install_dir"
-  make DESTDIR="$install_dir" install
+  mkdir -p "$out_dir"
+  make DESTDIR="$out_dir" install
 }
 
-phase_post_install() {
+step_post_install() {
   :
 }
 
-case "$phase" in
-  configure) phase_configure ;;
-  build) phase_build ;;
-  install) phase_install ;;
-  post_install) phase_post_install ;;
+case "$step" in
+  configure) step_configure ;;
+  build) step_build ;;
+  install) step_install ;;
+  post_install) step_post_install ;;
   *)
-    echo "perl-configure build-script: unsupported phase '$phase'" >&2
+    echo "perl-configure build-script: unsupported step '$step'" >&2
     exit 1
     ;;
 esac

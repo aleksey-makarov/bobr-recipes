@@ -19,45 +19,58 @@ fun pkgs =>
     name = "inetutils-build-image",
     tag = "Image",
     config = { ref_name | default = "inetutils-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image_2,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image_2 }
+      & recipe.numbered_inputs [
         pkgs.ncurses,
       ],
-    },
   }
   in
 
-  let inetutils =
-    recipe.binary
-      "inetutils-2.6"
-      {
-        script_config = {
-          pre_configure = m%"
-          sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c
-        "%,
-          configure_args = [
-            "--bindir=/usr/bin",
-            "--localstatedir=/var",
-            "--disable-logger",
-            "--disable-whois",
-            "--disable-rcp",
-            "--disable-rexec",
-            "--disable-rlogin",
-            "--disable-rsh",
-            "--disable-servers",
-          ],
-          post_install = m%"
-          mkdir -p "${MBUILD_INSTALL_DIR}/usr/sbin"
-          if [ -f "${MBUILD_INSTALL_DIR}/usr/bin/ifconfig" ]; then
-            mv -v "${MBUILD_INSTALL_DIR}/usr/bin/ifconfig" "${MBUILD_INSTALL_DIR}/usr/sbin/ifconfig"
-          fi
-        "%,
-        },
-      }
-      inetutils_build_image
-      pkgs.buildscript_autotools
-      [inetutils_src]
+  let inetutils = {
+    name = "inetutils-2.6",
+    tag = "Autotools",
+    config = {
+      pre_configure = {
+        name = "patch_telnet",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          "sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c",
+        ],
+      },
+      configure_args = [
+        "--bindir=/usr/bin",
+        "--localstatedir=/var",
+        "--disable-logger",
+        "--disable-whois",
+        "--disable-rcp",
+        "--disable-rexec",
+        "--disable-rlogin",
+        "--disable-rsh",
+        "--disable-servers",
+      ],
+      post_install = {
+        name = "move_ifconfig",
+        run_as = "root",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            mkdir -p "${out}/usr/sbin"
+            if [ -f "${out}/usr/bin/ifconfig" ]; then
+              mv -v "${out}/usr/bin/ifconfig" "${out}/usr/sbin/ifconfig"
+            fi
+          "%,
+        ],
+      },
+    },
+    inputs = {
+      image = inetutils_build_image,
+      source = inetutils_src,
+    },
+  }
   in
 
   {

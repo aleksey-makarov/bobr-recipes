@@ -12,20 +12,20 @@ fun pkgs =>
   }
   in
 
-  let libffi =
-    recipe.binary
-      "libffi-3.5.2"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-static",
-            "--with-gcc-arch=native",
-          ],
-        },
-      }
-      pkgs.system_image_2
-      pkgs.buildscript_autotools
-      [libffi_src]
+  let libffi = {
+    name = "libffi-3.5.2",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-static",
+        "--with-gcc-arch=native",
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      source = libffi_src,
+    },
+  }
   in
 
   {

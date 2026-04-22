@@ -19,25 +19,24 @@ fun pkgs =>
     name = "autoconf-build-image",
     tag = "Image",
     config = { ref_name | default = "autoconf-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image_2,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image_2 }
+      & recipe.numbered_inputs [
         pkgs.perl,
         pkgs.inetutils,
       ],
-    },
   }
   in
 
-  let autoconf =
-    recipe.binary
-      "autoconf-2.72"
-      {
-        script_config = {},
-      }
-      autoconf_build_image
-      pkgs.buildscript_autotools
-      [autoconf_src]
+  let autoconf = {
+    name = "autoconf-2.72",
+    tag = "Autotools",
+    config = {},
+    inputs = {
+      image = autoconf_build_image,
+      source = autoconf_src,
+    },
+  }
   in
 
   {

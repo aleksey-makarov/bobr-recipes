@@ -132,13 +132,12 @@ fun pkgs =>
     name = "python-build-image",
     tag = "Image",
     config = { ref_name | default = "python-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image_2,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image_2 }
+      & recipe.numbered_inputs [
         pkgs.expat,
         pkgs.libffi,
       ],
-    },
   }
   in
 
@@ -198,83 +197,63 @@ fun pkgs =>
   }
   in
 
-  let python =
-    recipe.binary
-      "python-3.13.7"
-      {
-        steps = [
-          recipe.steps.step "configure" "build-user" "${source}" ["${script}", "configure"],
-          recipe.steps.step "build" "build-user" "${build_dir}" ["${script}", "build"],
-          recipe.steps.step "install" "root" "${build_dir}" ["${script}", "install"],
-          recipe.steps.step
-            "install_python_modules"
-            "root"
-            "${build_dir}"
-            [
-              "/bin/bash",
-              "${source1}",
-              "install-extras",
-            ],
-          recipe.steps.step "post_install" "root" "${build_dir}" ["${script}", "post_install"],
-        ],
-        script_config = {
-          configure_args = [
-            "--enable-shared",
-            "--with-system-expat",
-            "--enable-optimizations",
-            "--without-static-libpython",
+  let python = {
+    name = "python-3.13.7",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--enable-shared",
+        "--with-system-expat",
+        "--enable-optimizations",
+        "--without-static-libpython",
+      ],
+      python_modules = [
+        "flit_core",
+        "packaging",
+        "wheel",
+        "setuptools",
+        "MarkupSafe",
+        "Jinja2",
+        "meson",
+      ],
+      ninja_source_input = "ninja",
+      post_install = [
+        {
+          name = "install_python_modules",
+          run_as = "root",
+          cwd = "${build}",
+          argv = [
+            "/bin/bash",
+            "${modules_helper}",
+            "install-extras",
           ],
-          python_modules = [
-            {
-              source_input = "sources2",
-              install_name = "flit_core",
-            },
-            {
-              source_input = "sources3",
-              install_name = "packaging",
-            },
-            {
-              source_input = "sources4",
-              install_name = "wheel",
-            },
-            {
-              source_input = "sources5",
-              install_name = "setuptools",
-            },
-            {
-              source_input = "sources6",
-              install_name = "Markupsafe",
-            },
-            {
-              source_input = "sources7",
-              install_name = "Jinja2",
-            },
-            {
-              source_input = "sources8",
-              install_name = "meson",
-            },
-          ],
-          ninja_source_input = "sources9",
-          post_install = m%"
-          ln -svf python3 /usr/bin/python
-          ln -svf python3 "${MBUILD_INSTALL_DIR}/usr/bin/python"
-        "%,
         },
-      }
-      python_build_image
-      pkgs.buildscript_autotools
-      [
-        python_src,
-        python_modules_helper,
-        flit_core_src,
-        packaging_src,
-        wheel_src,
-        setuptools_src,
-        markupsafe_src,
-        jinja2_src,
-        meson_src,
-        ninja_src,
-      ]
+        {
+          name = "link_python",
+          run_as = "root",
+          argv = [
+            "ln",
+            "-svf",
+            "python3",
+            "${out}/usr/bin/python",
+          ],
+        },
+      ],
+    },
+    inputs = {
+      image = python_build_image,
+      source = python_src,
+      modules_helper = python_modules_helper,
+      flit_core = flit_core_src,
+      packaging = packaging_src,
+      wheel = wheel_src,
+      setuptools = setuptools_src,
+      MarkupSafe = markupsafe_src,
+      Jinja2 = jinja2_src,
+      meson = meson_src,
+      ninja = ninja_src,
+    },
+  }
   in
 
   {

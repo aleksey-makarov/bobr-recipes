@@ -27,19 +27,47 @@ fun pkgs =>
     name = "perl-build-image",
     tag = "Image",
     config = { ref_name | default = "perl-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image_2,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image_2 }
+      & recipe.numbered_inputs [
         pkgs.zlib,
         pkgs.bzip2,
         pkgs.less,
       ],
-    },
   }
   in
 
-  let perl =
-    recipe.binary "perl-5.42.0" {} perl_build_image buildscript_perl_configure [perl_src]
+  let perl = {
+    name = "perl-5.42.0",
+    tag = "Binary",
+    config = {
+      steps = [
+        recipe.steps.env_step
+          "configure"
+          "build-user"
+          "${build}"
+          ["${script}", "configure"]
+          { MBUILD_SOURCE_DIR = "${source}" },
+        recipe.steps.env_step
+          "build"
+          "build-user"
+          "${build}"
+          ["${script}", "build"]
+          { MBUILD_SOURCE_DIR = "${source}" },
+        recipe.steps.env_step
+          "install"
+          "root"
+          "${build}"
+          ["${script}", "install"]
+          { MBUILD_SOURCE_DIR = "${source}" },
+      ],
+    },
+    inputs = {
+      image = perl_build_image,
+      script = buildscript_perl_configure,
+      source = perl_src,
+    },
+  }
   in
 
   {
