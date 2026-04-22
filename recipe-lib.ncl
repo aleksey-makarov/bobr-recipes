@@ -116,16 +116,10 @@ let lower_autotools_node = fun node =>
       else
         with_source_subdir
     in
-    let with_ninja_source_input =
-      if std.record.has_field "ninja_source_input" node_config then
-        std.record.insert "ninja_source_input" node_config.ninja_source_input with_python_modules
-      else
-        with_python_modules
-    in
     if record_get_or "in-tree" false node_config then
-      std.record.insert "in-tree" "true" with_ninja_source_input
+      std.record.insert "in-tree" "true" with_python_modules
     else
-      with_ninja_source_input
+      with_python_modules
   in
   let autotools_step_env = {
     MBUILD_SOURCE_DIR = "${source}",

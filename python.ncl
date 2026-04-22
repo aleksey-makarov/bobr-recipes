@@ -216,7 +216,6 @@ fun pkgs =>
         "Jinja2",
         "meson",
       ],
-      ninja_source_input = "ninja",
       post_install = [
         {
           name = "install_python_modules",
@@ -225,7 +224,6 @@ fun pkgs =>
           argv = [
             "/bin/bash",
             "${modules_helper}",
-            "install-extras",
           ],
         },
         {
