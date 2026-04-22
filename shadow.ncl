@@ -70,7 +70,7 @@ fun pkgs =>
       post_install = {
         name = "install_man_pages",
         run_as = "root",
-        cwd = "${source}",
+        cwd = "${build}",
         argv = [
           "/bin/sh",
           "-ec",
