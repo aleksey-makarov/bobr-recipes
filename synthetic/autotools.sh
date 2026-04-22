@@ -4,7 +4,7 @@ set -euo pipefail
 cfg="${MBUILD_CONFIG_DIR:?MBUILD_CONFIG_DIR is required}"
 step="${1:-${MBUILD_STEP_NAME:-}}"
 step="${step:?step name is required}"
-source_dir="${MBUILD_IN1:?MBUILD_IN1 is required}"
+source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
 out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
 default_build_dir="${MBUILD_BUILD_DIR:?MBUILD_BUILD_DIR is required}"
 

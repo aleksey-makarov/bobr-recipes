@@ -116,7 +116,6 @@ let lower_autotools_node = fun node =>
   in
   let autotools_step_env = {
     MBUILD_SOURCE_DIR = "${source}",
-    MBUILD_IN1 = "${source}",
   }
   in
   {
