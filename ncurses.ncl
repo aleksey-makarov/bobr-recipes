@@ -14,36 +14,66 @@ fun pkgs =>
   }
   in
 
-  let ncurses =
-    recipe.binary
-      "ncurses-6.6"
-      {
-        script_config = {
-          configure_args = [
-            "--mandir=/usr/share/man",
-            "--with-shared",
-            "--without-debug",
-            "--without-normal",
-            "--with-cxx-shared",
-            "--enable-pc-files",
-            "--with-pkg-config-libdir=/usr/lib/pkgconfig",
+  let ncurses = {
+    name = "ncurses-6.6",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--mandir=/usr/share/man",
+        "--with-shared",
+        "--without-debug",
+        "--without-normal",
+        "--with-cxx-shared",
+        "--enable-pc-files",
+        "--with-pkg-config-libdir=/usr/lib/pkgconfig",
+      ],
+      post_install = [
+        {
+          name = "patch_curses_header",
+          run_as = "root",
+          argv = [
+            "sed",
+            "-e",
+            "s/^#if.*XOPEN.*$/#if 1/",
+            "-i",
+            "${out}/usr/include/curses.h",
           ],
-          post_install = m%"
-          sed -e 's/^#if.*XOPEN.*$/#if 1/' -i "${MBUILD_INSTALL_DIR}/usr/include/curses.h"
-          mkdir -p "${MBUILD_INSTALL_DIR}/usr/lib/pkgconfig"
-          mkdir -p "${MBUILD_INSTALL_DIR}/usr/share/doc"
-          for lib in ncurses form panel menu; do
-            ln -sfv "lib${lib}w.so" "${MBUILD_INSTALL_DIR}/usr/lib/lib${lib}.so"
-            ln -sfv "${lib}w.pc" "${MBUILD_INSTALL_DIR}/usr/lib/pkgconfig/${lib}.pc"
-          done
-          ln -sfv libncursesw.so "${MBUILD_INSTALL_DIR}/usr/lib/libcurses.so"
-          cp -v -R "${MBUILD_SOURCE_DIR}/doc" -T "${MBUILD_INSTALL_DIR}/usr/share/doc/ncurses-6.6"
-        "%,
         },
-      }
-      pkgs.system_image_2
-      pkgs.buildscript_autotools
-      [ncurses_src]
+        {
+          name = "install_unversioned_symlinks",
+          run_as = "root",
+          argv = [
+            "/bin/sh",
+            "-ec",
+            m%"
+              mkdir -p "${out}/usr/lib/pkgconfig"
+              for lib in ncurses form panel menu; do
+                ln -sfv "lib${lib}w.so" "${out}/usr/lib/lib${lib}.so"
+                ln -sfv "${lib}w.pc" "${out}/usr/lib/pkgconfig/${lib}.pc"
+              done
+              ln -sfv libncursesw.so "${out}/usr/lib/libcurses.so"
+            "%,
+          ],
+        },
+        {
+          name = "install_docs",
+          run_as = "root",
+          argv = [
+            "/bin/sh",
+            "-ec",
+            m%"
+              mkdir -p "${out}/usr/share/doc"
+              cp -v -R "${source}/doc" -T "${out}/usr/share/doc/ncurses-6.6"
+            "%,
+          ],
+        },
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      source = ncurses_src,
+    },
+  }
   in
 
   {

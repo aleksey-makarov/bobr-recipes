@@ -52,39 +52,53 @@ fun pkgs =>
   }
   in
 
-  let gcc =
-    recipe.binary
-      "gcc-15.2.0"
-      {
-        script_config = {
-          build_dir = "build",
-          pre_configure = m%"
-          rm -rf gmp mpfr mpc
-          ln -s /in/sources1 gmp
-          ln -s /in/sources2 mpfr
-          ln -s /in/sources3 mpc
-        "%,
-          configure_args = [
-            "--enable-languages=c,c++",
-            "--enable-default-pie",
-            "--enable-default-ssp",
-            "--disable-multilib",
-            "--disable-bootstrap",
-            "--disable-fixincludes",
-            "--disable-nls",
-            "--without-zstd",
-          ],
-          post_install = "ln -sv gcc \"${MBUILD_INSTALL_DIR}/usr/bin/cc\"",
-        },
-      }
-      pkgs.system_image_0
-      pkgs.buildscript_autotools
-      [
-        gcc_src,
-        pkgs.gmp_src,
-        pkgs.mpfr_src,
-        pkgs.mpc_src,
-      ]
+  let gcc = {
+    name = "gcc-15.2.0",
+    tag = "Autotools",
+    config = {
+      pre_configure = {
+        name = "link_gcc_prereqs",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            rm -rf gmp mpfr mpc
+            ln -s "${gmp}" gmp
+            ln -s "${mpfr}" mpfr
+            ln -s "${mpc}" mpc
+          "%,
+        ],
+      },
+      configure_args = [
+        "--enable-languages=c,c++",
+        "--enable-default-pie",
+        "--enable-default-ssp",
+        "--disable-multilib",
+        "--disable-bootstrap",
+        "--disable-fixincludes",
+        "--disable-nls",
+        "--without-zstd",
+      ],
+      post_install = {
+        name = "add_cc_symlink",
+        run_as = "root",
+        argv = [
+          "ln",
+          "-sv",
+          "gcc",
+          "${out}/usr/bin/cc",
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.system_image_0,
+      source = gcc_src,
+      gmp = pkgs.gmp_src,
+      mpfr = pkgs.mpfr_src,
+      mpc = pkgs.mpc_src,
+    },
+  }
   in
 
   {

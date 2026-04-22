@@ -41,28 +41,27 @@ fun pkgs =>
   }
   in
 
-  let binutils =
-    recipe.binary
-      "binutils-2.45"
-      {
-        script_config = {
-          build_dir = "build",
-          configure_args = [
-            "--libdir=/usr/lib64",
-            "--enable-shared",
-            "--enable-64-bit-bfd",
-            "--enable-new-dtags",
-            "--enable-default-hash-style=gnu",
-            "--disable-nls",
-            "--disable-werror",
-            "--disable-gprofng",
-            "--without-zstd",
-          ],
-        },
-      }
-      pkgs.system_image_0
-      pkgs.buildscript_autotools
-      [binutils_src]
+  let binutils = {
+    name = "binutils-2.45",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--libdir=/usr/lib64",
+        "--enable-shared",
+        "--enable-64-bit-bfd",
+        "--enable-new-dtags",
+        "--enable-default-hash-style=gnu",
+        "--disable-nls",
+        "--disable-werror",
+        "--disable-gprofng",
+        "--without-zstd",
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_0,
+      source = binutils_src,
+    },
+  }
   in
 
   {

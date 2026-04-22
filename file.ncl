@@ -16,27 +16,26 @@ fun pkgs =>
     name = "file-build-image",
     tag = "Image",
     config = { ref_name | default = "file-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image_2,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image_2 }
+      & recipe.numbered_inputs [
         pkgs.bzip2,
         pkgs.xz,
       ],
-    },
   }
   in
 
-  let file =
-    recipe.binary
-      "file-5.46"
-      {
-        script_config = {
-          configure_args = [],
-        },
-      }
-      file_build_image
-      pkgs.buildscript_autotools
-      [file_src]
+  let file = {
+    name = "file-5.46",
+    tag = "Autotools",
+    config = {
+      configure_args = [],
+    },
+    inputs = {
+      image = file_build_image,
+      source = file_src,
+    },
+  }
   in
 
   {

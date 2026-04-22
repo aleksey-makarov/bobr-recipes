@@ -36,45 +36,75 @@ fun pkgs =>
   }
   in
 
-  let test_system_image_1 =
-    recipe.binary
-      "test-system-image-1"
-      {
-        script_config = {
-          name = "system-image-1",
+  let test_system_image_1 = {
+    name = "test-system-image-1",
+    tag = "Binary",
+    config = {
+      script_config = {
+        name = "system-image-1",
+      },
+      steps = [
+        {
+          name = "check_image",
+          run_as = "root",
+          cwd = "${out}",
+          argv = ["${script}"],
         },
-      }
-      pkgs.system_image_1
-      buildscript_test_image
-      []
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_1,
+      script = buildscript_test_image,
+    },
+  }
   in
 
-  let test_system_image_2 =
-    recipe.binary
-      "test-system-image-2"
-      {
-        script_config = {
-          name = "system-image-2",
-          check_live_usr = "true",
+  let test_system_image_2 = {
+    name = "test-system-image-2",
+    tag = "Binary",
+    config = {
+      script_config = {
+        name = "system-image-2",
+        check_live_usr = "true",
+      },
+      steps = [
+        {
+          name = "check_image",
+          run_as = "root",
+          cwd = "${out}",
+          argv = ["${script}"],
         },
-      }
-      pkgs.system_image_2
-      buildscript_test_image
-      []
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      script = buildscript_test_image,
+    },
+  }
   in
 
-  let test_system_image =
-    recipe.binary
-      "test-system-image"
-      {
-        script_config = {
-          name = "system-image",
-          check_python = "true",
+  let test_system_image = {
+    name = "test-system-image",
+    tag = "Binary",
+    config = {
+      script_config = {
+        name = "system-image",
+        check_python = "true",
+      },
+      steps = [
+        {
+          name = "check_image",
+          run_as = "root",
+          cwd = "${out}",
+          argv = ["${script}"],
         },
-      }
-      pkgs.system_image
-      buildscript_test_image
-      []
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image,
+      script = buildscript_test_image,
+    },
+  }
   in
 
   {
