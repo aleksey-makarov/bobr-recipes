@@ -196,6 +196,28 @@ let insert_after_step_fn = fun target_name =>
         []
         steps
 in
+let pad3 = fun n =>
+  let digits = std.string.from_number n in
+  if n < 10 then
+    "00" ++ digits
+  else if n < 100 then
+    "0" ++ digits
+  else
+    digits
+in
+let numbered_inputs_fn = fun inputs =>
+  std.record.from_array (
+    std.array.map_with_index
+      (fun idx =>
+        fun input =>
+          {
+            field = "n" ++ pad3 idx,
+            value = input,
+          }
+      )
+      inputs
+  )
+in
 {
   install = {
     root_default_attrs = {
@@ -254,6 +276,8 @@ in
 
     default_binary_sequence = default_binary_sequence,
   },
+
+  numbered_inputs = numbered_inputs_fn,
 
   to_request = fun root_node =>
     let lowered_root_node = lower_node root_node in

@@ -9,27 +9,28 @@ fun pkgs =>
       & {
         mode = "bootstrap",
       },
-    inputs = {
-      in000 = pkgs.base_filesystem,
-      in001 = pkgs.linux_headers,
-      in002 = pkgs.glibc_gen1,
-      in003 = pkgs.binutils_gen1,
-      in004 = pkgs.gcc_gen1,
-      in005 = pkgs.bash_gen1,
-      in006 = pkgs.gawk_gen1,
-      in007 = pkgs.bison_gen1,
-      in008 = pkgs.make_gen1,
-      in009 = pkgs.coreutils_gen1,
-      in010 = pkgs.sed_gen1,
-      in011 = pkgs.grep_gen1,
-      in012 = pkgs.gzip_gen1,
-      in013 = pkgs.tar_gen1,
-      in014 = pkgs.patch_gen1,
-      in015 = pkgs.findutils_gen1,
-      in016 = pkgs.diffutils_gen1,
-      in017 = pkgs.m4_gen1,
-      in018 = pkgs.python_gen1,
-    },
+    inputs =
+      recipe.numbered_inputs [
+        pkgs.base_filesystem,
+        pkgs.linux_headers,
+        pkgs.glibc_gen1,
+        pkgs.binutils_gen1,
+        pkgs.gcc_gen1,
+        pkgs.bash_gen1,
+        pkgs.gawk_gen1,
+        pkgs.bison_gen1,
+        pkgs.make_gen1,
+        pkgs.coreutils_gen1,
+        pkgs.sed_gen1,
+        pkgs.grep_gen1,
+        pkgs.gzip_gen1,
+        pkgs.tar_gen1,
+        pkgs.patch_gen1,
+        pkgs.findutils_gen1,
+        pkgs.diffutils_gen1,
+        pkgs.m4_gen1,
+        pkgs.python_gen1,
+      ],
   }
   in
 
@@ -41,9 +42,8 @@ fun pkgs =>
       & {
         mode = "bootstrap",
       },
-    inputs = {
-      base = null,
-      inputs = [
+    inputs =
+      recipe.numbered_inputs [
         pkgs.base_filesystem,
         pkgs.linux_headers,
         pkgs.glibc,
@@ -64,7 +64,6 @@ fun pkgs =>
         pkgs.m4_gen1,
         pkgs.python_gen1,
       ],
-    },
   }
   in
 
@@ -76,9 +75,8 @@ fun pkgs =>
       & {
         mode = "bootstrap",
       },
-    inputs = {
-      base = null,
-      inputs = [
+    inputs =
+      recipe.numbered_inputs [
         pkgs.base_filesystem,
         pkgs.linux_headers,
         pkgs.glibc,
@@ -102,7 +100,6 @@ fun pkgs =>
         pkgs.zlib,
         pkgs.elfutils,
       ],
-    },
   }
   in
 
@@ -110,9 +107,9 @@ fun pkgs =>
     name = "system-image",
     tag = "Image",
     config = { ref_name | default = "system-image" } & {},
-    inputs = {
-      base = pkgs.system_image_2,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image_2 }
+      & recipe.numbered_inputs [
         pkgs.autoconf,
         pkgs.bzip2,
         pkgs.ncurses,
@@ -122,7 +119,6 @@ fun pkgs =>
         pkgs.expat,
         pkgs.libffi,
       ],
-    },
   }
   in
 
