@@ -16,29 +16,46 @@ fun pkgs =>
     name = "intltool-build-image",
     tag = "Image",
     config = { ref_name | default = "intltool-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image }
+      & recipe.numbered_inputs [
         pkgs.xml_parser,
       ],
-    },
   }
   in
 
-  let intltool =
-    recipe.binary
-      "intltool-0.51.0"
-      {
-        script_config = {
-          pre_configure = m%"
-          sed -i 's:\\${:\\$\\{:' intltool-update.in
-        "%,
-          post_install = "install -v -Dm644 ${MBUILD_SOURCE_DIR}/doc/I18N-HOWTO ${MBUILD_INSTALL_DIR}/usr/share/doc/intltool-0.51.0/I18N-HOWTO",
-        },
-      }
-      intltool_build_image
-      pkgs.buildscript_autotools
-      [intltool_src]
+  let intltool = {
+    name = "intltool-0.51.0",
+    tag = "Autotools",
+    config = {
+      pre_configure = {
+        name = "patch_intltool_update",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            sed -i 's:\${:\$\{:g' intltool-update.in
+          "%,
+        ],
+      },
+      post_install = {
+        name = "install_i18n_howto",
+        run_as = "root",
+        argv = [
+          "install",
+          "-v",
+          "-Dm644",
+          "${source}/doc/I18N-HOWTO",
+          "${out}/usr/share/doc/intltool-0.51.0/I18N-HOWTO",
+        ],
+      },
+    },
+    inputs = {
+      image = intltool_build_image,
+      source = intltool_src,
+    },
+  }
   in
 
   {

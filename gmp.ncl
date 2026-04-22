@@ -15,24 +15,30 @@ fun pkgs =>
   }
   in
 
-  let gmp =
-    let script_config = {
-      pre_configure = "sed -i '/long long t1;/,+1s/()/(...)/' configure",
+  let gmp = {
+    name = "gmp-6.3.0",
+    tag = "Autotools",
+    config = {
+      pre_configure = {
+        name = "patch_configure",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          "sed -i '/long long t1;/,+1s/()/(...)/' configure",
+        ],
+      },
       configure_args = [
         "--enable-cxx",
         "--disable-static",
         "--docdir=/usr/share/doc/gmp-6.3.0",
       ],
-    }
-    in
-    recipe.binary
-      "gmp-6.3.0"
-      {
-        include script_config,
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [gmp_src]
+    },
+    inputs = {
+      image = pkgs.system_image,
+      source = gmp_src,
+    },
+  }
   in
 
   {

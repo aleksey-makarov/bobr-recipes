@@ -12,20 +12,20 @@ fun pkgs =>
   }
   in
 
-  let lz4 =
-    recipe.binary
-      "lz4-1.10.0"
-      {
-        script_config = {
-          make_args = [
-            "BUILD_STATIC=no",
-            "PREFIX=/usr",
-          ],
-        },
-      }
-      pkgs.system_image_2
-      pkgs.buildscript_gnu_make
-      [lz4_src]
+  let lz4 = {
+    name = "lz4-1.10.0",
+    tag = "Makefile",
+    config = {
+      make_args = [
+        "BUILD_STATIC=no",
+        "PREFIX=/usr",
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      source = lz4_src,
+    },
+  }
   in
 
   {

@@ -12,20 +12,20 @@ fun pkgs =>
   }
   in
 
-  let xz =
-    recipe.binary
-      "xz-5.8.1"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-static",
-            "--docdir=/usr/share/doc/xz-5.8.1",
-          ],
-        },
-      }
-      pkgs.system_image_2
-      pkgs.buildscript_autotools
-      [xz_src]
+  let xz = {
+    name = "xz-5.8.1",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-static",
+        "--docdir=/usr/share/doc/xz-5.8.1",
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      source = xz_src,
+    },
+  }
   in
 
   {

@@ -12,15 +12,15 @@ fun pkgs =>
   }
   in
 
-  let xml_parser =
-    recipe.binary
-      "xml-parser-2.47"
-      {
-        script_config = {},
-      }
-      pkgs.system_image
-      pkgs.buildscript_perl_module
-      [xml_parser_src]
+  let xml_parser = {
+    name = "xml-parser-2.47",
+    tag = "PerlModule",
+    config = {},
+    inputs = {
+      image = pkgs.system_image,
+      source = xml_parser_src,
+    },
+  }
   in
 
   {

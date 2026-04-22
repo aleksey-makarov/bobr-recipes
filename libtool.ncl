@@ -15,21 +15,25 @@ fun pkgs =>
   }
   in
 
-  let libtool =
-    let script_config = {
-      post_install = m%"
-          rm -fv "${MBUILD_INSTALL_DIR}/usr/lib/libltdl.a"
-        "%,
-    }
-    in
-    recipe.binary
-      "libtool-2.5.4"
-      {
-        include script_config,
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [libtool_src]
+  let libtool = {
+    name = "libtool-2.5.4",
+    tag = "Autotools",
+    config = {
+      post_install = {
+        name = "remove_static_libltdl",
+        run_as = "root",
+        argv = [
+          "rm",
+          "-fv",
+          "${out}/usr/lib/libltdl.a",
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.system_image,
+      source = libtool_src,
+    },
+  }
   in
 
   {

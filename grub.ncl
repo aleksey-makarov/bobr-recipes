@@ -15,35 +15,49 @@ fun pkgs =>
   }
   in
 
-  let grub =
-    let script_config = {
-      pre_configure = m%"
-          unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
-          echo 'depends bli part_gpt' > grub-core/extra_deps.lst
-        "%,
+  let grub = {
+    name = "grub-2.12",
+    tag = "Autotools",
+    config = {
+      pre_configure = {
+        name = "prepare_grub_sources",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
+            echo 'depends bli part_gpt' > grub-core/extra_deps.lst
+          "%,
+        ],
+      },
       configure_args = [
         "--sysconfdir=/etc",
         "--disable-efiemu",
         "--disable-werror",
       ],
-      post_install = m%"
-          install -vdm755 ${MBUILD_INSTALL_DIR}/usr/share/bash-completion/completions
-          if [ -f ${MBUILD_INSTALL_DIR}/etc/bash_completion.d/grub ]; then
-            mv -v ${MBUILD_INSTALL_DIR}/etc/bash_completion.d/grub \
-                  ${MBUILD_INSTALL_DIR}/usr/share/bash-completion/completions/grub
-            rmdir -p --ignore-fail-on-non-empty ${MBUILD_INSTALL_DIR}/etc/bash_completion.d 2>/dev/null || true
-          fi
-        "%,
-    }
-    in
-    recipe.binary
-      "grub-2.12"
-      {
-        include script_config,
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [grub_src]
+      post_install = {
+        name = "move_grub_bash_completion",
+        run_as = "root",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            install -vdm755 "${out}/usr/share/bash-completion/completions"
+            if [ -f "${out}/etc/bash_completion.d/grub" ]; then
+              mv -v "${out}/etc/bash_completion.d/grub" \
+                    "${out}/usr/share/bash-completion/completions/grub"
+              rmdir -p --ignore-fail-on-non-empty "${out}/etc/bash_completion.d" 2>/dev/null || true
+            fi
+          "%,
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.system_image,
+      source = grub_src,
+    },
+  }
   in
 
   {

@@ -46,18 +46,29 @@ fun pkgs =>
   }
   in
 
-  let openssl =
-    recipe.binary
-      "openssl-3.5.2"
-      {
-        steps = [
-          recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
-        ],
-        script_config = {},
-      }
-      pkgs.system_image
-      buildscript_openssl
-      [openssl_src]
+  let openssl = {
+    name = "openssl-3.5.2",
+    tag = "Binary",
+    config = {
+      steps = [
+        recipe.steps.env_step
+          "install"
+          "root"
+          "${build}"
+          ["${script}"]
+          {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+      ],
+      script_config = {},
+    },
+    inputs = {
+      image = pkgs.system_image,
+      script = buildscript_openssl,
+      source = openssl_src,
+    },
+  }
   in
 
   {

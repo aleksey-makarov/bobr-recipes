@@ -31,34 +31,52 @@ fun pkgs =>
     name = "expect-build-image",
     tag = "Image",
     config = { ref_name | default = "expect-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image }
+      & recipe.numbered_inputs [
         pkgs.tcl,
       ],
-    },
   }
   in
 
-  let expect =
-    recipe.binary
-      "expect-5.45.4"
-      {
-        script_config = {
-          pre_configure = "patch -Np1 -i /in/sources1",
-          configure_args = [
-            "--with-tcl=/usr/lib",
-            "--enable-shared",
-            "--disable-rpath",
-            "--mandir=/usr/share/man",
-            "--with-tclinclude=/usr/include",
-          ],
-          post_install = "ln -sfv expect5.45.4/libexpect5.45.4.so ${MBUILD_INSTALL_DIR}/usr/lib/libexpect5.45.4.so",
-        },
-      }
-      expect_build_image
-      pkgs.buildscript_autotools
-      [expect_src, expect_gcc15_patch]
+  let expect = {
+    name = "expect-5.45.4",
+    tag = "Autotools",
+    config = {
+      pre_configure = {
+        name = "apply_gcc15_patch",
+        run_as = "build-user",
+        argv = [
+          "patch",
+          "-Np1",
+          "-i",
+          "${gcc15_patch}",
+        ],
+      },
+      configure_args = [
+        "--with-tcl=/usr/lib",
+        "--enable-shared",
+        "--disable-rpath",
+        "--mandir=/usr/share/man",
+        "--with-tclinclude=/usr/include",
+      ],
+      post_install = {
+        name = "link_libexpect",
+        run_as = "root",
+        argv = [
+          "ln",
+          "-sfv",
+          "expect5.45.4/libexpect5.45.4.so",
+          "${out}/usr/lib/libexpect5.45.4.so",
+        ],
+      },
+    },
+    inputs = {
+      image = expect_build_image,
+      source = expect_src,
+      gcc15_patch = expect_gcc15_patch,
+    },
+  }
   in
 
   {

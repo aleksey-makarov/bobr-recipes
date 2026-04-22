@@ -12,19 +12,15 @@ fun pkgs =>
   }
   in
 
-  let libpipeline =
-    let script_config = {
-      configure_args = [],
-    }
-    in
-    recipe.binary
-      "libpipeline-1.5.8"
-      {
-        include script_config,
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [libpipeline_src]
+  let libpipeline = {
+    name = "libpipeline-1.5.8",
+    tag = "Autotools",
+    config = {},
+    inputs = {
+      image = pkgs.system_image,
+      source = libpipeline_src,
+    },
+  }
   in
 
   {

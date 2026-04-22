@@ -16,38 +16,37 @@ fun pkgs =>
     name = "man-db-build-image",
     tag = "Image",
     config = { ref_name | default = "man-db-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image }
+      & recipe.numbered_inputs [
         pkgs.gdbm,
         pkgs.groff,
         pkgs.libpipeline,
       ],
-    },
   }
   in
 
-  let man_db =
-    recipe.binary
-      "man-db-2.13.1"
-      {
-        script_config = {
-          configure_args = [
-            "--docdir=/usr/share/doc/man-db-2.13.1",
-            "--sysconfdir=/etc",
-            "--disable-setuid",
-            "--enable-cache-owner=bin",
-            "--with-systemdsystemunitdir=/usr/lib/systemd/system",
-            "--with-systemdtmpfilesdir=/usr/lib/tmpfiles.d",
-            "--with-browser=/usr/bin/lynx",
-            "--with-vgrind=/usr/bin/vgrind",
-            "--with-grap=/usr/bin/grap",
-          ],
-        },
-      }
-      man_db_build_image
-      pkgs.buildscript_autotools
-      [man_db_src]
+  let man_db = {
+    name = "man-db-2.13.1",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--docdir=/usr/share/doc/man-db-2.13.1",
+        "--sysconfdir=/etc",
+        "--disable-setuid",
+        "--enable-cache-owner=bin",
+        "--with-systemdsystemunitdir=/usr/lib/systemd/system",
+        "--with-systemdtmpfilesdir=/usr/lib/tmpfiles.d",
+        "--with-browser=/usr/bin/lynx",
+        "--with-vgrind=/usr/bin/vgrind",
+        "--with-grap=/usr/bin/grap",
+      ],
+    },
+    inputs = {
+      image = man_db_build_image,
+      source = man_db_src,
+    },
+  }
   in
 
   {

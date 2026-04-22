@@ -12,38 +12,46 @@ fun pkgs =>
   }
   in
 
-  let util_linux =
-    recipe.binary
-      "util-linux-2.41.1"
-      {
-        script_config = {
-          pre_configure = m%"
-          sed -i 's#chgrp tty $(DESTDIR)$(usrbin_execdir)/wall#chgrp root $(DESTDIR)$(usrbin_execdir)/wall#' Makefile.in
-          sed -i 's#chgrp tty $(DESTDIR)$(usrbin_execdir)/write#chgrp root $(DESTDIR)$(usrbin_execdir)/write#' Makefile.in
-        "%,
-          configure_args = [
-            "--bindir=/usr/bin",
-            "--libdir=/usr/lib",
-            "--runstatedir=/run",
-            "--sbindir=/usr/sbin",
-            "--disable-chfn-chsh",
-            "--disable-login",
-            "--disable-nologin",
-            "--disable-su",
-            "--disable-setpriv",
-            "--disable-runuser",
-            "--disable-pylibmount",
-            "--disable-liblastlog2",
-            "--disable-static",
-            "--without-python",
-            "ADJTIME_PATH=/var/lib/hwclock/adjtime",
-            "--docdir=/usr/share/doc/util-linux-2.41.1",
-          ],
-        },
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [util_linux_src]
+  let util_linux = {
+    name = "util-linux-2.41.1",
+    tag = "Autotools",
+    config = {
+      pre_configure = {
+        name = "patch_permissions",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            sed -i 's#chgrp tty $(DESTDIR)$(usrbin_execdir)/wall#chgrp root $(DESTDIR)$(usrbin_execdir)/wall#' Makefile.in
+            sed -i 's#chgrp tty $(DESTDIR)$(usrbin_execdir)/write#chgrp root $(DESTDIR)$(usrbin_execdir)/write#' Makefile.in
+          "%,
+        ],
+      },
+      configure_args = [
+        "--bindir=/usr/bin",
+        "--libdir=/usr/lib",
+        "--runstatedir=/run",
+        "--sbindir=/usr/sbin",
+        "--disable-chfn-chsh",
+        "--disable-login",
+        "--disable-nologin",
+        "--disable-su",
+        "--disable-setpriv",
+        "--disable-runuser",
+        "--disable-pylibmount",
+        "--disable-liblastlog2",
+        "--disable-static",
+        "--without-python",
+        "ADJTIME_PATH=/var/lib/hwclock/adjtime",
+        "--docdir=/usr/share/doc/util-linux-2.41.1",
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image,
+      source = util_linux_src,
+    },
+  }
   in
 
   {

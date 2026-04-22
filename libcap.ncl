@@ -12,21 +12,29 @@ fun pkgs =>
   }
   in
 
-  let libcap =
-    recipe.binary
-      "libcap-2.76"
-      {
-        script_config = {
-          pre_build = "sed -i '/install -m.*STA/d' libcap/Makefile",
-          make_args = [
-            "prefix=/usr",
-            "lib=lib",
-          ],
-        },
-      }
-      pkgs.system_image_2
-      pkgs.buildscript_gnu_make
-      [libcap_src]
+  let libcap = {
+    name = "libcap-2.76",
+    tag = "Makefile",
+    config = {
+      pre_build = {
+        name = "drop_static_install_rule",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          "sed -i '/install -m.*STA/d' libcap/Makefile",
+        ],
+      },
+      make_args = [
+        "prefix=/usr",
+        "lib=lib",
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      source = libcap_src,
+    },
+  }
   in
 
   {

@@ -15,22 +15,20 @@ fun pkgs =>
   }
   in
 
-  let gdbm =
-    let script_config = {
+  let gdbm = {
+    name = "gdbm-1.26",
+    tag = "Autotools",
+    config = {
       configure_args = [
         "--disable-static",
         "--enable-libgdbm-compat",
       ],
-    }
-    in
-    recipe.binary
-      "gdbm-1.26"
-      {
-        include script_config,
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [gdbm_src]
+    },
+    inputs = {
+      image = pkgs.system_image,
+      source = gdbm_src,
+    },
+  }
   in
 
   {

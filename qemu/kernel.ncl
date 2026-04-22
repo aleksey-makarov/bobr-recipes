@@ -23,18 +23,51 @@ fun pkgs =>
   }
   in
 
-  let qemu_kernel =
-    recipe.binary
-      "qemu-kernel"
-      {
-        script_config = {},
-      }
-      pkgs.system_image_2
-      qemu_kernel_buildscript
-      [
-        pkgs.linux_src,
-        qemu_kernel_config,
-      ]
+  let qemu_kernel = {
+    name = "qemu-kernel",
+    tag = "Binary",
+    config = {
+      script_config = {},
+      steps = [
+        {
+          name = "configure",
+          run_as = "build-user",
+          cwd = "${build}",
+          argv = ["${script}", "configure"],
+          env = {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+        },
+        {
+          name = "build",
+          run_as = "build-user",
+          cwd = "${build}",
+          argv = ["${script}", "build"],
+          env = {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+        },
+        {
+          name = "install",
+          run_as = "root",
+          cwd = "${build}",
+          argv = ["${script}", "install"],
+          env = {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+        },
+      ],
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      script = qemu_kernel_buildscript,
+      source = pkgs.linux_src,
+      kernel_config = qemu_kernel_config,
+    },
+  }
   in
 
   {

@@ -15,17 +15,17 @@ fun pkgs =>
   }
   in
 
-  let gperf =
-    recipe.binary
-      "gperf-3.3"
-      {
-        script_config = {
-          configure_args = ["--docdir=/usr/share/doc/gperf-3.3"],
-        },
-      }
-      pkgs.system_image_2
-      pkgs.buildscript_autotools
-      [gperf_src]
+  let gperf = {
+    name = "gperf-3.3",
+    tag = "Autotools",
+    config = {
+      configure_args = ["--docdir=/usr/share/doc/gperf-3.3"],
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      source = gperf_src,
+    },
+  }
   in
 
   {

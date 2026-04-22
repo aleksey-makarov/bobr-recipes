@@ -16,14 +16,13 @@ fun pkgs =>
     name = "dejagnu-build-image",
     tag = "Image",
     config = { ref_name | default = "dejagnu-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image }
+      & recipe.numbered_inputs [
         pkgs.tcl,
         pkgs.expect,
         pkgs.texinfo,
       ],
-    },
   }
   in
 
@@ -57,18 +56,29 @@ fun pkgs =>
   }
   in
 
-  let dejagnu =
-    recipe.binary
-      "dejagnu-1.6.3"
-      {
-        steps = [
-          recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
-        ],
-        script_config = {},
-      }
-      dejagnu_build_image
-      buildscript_dejagnu
-      [dejagnu_src]
+  let dejagnu = {
+    name = "dejagnu-1.6.3",
+    tag = "Binary",
+    config = {
+      steps = [
+        recipe.steps.env_step
+          "install"
+          "root"
+          "${build}"
+          ["${script}"]
+          {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+      ],
+      script_config = {},
+    },
+    inputs = {
+      image = dejagnu_build_image,
+      script = buildscript_dejagnu,
+      source = dejagnu_src,
+    },
+  }
   in
 
   {

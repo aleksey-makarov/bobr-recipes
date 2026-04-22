@@ -33,18 +33,29 @@ fun pkgs =>
   }
   in
 
-  let man_pages =
-    recipe.binary
-      "man-pages-6.15"
-      {
-        steps = [
-          recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
-        ],
-        script_config = {},
-      }
-      pkgs.system_image
-      buildscript_man_pages
-      [man_pages_src]
+  let man_pages = {
+    name = "man-pages-6.15",
+    tag = "Binary",
+    config = {
+      steps = [
+        recipe.steps.env_step
+          "install"
+          "root"
+          "${build}"
+          ["${script}"]
+          {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+      ],
+      script_config = {},
+    },
+    inputs = {
+      image = pkgs.system_image,
+      script = buildscript_man_pages,
+      source = man_pages_src,
+    },
+  }
   in
 
   {

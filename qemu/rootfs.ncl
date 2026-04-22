@@ -8,8 +8,8 @@ fun pkgs =>
       size_mib = 4096,
       label = "qemu-rootfs",
     },
-    inputs = {
-      inputs = [
+    inputs =
+      recipe.numbered_inputs [
         pkgs.base_filesystem,
         pkgs.qemu_runtime_files,
         pkgs.man_pages,
@@ -85,7 +85,6 @@ fun pkgs =>
         pkgs.e2fsprogs,
         pkgs.vim,
       ],
-    },
   }
   in
 

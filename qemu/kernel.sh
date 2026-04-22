@@ -5,6 +5,7 @@ phase="${1:-${MBUILD_STEP_NAME:-}}"
 phase="${phase:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
 install_dir="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
+kernel_config="/__mbuild/inputs/kernel_config"
 
 export ARCH=x86_64
 export KBUILD_BUILD_USER=mbuild
@@ -51,7 +52,7 @@ phase_configure() {
   cd "$project_source_dir"
   ensure_tmpdir
   make mrproper
-  cp /in/sources1 .config
+  cp "$kernel_config" .config
   make olddefconfig
 }
 
@@ -75,15 +76,10 @@ phase_install() {
   install -m0644 .config "$install_dir/boot/kernel.config"
 }
 
-phase_post_install() {
-  :
-}
-
 case "$phase" in
   configure) phase_configure ;;
   build) phase_build ;;
   install) phase_install ;;
-  post_install) phase_post_install ;;
   *)
     echo "qemu-kernel build-script: unsupported phase '$phase'" >&2
     exit 1

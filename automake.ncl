@@ -15,21 +15,19 @@ fun pkgs =>
   }
   in
 
-  let automake =
-    let script_config = {
+  let automake = {
+    name = "automake-1.18.1",
+    tag = "Autotools",
+    config = {
       configure_args = [
         "--docdir=/usr/share/doc/automake-1.18.1",
       ],
-    }
-    in
-    recipe.binary
-      "automake-1.18.1"
-      {
-        include script_config,
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [automake_src]
+    },
+    inputs = {
+      image = pkgs.system_image,
+      source = automake_src,
+    },
+  }
   in
 
   {

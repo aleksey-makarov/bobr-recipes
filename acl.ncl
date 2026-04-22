@@ -16,29 +16,28 @@ fun pkgs =>
     name = "acl-build-image",
     tag = "Image",
     config = { ref_name | default = "acl-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image_2,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image_2 }
+      & recipe.numbered_inputs [
         pkgs.attr,
       ],
-    },
   }
   in
 
-  let acl =
-    recipe.binary
-      "acl-2.3.2"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-static",
-            "--docdir=/usr/share/doc/acl-2.3.2",
-          ],
-        },
-      }
-      acl_build_image
-      pkgs.buildscript_autotools
-      [acl_src]
+  let acl = {
+    name = "acl-2.3.2",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-static",
+        "--docdir=/usr/share/doc/acl-2.3.2",
+      ],
+    },
+    inputs = {
+      image = acl_build_image,
+      source = acl_src,
+    },
+  }
   in
 
   {

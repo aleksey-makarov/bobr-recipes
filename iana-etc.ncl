@@ -31,18 +31,29 @@ fun pkgs =>
   }
   in
 
-  let iana_etc =
-    recipe.binary
-      "iana-etc-20250807"
-      {
-        steps = [
-          recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
-        ],
-        script_config = {},
-      }
-      pkgs.system_image
-      buildscript_iana_etc
-      [iana_etc_src]
+  let iana_etc = {
+    name = "iana-etc-20250807",
+    tag = "Binary",
+    config = {
+      steps = [
+        recipe.steps.env_step
+          "install"
+          "root"
+          "${build}"
+          ["${script}"]
+          {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+      ],
+      script_config = {},
+    },
+    inputs = {
+      image = pkgs.system_image,
+      script = buildscript_iana_etc,
+      source = iana_etc_src,
+    },
+  }
   in
 
   {

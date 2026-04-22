@@ -15,23 +15,30 @@ fun pkgs =>
   }
   in
 
-  let gettext =
-    let script_config = {
+  let gettext = {
+    name = "gettext-0.26",
+    tag = "Autotools",
+    config = {
       configure_args = [
         "--disable-static",
         "--docdir=/usr/share/doc/gettext-0.26",
       ],
-      post_install = "chmod -v 0755 \"${MBUILD_INSTALL_DIR}/usr/lib/preloadable_libintl.so\"",
-    }
-    in
-    recipe.binary
-      "gettext-0.26"
-      {
-        include script_config,
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [gettext_src]
+      post_install = {
+        name = "fix_preloadable_libintl_permissions",
+        run_as = "root",
+        argv = [
+          "chmod",
+          "-v",
+          "0755",
+          "${out}/usr/lib/preloadable_libintl.so",
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.system_image,
+      source = gettext_src,
+    },
+  }
   in
 
   {

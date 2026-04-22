@@ -24,30 +24,45 @@ fun pkgs =>
   }
   in
 
-  let kbd =
-    let script_config = {
-      pre_configure = m%"
-          patch -Np1 -i /in/sources1
-          sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
-          sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
-        "%,
+  let kbd = {
+    name = "kbd-2.8.0",
+    tag = "Autotools",
+    config = {
+      pre_configure = {
+        name = "prepare_kbd_sources",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            patch -Np1 -i "${backspace_patch}"
+            sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
+            sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
+          "%,
+        ],
+      },
       configure_args = [
         "--disable-vlock",
       ],
-      post_install = m%"
-          install -vdm755 ${MBUILD_INSTALL_DIR}/usr/share/doc
-          cp -R -v ${MBUILD_SOURCE_DIR}/docs/doc -T ${MBUILD_INSTALL_DIR}/usr/share/doc/kbd-2.8.0
-        "%,
-    }
-    in
-    recipe.binary
-      "kbd-2.8.0"
-      {
-        include script_config,
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [kbd_src, kbd_backspace_patch]
+      post_install = {
+        name = "install_docs",
+        run_as = "root",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            install -vdm755 "${out}/usr/share/doc"
+            cp -R -v "${source}/docs/doc" -T "${out}/usr/share/doc/kbd-2.8.0"
+          "%,
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.system_image,
+      source = kbd_src,
+      backspace_patch = kbd_backspace_patch,
+    },
+  }
   in
 
   {

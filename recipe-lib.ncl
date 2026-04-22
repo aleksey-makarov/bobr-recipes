@@ -45,6 +45,26 @@ let buildscript_gnu_make = {
   inputs = {},
 }
 in
+let buildscript_meson = {
+  name = "buildscript-meson",
+  tag = "Text",
+  config = {
+    executable = true,
+    source = import "buildscripts/meson.sh" as 'Text,
+  },
+  inputs = {},
+}
+in
+let buildscript_perl_module = {
+  name = "buildscript-perl-module",
+  tag = "Text",
+  config = {
+    executable = true,
+    source = import "buildscripts/perl-module.sh" as 'Text,
+  },
+  inputs = {},
+}
+in
 let record_get_or = fun field =>
   fun fallback =>
     fun record =>
@@ -250,11 +270,183 @@ let lower_makefile_node = fun node =>
         node.inputs,
   }
 in
+let lower_meson_node = fun node =>
+  let node_config = node.config in
+  let source_root_expr = autotools_source_root_expr node_config in
+  let pre_configure_steps =
+    normalize_hook_steps node_config "pre_configure" source_root_expr
+  in
+  let post_install_steps =
+    normalize_hook_steps node_config "post_install" "${build}"
+  in
+  let lowered_script_config =
+    let with_setup_args =
+      if std.record.has_field "setup_args" node_config then
+        { setup_args = node_config.setup_args }
+      else
+        {}
+    in
+    let with_env =
+      if std.record.has_field "env" node_config then
+        std.record.insert "env" node_config.env with_setup_args
+      else
+        with_setup_args
+    in
+    let with_source_subdir =
+      if std.record.has_field "source_subdir" node_config then
+        std.record.insert "source_subdir" node_config.source_subdir with_env
+      else
+        with_env
+    in
+    if std.record.has_field "build_dir" node_config then
+      std.record.insert "build_dir" node_config.build_dir with_source_subdir
+    else
+      with_source_subdir
+  in
+  let meson_step_env = {
+    MBUILD_SOURCE_DIR = "${source}",
+  }
+  in
+  {
+    name = node.name,
+    tag = "Binary",
+    config = (
+      {
+        steps =
+          pre_configure_steps
+          @ [
+            {
+              name = "configure",
+              run_as = "build-user",
+              cwd = "${build}",
+              argv = ["${script}", "configure"],
+              env = meson_step_env,
+            },
+            {
+              name = "build",
+              run_as = "build-user",
+              cwd = "${build}",
+              argv = ["${script}", "build"],
+              env = meson_step_env,
+            },
+            {
+              name = "install",
+              run_as = "root",
+              cwd = "${build}",
+              argv = ["${script}", "install"],
+              env = meson_step_env,
+            },
+          ]
+          @ post_install_steps,
+        script_config = lowered_script_config,
+      }
+      & (
+        if std.record.has_field "install" node_config then
+          { install = node_config.install }
+        else
+          {}
+      )
+    ),
+    inputs =
+      std.record.insert
+        "script"
+        buildscript_meson
+        node.inputs,
+  }
+in
+let lower_perl_module_node = fun node =>
+  let node_config = node.config in
+  let source_root_expr = autotools_source_root_expr node_config in
+  let pre_configure_steps =
+    normalize_hook_steps node_config "pre_configure" source_root_expr
+  in
+  let post_install_steps =
+    normalize_hook_steps node_config "post_install" "${out}"
+  in
+  let lowered_script_config =
+    let with_perl_args =
+      if std.record.has_field "perl_args" node_config then
+        { perl_args = node_config.perl_args }
+      else
+        {}
+    in
+    let with_make_args =
+      if std.record.has_field "make_args" node_config then
+        std.record.insert "make_args" node_config.make_args with_perl_args
+      else
+        with_perl_args
+    in
+    let with_env =
+      if std.record.has_field "env" node_config then
+        std.record.insert "env" node_config.env with_make_args
+      else
+        with_make_args
+    in
+    if std.record.has_field "source_subdir" node_config then
+      std.record.insert "source_subdir" node_config.source_subdir with_env
+    else
+      with_env
+  in
+  let perl_module_step_env = {
+    MBUILD_SOURCE_DIR = "${source}",
+  }
+  in
+  {
+    name = node.name,
+    tag = "Binary",
+    config = (
+      {
+        steps =
+          pre_configure_steps
+          @ [
+            {
+              name = "configure",
+              run_as = "build-user",
+              cwd = "${build}",
+              argv = ["${script}", "configure"],
+              env = perl_module_step_env,
+            },
+            {
+              name = "build",
+              run_as = "build-user",
+              cwd = "${build}",
+              argv = ["${script}", "build"],
+              env = perl_module_step_env,
+            },
+            {
+              name = "install",
+              run_as = "root",
+              cwd = "${build}",
+              argv = ["${script}", "install"],
+              env = perl_module_step_env,
+            },
+          ]
+          @ post_install_steps,
+        script_config = lowered_script_config,
+      }
+      & (
+        if std.record.has_field "install" node_config then
+          { install = node_config.install }
+        else
+          {}
+      )
+    ),
+    inputs =
+      std.record.insert
+        "script"
+        buildscript_perl_module
+        node.inputs,
+  }
+in
 let lower_node = fun node =>
   if node.tag == "Autotools" then
     lower_autotools_node node
   else if node.tag == "Makefile" then
     lower_makefile_node node
+  else if node.tag == "Meson" then
+    lower_meson_node node
+  else if node.tag == "PerlModule" then
+    lower_perl_module_node node
   else
     node
 in
@@ -457,18 +649,4 @@ in
         )
         ordered_names
     ),
-
-  binary = fun recipe_name =>
-    fun recipe_config =>
-      fun image_input =>
-        fun input_nodes =>
-          {
-            name = recipe_name,
-            tag = "Binary",
-            config = recipe_config,
-            inputs = {
-              image = image_input,
-              "in" = input_nodes,
-            },
-          },
 }

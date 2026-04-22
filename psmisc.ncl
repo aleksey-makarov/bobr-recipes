@@ -15,17 +15,15 @@ fun pkgs =>
   }
   in
 
-  let psmisc =
-    let script_config = {}
-    in
-    recipe.binary
-      "psmisc-23.7"
-      {
-        include script_config,
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [psmisc_src]
+  let psmisc = {
+    name = "psmisc-23.7",
+    tag = "Autotools",
+    config = {},
+    inputs = {
+      image = pkgs.system_image,
+      source = psmisc_src,
+    },
+  }
   in
 
   {

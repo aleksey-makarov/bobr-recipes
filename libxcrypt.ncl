@@ -16,31 +16,30 @@ fun pkgs =>
     name = "libxcrypt-build-image",
     tag = "Image",
     config = { ref_name | default = "libxcrypt-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image_2,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image_2 }
+      & recipe.numbered_inputs [
         pkgs.perl,
       ],
-    },
   }
   in
 
-  let libxcrypt =
-    recipe.binary
-      "libxcrypt-4.4.38"
-      {
-        script_config = {
-          configure_args = [
-            "--enable-hashes=strong,glibc",
-            "--enable-obsolete-api=no",
-            "--disable-static",
-            "--disable-failure-tokens",
-          ],
-        },
-      }
-      libxcrypt_build_image
-      pkgs.buildscript_autotools
-      [libxcrypt_src]
+  let libxcrypt = {
+    name = "libxcrypt-4.4.38",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--enable-hashes=strong,glibc",
+        "--enable-obsolete-api=no",
+        "--disable-static",
+        "--disable-failure-tokens",
+      ],
+    },
+    inputs = {
+      image = libxcrypt_build_image,
+      source = libxcrypt_src,
+    },
+  }
   in
 
   {

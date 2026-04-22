@@ -19,33 +19,32 @@ fun pkgs =>
     name = "procps-ng-build-image",
     tag = "Image",
     config = { ref_name | default = "procps-ng-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image }
+      & recipe.numbered_inputs [
         pkgs.libcap,
         pkgs.systemd,
       ],
-    },
   }
   in
 
-  let procps_ng =
-    recipe.binary
-      "procps-ng-4.0.5"
-      {
-        script_config = {
-          configure_args = [
-            "--docdir=/usr/share/doc/procps-ng-4.0.5",
-            "--disable-static",
-            "--disable-kill",
-            "--enable-watch8bit",
-            "--with-systemd",
-          ],
-        },
-      }
-      procps_ng_build_image
-      pkgs.buildscript_autotools
-      [procps_ng_src]
+  let procps_ng = {
+    name = "procps-ng-4.0.5",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--docdir=/usr/share/doc/procps-ng-4.0.5",
+        "--disable-static",
+        "--disable-kill",
+        "--enable-watch8bit",
+        "--with-systemd",
+      ],
+    },
+    inputs = {
+      image = procps_ng_build_image,
+      source = procps_ng_src,
+    },
+  }
   in
 
   {

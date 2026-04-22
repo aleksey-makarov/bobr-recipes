@@ -15,22 +15,19 @@ fun pkgs =>
   }
   in
 
-  let groff =
-    let script_config = {
-      configure_args = [],
+  let groff = {
+    name = "groff-1.23.0",
+    tag = "Autotools",
+    config = {
       env = {
         PAGE = "A4",
       },
-    }
-    in
-    recipe.binary
-      "groff-1.23.0"
-      {
-        include script_config,
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [groff_src]
+    },
+    inputs = {
+      image = pkgs.system_image,
+      source = groff_src,
+    },
+  }
   in
 
   {

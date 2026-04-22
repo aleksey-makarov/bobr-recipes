@@ -12,18 +12,28 @@ fun pkgs =>
   }
   in
 
-  let test_reports =
-    recipe.binary
-      "test-reports"
-      {}
-      pkgs.host_image
-      buildscript_test_reports
-      [
-        pkgs.test_system_image_0,
-        pkgs.test_system_image_1,
-        pkgs.test_system_image_2,
-        pkgs.test_system_image,
-      ]
+  let test_reports = {
+    name = "test-reports",
+    tag = "Binary",
+    config = {
+      steps = [
+        {
+          name = "collect_reports",
+          run_as = "root",
+          cwd = "${out}",
+          argv = ["${script}"],
+        },
+      ],
+    },
+    inputs = {
+      image = pkgs.host_image,
+      script = buildscript_test_reports,
+      report000 = pkgs.test_system_image_0,
+      report001 = pkgs.test_system_image_1,
+      report002 = pkgs.test_system_image_2,
+      report003 = pkgs.test_system_image,
+    },
+  }
   in
 
   {

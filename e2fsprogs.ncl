@@ -16,13 +16,12 @@ fun pkgs =>
     name = "e2fsprogs-build-image",
     tag = "Image",
     config = { ref_name | default = "e2fsprogs-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image }
+      & recipe.numbered_inputs [
         pkgs.util_linux,
         pkgs.texinfo,
       ],
-    },
   }
   in
 
@@ -83,18 +82,29 @@ fun pkgs =>
   }
   in
 
-  let e2fsprogs =
-    recipe.binary
-      "e2fsprogs-1.47.3"
-      {
-        steps = [
-          recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
-        ],
-        script_config = {},
-      }
-      e2fsprogs_build_image
-      buildscript_e2fsprogs
-      [e2fsprogs_src]
+  let e2fsprogs = {
+    name = "e2fsprogs-1.47.3",
+    tag = "Binary",
+    config = {
+      steps = [
+        recipe.steps.env_step
+          "install"
+          "root"
+          "${build}"
+          ["${script}"]
+          {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+      ],
+      script_config = {},
+    },
+    inputs = {
+      image = e2fsprogs_build_image,
+      script = buildscript_e2fsprogs,
+      source = e2fsprogs_src,
+    },
+  }
   in
 
   {

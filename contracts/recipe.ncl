@@ -5,6 +5,8 @@ let KnownTags = [
   "ContainerImage",
   "Autotools",
   "Makefile",
+  "Meson",
+  "PerlModule",
   "Binary",
   "Ext4Rootfs",
   "Image",
@@ -222,6 +224,26 @@ let MakefileConfig = {
   install | InstallMeta | optional,
 }
 in
+let MesonConfig = {
+  setup_args | Array String | optional,
+  env | Dyn | optional,
+  source_subdir | String | optional,
+  build_dir | String | optional,
+  pre_configure | AutotoolsHook | optional,
+  post_install | AutotoolsHook | optional,
+  install | InstallMeta | optional,
+}
+in
+let PerlModuleConfig = {
+  perl_args | Array String | optional,
+  make_args | Array String | optional,
+  env | Dyn | optional,
+  source_subdir | String | optional,
+  pre_configure | AutotoolsHook | optional,
+  post_install | AutotoolsHook | optional,
+  install | InstallMeta | optional,
+}
+in
 let ImageConfig = {
   ref_name
     | String
@@ -275,6 +297,18 @@ let AutotoolsInputsShape = {
 }
 in
 let MakefileInputsShape = {
+  image | Dyn,
+  source | Dyn,
+  ..
+}
+in
+let MesonInputsShape = {
+  image | Dyn,
+  source | Dyn,
+  ..
+}
+in
+let PerlModuleInputsShape = {
   image | Dyn,
   source | Dyn,
   ..
@@ -337,6 +371,16 @@ let ValidateRecipeShallow = fun recipe =>
     & {
       config = checked.config | MakefileConfig,
     }
+  else if checked.tag == "Meson" then
+    checked
+    & {
+      config = checked.config | MesonConfig,
+    }
+  else if checked.tag == "PerlModule" then
+    checked
+    & {
+      config = checked.config | PerlModuleConfig,
+    }
   else if checked.tag == "Binary" then
     checked
     & {
@@ -388,6 +432,18 @@ let rec ValidateRecipe = fun recipe =>
   in
   let validate_makefile_inputs = fun inputs =>
     let checked = inputs | MakefileInputsShape in
+    std.record.map
+      (fun _ input => ValidateRecipe input)
+      checked
+  in
+  let validate_meson_inputs = fun inputs =>
+    let checked = inputs | MesonInputsShape in
+    std.record.map
+      (fun _ input => ValidateRecipe input)
+      checked
+  in
+  let validate_perl_module_inputs = fun inputs =>
+    let checked = inputs | PerlModuleInputsShape in
     std.record.map
       (fun _ input => ValidateRecipe input)
       checked
@@ -457,6 +513,18 @@ let rec ValidateRecipe = fun recipe =>
       config = checked.config | MakefileConfig,
       inputs = validate_makefile_inputs checked.inputs,
     }
+  else if checked.tag == "Meson" then
+    checked
+    & {
+      config = checked.config | MesonConfig,
+      inputs = validate_meson_inputs checked.inputs,
+    }
+  else if checked.tag == "PerlModule" then
+    checked
+    & {
+      config = checked.config | PerlModuleConfig,
+      inputs = validate_perl_module_inputs checked.inputs,
+    }
   else if checked.tag == "Binary" then
     checked
     & {
@@ -502,6 +570,12 @@ in
   makefile_config
     | doc "Config contract for synthetic `Makefile` recipe nodes."
     = MakefileConfig,
+  meson_config
+    | doc "Config contract for synthetic `Meson` recipe nodes."
+    = MesonConfig,
+  perl_module_config
+    | doc "Config contract for synthetic `PerlModule` recipe nodes."
+    = PerlModuleConfig,
   binary_config
     | doc "Config contract for `Binary` recipe nodes."
     = BinaryConfig,

@@ -19,30 +19,29 @@ fun pkgs =>
     name = "mpc-build-image",
     tag = "Image",
     config = { ref_name | default = "mpc-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image }
+      & recipe.numbered_inputs [
         pkgs.gmp,
         pkgs.mpfr,
       ],
-    },
   }
   in
 
-  let mpc =
-    recipe.binary
-      "mpc-1.3.1"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-static",
-            "--docdir=/usr/share/doc/mpc-1.3.1",
-          ],
-        },
-      }
-      mpc_build_image
-      pkgs.buildscript_autotools
-      [mpc_src]
+  let mpc = {
+    name = "mpc-1.3.1",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-static",
+        "--docdir=/usr/share/doc/mpc-1.3.1",
+      ],
+    },
+    inputs = {
+      image = mpc_build_image,
+      source = mpc_src,
+    },
+  }
   in
 
   {

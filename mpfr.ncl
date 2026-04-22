@@ -19,30 +19,29 @@ fun pkgs =>
     name = "mpfr-build-image",
     tag = "Image",
     config = { ref_name | default = "mpfr-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image }
+      & recipe.numbered_inputs [
         pkgs.gmp,
       ],
-    },
   }
   in
 
-  let mpfr =
-    recipe.binary
-      "mpfr-4.2.2"
-      {
-        script_config = {
-          configure_args = [
-            "--disable-static",
-            "--enable-thread-safe",
-            "--docdir=/usr/share/doc/mpfr-4.2.2",
-          ],
-        },
-      }
-      mpfr_build_image
-      pkgs.buildscript_autotools
-      [mpfr_src]
+  let mpfr = {
+    name = "mpfr-4.2.2",
+    tag = "Autotools",
+    config = {
+      configure_args = [
+        "--disable-static",
+        "--enable-thread-safe",
+        "--docdir=/usr/share/doc/mpfr-4.2.2",
+      ],
+    },
+    inputs = {
+      image = mpfr_build_image,
+      source = mpfr_src,
+    },
+  }
   in
 
   {

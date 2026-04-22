@@ -63,18 +63,29 @@ fun pkgs =>
   }
   in
 
-  let tcl =
-    recipe.binary
-      "tcl-8.6.16"
-      {
-        steps = [
-          recipe.steps.step "install" "root" "${build_dir}" ["${script}"],
-        ],
-        script_config = {},
-      }
-      pkgs.system_image
-      buildscript_tcl
-      [tcl_src]
+  let tcl = {
+    name = "tcl-8.6.16",
+    tag = "Binary",
+    config = {
+      steps = [
+        recipe.steps.env_step
+          "install"
+          "root"
+          "${build}"
+          ["${script}"]
+          {
+            MBUILD_SOURCE_DIR = "${source}",
+            MBUILD_INSTALL_DIR = "${out}",
+          },
+      ],
+      script_config = {},
+    },
+    inputs = {
+      image = pkgs.system_image,
+      script = buildscript_tcl,
+      source = tcl_src,
+    },
+  }
   in
 
   {

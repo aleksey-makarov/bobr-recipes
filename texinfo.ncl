@@ -15,21 +15,35 @@ fun pkgs =>
   }
   in
 
-  let texinfo =
-    let script_config = {
-      pre_configure = "sed 's/! $output_file eq/$output_file ne/' -i tp/Texinfo/Convert/*.pm",
-      configure_args = [],
-      post_install = "make DESTDIR=\"${MBUILD_INSTALL_DIR}\" TEXMF=/usr/share/texmf install-tex",
-    }
-    in
-    recipe.binary
-      "texinfo-7.2"
-      {
-        include script_config,
-      }
-      pkgs.system_image
-      pkgs.buildscript_autotools
-      [texinfo_src]
+  let texinfo = {
+    name = "texinfo-7.2",
+    tag = "Autotools",
+    config = {
+      pre_configure = {
+        name = "patch_texinfo_sources",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          "sed 's/! $output_file eq/$output_file ne/' -i tp/Texinfo/Convert/*.pm",
+        ],
+      },
+      post_install = {
+        name = "install_tex_support",
+        run_as = "root",
+        cwd = "${build}",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          "make DESTDIR=\"${out}\" TEXMF=/usr/share/texmf install-tex",
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.system_image,
+      source = texinfo_src,
+    },
+  }
   in
 
   {

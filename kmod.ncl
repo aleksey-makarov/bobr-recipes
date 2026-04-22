@@ -16,33 +16,40 @@ fun pkgs =>
     name = "kmod-build-image",
     tag = "Image",
     config = { ref_name | default = "kmod-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image }
+      & recipe.numbered_inputs [
         pkgs.openssl,
         pkgs.xz,
         pkgs.zstd,
       ],
-    },
   }
   in
 
-  let kmod =
-    recipe.binary
-      "kmod-34.2"
-      {
-        script_config = {
-          pre_configure = "sed -i '/requires_private : libkmod_deps,/d' meson.build",
-          build_dir = "build",
-          setup_args = [
-            "--buildtype=release",
-            "-Dmanpages=false",
-          ],
-        },
-      }
-      kmod_build_image
-      pkgs.buildscript_meson
-      [kmod_src]
+  let kmod = {
+    name = "kmod-34.2",
+    tag = "Meson",
+    config = {
+      pre_configure = {
+        name = "patch_requires_private",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          "sed -i '/requires_private : libkmod_deps,/d' meson.build",
+        ],
+      },
+      build_dir = "build",
+      setup_args = [
+        "--buildtype=release",
+        "-Dmanpages=false",
+      ],
+    },
+    inputs = {
+      image = kmod_build_image,
+      source = kmod_src,
+    },
+  }
   in
 
   {

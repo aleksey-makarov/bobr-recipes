@@ -12,20 +12,28 @@ fun pkgs =>
   }
   in
 
-  let zstd =
-    recipe.binary
-      "zstd-1.5.7"
-      {
-        script_config = {
-          make_args = [
-            "prefix=/usr",
-          ],
-          post_install = "rm -fv \"${MBUILD_INSTALL_DIR}/usr/lib/libzstd.a\"",
-        },
-      }
-      pkgs.system_image_2
-      pkgs.buildscript_gnu_make
-      [zstd_src]
+  let zstd = {
+    name = "zstd-1.5.7",
+    tag = "Makefile",
+    config = {
+      make_args = [
+        "prefix=/usr",
+      ],
+      post_install = {
+        name = "remove_static_library",
+        run_as = "root",
+        argv = [
+          "rm",
+          "-fv",
+          "${out}/usr/lib/libzstd.a",
+        ],
+      },
+    },
+    inputs = {
+      image = pkgs.system_image_2,
+      source = zstd_src,
+    },
+  }
   in
 
   {

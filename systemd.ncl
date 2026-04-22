@@ -28,9 +28,9 @@ fun pkgs =>
     name = "systemd-build-image",
     tag = "Image",
     config = { ref_name | default = "systemd-build-image" } & {},
-    inputs = {
-      base = pkgs.system_image,
-      inputs = [
+    inputs =
+      { base = pkgs.system_image }
+      & recipe.numbered_inputs [
         pkgs.attr,
         pkgs.acl,
         pkgs.gperf,
@@ -41,53 +41,69 @@ fun pkgs =>
         pkgs.util_linux,
         pkgs.xz,
       ],
-    },
   }
   in
 
-  let systemd =
-    recipe.binary
-      "systemd-257.8"
-      {
-        script_config = {
-          pre_configure = m%"
-          sed -e 's/GROUP="render"/GROUP="video"/' \
-              -e 's/GROUP="sgx", //' \
-              -i rules.d/50-udev-default.rules.in
-        "%,
-          build_dir = "build",
-          setup_args = [
-            "--buildtype=release",
-            "--libdir=/usr/lib",
-            "-Ddefault-dnssec=no",
-            "-Dfirstboot=false",
-            "-Dinstall-tests=false",
-            "-Dldconfig=false",
-            "-Drpmmacrosdir=no",
-            "-Dhomed=disabled",
-            "-Duserdb=false",
-            "-Dman=disabled",
-            "-Dmode=release",
-            "-Dpamconfdir=no",
-            "-Ddev-kvm-mode=0660",
-            "-Dnobody-group=nogroup",
-            "-Dsysupdate=disabled",
-            "-Dukify=disabled",
-            "-Ddocdir=/usr/share/doc/systemd-257.8",
-          ],
-          post_install = m%"
-          install -vdm755 ${MBUILD_INSTALL_DIR}/usr/share/man
-          tar -xf /in/sources1 \
-              --no-same-owner --strip-components=1 \
-              -C ${MBUILD_INSTALL_DIR}/usr/share/man
-          install -vdm755 ${MBUILD_INSTALL_DIR}/etc
-          : > ${MBUILD_INSTALL_DIR}/etc/machine-id
-        "%,
-        },
-      }
-      systemd_build_image
-      pkgs.buildscript_meson
-      [systemd_src, systemd_man_pages_src]
+  let systemd = {
+    name = "systemd-257.8",
+    tag = "Meson",
+    config = {
+      pre_configure = {
+        name = "patch_udev_rules",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            sed -e 's/GROUP="render"/GROUP="video"/' \
+                -e 's/GROUP="sgx", //' \
+                -i rules.d/50-udev-default.rules.in
+          "%,
+        ],
+      },
+      build_dir = "build",
+      setup_args = [
+        "--buildtype=release",
+        "--libdir=/usr/lib",
+        "-Ddefault-dnssec=no",
+        "-Dfirstboot=false",
+        "-Dinstall-tests=false",
+        "-Dldconfig=false",
+        "-Drpmmacrosdir=no",
+        "-Dhomed=disabled",
+        "-Duserdb=false",
+        "-Dman=disabled",
+        "-Dmode=release",
+        "-Dpamconfdir=no",
+        "-Ddev-kvm-mode=0660",
+        "-Dnobody-group=nogroup",
+        "-Dsysupdate=disabled",
+        "-Dukify=disabled",
+        "-Ddocdir=/usr/share/doc/systemd-257.8",
+      ],
+      post_install = {
+        name = "install_man_pages_and_machine_id",
+        run_as = "root",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            install -vdm755 "${out}/usr/share/man"
+            tar -xf "${man_pages}" \
+                --no-same-owner --strip-components=1 \
+                -C "${out}/usr/share/man"
+            install -vdm755 "${out}/etc"
+            : > "${out}/etc/machine-id"
+          "%,
+        ],
+      },
+    },
+    inputs = {
+      image = systemd_build_image,
+      source = systemd_src,
+      man_pages = systemd_man_pages_src,
+    },
+  }
   in
 
   {
