@@ -88,6 +88,17 @@ let numbered_inputs_fn = fun inputs =>
       inputs
   )
 in
+let old_style_input_error = fun node_name =>
+  fun slot_name =>
+    fun shape =>
+      std.record.get
+        (
+          "recipe-lib.to_request: input '" ++ slot_name
+          ++ "' of node '" ++ node_name
+          ++ "' uses unsupported old-style " ++ shape
+        )
+        {}
+in
 {
   install = {
     root_default_attrs = {
@@ -162,15 +173,15 @@ in
             (fun acc =>
               fun slot_name =>
                 let input = std.record.get slot_name lowered_node.inputs in
-                if input == null then
-                  acc
-                else if std.is_array input then
-                  std.array.fold_left
-                    (fun inner_acc child => collect inner_acc child)
-                    acc
+                let validated_input =
+                  if input == null then
+                    old_style_input_error lowered_node.name slot_name "null"
+                  else if std.is_array input then
+                    old_style_input_error lowered_node.name slot_name "array"
+                  else
                     input
-                else
-                  collect acc input
+                in
+                collect acc validated_input
             )
             seen_with_node
             (std.record.fields lowered_node.inputs)
@@ -202,14 +213,14 @@ in
           other_names
       )
     in
-    let input_to_id = fun input =>
-      if input == null then
-        null
-      else if std.is_array input then
-        std.array.map
-          (fun child => std.record.get child.name name_to_id)
-          input
-      else
+    let input_to_id = fun node_name =>
+      fun slot_name =>
+        fun input =>
+          if input == null then
+            old_style_input_error node_name slot_name "null"
+          else if std.is_array input then
+            old_style_input_error node_name slot_name "array"
+          else
         std.record.get input.name name_to_id
     in
     std.record.from_array (
@@ -224,7 +235,7 @@ in
               config = node.config,
               inputs =
                 std.record.map
-                  (fun _ input => input_to_id input)
+                  (fun slot_name input => input_to_id node.name slot_name input)
                   node.inputs,
             },
           }
