@@ -32,7 +32,7 @@ fun pkgs =>
         {
           name = "prepare_live_usr",
           run_as = "root",
-          cwd = "${build}",
+          cwd = "@{build}",
           argv = [
             "/bin/sh",
             "-ec",
@@ -70,11 +70,11 @@ fun pkgs =>
       post_install = {
         name = "install_man_pages",
         run_as = "root",
-        cwd = "${build}",
+        cwd = "@{build}",
         argv = [
           "/bin/sh",
           "-ec",
-          "make DESTDIR=\"${out}\" -C man install-man",
+          "make DESTDIR=\"@{out}\" -C man install-man",
         ],
       },
     },

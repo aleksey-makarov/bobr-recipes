@@ -25,7 +25,7 @@ fun pkgs =>
         argv = [
           "rm",
           "-fv",
-          "${out}/usr/lib/libzstd.a",
+          "@{out}/usr/lib/libzstd.a",
         ],
       },
     },

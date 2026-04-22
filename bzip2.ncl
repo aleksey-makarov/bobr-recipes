@@ -35,7 +35,7 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            patch -Np1 -i "${install_docs_patch}"
+            patch -Np1 -i "@{install_docs_patch}"
             sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' Makefile
             sed -i 's@(PREFIX)/man@(PREFIX)/share/man@g' Makefile
             make -f Makefile-libbz2_so
@@ -47,25 +47,25 @@ fun pkgs =>
       post_install = {
         name = "install_runtime",
         run_as = "root",
-        cwd = "${source}",
+        cwd = "@{source}",
         argv = [
           "/bin/sh",
           "-ec",
           m%"
-            make PREFIX="${out}/usr" install
-            mkdir -p "${out}/usr/lib" "${out}/usr/bin" "${out}/usr/include"
-            cp -av libbz2.so.* "${out}/usr/lib/"
-            ln -svf libbz2.so.1.0.8 "${out}/usr/lib/libbz2.so"
-            cp -v bzip2-shared "${out}/usr/bin/bzip2"
-            cp -v bzlib.h "${out}/usr/include/"
-            for i in "${out}/usr/bin"/{bzcat,bunzip2}; do
+            make PREFIX="@{out}/usr" install
+            mkdir -p "@{out}/usr/lib" "@{out}/usr/bin" "@{out}/usr/include"
+            cp -av libbz2.so.* "@{out}/usr/lib/"
+            ln -svf libbz2.so.1.0.8 "@{out}/usr/lib/libbz2.so"
+            cp -v bzip2-shared "@{out}/usr/bin/bzip2"
+            cp -v bzlib.h "@{out}/usr/include/"
+            for i in "@{out}/usr/bin"/{bzcat,bunzip2}; do
               ln -sfv bzip2 "$i"
             done
-            ln -sfv bzdiff "${out}/usr/bin/bzcmp"
-            ln -sfv bzgrep "${out}/usr/bin/bzegrep"
-            ln -sfv bzgrep "${out}/usr/bin/bzfgrep"
-            ln -sfv bzmore "${out}/usr/bin/bzless"
-            rm -fv "${out}/usr/lib/libbz2.a"
+            ln -sfv bzdiff "@{out}/usr/bin/bzcmp"
+            ln -sfv bzgrep "@{out}/usr/bin/bzegrep"
+            ln -sfv bzgrep "@{out}/usr/bin/bzfgrep"
+            ln -sfv bzmore "@{out}/usr/bin/bzless"
+            rm -fv "@{out}/usr/lib/libbz2.a"
           "%,
         ],
       },

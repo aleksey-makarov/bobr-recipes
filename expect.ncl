@@ -50,7 +50,7 @@ fun pkgs =>
           "patch",
           "-Np1",
           "-i",
-          "${gcc15_patch}",
+          "@{gcc15_patch}",
         ],
       },
       configure_args = [
@@ -67,7 +67,7 @@ fun pkgs =>
           "ln",
           "-sfv",
           "expect5.45.4/libexpect5.45.4.so",
-          "${out}/usr/lib/libexpect5.45.4.so",
+          "@{out}/usr/lib/libexpect5.45.4.so",
         ],
       },
     },

@@ -27,9 +27,9 @@ fun pkgs =>
           "-ec",
           m%"
             rm -rf gmp mpfr mpc
-            ln -s "${gmp}" gmp
-            ln -s "${mpfr}" mpfr
-            ln -s "${mpc}" mpc
+            ln -s "@{gmp}" gmp
+            ln -s "@{mpfr}" mpfr
+            ln -s "@{mpc}" mpc
           "%,
         ],
       },
@@ -64,9 +64,9 @@ fun pkgs =>
           "-ec",
           m%"
             rm -rf gmp mpfr mpc
-            ln -s "${gmp}" gmp
-            ln -s "${mpfr}" mpfr
-            ln -s "${mpc}" mpc
+            ln -s "@{gmp}" gmp
+            ln -s "@{mpfr}" mpfr
+            ln -s "@{mpc}" mpc
           "%,
         ],
       },
@@ -87,7 +87,7 @@ fun pkgs =>
           "ln",
           "-sv",
           "gcc",
-          "${out}/usr/bin/cc",
+          "@{out}/usr/bin/cc",
         ],
       },
     },

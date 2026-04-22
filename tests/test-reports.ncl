@@ -20,8 +20,8 @@ fun pkgs =>
         {
           name = "collect_reports",
           run_as = "root",
-          cwd = "${out}",
-          argv = ["${script}"],
+          cwd = "@{out}",
+          argv = ["@{script}"],
         },
       ],
     },

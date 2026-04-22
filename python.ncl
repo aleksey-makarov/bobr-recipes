@@ -186,7 +186,7 @@ fun pkgs =>
           "ln",
           "-svf",
           "python3",
-          "${out}/usr/bin/python",
+          "@{out}/usr/bin/python",
         ],
       },
     },
@@ -220,10 +220,10 @@ fun pkgs =>
         {
           name = "install_python_modules",
           run_as = "root",
-          cwd = "${build}",
+          cwd = "@{build}",
           argv = [
             "/bin/bash",
-            "${modules_helper}",
+            "@{modules_helper}",
           ],
         },
         {
@@ -233,7 +233,7 @@ fun pkgs =>
             "ln",
             "-svf",
             "python3",
-            "${out}/usr/bin/python",
+            "@{out}/usr/bin/python",
           ],
         },
       ],

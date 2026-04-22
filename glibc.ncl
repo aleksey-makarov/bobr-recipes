@@ -61,7 +61,7 @@ fun pkgs =>
             "patch",
             "-Np1",
             "-i",
-            "${fhs_patch}",
+            "@{fhs_patch}",
           ],
         },
         {
@@ -70,7 +70,7 @@ fun pkgs =>
           argv = [
             "/bin/sh",
             "-ec",
-            "echo \"rootsbindir=/usr/sbin\" > \"${build}/configparms\"",
+            "echo \"rootsbindir=/usr/sbin\" > \"@{build}/configparms\"",
           ],
         },
       ],
@@ -103,7 +103,7 @@ fun pkgs =>
             "patch",
             "-Np1",
             "-i",
-            "${fhs_patch}",
+            "@{fhs_patch}",
           ],
         },
         {
@@ -112,7 +112,7 @@ fun pkgs =>
           argv = [
             "/bin/sh",
             "-ec",
-            "echo \"rootsbindir=/usr/sbin\" > \"${build}/configparms\"",
+            "echo \"rootsbindir=/usr/sbin\" > \"@{build}/configparms\"",
           ],
         },
       ],

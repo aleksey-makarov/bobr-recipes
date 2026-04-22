@@ -28,7 +28,7 @@ fun pkgs =>
             "ln",
             "-sv",
             "pkgconf",
-            "${out}/usr/bin/pkg-config",
+            "@{out}/usr/bin/pkg-config",
           ],
         },
         {
@@ -38,7 +38,7 @@ fun pkgs =>
             "ln",
             "-sv",
             "pkgconf.1",
-            "${out}/usr/share/man/man1/pkg-config.1",
+            "@{out}/usr/share/man/man1/pkg-config.1",
           ],
         },
       ],

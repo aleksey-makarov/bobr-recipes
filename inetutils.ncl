@@ -58,9 +58,9 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            mkdir -p "${out}/usr/sbin"
-            if [ -f "${out}/usr/bin/ifconfig" ]; then
-              mv -v "${out}/usr/bin/ifconfig" "${out}/usr/sbin/ifconfig"
+            mkdir -p "@{out}/usr/sbin"
+            if [ -f "@{out}/usr/bin/ifconfig" ]; then
+              mv -v "@{out}/usr/bin/ifconfig" "@{out}/usr/sbin/ifconfig"
             fi
           "%,
         ],

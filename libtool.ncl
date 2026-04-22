@@ -25,7 +25,7 @@ fun pkgs =>
         argv = [
           "rm",
           "-fv",
-          "${out}/usr/lib/libltdl.a",
+          "@{out}/usr/lib/libltdl.a",
         ],
       },
     },

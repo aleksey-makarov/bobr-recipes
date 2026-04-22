@@ -35,17 +35,17 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            mkdir -p "${out}/usr/bin"
-            mkdir -p "${out}/usr/share/doc"
-            mkdir -p "${out}/etc"
-            ln -svf vim "${out}/usr/bin/vi"
-            for L in "${out}"/usr/share/man/{,*/}man1/vim.1; do
+            mkdir -p "@{out}/usr/bin"
+            mkdir -p "@{out}/usr/share/doc"
+            mkdir -p "@{out}/etc"
+            ln -svf vim "@{out}/usr/bin/vi"
+            for L in "@{out}"/usr/share/man/{,*/}man1/vim.1; do
               if [ -e "$L" ]; then
                 ln -svf vim.1 "$(dirname "$L")/vi.1"
               fi
             done
-            ln -svf ../vim/vim91/doc "${out}/usr/share/doc/vim-9.1.1629"
-            cat > "${out}/etc/vimrc" <<'EOF_INNER'
+            ln -svf ../vim/vim91/doc "@{out}/usr/share/doc/vim-9.1.1629"
+            cat > "@{out}/etc/vimrc" <<'EOF_INNER'
             " Begin /etc/vimrc
 
             source $VIMRUNTIME/defaults.vim

@@ -42,43 +42,43 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            dbus_src_root="${source}"
+            dbus_src_root="@{source}"
 
             install -vdm755 \
-                "${out}/usr/lib/systemd/system/multi-user.target.wants" \
-                "${out}/usr/lib/systemd/system/sockets.target.wants" \
-                "${out}/usr/lib/sysusers.d" \
-                "${out}/usr/lib/tmpfiles.d"
+                "@{out}/usr/lib/systemd/system/multi-user.target.wants" \
+                "@{out}/usr/lib/systemd/system/sockets.target.wants" \
+                "@{out}/usr/lib/sysusers.d" \
+                "@{out}/usr/lib/tmpfiles.d"
 
             sed \
                 -e 's#@EXPANDED_BINDIR@#/usr/bin#g' \
                 -e 's#@DBUS_USER@#messagebus#g' \
                 -e '/@AMBIENT_CAPS@/d' \
                 "$dbus_src_root"/bus/dbus.service.in \
-                > "${out}/usr/lib/systemd/system/dbus.service"
+                > "@{out}/usr/lib/systemd/system/dbus.service"
 
             sed \
                 -e 's#@DBUS_SYSTEM_SOCKET@#/run/dbus/system_bus_socket#g' \
                 "$dbus_src_root"/bus/dbus.socket.in \
-                > "${out}/usr/lib/systemd/system/dbus.socket"
+                > "@{out}/usr/lib/systemd/system/dbus.socket"
 
             sed \
                 -e 's#@DBUS_USER@#messagebus#g' \
                 "$dbus_src_root"/bus/sysusers.d/dbus.conf.in \
-                > "${out}/usr/lib/sysusers.d/dbus.conf"
+                > "@{out}/usr/lib/sysusers.d/dbus.conf"
 
             sed \
                 -e 's#@EXPANDED_LOCALSTATEDIR@#/var#g' \
                 "$dbus_src_root"/bus/tmpfiles.d/dbus.conf.in \
-                > "${out}/usr/lib/tmpfiles.d/dbus.conf"
+                > "@{out}/usr/lib/tmpfiles.d/dbus.conf"
 
             ln -sfv ../dbus.service \
-                "${out}/usr/lib/systemd/system/multi-user.target.wants/dbus.service"
+                "@{out}/usr/lib/systemd/system/multi-user.target.wants/dbus.service"
             ln -sfv ../dbus.socket \
-                "${out}/usr/lib/systemd/system/sockets.target.wants/dbus.socket"
+                "@{out}/usr/lib/systemd/system/sockets.target.wants/dbus.socket"
 
-            install -vdm755 "${out}/var/lib/dbus"
-            ln -sfv /etc/machine-id "${out}/var/lib/dbus/machine-id"
+            install -vdm755 "@{out}/var/lib/dbus"
+            ln -sfv /etc/machine-id "@{out}/var/lib/dbus/machine-id"
           "%,
         ],
       },

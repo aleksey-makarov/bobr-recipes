@@ -35,11 +35,11 @@ fun pkgs =>
       post_install = {
         name = "install_docs",
         run_as = "root",
-        cwd = "${source}",
+        cwd = "@{source}",
         argv = [
           "/bin/sh",
           "-ec",
-          "install -vDm644 COPYING README* -t \"${out}/usr/share/doc/iproute2-6.16.0\"",
+          "install -vDm644 COPYING README* -t \"@{out}/usr/share/doc/iproute2-6.16.0\"",
         ],
       },
     },

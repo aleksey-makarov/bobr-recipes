@@ -43,11 +43,11 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            install -vdm755 "${out}/usr/share/bash-completion/completions"
-            if [ -f "${out}/etc/bash_completion.d/grub" ]; then
-              mv -v "${out}/etc/bash_completion.d/grub" \
-                    "${out}/usr/share/bash-completion/completions/grub"
-              rmdir -p --ignore-fail-on-non-empty "${out}/etc/bash_completion.d" 2>/dev/null || true
+            install -vdm755 "@{out}/usr/share/bash-completion/completions"
+            if [ -f "@{out}/etc/bash_completion.d/grub" ]; then
+              mv -v "@{out}/etc/bash_completion.d/grub" \
+                    "@{out}/usr/share/bash-completion/completions/grub"
+              rmdir -p --ignore-fail-on-non-empty "@{out}/etc/bash_completion.d" 2>/dev/null || true
             fi
           "%,
         ],

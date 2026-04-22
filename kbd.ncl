@@ -35,7 +35,7 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            patch -Np1 -i "${backspace_patch}"
+            patch -Np1 -i "@{backspace_patch}"
             sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
             sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
           "%,
@@ -51,8 +51,8 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            install -vdm755 "${out}/usr/share/doc"
-            cp -R -v "${source}/docs/doc" -T "${out}/usr/share/doc/kbd-2.8.0"
+            install -vdm755 "@{out}/usr/share/doc"
+            cp -R -v "@{source}/docs/doc" -T "@{out}/usr/share/doc/kbd-2.8.0"
           "%,
         ],
       },

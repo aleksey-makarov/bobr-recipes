@@ -88,12 +88,12 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            install -vdm755 "${out}/usr/share/man"
-            tar -xf "${man_pages}" \
+            install -vdm755 "@{out}/usr/share/man"
+            tar -xf "@{man_pages}" \
                 --no-same-owner --strip-components=1 \
-                -C "${out}/usr/share/man"
-            install -vdm755 "${out}/etc"
-            : > "${out}/etc/machine-id"
+                -C "@{out}/usr/share/man"
+            install -vdm755 "@{out}/etc"
+            : > "@{out}/etc/machine-id"
           "%,
         ],
       },

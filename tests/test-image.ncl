@@ -24,8 +24,8 @@ fun pkgs =>
         {
           name = "check_image",
           run_as = "root",
-          cwd = "${out}",
-          argv = ["${script}"],
+          cwd = "@{out}",
+          argv = ["@{script}"],
         },
       ],
     },
@@ -47,8 +47,8 @@ fun pkgs =>
         {
           name = "check_image",
           run_as = "root",
-          cwd = "${out}",
-          argv = ["${script}"],
+          cwd = "@{out}",
+          argv = ["@{script}"],
         },
       ],
     },
@@ -71,8 +71,8 @@ fun pkgs =>
         {
           name = "check_image",
           run_as = "root",
-          cwd = "${out}",
-          argv = ["${script}"],
+          cwd = "@{out}",
+          argv = ["@{script}"],
         },
       ],
     },
@@ -95,8 +95,8 @@ fun pkgs =>
         {
           name = "check_image",
           run_as = "root",
-          cwd = "${out}",
-          argv = ["${script}"],
+          cwd = "@{out}",
+          argv = ["@{script}"],
         },
       ],
     },

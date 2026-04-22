@@ -30,7 +30,7 @@ fun pkgs =>
           "chmod",
           "-v",
           "0755",
-          "${out}/usr/lib/preloadable_libintl.so",
+          "@{out}/usr/lib/preloadable_libintl.so",
         ],
       },
     },

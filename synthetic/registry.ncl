@@ -48,9 +48,9 @@ let record_get_or = fun field =>
 in
 let synthetic_source_root_expr = fun node_config =>
   if std.record.has_field "source_subdir" node_config then
-    "${source}/" ++ node_config.source_subdir
+    "@{source}/" ++ node_config.source_subdir
   else
-    "${source}"
+    "@{source}"
 in
 let normalize_hook_steps = fun node_config =>
   fun field_name =>
@@ -76,7 +76,7 @@ let lower_autotools_node = fun node =>
     normalize_hook_steps node_config "pre_configure" source_root_expr
   in
   let post_install_steps =
-    normalize_hook_steps node_config "post_install" "${out}"
+    normalize_hook_steps node_config "post_install" "@{out}"
   in
   let lowered_script_config =
     let with_configure_args =
@@ -115,7 +115,7 @@ let lower_autotools_node = fun node =>
       with_python_modules
   in
   let autotools_step_env = {
-    MBUILD_SOURCE_DIR = "${source}",
+    MBUILD_SOURCE_DIR = "@{source}",
   }
   in
   {
@@ -129,22 +129,22 @@ let lower_autotools_node = fun node =>
             {
               name = "configure",
               run_as = "build-user",
-              cwd = "${build}",
-              argv = ["${script}", "configure"],
+              cwd = "@{build}",
+              argv = ["@{script}", "configure"],
               env = autotools_step_env,
             },
             {
               name = "build",
               run_as = "build-user",
-              cwd = "${build}",
-              argv = ["${script}", "build"],
+              cwd = "@{build}",
+              argv = ["@{script}", "build"],
               env = autotools_step_env,
             },
             {
               name = "install",
               run_as = "root",
-              cwd = "${build}",
-              argv = ["${script}", "install"],
+              cwd = "@{build}",
+              argv = ["@{script}", "install"],
               env = autotools_step_env,
             },
           ]
@@ -172,7 +172,7 @@ let lower_makefile_node = fun node =>
     normalize_hook_steps node_config "pre_build" source_root_expr
   in
   let post_install_steps =
-    normalize_hook_steps node_config "post_install" "${out}"
+    normalize_hook_steps node_config "post_install" "@{out}"
   in
   let lowered_script_config =
     let with_make_args =
@@ -214,14 +214,14 @@ let lower_makefile_node = fun node =>
               name = "build",
               run_as = "build-user",
               cwd = source_root_expr,
-              argv = ["${script}", "build"],
+              argv = ["@{script}", "build"],
               env = makefile_step_env,
             },
             {
               name = "install",
               run_as = "root",
               cwd = source_root_expr,
-              argv = ["${script}", "install"],
+              argv = ["@{script}", "install"],
               env = makefile_step_env,
             },
           ]
@@ -249,7 +249,7 @@ let lower_meson_node = fun node =>
     normalize_hook_steps node_config "pre_configure" source_root_expr
   in
   let post_install_steps =
-    normalize_hook_steps node_config "post_install" "${build}"
+    normalize_hook_steps node_config "post_install" "@{build}"
   in
   let lowered_script_config =
     let with_setup_args =
@@ -276,7 +276,7 @@ let lower_meson_node = fun node =>
       with_source_subdir
   in
   let meson_step_env = {
-    MBUILD_SOURCE_DIR = "${source}",
+    MBUILD_SOURCE_DIR = "@{source}",
   }
   in
   {
@@ -290,22 +290,22 @@ let lower_meson_node = fun node =>
             {
               name = "configure",
               run_as = "build-user",
-              cwd = "${build}",
-              argv = ["${script}", "configure"],
+              cwd = "@{build}",
+              argv = ["@{script}", "configure"],
               env = meson_step_env,
             },
             {
               name = "build",
               run_as = "build-user",
-              cwd = "${build}",
-              argv = ["${script}", "build"],
+              cwd = "@{build}",
+              argv = ["@{script}", "build"],
               env = meson_step_env,
             },
             {
               name = "install",
               run_as = "root",
-              cwd = "${build}",
-              argv = ["${script}", "install"],
+              cwd = "@{build}",
+              argv = ["@{script}", "install"],
               env = meson_step_env,
             },
           ]
@@ -333,7 +333,7 @@ let lower_perl_module_node = fun node =>
     normalize_hook_steps node_config "pre_configure" source_root_expr
   in
   let post_install_steps =
-    normalize_hook_steps node_config "post_install" "${out}"
+    normalize_hook_steps node_config "post_install" "@{out}"
   in
   let lowered_script_config =
     let with_perl_args =
@@ -360,7 +360,7 @@ let lower_perl_module_node = fun node =>
       with_env
   in
   let perl_module_step_env = {
-    MBUILD_SOURCE_DIR = "${source}",
+    MBUILD_SOURCE_DIR = "@{source}",
   }
   in
   {
@@ -374,22 +374,22 @@ let lower_perl_module_node = fun node =>
             {
               name = "configure",
               run_as = "build-user",
-              cwd = "${build}",
-              argv = ["${script}", "configure"],
+              cwd = "@{build}",
+              argv = ["@{script}", "configure"],
               env = perl_module_step_env,
             },
             {
               name = "build",
               run_as = "build-user",
-              cwd = "${build}",
-              argv = ["${script}", "build"],
+              cwd = "@{build}",
+              argv = ["@{script}", "build"],
               env = perl_module_step_env,
             },
             {
               name = "install",
               run_as = "root",
-              cwd = "${build}",
-              argv = ["${script}", "install"],
+              cwd = "@{build}",
+              argv = ["@{script}", "install"],
               env = perl_module_step_env,
             },
           ]

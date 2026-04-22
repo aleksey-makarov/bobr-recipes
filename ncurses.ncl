@@ -36,7 +36,7 @@ fun pkgs =>
             "-e",
             "s/^#if.*XOPEN.*$/#if 1/",
             "-i",
-            "${out}/usr/include/curses.h",
+            "@{out}/usr/include/curses.h",
           ],
         },
         {
@@ -46,12 +46,12 @@ fun pkgs =>
             "/bin/sh",
             "-ec",
             m%"
-              mkdir -p "${out}/usr/lib/pkgconfig"
+              mkdir -p "@{out}/usr/lib/pkgconfig"
               for lib in ncurses form panel menu; do
-                ln -sfv "lib"$lib"w.so" "${out}/usr/lib/lib"$lib".so"
-                ln -sfv "$lib"w.pc "${out}/usr/lib/pkgconfig/"$lib".pc"
+                ln -sfv "lib"$lib"w.so" "@{out}/usr/lib/lib"$lib".so"
+                ln -sfv "$lib"w.pc "@{out}/usr/lib/pkgconfig/"$lib".pc"
               done
-              ln -sfv libncursesw.so "${out}/usr/lib/libcurses.so"
+              ln -sfv libncursesw.so "@{out}/usr/lib/libcurses.so"
             "%,
           ],
         },
@@ -62,8 +62,8 @@ fun pkgs =>
             "/bin/sh",
             "-ec",
             m%"
-              mkdir -p "${out}/usr/share/doc"
-              cp -v -R "${source}/doc" -T "${out}/usr/share/doc/ncurses-6.6"
+              mkdir -p "@{out}/usr/share/doc"
+              cp -v -R "@{source}/doc" -T "@{out}/usr/share/doc/ncurses-6.6"
             "%,
           ],
         },
