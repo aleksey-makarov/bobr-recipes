@@ -35,7 +35,7 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            sed -i 's:\${:\$\{:g' intltool-update.in
+            sed -i 's:\\$[{]:\\$\\\\{:g' intltool-update.in
           "%,
         ],
       },
