@@ -5,6 +5,12 @@ let lower_node = fun node =>
   else
     node
 in
+let node_inputs = fun node =>
+  if node.tag == "Source" then
+    {}
+  else
+    node.inputs
+in
 let pad3 = fun n =>
   let digits = std.string.from_number n in
   if n < 10 then
@@ -75,10 +81,11 @@ in
           seen
         else
           let seen_with_node = std.record.insert lowered_node.name lowered_node seen in
+          let inputs = node_inputs lowered_node in
           std.array.fold_left
             (fun acc =>
               fun slot_name =>
-                let input = std.record.get slot_name lowered_node.inputs in
+                let input = std.record.get slot_name inputs in
                 let validated_input =
                   if input == null then
                     old_style_input_error lowered_node.name slot_name "null"
@@ -90,7 +97,7 @@ in
                 collect acc validated_input
             )
             seen_with_node
-            (std.record.fields lowered_node.inputs)
+            (std.record.fields inputs)
     in
 
     let unique_nodes = collect {} lowered_root_node in
@@ -133,17 +140,29 @@ in
       std.array.map
         (fun name =>
           let node = lower_node (std.record.get name unique_nodes) in
+          let node_value =
+            if node.tag == "Source" then
+              {
+                name = node.name,
+                tag = node.tag,
+                object_hash = node.object_hash,
+                origin = node.origin,
+                meta = node.meta,
+              }
+            else
+              {
+                name = node.name,
+                tag = node.tag,
+                config = node.config,
+                inputs =
+                  std.record.map
+                    (fun slot_name input => input_to_id node.name slot_name input)
+                    node.inputs,
+              }
+          in
           {
             field = std.record.get name name_to_id,
-            value = {
-              name = node.name,
-              tag = node.tag,
-              config = node.config,
-              inputs =
-                std.record.map
-                  (fun slot_name input => input_to_id node.name slot_name input)
-                  node.inputs,
-            },
+            value = node_value,
           }
         )
         ordered_names

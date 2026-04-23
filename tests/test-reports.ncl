@@ -12,6 +12,19 @@ fun pkgs =>
   }
   in
 
+  let test_reports_script_source = {
+    name = "test-reports-script-source",
+    tag = "Source",
+    object_hash = "5a8396328664cf4ba92281e288034cb8243acd7cc9fc98b1e143194f5a883129",
+    origin = {
+      type = "path",
+      path = "/home/amakarov/home/mbuild/mbuild-recipes/tests/test-reports.sh",
+      mode = "direct",
+    },
+    meta = {},
+  }
+  in
+
   let test_reports = {
     name = "test-reports",
     tag = "Binary",
@@ -37,5 +50,5 @@ fun pkgs =>
   in
 
   {
-    include [test_reports],
+    include [test_reports, test_reports_script_source],
   }

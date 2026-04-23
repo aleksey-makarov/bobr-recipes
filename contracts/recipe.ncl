@@ -1,4 +1,5 @@
 let KnownTags = [
+  "Source",
   "Fetch",
   "Text",
   "Tree",
@@ -50,6 +51,29 @@ let ShallowBaseRecipe = {
   inputs
     | Dyn
     | doc "Builder-specific input object left unvalidated in shallow mode.",
+}
+in
+let SourcePathMode =
+  std.contract.from_predicate (fun value => std.array.elem value ["direct", "tar"])
+in
+let SourceOrigin = {
+  type | std.contract.Equal "path",
+  path | String,
+  mode | SourcePathMode,
+}
+in
+let SourceRecipe = {
+  name
+    | String
+    | doc "Publication name of the source recipe node.",
+  tag
+    | std.contract.Equal "Source"
+    | doc "Special node tag for recipes with predeclared payload object identity.",
+  object_hash
+    | String
+    | doc "Declared payload object hash materialized from `origin`; `result_id` is derived later from `object_hash` and `meta`.",
+  origin | SourceOrigin,
+  meta | { .. },
 }
 in
 let TextConfig = {
@@ -315,234 +339,240 @@ let PerlModuleInputsShape = {
 }
 in
 let ValidateRecipeShallow = fun recipe =>
-  let checked = recipe | ShallowBaseRecipe in
-  let validate_tree_entry = fun entry =>
-    let checked = entry | { type | TreeEntryKind, .. } in
-    if checked.type == "file" then
-      checked | TreeFileEntry
-    else if checked.type == "symlink" then
-      checked | TreeSymlinkEntry
-    else
-      checked | TreeDirEntry
-  in
-  let validate_tree_config = fun config =>
-    let checked = config | TreeConfig in
-    checked
-    & {
-      tree =
-        checked.tree
-        & {
-          entries = std.array.map validate_tree_entry checked.tree.entries,
-        },
-    }
-  in
-  if checked.tag == "Fetch" then
-    let config = checked.config | FetchConfig in
-    checked
-    & {
-      config =
-        if std.record.has_field "install" config then
-          config & { install = config.install | InstallMeta }
-        else
-          config,
-    }
-  else if checked.tag == "Text" then
-    checked
-    & {
-      config = checked.config | TextConfig,
-    }
-  else if checked.tag == "Tree" then
-    checked
-    & {
-      config = validate_tree_config checked.config,
-    }
-  else if checked.tag == "ContainerImage" then
-    checked
-    & {
-      config = checked.config | ContainerImageConfig,
-    }
-  else if checked.tag == "Autotools" then
-    checked
-    & {
-      config = checked.config | AutotoolsConfig,
-    }
-  else if checked.tag == "Makefile" then
-    checked
-    & {
-      config = checked.config | MakefileConfig,
-    }
-  else if checked.tag == "Meson" then
-    checked
-    & {
-      config = checked.config | MesonConfig,
-    }
-  else if checked.tag == "PerlModule" then
-    checked
-    & {
-      config = checked.config | PerlModuleConfig,
-    }
-  else if checked.tag == "Binary" then
-    checked
-    & {
-      config = checked.config | BinaryConfig,
-    }
-  else if checked.tag == "Ext4Rootfs" then
-    checked
-    & {
-      config = checked.config | Ext4RootfsConfig,
-    }
+  if recipe.tag == "Source" then
+    recipe | SourceRecipe
   else
-    checked
-    & {
-      config = checked.config | ImageConfig,
-    }
+    let checked = recipe | ShallowBaseRecipe in
+    let validate_tree_entry = fun entry =>
+      let checked = entry | { type | TreeEntryKind, .. } in
+      if checked.type == "file" then
+        checked | TreeFileEntry
+      else if checked.type == "symlink" then
+        checked | TreeSymlinkEntry
+      else
+        checked | TreeDirEntry
+    in
+    let validate_tree_config = fun config =>
+      let checked = config | TreeConfig in
+      checked
+      & {
+        tree =
+          checked.tree
+          & {
+            entries = std.array.map validate_tree_entry checked.tree.entries,
+          },
+      }
+    in
+    if checked.tag == "Fetch" then
+      let config = checked.config | FetchConfig in
+      checked
+      & {
+        config =
+          if std.record.has_field "install" config then
+            config & { install = config.install | InstallMeta }
+          else
+            config,
+      }
+    else if checked.tag == "Text" then
+      checked
+      & {
+        config = checked.config | TextConfig,
+      }
+    else if checked.tag == "Tree" then
+      checked
+      & {
+        config = validate_tree_config checked.config,
+      }
+    else if checked.tag == "ContainerImage" then
+      checked
+      & {
+        config = checked.config | ContainerImageConfig,
+      }
+    else if checked.tag == "Autotools" then
+      checked
+      & {
+        config = checked.config | AutotoolsConfig,
+      }
+    else if checked.tag == "Makefile" then
+      checked
+      & {
+        config = checked.config | MakefileConfig,
+      }
+    else if checked.tag == "Meson" then
+      checked
+      & {
+        config = checked.config | MesonConfig,
+      }
+    else if checked.tag == "PerlModule" then
+      checked
+      & {
+        config = checked.config | PerlModuleConfig,
+      }
+    else if checked.tag == "Binary" then
+      checked
+      & {
+        config = checked.config | BinaryConfig,
+      }
+    else if checked.tag == "Ext4Rootfs" then
+      checked
+      & {
+        config = checked.config | Ext4RootfsConfig,
+      }
+    else
+      checked
+      & {
+        config = checked.config | ImageConfig,
+      }
 in
 # WARNING:
 # `ValidateRecipe` performs a deep recursive traversal of the entire nested
 # raw recipe graph. It is intentionally expensive and should only be used for
 # small smoke cases, not for full-package-set validation.
 let rec ValidateRecipe = fun recipe =>
-  let checked = recipe | BaseRecipe in
-  let validate_tree_entry = fun entry =>
-    let checked = entry | { type | TreeEntryKind, .. } in
-    if checked.type == "file" then
-      checked | TreeFileEntry
-    else if checked.type == "symlink" then
-      checked | TreeSymlinkEntry
-    else
-      checked | TreeDirEntry
-  in
-  let validate_fetch_inputs = fun inputs =>
-    inputs | FetchInputs
-  in
-  let validate_text_inputs = fun inputs =>
-    inputs | TextInputs
-  in
-  let validate_tree_inputs = fun inputs =>
-    inputs | TreeInputs
-  in
-  let validate_container_image_inputs = fun inputs =>
-    inputs | ContainerImageInputs
-  in
-  let validate_autotools_inputs = fun inputs =>
-    let checked = inputs | AutotoolsInputsShape in
-    std.record.map
-      (fun _ input => ValidateRecipe input)
-      checked
-  in
-  let validate_makefile_inputs = fun inputs =>
-    let checked = inputs | MakefileInputsShape in
-    std.record.map
-      (fun _ input => ValidateRecipe input)
-      checked
-  in
-  let validate_meson_inputs = fun inputs =>
-    let checked = inputs | MesonInputsShape in
-    std.record.map
-      (fun _ input => ValidateRecipe input)
-      checked
-  in
-  let validate_perl_module_inputs = fun inputs =>
-    let checked = inputs | PerlModuleInputsShape in
-    std.record.map
-      (fun _ input => ValidateRecipe input)
-      checked
-  in
-  let validate_tree_config = fun config =>
-    let checked = config | TreeConfig in
-    checked
-    & {
-      tree =
-        checked.tree
-        & {
-          entries = std.array.map validate_tree_entry checked.tree.entries,
-        },
-    }
-  in
-  let validate_binary_inputs = fun inputs =>
-    let checked = inputs | BinaryInputsShape in
-    std.record.map
-      (fun _ input => ValidateRecipe input)
-      checked
-  in
-  let validate_image_inputs = fun inputs =>
-    let checked = inputs | ImageInputsShape in
-    std.record.map
-      (fun _ input => ValidateRecipe input)
-      checked
-  in
-  let validate_ext4_rootfs_inputs = fun inputs =>
-    let checked = inputs | Ext4RootfsInputsShape in
-    std.record.map
-      (fun _ input => ValidateRecipe input)
-      checked
-  in
-  if checked.tag == "Fetch" then
-    checked
-    & {
-      config = checked.config | FetchConfig,
-      inputs = validate_fetch_inputs checked.inputs,
-    }
-  else if checked.tag == "Text" then
-    checked
-    & {
-      config = checked.config | TextConfig,
-      inputs = validate_text_inputs checked.inputs,
-    }
-  else if checked.tag == "Tree" then
-    checked
-    & {
-      config = validate_tree_config checked.config,
-      inputs = validate_tree_inputs checked.inputs,
-    }
-  else if checked.tag == "ContainerImage" then
-    checked
-    & {
-      config = checked.config | ContainerImageConfig,
-      inputs = validate_container_image_inputs checked.inputs,
-    }
-  else if checked.tag == "Autotools" then
-    checked
-    & {
-      config = checked.config | AutotoolsConfig,
-      inputs = validate_autotools_inputs checked.inputs,
-    }
-  else if checked.tag == "Makefile" then
-    checked
-    & {
-      config = checked.config | MakefileConfig,
-      inputs = validate_makefile_inputs checked.inputs,
-    }
-  else if checked.tag == "Meson" then
-    checked
-    & {
-      config = checked.config | MesonConfig,
-      inputs = validate_meson_inputs checked.inputs,
-    }
-  else if checked.tag == "PerlModule" then
-    checked
-    & {
-      config = checked.config | PerlModuleConfig,
-      inputs = validate_perl_module_inputs checked.inputs,
-    }
-  else if checked.tag == "Binary" then
-    checked
-    & {
-      config = checked.config | BinaryConfig,
-      inputs = validate_binary_inputs checked.inputs,
-    }
-  else if checked.tag == "Ext4Rootfs" then
-    checked
-    & {
-      config = checked.config | Ext4RootfsConfig,
-      inputs = validate_ext4_rootfs_inputs checked.inputs,
-    }
+  if recipe.tag == "Source" then
+    recipe | SourceRecipe
   else
-    checked
-    & {
-      config = checked.config | ImageConfig,
-      inputs = validate_image_inputs checked.inputs,
-    }
+    let checked = recipe | BaseRecipe in
+    let validate_tree_entry = fun entry =>
+      let checked = entry | { type | TreeEntryKind, .. } in
+      if checked.type == "file" then
+        checked | TreeFileEntry
+      else if checked.type == "symlink" then
+        checked | TreeSymlinkEntry
+      else
+        checked | TreeDirEntry
+    in
+    let validate_fetch_inputs = fun inputs =>
+      inputs | FetchInputs
+    in
+    let validate_text_inputs = fun inputs =>
+      inputs | TextInputs
+    in
+    let validate_tree_inputs = fun inputs =>
+      inputs | TreeInputs
+    in
+    let validate_container_image_inputs = fun inputs =>
+      inputs | ContainerImageInputs
+    in
+    let validate_autotools_inputs = fun inputs =>
+      let checked = inputs | AutotoolsInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_makefile_inputs = fun inputs =>
+      let checked = inputs | MakefileInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_meson_inputs = fun inputs =>
+      let checked = inputs | MesonInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_perl_module_inputs = fun inputs =>
+      let checked = inputs | PerlModuleInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_tree_config = fun config =>
+      let checked = config | TreeConfig in
+      checked
+      & {
+        tree =
+          checked.tree
+          & {
+            entries = std.array.map validate_tree_entry checked.tree.entries,
+          },
+      }
+    in
+    let validate_binary_inputs = fun inputs =>
+      let checked = inputs | BinaryInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_image_inputs = fun inputs =>
+      let checked = inputs | ImageInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_ext4_rootfs_inputs = fun inputs =>
+      let checked = inputs | Ext4RootfsInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    if checked.tag == "Fetch" then
+      checked
+      & {
+        config = checked.config | FetchConfig,
+        inputs = validate_fetch_inputs checked.inputs,
+      }
+    else if checked.tag == "Text" then
+      checked
+      & {
+        config = checked.config | TextConfig,
+        inputs = validate_text_inputs checked.inputs,
+      }
+    else if checked.tag == "Tree" then
+      checked
+      & {
+        config = validate_tree_config checked.config,
+        inputs = validate_tree_inputs checked.inputs,
+      }
+    else if checked.tag == "ContainerImage" then
+      checked
+      & {
+        config = checked.config | ContainerImageConfig,
+        inputs = validate_container_image_inputs checked.inputs,
+      }
+    else if checked.tag == "Autotools" then
+      checked
+      & {
+        config = checked.config | AutotoolsConfig,
+        inputs = validate_autotools_inputs checked.inputs,
+      }
+    else if checked.tag == "Makefile" then
+      checked
+      & {
+        config = checked.config | MakefileConfig,
+        inputs = validate_makefile_inputs checked.inputs,
+      }
+    else if checked.tag == "Meson" then
+      checked
+      & {
+        config = checked.config | MesonConfig,
+        inputs = validate_meson_inputs checked.inputs,
+      }
+    else if checked.tag == "PerlModule" then
+      checked
+      & {
+        config = checked.config | PerlModuleConfig,
+        inputs = validate_perl_module_inputs checked.inputs,
+      }
+    else if checked.tag == "Binary" then
+      checked
+      & {
+        config = checked.config | BinaryConfig,
+        inputs = validate_binary_inputs checked.inputs,
+      }
+    else if checked.tag == "Ext4Rootfs" then
+      checked
+      & {
+        config = checked.config | Ext4RootfsConfig,
+        inputs = validate_ext4_rootfs_inputs checked.inputs,
+      }
+    else
+      checked
+      & {
+        config = checked.config | ImageConfig,
+        inputs = validate_image_inputs checked.inputs,
+      }
 in
 {
   known_tags
@@ -561,6 +591,9 @@ in
   fetch_config
     | doc "Config contract for `Fetch` recipe nodes."
     = FetchConfig,
+  source_recipe
+    | doc "Structural contract for `Source` recipe nodes."
+    = SourceRecipe,
   container_image_config
     | doc "Config contract for `ContainerImage` recipe nodes."
     = ContainerImageConfig,
