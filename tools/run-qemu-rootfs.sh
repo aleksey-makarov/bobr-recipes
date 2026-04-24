@@ -7,9 +7,9 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-workspace_root="$(cd "${repo_root}/.." && pwd)"
-rootfs_path="${workspace_root}/.mbuild/object-refs/qemu-rootfs"
-kernel_path="${workspace_root}/.mbuild/object-refs/qemu-kernel/boot/bzImage"
+source "${repo_root}/env.sh"
+rootfs_path="${store_root}/object-refs/qemu-rootfs"
+kernel_path="${store_root}/object-refs/qemu-kernel/boot/bzImage"
 qemu_bin="$(command -v qemu-system-x86_64 || true)"
 mem_mb="${QEMU_MEM_MB:-1024}"
 smp_count="${QEMU_SMP:-2}"

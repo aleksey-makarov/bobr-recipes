@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Validate every JSON build result under .mbuild/meta-refs against the
+# Validate every JSON build result under mbuild-store/meta-refs against the
 # build-result contract.
 # Run this after local builds when you want to check stored result metadata
 # rather than recipe definitions.
@@ -8,9 +8,9 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-workspace_root="$(cd "${repo_root}/.." && pwd)"
+source "${repo_root}/env.sh"
 contract_file="${repo_root}/contracts/build-result.ncl"
-meta_refs_dir="${workspace_root}/.mbuild/meta-refs"
+meta_refs_dir="${store_root}/meta-refs"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 

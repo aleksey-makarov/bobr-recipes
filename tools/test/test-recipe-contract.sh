@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Smoke-test the recipe contract with synthetic cases and then shallow-
-# validate every raw recipe from mk-pkgs.ncl.
-# Run this when editing recipe contracts, mk-pkgs wiring, or recipe shapes.
+# validate every raw recipe from pkgs.ncl.
+# Run this when editing recipe contracts, pkgs wiring, or recipe shapes.
 
 set -euo pipefail
 
@@ -64,7 +64,7 @@ run_case "bad-fetch-archive-format" fail '{"name":"src","tag":"Fetch","config":{
 run_case "bad-ext4-rootfs-size" fail '{"name":"rootfs","tag":"Ext4Rootfs","config":{"label":"rootfs"},"inputs":{}}'
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER
-let raw_pkgs = (import "${repo_root}/mk-pkgs.ncl") [] in
+let raw_pkgs = (import "${repo_root}/pkgs.ncl") [] in
 std.record.fields raw_pkgs
 EOF_INNER
 attr_count="$(
@@ -74,7 +74,7 @@ attr_count="$(
 
 cat > "${tmpdir}/check-shallow-raw-pkgs.ncl" <<EOF_INNER
 let contracts = import "${contract_file}" in
-let raw_pkgs = (import "${repo_root}/mk-pkgs.ncl") [] in
+let raw_pkgs = (import "${repo_root}/pkgs.ncl") [] in
 std.record.map
   (fun _ recipe => let checked = recipe | contracts.shallow_recipe in checked.tag)
   raw_pkgs
