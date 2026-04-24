@@ -20,21 +20,6 @@ let pad3 = fun n =>
   else
     digits
 in
-let slugify_name = fun name =>
-  let lowered = std.string.lowercase name in
-  let replaced = std.string.replace_regex "[^a-z0-9.-]+" "-" lowered in
-  let collapsed = std.string.replace_regex "-+" "-" replaced in
-  std.string.replace_regex "^-|-$" "" collapsed
-in
-let request_node_id = fun idx =>
-  fun node =>
-    let prefix = if node.tag == "Source" then "s" else "b" in
-    let slug = slugify_name node.name in
-    if slug == "" then
-      prefix ++ std.string.from_number idx
-    else
-      prefix ++ std.string.from_number idx ++ "-" ++ slug
-in
 let numbered_inputs_fn = fun inputs =>
   std.record.from_array (
     std.array.map_with_index
@@ -133,10 +118,9 @@ in
         @ std.array.map_with_index
           (fun idx =>
             fun name =>
-              let node = std.record.get name unique_nodes in
               {
                 field = name,
-                value = request_node_id idx node,
+                value = "n" ++ std.string.from_number idx,
               }
           )
           other_names
