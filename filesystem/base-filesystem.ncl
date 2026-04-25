@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 let tree_data = import "base-filesystem-tree.ncl" in
 
 fun _pkgs =>

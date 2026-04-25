@@ -1,4 +1,4 @@
-let recipe = import "../recipe-lib.ncl" in
+let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
   let qemu_rootfs = {
