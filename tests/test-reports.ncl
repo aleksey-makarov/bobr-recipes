@@ -1,24 +1,13 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let buildscript_test_reports = {
-    name = "buildscript-test-reports",
-    tag = "Text",
-    config = {
-      executable = true,
-      source = import "test-reports.sh" as 'Text,
-    },
-    inputs = {},
-  }
-  in
-
   let test_reports_script_source = {
     name = "test-reports-script-source",
     tag = "Source",
-    object_hash = "5a8396328664cf4ba92281e288034cb8243acd7cc9fc98b1e143194f5a883129",
+    object_hash = import "test-reports.sh.fsobj-hash" as 'Text,
     origin = {
       type = "path",
-      path = "/home/amakarov/home/mbuild/mbuild-recipes/tests/test-reports.sh",
+      path = "tests/test-reports.sh",
       mode = "direct",
     },
     meta = {},
@@ -40,7 +29,7 @@ fun pkgs =>
     },
     inputs = {
       image = pkgs.host_image,
-      script = buildscript_test_reports,
+      script = test_reports_script_source,
       report000 = pkgs.test_system_image_0,
       report001 = pkgs.test_system_image_1,
       report002 = pkgs.test_system_image_2,

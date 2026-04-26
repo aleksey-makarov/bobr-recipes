@@ -142,13 +142,18 @@ in
           let node = lower_node (std.record.get name unique_nodes) in
           let node_value =
             if node.tag == "Source" then
-              {
+              let source_base = {
                 name = node.name,
                 tag = node.tag,
                 object_hash = node.object_hash,
-                origin = node.origin,
                 meta = node.meta,
               }
+              in
+              source_base
+              & (if std.record.has_field "origin" node then
+                  { origin = node.origin }
+                else
+                  {})
             else
               {
                 name = node.name,

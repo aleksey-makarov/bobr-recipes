@@ -56,9 +56,19 @@ in
 let SourcePathMode =
   std.contract.from_predicate (fun value => std.array.elem value ["direct", "tar"])
 in
+let RelativeSourcePath =
+  std.contract.from_predicate (fun value =>
+    std.is_string value
+    && value != ""
+    && !std.string.is_match "^/" value
+    && !std.string.is_match "(^|/)\\.\\.($|/)" value
+  )
+in
 let SourceOrigin = {
   type | std.contract.Equal "path",
-  path | String,
+  path
+    | RelativeSourcePath
+    | doc "Relative local source path without `..`, resolved from request `paths.local`.",
   mode | SourcePathMode,
 }
 in
@@ -72,7 +82,10 @@ let SourceRecipe = {
   object_hash
     | String
     | doc "Declared payload object hash materialized from `origin`; `result_id` is derived later from `object_hash` and `meta`.",
-  origin | SourceOrigin,
+  origin
+    | SourceOrigin
+    | optional
+    | doc "Optional local source origin. If omitted, the canonical result must already exist in store.",
   meta | { .. },
 }
 in

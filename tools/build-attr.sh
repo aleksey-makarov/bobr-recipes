@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-# Build a single recipe attribute through `request.ncl(store_path, target_name)`.
+# Build a single recipe attribute through `request.ncl({ ... })`.
 # Regenerates tree modules, exports the full JSON request envelope, and pipes
-# it directly into `mbuild`. Store configuration comes from `mbuild-recipes/env.sh`.
+# it directly into `mbuild`. Store and local source configuration come from
+# `mbuild-recipes/env.sh`.
 
 set -euo pipefail
 
@@ -25,7 +26,11 @@ python3 "${tree_generator}"
 
 expr=$(cat <<EOF_INNER
 let request = import "${request_file}" in
-request "${store_root}" "${attr}"
+request {
+  store_path = "${store_root}",
+  local_path = "${local_root}",
+  target_name = "${attr}",
+}
 EOF_INNER
 )
 
