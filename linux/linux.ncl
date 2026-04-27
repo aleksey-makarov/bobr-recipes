@@ -21,12 +21,14 @@ fun pkgs =>
 
   let buildscript_linux_headers = {
     name = headers_script_name,
-    tag = "Text",
-    config = {
-      executable = true,
-      source = import "linux-headers.sh" as 'Text,
+    tag = "Source",
+    object_hash = import "linux-headers.sh.fsobj-hash" as 'Text,
+    origin = {
+      type = "path",
+      path = "linux/linux-headers.sh",
+      mode = "direct",
     },
-    inputs = {},
+    meta = {},
   }
   in
 

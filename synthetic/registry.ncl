@@ -1,41 +1,49 @@
 let buildscript_autotools = {
   name = "buildscript-autotools",
-  tag = "Text",
-  config = {
-    executable = true,
-    source = import "autotools.sh" as 'Text,
+  tag = "Source",
+  object_hash = import "autotools.sh.fsobj-hash" as 'Text,
+  origin = {
+    type = "path",
+    path = "synthetic/autotools.sh",
+    mode = "direct",
   },
-  inputs = {},
+  meta = {},
 }
 in
 let buildscript_gnu_make = {
   name = "buildscript-gnu-make",
-  tag = "Text",
-  config = {
-    executable = true,
-    source = import "gnu-make.sh" as 'Text,
+  tag = "Source",
+  object_hash = import "gnu-make.sh.fsobj-hash" as 'Text,
+  origin = {
+    type = "path",
+    path = "synthetic/gnu-make.sh",
+    mode = "direct",
   },
-  inputs = {},
+  meta = {},
 }
 in
 let buildscript_meson = {
   name = "buildscript-meson",
-  tag = "Text",
-  config = {
-    executable = true,
-    source = import "meson.sh" as 'Text,
+  tag = "Source",
+  object_hash = import "meson.sh.fsobj-hash" as 'Text,
+  origin = {
+    type = "path",
+    path = "synthetic/meson.sh",
+    mode = "direct",
   },
-  inputs = {},
+  meta = {},
 }
 in
 let buildscript_perl_module = {
   name = "buildscript-perl-module",
-  tag = "Text",
-  config = {
-    executable = true,
-    source = import "perl-module.sh" as 'Text,
+  tag = "Source",
+  object_hash = import "perl-module.sh.fsobj-hash" as 'Text,
+  origin = {
+    type = "path",
+    path = "synthetic/perl-module.sh",
+    mode = "direct",
   },
-  inputs = {},
+  meta = {},
 }
 in
 let record_get_or = fun field =>

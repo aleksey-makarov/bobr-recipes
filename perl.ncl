@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let buildscript_perl_configure = {
     name = "buildscript-perl-configure",
-    tag = "Text",
-    config = {
-      executable = true,
-      source = import "perl-configure.sh" as 'Text,
+    tag = "Source",
+    object_hash = import "perl-configure.sh.fsobj-hash" as 'Text,
+    origin = {
+      type = "path",
+      path = "perl-configure.sh",
+      mode = "direct",
     },
-    inputs = {},
+    meta = {},
   }
   in
 

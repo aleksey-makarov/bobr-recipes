@@ -120,11 +120,14 @@ fun pkgs =>
 
   let python_modules_helper = {
     name = "buildscript-python-modules",
-    tag = "Text",
-    config = {
-      source = import "python-modules.sh" as 'Text,
+    tag = "Source",
+    object_hash = import "python-modules.sh.fsobj-hash" as 'Text,
+    origin = {
+      type = "path",
+      path = "python-modules.sh",
+      mode = "direct",
     },
-    inputs = {},
+    meta = {},
   }
   in
 

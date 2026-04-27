@@ -3,23 +3,27 @@ let recipe = import "../recipe-lib.ncl" in
 fun pkgs =>
   let qemu_kernel_config = {
     name = "qemu-kernel-config",
-    tag = "Text",
-    config = {
-      executable = false,
-      source = import ".config" as 'Text,
+    tag = "Source",
+    object_hash = import ".config.fsobj-hash" as 'Text,
+    origin = {
+      type = "path",
+      path = "linux/.config",
+      mode = "direct",
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let qemu_kernel_buildscript = {
     name = "buildscript-qemu-kernel",
-    tag = "Text",
-    config = {
-      executable = true,
-      source = import "kernel.sh" as 'Text,
+    tag = "Source",
+    object_hash = import "kernel.sh.fsobj-hash" as 'Text,
+    origin = {
+      type = "path",
+      path = "linux/kernel.sh",
+      mode = "direct",
     },
-    inputs = {},
+    meta = {},
   }
   in
 

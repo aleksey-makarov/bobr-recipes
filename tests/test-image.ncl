@@ -1,14 +1,16 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let buildscript_test_image = {
-    name = "buildscript-test-image",
-    tag = "Text",
-    config = {
-      executable = true,
-      source = import "test-image.sh" as 'Text,
+  let test_image_script_source = {
+    name = "test-image-script-source",
+    tag = "Source",
+    object_hash = import "test-image.sh.fsobj-hash" as 'Text,
+    origin = {
+      type = "path",
+      path = "tests/test-image.sh",
+      mode = "direct",
     },
-    inputs = {},
+    meta = {},
   }
   in
 
@@ -31,7 +33,7 @@ fun pkgs =>
     },
     inputs = {
       image = pkgs.system_image_0,
-      script = buildscript_test_image,
+      script = test_image_script_source,
     },
   }
   in
@@ -54,7 +56,7 @@ fun pkgs =>
     },
     inputs = {
       image = pkgs.system_image_1,
-      script = buildscript_test_image,
+      script = test_image_script_source,
     },
   }
   in
@@ -78,7 +80,7 @@ fun pkgs =>
     },
     inputs = {
       image = pkgs.system_image_2,
-      script = buildscript_test_image,
+      script = test_image_script_source,
     },
   }
   in
@@ -102,7 +104,7 @@ fun pkgs =>
     },
     inputs = {
       image = pkgs.system_image,
-      script = buildscript_test_image,
+      script = test_image_script_source,
     },
   }
   in
