@@ -1,12 +1,14 @@
 fun pkgs =>
   let openssl_src = {
     name = "openssl-src-3.5.2",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "48040e46d92989d1d868a10c614d0d21f84d3c4db4c6beade1b3958dda9a053b",
+    origin = {
+      type = "http",
       url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz",
-      hash = "md5:890fc59f86fc21b5e4d1c031a698dbde",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

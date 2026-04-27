@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let m4_src = {
     name = "m4-src-1.4.20",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "b4411f1e520623d5280b41d7133987e068318ea369b8866f61a0633ae7e58691",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/m4/m4-1.4.20.tar.xz",
         "https://mirrors.kernel.org/gnu/m4/m4-1.4.20.tar.xz",
       ],
-      hash = "md5:6eb2ebed5b24e74b6e890919331d2132",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

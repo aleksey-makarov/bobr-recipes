@@ -1,15 +1,17 @@
 fun pkgs =>
   let tcl_src = {
     name = "tcl-src-8.6.16",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "cbd06d9431a55b67ed89e1b0a49b6d53d2baedaa6ae7ae5d6435d9d3b069c70b",
+    origin = {
+      type = "http",
       url = [
         "https://downloads.sourceforge.net/project/tcl/Tcl/8.6.16/tcl8.6.16-src.tar.gz",
         "https://sourceforge.net/projects/tcl/files/Tcl/8.6.16/tcl8.6.16-src.tar.gz/download",
       ],
-      hash = "md5:eaef5d0a27239fb840f04af8ec608242",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

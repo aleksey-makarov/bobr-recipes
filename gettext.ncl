@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let gettext_src = {
     name = "gettext-src-0.26",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "f601d9cd3fd141e65e1baf6e222de3b9b94fdc139eca58aa707f3f30bd080c00",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.xz",
         "https://mirrors.kernel.org/gnu/gettext/gettext-0.26.tar.xz",
       ],
-      hash = "md5:8e14e926f088e292f5f2bce95b81d10e",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

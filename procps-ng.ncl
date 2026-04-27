@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let procps_ng_src = {
     name = "procps-ng-src-4.0.5",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "10da56c9dc78efa7f7abdc4cc35253661d969eb3d18bcb42ad6e4990a2db2139",
+    origin = {
+      type = "http",
       url = [
         "https://downloads.sourceforge.net/project/procps-ng/Production/procps-ng-4.0.5.tar.xz",
         "https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-4.0.5.tar.xz/download",
       ],
-      hash = "md5:90803e64f51f192f3325d25c3335d057",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

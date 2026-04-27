@@ -10,12 +10,14 @@ fun pkgs =>
 
   let linux_src = {
     name = source_name,
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "9dd1683dd83a8808063e6ccdd2d5604247c518c41b3052f4eda26d773aaca951",
+    origin = {
+      type = "http",
       url = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-6.18.10.tar.xz",
-      hash = "md5:660e706a43f634b1fcd911f8839d2f61",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

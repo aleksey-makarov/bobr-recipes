@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let mpc_src = {
     name = "mpc-src-1.3.1",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "43e5127bf0025b5518a123cbcb44bf3f7c7de939184bfead6d0c748aef2e1af5",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz",
         "https://mirrors.kernel.org/gnu/mpc/mpc-1.3.1.tar.gz",
       ],
-      hash = "md5:5c9bc658c9fd0f940e8e3e0f09530c62",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

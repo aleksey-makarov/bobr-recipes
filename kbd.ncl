@@ -3,24 +3,27 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let kbd_src = {
     name = "kbd-src-2.8.0",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "264b06aef2d195e374e8045d482722a43f609e24fb261096430d22381f96c08e",
+    origin = {
+      type = "http",
       url = "https://www.kernel.org/pub/linux/utils/kbd/kbd-2.8.0.tar.xz",
-      hash = "md5:24b5d24f7483726b88f214dc6c77aa41",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let kbd_backspace_patch = {
     name = "kbd-backspace-patch",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "e9f468ea0ed2089b0743133e41e13d3cd9891afe258534d82bc596cda98c8f0d",
+    origin = {
+      type = "http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/kbd-2.8.0-backspace-1.patch",
-      hash = "md5:f75cca16a38da6caa7d52151f7136895",
       unpack = false,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

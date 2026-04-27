@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let patch_src = {
     name = "patch-src-2.8",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "c4fa1fcb69e29607159a469efebda0757341028d4f68e70d3540110425788e9a",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz",
         "https://mirrors.kernel.org/gnu/patch/patch-2.8.tar.xz",
       ],
-      hash = "md5:149327a021d41c8f88d034eab41c039f",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

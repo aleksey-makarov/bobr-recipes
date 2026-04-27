@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let bc_src = {
     name = "bc-src-7.0.3",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "31e2e5aceea232645423625c5250bbfddce3797565af380db798e283cde0e5ba",
+    origin = {
+      type = "http",
       url = "https://github.com/gavinhoward/bc/archive/c8dabac65d39fd527a9264a5e505a99b1d8df3d8.tar.gz",
-      hash = "sha256:efc1df54c5378be62a93662e34f6829af1738a858211bd51c8d9b6c0892825ac",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

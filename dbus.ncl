@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let dbus_src = {
     name = "dbus-src-1.16.2",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "35855b72dc24b6a9afa65e9695dd7a00a12aab0ed2511096afc6779e1891a8c4",
+    origin = {
+      type = "http",
       url = "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz",
-      hash = "md5:97832e6f0a260936d28536e5349c22e5",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

@@ -3,27 +3,30 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let glibc_fhs_patch_2_42 = {
     name = "glibc-fhs-patch-2.42",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "b84d3ef28f8f0dd62db8b3d70cc65b5f7f4c9aa9affc7dcfa0d093df80d5f710",
+    origin = {
+      type = "http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch",
-      hash = "md5:9a5997c3452909b1769918c759eff8a2",
       unpack = false,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let glibc_src = {
     name = "glibc-src-2.42",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "fe4dd5420cafd78fd66805b9fe4b2f5c7e981a9f68410b3d273e2c5b355dbba4",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz",
         "https://mirrors.kernel.org/gnu/glibc/glibc-2.42.tar.xz",
       ],
-      hash = "md5:23c6f5a27932b435cae94e087cb8b1f5",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

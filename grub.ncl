@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let grub_src = {
     name = "grub-src-2.12",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "22e18f36eecd9968594ecd303dd7470560bf0ad480abe2199d90d56bbdd45228",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/grub/grub-2.12.tar.xz",
         "https://mirrors.kernel.org/gnu/grub/grub-2.12.tar.xz",
       ],
-      hash = "md5:60c564b1bdc39d8e43b3aab4bc0fb140",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

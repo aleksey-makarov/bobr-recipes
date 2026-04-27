@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let zlib_src = {
     name = "zlib-src-1.3.1",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "d916134715c36c4535c9a83759f6d48bcbf0aeed3ef2261e929151bfbfc8033f",
+    origin = {
+      type = "http",
       url = "https://zlib.net/fossils/zlib-1.3.1.tar.gz",
-      hash = "md5:9855b6d802d7fe5b7bd5b196a2271655",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

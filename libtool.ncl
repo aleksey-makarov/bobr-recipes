@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let libtool_src = {
     name = "libtool-src-2.5.4",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "5ac77ad72cf9663bd437fb91a597a69b9566c3422247f3f49c1c4ca7b5bc5aaf",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/libtool/libtool-2.5.4.tar.xz",
         "https://mirrors.kernel.org/gnu/libtool/libtool-2.5.4.tar.xz",
       ],
-      hash = "md5:22e0a29df8af5fdde276ea3a7d351d30",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

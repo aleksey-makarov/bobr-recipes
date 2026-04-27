@@ -9,15 +9,17 @@ fun pkgs =>
 
   let binutils_src = {
     name = source_name,
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "f6f8cf20a147394819074094d119cdf9158e5088db8de8f759e56266a5b7910c",
+    origin = {
+      type = "http",
       url = [
         "https://sourceware.org/pub/binutils/releases/binutils-2.45.tar.xz",
         "https://mirrors.kernel.org/gnu/binutils/binutils-2.45.tar.xz",
       ],
-      hash = "md5:dee5b4267e0305a99a3c9d6131f45759",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

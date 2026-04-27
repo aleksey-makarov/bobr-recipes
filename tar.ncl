@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let tar_src = {
     name = "tar-src-1.35",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "687da4655985992a12ec70eda7c7cacbe979f04618d93f9a599d8631ee57a905",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz",
         "https://mirrors.kernel.org/gnu/tar/tar-1.35.tar.xz",
       ],
-      hash = "md5:a2d8042658cfd8ea939e6d911eaf4152",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

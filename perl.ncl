@@ -16,12 +16,14 @@ fun pkgs =>
 
   let perl_src = {
     name = "perl-src-5.42.0",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "31df3e5ba7152f4f48ce98c8b7b892cebff07943fd08a6bf655142fc47309ab8",
+    origin = {
+      type = "http",
       url = "https://www.cpan.org/src/5.0/perl-5.42.0.tar.xz",
-      hash = "md5:7a6950a9f12d01eb96a9d2ed2f4e0072",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

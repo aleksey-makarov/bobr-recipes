@@ -3,24 +3,27 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let systemd_src = {
     name = "systemd-src-257.8",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "75d455ae708777bd383ce8d4e8d5eea67c2b8da2875a3e91dd8ecf1f8b91f17b",
+    origin = {
+      type = "http",
       url = "https://github.com/systemd/systemd/archive/v257.8/systemd-257.8.tar.gz",
-      hash = "md5:25fe5d328e22641254761f1baa74cee0",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let systemd_man_pages_src = {
     name = "systemd-man-pages-src-257.8",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "b0c85b585ffc3cfa57c3ee9da936d2f1e0de9ef2fa1db4bff94005eee5bddc04",
+    origin = {
+      type = "http",
       url = "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-257.8.tar.xz",
-      hash = "md5:a44063e2ec0cf4adfd2ed5c9e9e095c5",
       unpack = false,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

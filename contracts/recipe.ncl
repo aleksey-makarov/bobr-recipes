@@ -1,6 +1,5 @@
 let KnownTags = [
   "Source",
-  "Fetch",
   "Text",
   "Tree",
   "ContainerImage",
@@ -64,13 +63,34 @@ let RelativeSourcePath =
     && !std.string.is_match "(^|/)\\.\\.($|/)" value
   )
 in
-let SourceOrigin = {
+let SourcePathOrigin = {
   type | std.contract.Equal "path",
   path
     | RelativeSourcePath
     | doc "Relative local source path without `..`, resolved from request `paths.local`.",
   mode | SourcePathMode,
 }
+in
+let SourceHttpOrigin = {
+  type | std.contract.Equal "http",
+  url
+    | UrlField
+    | doc "HTTP(S) source URL or list of fallback URLs.",
+  unpack
+    | Bool
+    | optional
+    | doc "Whether the downloaded payload should be unpacked into a directory object.",
+  archive_format
+    | ArchiveFormat
+    | optional
+    | doc "Optional explicit archive format override.",
+}
+in
+let SourceOrigin =
+  std.contract.any_of [
+    SourcePathOrigin,
+    SourceHttpOrigin,
+  ]
 in
 let SourceRecipe = {
   name
@@ -85,7 +105,7 @@ let SourceRecipe = {
   origin
     | SourceOrigin
     | optional
-    | doc "Optional local source origin. If omitted, the canonical result must already exist in store.",
+    | doc "Optional source origin. If omitted, the canonical result must already exist in store.",
   meta | { .. },
 }
 in
@@ -121,25 +141,9 @@ let InstallMeta = {
     | doc "Install rules applied when the result is used as an installable object.",
 }
 in
-let FetchConfig = {
-  url
-    | UrlField
-    | doc "Source URL or list of fallback URLs.",
-  hash
-    | String
-    | doc "Declared source hash in `<algo>:<hex>` form.",
-  unpack
-    | Bool
-    | optional
-    | doc "Whether the fetched payload should be unpacked.",
-  archive_format
-    | ArchiveFormat
-    | optional
-    | doc "Optional explicit archive format override.",
-  install
-    | InstallMeta
-    | optional
-    | doc "Optional install metadata for unpacked directory output.",
+let SourceMeta = {
+  install | InstallMeta | optional,
+  ..
 }
 in
 let TreeFileEntry = {
@@ -302,8 +306,6 @@ let Ext4RootfsConfig = {
     | doc "Optional ext4 volume label.",
 }
 in
-let FetchInputs = {}
-in
 let TextInputs = {}
 in
 let TreeInputs = {}
@@ -353,7 +355,8 @@ let PerlModuleInputsShape = {
 in
 let ValidateRecipeShallow = fun recipe =>
   if recipe.tag == "Source" then
-    recipe | SourceRecipe
+    let checked = recipe | SourceRecipe in
+    checked & { meta = checked.meta | SourceMeta }
   else
     let checked = recipe | ShallowBaseRecipe in
     let validate_tree_entry = fun entry =>
@@ -376,17 +379,7 @@ let ValidateRecipeShallow = fun recipe =>
           },
       }
     in
-    if checked.tag == "Fetch" then
-      let config = checked.config | FetchConfig in
-      checked
-      & {
-        config =
-          if std.record.has_field "install" config then
-            config & { install = config.install | InstallMeta }
-          else
-            config,
-      }
-    else if checked.tag == "Text" then
+    if checked.tag == "Text" then
       checked
       & {
         config = checked.config | TextConfig,
@@ -443,7 +436,8 @@ in
 # small smoke cases, not for full-package-set validation.
 let rec ValidateRecipe = fun recipe =>
   if recipe.tag == "Source" then
-    recipe | SourceRecipe
+    let checked = recipe | SourceRecipe in
+    checked & { meta = checked.meta | SourceMeta }
   else
     let checked = recipe | BaseRecipe in
     let validate_tree_entry = fun entry =>
@@ -454,9 +448,6 @@ let rec ValidateRecipe = fun recipe =>
         checked | TreeSymlinkEntry
       else
         checked | TreeDirEntry
-    in
-    let validate_fetch_inputs = fun inputs =>
-      inputs | FetchInputs
     in
     let validate_text_inputs = fun inputs =>
       inputs | TextInputs
@@ -520,13 +511,7 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
-    if checked.tag == "Fetch" then
-      checked
-      & {
-        config = checked.config | FetchConfig,
-        inputs = validate_fetch_inputs checked.inputs,
-      }
-    else if checked.tag == "Text" then
+    if checked.tag == "Text" then
       checked
       & {
         config = checked.config | TextConfig,
@@ -601,9 +586,6 @@ in
   tree_config
     | doc "Config contract for `Tree` recipe nodes."
     = TreeConfig,
-  fetch_config
-    | doc "Config contract for `Fetch` recipe nodes."
-    = FetchConfig,
   source_recipe
     | doc "Structural contract for `Source` recipe nodes."
     = SourceRecipe,

@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let acl_src = {
     name = "acl-src-2.3.2",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "18982c81ba304a0f0b9c1d7369845a3a76190aa051a637e21d52a912e55b62d7",
+    origin = {
+      type = "http",
       url = "https://download.savannah.gnu.org/releases/acl/acl-2.3.2.tar.xz",
-      hash = "md5:590765dee95907dbc3c856f7255bd669",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

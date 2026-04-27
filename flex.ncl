@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let flex_src = {
     name = "flex-src-2.6.4",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "5df5ea9e7af9b55a453c038e840e245efe79baf84da6f37c66505dfa0f51124f",
+    origin = {
+      type = "http",
       url = "https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz",
-      hash = "sha256:e87aae032bf07c26f85ac0ed3250998c37621d95f8bd748b31f15b33c45ee995",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

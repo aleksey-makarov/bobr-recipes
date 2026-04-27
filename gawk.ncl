@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let gawk_src = {
     name = "gawk-src-5.3.2",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "6c94095ba63575383478eab9fae4dcffd400747f99242f8a9eec5fb7e07722ef",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz",
         "https://mirrors.kernel.org/gnu/gawk/gawk-5.3.2.tar.xz",
       ],
-      hash = "md5:b7014650c5f45e5d4837c31209dc0037",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

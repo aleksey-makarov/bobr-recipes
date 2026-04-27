@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let diffutils_src = {
     name = "diffutils-src-3.12",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "b25f86cc6065a6fa173176105f4fb5999514d05ba1672ce56fe431944549a53a",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/diffutils/diffutils-3.12.tar.xz",
         "https://mirrors.kernel.org/gnu/diffutils/diffutils-3.12.tar.xz",
       ],
-      hash = "md5:d1b18b20868fb561f77861cd90b05de4",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

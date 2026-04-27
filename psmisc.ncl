@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let psmisc_src = {
     name = "psmisc-src-23.7",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "486e65b54d0e4d2a942e292e5185379cfd177b7cf780bf591ed5b9b6aab85a67",
+    origin = {
+      type = "http",
       url = [
         "https://downloads.sourceforge.net/project/psmisc/psmisc/psmisc-23.7.tar.xz",
         "https://sourceforge.net/projects/psmisc/files/psmisc/psmisc-23.7.tar.xz/download",
       ],
-      hash = "md5:53eae841735189a896d614cba440eb10",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let texinfo_src = {
     name = "texinfo-src-7.2",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "bf7334808d0c4c23a617aa9d92fc6958bad23d092a354c00a5b2537920ccecf7",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/texinfo/texinfo-7.2.tar.xz",
         "https://mirrors.kernel.org/gnu/texinfo/texinfo-7.2.tar.xz",
       ],
-      hash = "md5:11939a7624572814912a18e76c8d8972",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

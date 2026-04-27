@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let kmod_src = {
     name = "kmod-src-34.2",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "8ff0492fbf5fc62aa6d89c75960cf81f7efc21b95d7b3c8a5ffeb5de5f4f6a9d",
+    origin = {
+      type = "http",
       url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.xz",
-      hash = "md5:36f2cc483745e81ede3406fa55e1065a",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let e2fsprogs_src = {
     name = "e2fsprogs-src-1.47.3",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "0f4a433c0409d55e04ef2a638c9ea04a835b38f42881c4d4140de3683ef54142",
+    origin = {
+      type = "http",
       url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.3/e2fsprogs-1.47.3.tar.gz",
-      hash = "md5:113d7a7ee0710d2a670a44692a35fd2e",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

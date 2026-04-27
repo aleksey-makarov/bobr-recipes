@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let sed_src = {
     name = "sed-src-4.9",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "51f4169cb5f56f544a72cef9168c3bdd7114a031db13085bb7492140a2a0ed5b",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz",
         "https://mirrors.kernel.org/gnu/sed/sed-4.9.tar.xz",
       ],
-      hash = "md5:6aac9b2dbafcd5b7a67a8a9bcb8036c3",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

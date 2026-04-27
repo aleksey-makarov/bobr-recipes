@@ -3,118 +3,136 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let python_src = {
     name = "python-src-3.13.7",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "acd88f182c16775a0b20160c5412dc5602c00a26bccb9d510aae13c00db4b772",
+    origin = {
+      type = "http",
       url = [
         "https://www.python.org/ftp/python/3.13.7/Python-3.13.7.tar.xz",
       ],
-      hash = "md5:256cdb3bbf45cdce7499e52ba6c36ea3",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let flit_core_src = {
     name = "flit-core-src-3.12.0",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "4ae18f5a18bd14a7f0c81f0898c9173e7bf6e3da6f7797b38dd7598e9c0df83e",
+    origin = {
+      type = "http",
       url = [
         "https://pypi.org/packages/source/f/flit-core/flit_core-3.12.0.tar.gz",
       ],
-      hash = "md5:c538415c1f27bd69cbbbf3cdd5135d39",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let packaging_src = {
     name = "packaging-src-25.0",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "eef46092fcf8c09e867314008a279f878dc2082b4836b2cef40c0e6f1bffb038",
+    origin = {
+      type = "http",
       url = [
         "https://files.pythonhosted.org/packages/source/p/packaging/packaging-25.0.tar.gz",
       ],
-      hash = "md5:ab0ef21ddebe09d1803575120d3f99f8",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let wheel_src = {
     name = "wheel-src-0.46.1",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "87ee5389942362742e150c7fde90082fa12f60920e7d57f993b17e00714f1c9c",
+    origin = {
+      type = "http",
       url = [
         "https://pypi.org/packages/source/w/wheel/wheel-0.46.1.tar.gz",
       ],
-      hash = "md5:65e09ee84af36821e3b1e9564aa91bd5",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let setuptools_src = {
     name = "setuptools-src-80.9.0",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "3ce8dc0ff6d650b87bf097d0060d6072d3ee07501b94cb2da34446bf6d9d33ec",
+    origin = {
+      type = "http",
       url = [
         "https://pypi.org/packages/source/s/setuptools/setuptools-80.9.0.tar.gz",
       ],
-      hash = "md5:82e1d67883b713f9493659b50d13b436",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let markupsafe_src = {
     name = "markupsafe-src-3.0.2",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "09b2777975dde2530652f132ccad00ec10e0b1d66ce9c9b9d74565e92cc81b87",
+    origin = {
+      type = "http",
       url = [
         "https://pypi.org/packages/source/M/MarkupSafe/markupsafe-3.0.2.tar.gz",
       ],
-      hash = "md5:cb0071711b573b155cc8f86e1de72167",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let jinja2_src = {
     name = "jinja2-src-3.1.6",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "8ec4e4952cb7d50ddc246f33c0c42f637e28af501c953a2f95b9d056badfb314",
+    origin = {
+      type = "http",
       url = [
         "https://pypi.org/packages/source/J/Jinja2/jinja2-3.1.6.tar.gz",
       ],
-      hash = "md5:66d4c25ff43d1deaf9637ccda523dec8",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let meson_src = {
     name = "meson-src-1.8.3",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "eb8f23b24a47a7c581270ed0f2367d7b97c5e6b3133416b3c7d90b1d3fbfd4a6",
+    origin = {
+      type = "http",
       url = [
         "https://github.com/mesonbuild/meson/releases/download/1.8.3/meson-1.8.3.tar.gz",
       ],
-      hash = "md5:08221d2f515e759686f666ff6409a903",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
   let ninja_src = {
     name = "ninja-src-1.13.1",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "97375f11d9a92187509c71fb91b88f763ed535f12a5011d565058c512eb9ebab",
+    origin = {
+      type = "http",
       url = [
         "https://github.com/ninja-build/ninja/archive/v1.13.1/ninja-1.13.1.tar.gz",
       ],
-      hash = "md5:c35f8f55f4cf60f1a916068d8f45a0f8",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

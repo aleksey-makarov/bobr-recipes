@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let bison_src = {
     name = "bison-src-3.8.2",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "0c50e2d3339a5bbbe95673b168d78e5dc1896b8cfb0bf0e91fa33798bb2c30c6",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz",
         "https://mirrors.kernel.org/gnu/bison/bison-3.8.2.tar.xz",
       ],
-      hash = "md5:c28f119f405a2304ff0a7ccdcc629713",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

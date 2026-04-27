@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let util_linux_src = {
     name = "util-linux-src-2.41.1",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "92efaf044d9ab279282bbe4a4d7543f49b275b099a183ab3843fd3a6129b57fc",
+    origin = {
+      type = "http",
       url = "https://www.kernel.org/pub/linux/utils/util-linux/v2.41/util-linux-2.41.1.tar.xz",
-      hash = "md5:7e5e68845e2f347cf96f5448165f1764",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

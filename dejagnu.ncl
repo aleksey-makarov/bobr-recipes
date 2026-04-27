@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let dejagnu_src = {
     name = "dejagnu-src-1.6.3",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "703e572179478abc82c20ad18c6aa98f84cb864a2153f96e68361e4bf9680bf8",
+    origin = {
+      type = "http",
       url = "https://ftp.gnu.org/gnu/dejagnu/dejagnu-1.6.3.tar.gz",
-      hash = "md5:68c5208c58236eba447d7d6d1326b821",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let libcap_src = {
     name = "libcap-src-2.76",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "4408f342e49af7bbd7156d75ee6f1c2940beca650122b8300c456f6d51a32259",
+    origin = {
+      type = "http",
       url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.76.tar.xz",
-      hash = "md5:449ade7d620b5c4eeb15a632fbaa4f74",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let intltool_src = {
     name = "intltool-src-0.51.0",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "c44bf1e9e67947aba535a53800875ca3645a4e9265479744b01a477b15b184e3",
+    origin = {
+      type = "http",
       url = "https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz",
-      hash = "md5:12e517cac2b57a0121cda351570f1e63",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

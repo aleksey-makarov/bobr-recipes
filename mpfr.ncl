@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let mpfr_src = {
     name = "mpfr-src-4.2.2",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "f4df0e1987dc5541119a349fdd45ad5e69700f494dfab5b2c4fa2d4e0ee74a20",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz",
         "https://mirrors.kernel.org/gnu/mpfr/mpfr-4.2.2.tar.xz",
       ],
-      hash = "md5:7c32c39b8b6e3ae85f25156228156061",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

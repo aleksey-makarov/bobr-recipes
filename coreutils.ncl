@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let coreutils_src = {
     name = "coreutils-src-9.7",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "9b9ce647d9013a0f978cc564ebfc2e7fa86c838e011d4979af05d519255c9899",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz",
         "https://mirrors.kernel.org/gnu/coreutils/coreutils-9.7.tar.xz",
       ],
-      hash = "md5:6b7285faf7d5eb91592bdd689270d3f1",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

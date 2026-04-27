@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let grep_src = {
     name = "grep-src-3.12",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "c6c60e306b7865d331607e6f0317afaf4e0d1721ca4b2661f62a8bf5c08ace88",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz",
         "https://mirrors.kernel.org/gnu/grep/grep-3.12.tar.xz",
       ],
-      hash = "md5:5d9301ed9d209c4a88c8d3a6fd08b9ac",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

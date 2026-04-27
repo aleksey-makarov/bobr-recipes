@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let inetutils_src = {
     name = "inetutils-src-2.6",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "c1f6873149c20580acce0e08b6840bef2f0340eab274541477aca7c548efd4cb",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/inetutils/inetutils-2.6.tar.xz",
         "https://mirrors.kernel.org/gnu/inetutils/inetutils-2.6.tar.xz",
       ],
-      hash = "md5:401d7d07682a193960bcdecafd03de94",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

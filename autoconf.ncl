@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let autoconf_src = {
     name = "autoconf-src-2.72",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "b3e588c79a56d7cb5f8dce6bf383ec1c01b4a85ef5700ef967ad08de7cbfc8ab",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/autoconf/autoconf-2.72.tar.xz",
         "https://mirrors.kernel.org/gnu/autoconf/autoconf-2.72.tar.xz",
       ],
-      hash = "md5:1be79f7106ab6767f18391c5e22be701",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

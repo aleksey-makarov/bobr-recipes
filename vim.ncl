@@ -3,14 +3,16 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let vim_src = {
     name = "vim-src-9.1.1629",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "3a5ee65443c8edee9f53ced99f89568b6ef3dc5988301f2d0fb920511f58713f",
+    origin = {
+      type = "http",
       url = [
         "https://github.com/vim/vim/archive/v9.1.1629/vim-9.1.1629.tar.gz",
       ],
-      hash = "md5:4f856c3233c1c4570bc17572e4f9e8e4",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let libxcrypt_src = {
     name = "libxcrypt-src-4.4.38",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "312c70fc5072cf879077124cbec78e2b3e39263f5a35e0b0d2947142d2f279ee",
+    origin = {
+      type = "http",
       url = "https://github.com/besser82/libxcrypt/releases/download/v4.4.38/libxcrypt-4.4.38.tar.xz",
-      hash = "md5:1796a5d20098e9dd9e3f576803c83000",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

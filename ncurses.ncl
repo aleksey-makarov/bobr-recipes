@@ -3,14 +3,16 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let ncurses_src = {
     name = "ncurses-src-6.6",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "1042d01430d5c0f4777a6c51a52e4af1dc58ccbf001070fea5915a859b05190f",
+    origin = {
+      type = "http",
       url = [
         "https://invisible-mirror.net/archives/ncurses/ncurses-6.6.tar.gz",
       ],
-      hash = "md5:dd45bf6854430af403452a7a6a40652c",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

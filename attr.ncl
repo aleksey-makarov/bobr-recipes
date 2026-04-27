@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let attr_src = {
     name = "attr-src-2.5.2",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "c0132672e62d9b4830b8e3ed6725b2cd0cd02eb448fffa127685b7bf444007b4",
+    origin = {
+      type = "http",
       url = "https://download.savannah.gnu.org/releases/attr/attr-2.5.2.tar.gz",
-      hash = "md5:227043ec2f6ca03c0948df5517f9c927",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

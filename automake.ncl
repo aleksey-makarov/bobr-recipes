@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let automake_src = {
     name = "automake-src-1.18.1",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "ffa05fcb79316474182f9f80b782dcaf83cc72a5782e4f5525488b7de9f2f514",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/automake/automake-1.18.1.tar.xz",
         "https://mirrors.kernel.org/gnu/automake/automake-1.18.1.tar.xz",
       ],
-      hash = "md5:cea31dbf1120f890cbf2a3032cfb9a68",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

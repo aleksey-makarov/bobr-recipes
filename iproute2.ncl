@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let iproute2_src = {
     name = "iproute2-src-6.16.0",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "1741ed1137f11d7218abaa176338c50af6abd6e0876841bbdcc62fe960aaabd2",
+    origin = {
+      type = "http",
       url = "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-6.16.0.tar.xz",
-      hash = "md5:80e1f91bf59d572acc15d5c6eb4f3e7c",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

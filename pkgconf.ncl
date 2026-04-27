@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let pkgconf_src = {
     name = "pkgconf-src-2.5.1",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "e711b652e2bba08164fa9073df53a11c284b6caae71431d30b5ca0eb28df0ae5",
+    origin = {
+      type = "http",
       url = "https://distfiles.ariadne.space/pkgconf/pkgconf-2.5.1.tar.xz",
-      hash = "md5:3291128c917fdb8fccd8c9e7784b643b",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

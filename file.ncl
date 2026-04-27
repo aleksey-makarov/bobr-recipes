@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let file_src = {
     name = "file-src-5.46",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "86dcad02a676f63c74767540161ae441ea16e77abaa1c50a6668853297a9f43b",
+    origin = {
+      type = "http",
       url = "https://astron.com/pub/file/file-5.46.tar.gz",
-      hash = "md5:459da2d4b534801e2e2861611d823864",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let lz4_src = {
     name = "lz4-src-1.10.0",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "657d5573d4decf4ab4527583c2fcc8da511d19555eec20de255070f108bf97b6",
+    origin = {
+      type = "http",
       url = "https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz",
-      hash = "md5:dead9f5f1966d9ae56e1e32761e4e675",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

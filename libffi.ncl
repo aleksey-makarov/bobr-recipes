@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let libffi_src = {
     name = "libffi-src-3.5.2",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "814f16b2755ecf7390072198fbbcce558aee5a655d63ced1537eb35c2ecc2232",
+    origin = {
+      type = "http",
       url = "https://github.com/libffi/libffi/releases/download/v3.5.2/libffi-3.5.2.tar.gz",
-      hash = "md5:92af9efad4ba398995abf44835c5d9e9",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

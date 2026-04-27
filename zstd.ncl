@@ -3,12 +3,14 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let zstd_src = {
     name = "zstd-src-1.5.7",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "21c1e49af79310cf1e8b44549cd3b174d83097a83797bf3c7b97e419fbb44aa0",
+    origin = {
+      type = "http",
       url = "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz",
-      hash = "md5:780fc1896922b1bc52a4e90980cdda48",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 

@@ -3,15 +3,17 @@ let recipe = import "recipe-lib.ncl" in
 fun pkgs =>
   let gcc_src = {
     name = "gcc-src-15.2.0",
-    tag = "Fetch",
-    config = {
+    tag = "Source",
+    object_hash = "5198aafc0a81a63a95c199fb60d4f6636872bc5d51af4e92a152223c880e6a29",
+    origin = {
+      type = "http",
       url = [
         "https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz",
         "https://mirrors.kernel.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz",
       ],
-      hash = "md5:b861b092bf1af683c46a8aa2e689a6fd",
+      unpack = true,
     },
-    inputs = {},
+    meta = {},
   }
   in
 
