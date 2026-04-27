@@ -15,7 +15,6 @@
 #   `mbuild` JSON request
 # - helper scripts such as `list-pkgs-attrs.sh` inspect the fields of
 #   `(mkPkgs [])` directly
-
 let base_modules = [
   import "host-image.ncl",
   import "iana-etc.ncl",

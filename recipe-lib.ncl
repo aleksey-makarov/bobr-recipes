@@ -38,9 +38,12 @@ let old_style_input_error = fun node_name =>
     fun shape =>
       std.record.get
         (
-          "recipe-lib.to_request: input '" ++ slot_name
-          ++ "' of node '" ++ node_name
-          ++ "' uses unsupported old-style " ++ shape
+          "recipe-lib.to_request: input '"
+          ++ slot_name
+          ++ "' of node '"
+          ++ node_name
+          ++ "' uses unsupported old-style "
+          ++ shape
         )
         {}
 in
@@ -134,7 +137,7 @@ in
           else if std.is_array input then
             old_style_input_error node_name slot_name "array"
           else
-        std.record.get input.name name_to_id
+            std.record.get input.name name_to_id
     in
     std.record.from_array (
       std.array.map
@@ -150,10 +153,12 @@ in
               }
               in
               source_base
-              & (if std.record.has_field "origin" node then
+              & (
+                if std.record.has_field "origin" node then
                   { origin = node.origin }
                 else
-                  {})
+                  {}
+              )
             else
               {
                 name = node.name,

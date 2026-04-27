@@ -15,7 +15,6 @@
 # - `paths.store = store_path`
 # - `paths.local = local_path` when provided
 # - `nodes = recipe.to_request (...)`
-
 let mkPkgs = import "pkgs.ncl" in
 let recipe = import "recipe-lib.ncl" in
 let RequestArgs = {
@@ -24,26 +23,25 @@ let RequestArgs = {
   local_path | String | optional,
 }
 in
-let request | RequestArgs -> Dyn =
-  fun args =>
-    let store_path = args.store_path in
-    let target_name = args.target_name in
-    let has_local_path = std.record.has_field "local_path" args in
-    let local_path = if has_local_path then std.record.get "local_path" args else "" in
-    let request_paths =
-      { store = store_path }
-      & (if has_local_path then { local = local_path } else {})
-    in
-    if !std.string.is_match "^/" store_path then
-      std.fail_with "request.ncl: store_path must be an absolute path"
-    else if has_local_path && !std.string.is_match "^/" local_path then
-      std.fail_with "request.ncl: local_path must be an absolute path"
-    else
-      let raw = mkPkgs [] in
-      {
-        paths = request_paths,
-        nodes = recipe.to_request (std.record.get target_name raw),
-      }
+let request | RequestArgs -> Dyn = fun args =>
+  let store_path = args.store_path in
+  let target_name = args.target_name in
+  let has_local_path = std.record.has_field "local_path" args in
+  let local_path = if has_local_path then std.record.get "local_path" args else "" in
+  let request_paths =
+    { store = store_path }
+    & (if has_local_path then { local = local_path } else {})
+  in
+  if !std.string.is_match "^/" store_path then
+    std.fail_with "request.ncl: store_path must be an absolute path"
+  else if has_local_path && !std.string.is_match "^/" local_path then
+    std.fail_with "request.ncl: local_path must be an absolute path"
+  else
+    let raw = mkPkgs [] in
+    {
+      paths = request_paths,
+      nodes = recipe.to_request (std.record.get target_name raw),
+    }
 in
 
 request
