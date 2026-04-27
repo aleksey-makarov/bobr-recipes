@@ -52,13 +52,6 @@ let InstallMeta = {
     | doc "Installation metadata attached to this output tree.",
 }
 in
-let ManifestDigestMeta = {
-  manifest_digest
-    | String
-    | Sha256Digest
-    | doc "Digest of the OCI manifest blob stored in the object.",
-}
-in
 let MetaRecord = { .. }
 in
 {
@@ -68,17 +61,12 @@ in
   install_meta
     | doc "Contract for installable filesystem tree metadata."
     = InstallMeta,
-  manifest_digest_meta
-    | doc "Contract for OCI image metadata carrying a manifest digest."
-    = ManifestDigestMeta,
   validate_meta
     | doc "Validate a metadata record against the current closed metadata shapes."
     = fun meta =>
       let checked = meta | MetaRecord in
       if std.record.has_field "install" checked then
         checked | InstallMeta
-      else if std.record.has_field "manifest_digest" checked then
-        checked | ManifestDigestMeta
       else
         checked | EmptyRecord,
 }

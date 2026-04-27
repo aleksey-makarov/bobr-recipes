@@ -2,7 +2,6 @@ let KnownTags = [
   "Source",
   "Text",
   "Tree",
-  "ContainerImage",
   "Autotools",
   "Makefile",
   "Meson",
@@ -86,10 +85,21 @@ let SourceHttpOrigin = {
     | doc "Optional explicit archive format override.",
 }
 in
+let SourceOciRegistryOrigin = {
+  type | std.contract.Equal "oci-registry",
+  image
+    | String
+    | doc "Pinned external image reference resolved through the OCI/Docker registry API.",
+  digest
+    | String
+    | doc "Pinned manifest or index digest to request from the registry.",
+}
+in
 let SourceOrigin =
   std.contract.any_of [
     SourcePathOrigin,
     SourceHttpOrigin,
+    SourceOciRegistryOrigin,
   ]
 in
 let SourceRecipe = {
@@ -201,15 +211,6 @@ let TreeConfig = {
     | doc "Manual install metadata for directory output only.",
 }
 in
-let ContainerImageConfig = {
-  image
-    | String
-    | doc "Pinned external image reference.",
-  digest
-    | String
-    | doc "Pinned digest for the external image reference.",
-}
-in
 let BinaryConfig = {
   steps
     | Array {
@@ -310,8 +311,6 @@ let TextInputs = {}
 in
 let TreeInputs = {}
 in
-let ContainerImageInputs = {}
-in
 let BinaryInputsShape = {
   image
     | Dyn
@@ -389,11 +388,6 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = validate_tree_config checked.config,
       }
-    else if checked.tag == "ContainerImage" then
-      checked
-      & {
-        config = checked.config | ContainerImageConfig,
-      }
     else if checked.tag == "Autotools" then
       checked
       & {
@@ -454,9 +448,6 @@ let rec ValidateRecipe = fun recipe =>
     in
     let validate_tree_inputs = fun inputs =>
       inputs | TreeInputs
-    in
-    let validate_container_image_inputs = fun inputs =>
-      inputs | ContainerImageInputs
     in
     let validate_autotools_inputs = fun inputs =>
       let checked = inputs | AutotoolsInputsShape in
@@ -523,12 +514,6 @@ let rec ValidateRecipe = fun recipe =>
         config = validate_tree_config checked.config,
         inputs = validate_tree_inputs checked.inputs,
       }
-    else if checked.tag == "ContainerImage" then
-      checked
-      & {
-        config = checked.config | ContainerImageConfig,
-        inputs = validate_container_image_inputs checked.inputs,
-      }
     else if checked.tag == "Autotools" then
       checked
       & {
@@ -589,9 +574,6 @@ in
   source_recipe
     | doc "Structural contract for `Source` recipe nodes."
     = SourceRecipe,
-  container_image_config
-    | doc "Config contract for `ContainerImage` recipe nodes."
-    = ContainerImageConfig,
   autotools_config
     | doc "Config contract for synthetic `Autotools` recipe nodes."
     = AutotoolsConfig,
