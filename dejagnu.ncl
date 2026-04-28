@@ -7,7 +7,10 @@ fun pkgs =>
     object_hash = "703e572179478abc82c20ad18c6aa98f84cb864a2153f96e68361e4bf9680bf8",
     origin = {
       type = "http",
-      url = "https://ftp.gnu.org/gnu/dejagnu/dejagnu-1.6.3.tar.gz",
+      url = [
+        "https://ftp.gnu.org/gnu/dejagnu/dejagnu-1.6.3.tar.gz",
+        "https://mirrors.kernel.org/gnu/dejagnu/dejagnu-1.6.3.tar.gz",
+      ],
       unpack = true,
     },
     meta = {},
