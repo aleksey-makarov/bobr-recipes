@@ -8,6 +8,7 @@ let KnownTags = [
   "PerlModule",
   "Binary",
   "Ext4Rootfs",
+  "Rootfs",
   "Image",
 ]
 in
@@ -307,6 +308,9 @@ let Ext4RootfsConfig = {
     | doc "Optional ext4 volume label.",
 }
 in
+let RootfsConfig =
+  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
+in
 let TextInputs = {}
 in
 let TreeInputs = {}
@@ -327,6 +331,8 @@ let ImageInputsShape = {
 }
 in
 let Ext4RootfsInputsShape = { .. }
+in
+let RootfsInputsShape = { .. }
 in
 let AutotoolsInputsShape = {
   image | Dyn,
@@ -418,6 +424,11 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | Ext4RootfsConfig,
       }
+    else if checked.tag == "Rootfs" then
+      checked
+      & {
+        config = checked.config | RootfsConfig,
+      }
     else
       checked
       & {
@@ -502,6 +513,12 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_rootfs_inputs = fun inputs =>
+      let checked = inputs | RootfsInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     if checked.tag == "Text" then
       checked
       & {
@@ -550,6 +567,12 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | Ext4RootfsConfig,
         inputs = validate_ext4_rootfs_inputs checked.inputs,
       }
+    else if checked.tag == "Rootfs" then
+      checked
+      & {
+        config = checked.config | RootfsConfig,
+        inputs = validate_rootfs_inputs checked.inputs,
+      }
     else
       checked
       & {
@@ -592,6 +615,9 @@ in
   ext4_rootfs_config
     | doc "Config contract for `Ext4Rootfs` recipe nodes."
     = Ext4RootfsConfig,
+  rootfs_config
+    | doc "Config contract for `Rootfs` recipe nodes."
+    = RootfsConfig,
   image_config
     | doc "Config contract for `Image` recipe nodes."
     = ImageConfig,
