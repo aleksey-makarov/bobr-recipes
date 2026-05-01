@@ -3,10 +3,12 @@ let KnownTags = [
   "Text",
   "Tree",
   "Autotools",
+  "AutotoolsContainer",
   "Makefile",
   "Meson",
   "PerlModule",
   "Binary",
+  "Container",
   "Ext4Rootfs",
   "Rootfs",
   "Image",
@@ -257,6 +259,8 @@ let AutotoolsConfig = {
   install | InstallMeta | optional,
 }
 in
+let AutotoolsContainerConfig = AutotoolsConfig
+in
 let MakefileConfig = {
   make_args | Array String | optional,
   env | Dyn | optional,
@@ -322,6 +326,15 @@ let BinaryInputsShape = {
   ..
 }
 in
+let ContainerConfig = BinaryConfig
+in
+let ContainerInputsShape = {
+  rootfs
+    | Dyn
+    | doc "Single recipe node for the rootfs directory input.",
+  ..
+}
+in
 let ImageInputsShape = {
   base
     | Dyn
@@ -336,6 +349,12 @@ let RootfsInputsShape = { .. }
 in
 let AutotoolsInputsShape = {
   image | Dyn,
+  source | Dyn,
+  ..
+}
+in
+let AutotoolsContainerInputsShape = {
+  rootfs | Dyn,
   source | Dyn,
   ..
 }
@@ -399,6 +418,11 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | AutotoolsConfig,
       }
+    else if checked.tag == "AutotoolsContainer" then
+      checked
+      & {
+        config = checked.config | AutotoolsContainerConfig,
+      }
     else if checked.tag == "Makefile" then
       checked
       & {
@@ -418,6 +442,11 @@ let ValidateRecipeShallow = fun recipe =>
       checked
       & {
         config = checked.config | BinaryConfig,
+      }
+    else if checked.tag == "Container" then
+      checked
+      & {
+        config = checked.config | ContainerConfig,
       }
     else if checked.tag == "Ext4Rootfs" then
       checked
@@ -466,6 +495,12 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_autotools_container_inputs = fun inputs =>
+      let checked = inputs | AutotoolsContainerInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_makefile_inputs = fun inputs =>
       let checked = inputs | MakefileInputsShape in
       std.record.map
@@ -497,6 +532,12 @@ let rec ValidateRecipe = fun recipe =>
     in
     let validate_binary_inputs = fun inputs =>
       let checked = inputs | BinaryInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_container_inputs = fun inputs =>
+      let checked = inputs | ContainerInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -537,6 +578,12 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | AutotoolsConfig,
         inputs = validate_autotools_inputs checked.inputs,
       }
+    else if checked.tag == "AutotoolsContainer" then
+      checked
+      & {
+        config = checked.config | AutotoolsContainerConfig,
+        inputs = validate_autotools_container_inputs checked.inputs,
+      }
     else if checked.tag == "Makefile" then
       checked
       & {
@@ -560,6 +607,12 @@ let rec ValidateRecipe = fun recipe =>
       & {
         config = checked.config | BinaryConfig,
         inputs = validate_binary_inputs checked.inputs,
+      }
+    else if checked.tag == "Container" then
+      checked
+      & {
+        config = checked.config | ContainerConfig,
+        inputs = validate_container_inputs checked.inputs,
       }
     else if checked.tag == "Ext4Rootfs" then
       checked
@@ -600,6 +653,9 @@ in
   autotools_config
     | doc "Config contract for synthetic `Autotools` recipe nodes."
     = AutotoolsConfig,
+  autotools_container_config
+    | doc "Config contract for synthetic `AutotoolsContainer` recipe nodes."
+    = AutotoolsContainerConfig,
   makefile_config
     | doc "Config contract for synthetic `Makefile` recipe nodes."
     = MakefileConfig,
@@ -612,6 +668,9 @@ in
   binary_config
     | doc "Config contract for `Binary` recipe nodes."
     = BinaryConfig,
+  container_config
+    | doc "Config contract for `Container` recipe nodes."
+    = ContainerConfig,
   ext4_rootfs_config
     | doc "Config contract for `Ext4Rootfs` recipe nodes."
     = Ext4RootfsConfig,

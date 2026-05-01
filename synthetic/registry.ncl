@@ -78,6 +78,7 @@ let normalize_hook_steps = fun node_config =>
         []
 in
 let lower_autotools_node = fun node =>
+  fun lowered_tag =>
   let node_config = node.config in
   let source_root_expr = synthetic_source_root_expr node_config in
   let pre_configure_steps =
@@ -128,7 +129,7 @@ let lower_autotools_node = fun node =>
   in
   {
     name = node.name,
-    tag = "Binary",
+    tag = lowered_tag,
     config = (
       {
         steps =
@@ -173,6 +174,8 @@ let lower_autotools_node = fun node =>
         node.inputs,
   }
 in
+let lower_binary_autotools_node = fun node => lower_autotools_node node "Binary" in
+let lower_container_autotools_node = fun node => lower_autotools_node node "Container" in
 let lower_makefile_node = fun node =>
   let node_config = node.config in
   let source_root_expr = synthetic_source_root_expr node_config in
@@ -419,7 +422,8 @@ let lower_perl_module_node = fun node =>
   }
 in
 {
-  "Autotools" = lower_autotools_node,
+  "Autotools" = lower_binary_autotools_node,
+  "AutotoolsContainer" = lower_container_autotools_node,
   "Makefile" = lower_makefile_node,
   "Meson" = lower_meson_node,
   "PerlModule" = lower_perl_module_node,
