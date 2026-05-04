@@ -30,7 +30,14 @@ if [ ! -f "${kernel_path}" ]; then
   exit 1
 fi
 
+if [ ! -e /dev/kvm ]; then
+  echo "/dev/kvm is not available; this smoke check requires KVM acceleration" >&2
+  exit 1
+fi
+
 exec "${qemu_bin}" \
+  -enable-kvm \
+  -cpu host \
   -m "${mem_mb}" \
   -smp "${smp_count}" \
   -kernel "${kernel_path}" \
