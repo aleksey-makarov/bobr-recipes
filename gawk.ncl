@@ -33,7 +33,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.host_image,
+      image = pkgs.buildpack_deps_image,
       source = gawk_src,
     },
   }

@@ -24,7 +24,7 @@ fun pkgs =>
       configure_args = ["--disable-nls", "--disable-perl-regexp"],
     },
     inputs = {
-      image = pkgs.host_image,
+      image = pkgs.buildpack_deps_image,
       source = grep_src,
     },
   }

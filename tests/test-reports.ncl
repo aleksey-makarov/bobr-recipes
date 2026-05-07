@@ -28,7 +28,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.host_image,
+      image = pkgs.buildpack_deps_image,
       script = test_reports_script_source,
       report000 = pkgs.test_system_image_0,
       report001 = pkgs.test_system_image_1,

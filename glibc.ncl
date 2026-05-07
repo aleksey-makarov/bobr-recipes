@@ -39,7 +39,7 @@ fun pkgs =>
         mode = "layered",
       },
     inputs = {
-      base = pkgs.host_image,
+      base = pkgs.buildpack_deps_image,
       in000 = pkgs.gawk_gen1,
       in001 = pkgs.bison_gen1,
     },

@@ -73,7 +73,7 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      image = pkgs.host_image,
+      image = pkgs.buildpack_deps_image,
       script = buildscript_linux_headers,
       source = linux_src,
     },

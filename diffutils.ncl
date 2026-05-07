@@ -25,7 +25,7 @@ fun pkgs =>
       env = { gl_cv_func_strcasecmp_works = "y" },
     },
     inputs = {
-      image = pkgs.host_image,
+      image = pkgs.buildpack_deps_image,
       source = diffutils_src,
     },
   }

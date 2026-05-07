@@ -45,7 +45,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.host_image,
+      image = pkgs.buildpack_deps_image,
       source = gcc_src,
       gmp = pkgs.gmp_src,
       mpfr = pkgs.mpfr_src,

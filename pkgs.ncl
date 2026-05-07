@@ -16,7 +16,7 @@
 # - helper scripts such as `list-pkgs-attrs.sh` inspect the fields of
 #   `(mkPkgs [])` directly
 let base_modules = [
-  import "host-image.ncl",
+  import "images.ncl",
   import "iana-etc.ncl",
   import "binutils.ncl",
   import "bzip2.ncl",
