@@ -19,10 +19,10 @@ fun pkgs =>
 
   let bison_gen1 = {
     name = "bison-gen1-3.8.2",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {},
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = bison_src,
     },
   }

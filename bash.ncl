@@ -19,7 +19,7 @@ fun pkgs =>
 
   let bash_gen1 = {
     name = "bash-gen1-5.3",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--without-bash-malloc",
@@ -37,7 +37,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = bash_src,
     },
   }

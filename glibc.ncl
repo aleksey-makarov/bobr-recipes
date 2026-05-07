@@ -46,9 +46,19 @@ fun pkgs =>
   }
   in
 
+  let glibc_bootstrap_rootfs = {
+    name = "glibc-bootstrap-rootfs",
+    tag = "OciExtract",
+    config = {},
+    inputs = {
+      image = glibc_bootstrap_image,
+    },
+  }
+  in
+
   let glibc_gen1 = {
     name = "glibc-gen1-2.42",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "libc_cv_slibdir=/usr/lib64",
@@ -79,7 +89,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = glibc_bootstrap_image,
+      rootfs = glibc_bootstrap_rootfs,
       source = glibc_src,
       fhs_patch = glibc_fhs_patch_2_42,
     },
@@ -132,6 +142,7 @@ fun pkgs =>
     include [
       glibc_src,
       glibc_bootstrap_image,
+      glibc_bootstrap_rootfs,
       glibc_gen1,
       glibc,
     ],

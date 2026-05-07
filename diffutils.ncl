@@ -19,13 +19,13 @@ fun pkgs =>
 
   let diffutils_gen1 = {
     name = "diffutils-gen1-3.12",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = ["--disable-nls"],
       env = { gl_cv_func_strcasecmp_works = "y" },
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = diffutils_src,
     },
   }

@@ -19,10 +19,10 @@ fun pkgs =>
 
   let m4_gen1 = {
     name = "m4-gen1-1.4.20",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {},
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = m4_src,
     },
   }

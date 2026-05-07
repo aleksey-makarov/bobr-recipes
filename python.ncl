@@ -164,7 +164,7 @@ fun pkgs =>
 
   let python_gen1 = {
     name = "python-gen1-3.13.7",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       in-tree = true,
       pre_configure = {
@@ -212,7 +212,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = python_src,
     },
   }

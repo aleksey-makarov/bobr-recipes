@@ -19,12 +19,12 @@ fun pkgs =>
 
   let make_gen1 = {
     name = "make-gen1-4.4.1",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = ["--disable-nls"],
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = make_src,
     },
   }

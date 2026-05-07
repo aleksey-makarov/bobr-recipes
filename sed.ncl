@@ -19,12 +19,12 @@ fun pkgs =>
 
   let sed_gen1 = {
     name = "sed-gen1-4.9",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = ["--disable-nls", "--without-selinux"],
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = sed_src,
     },
   }

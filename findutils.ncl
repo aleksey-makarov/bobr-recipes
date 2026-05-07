@@ -19,7 +19,7 @@ fun pkgs =>
 
   let findutils_gen1 = {
     name = "findutils-gen1-4.10.0",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-nls",
@@ -28,7 +28,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = findutils_src,
     },
   }

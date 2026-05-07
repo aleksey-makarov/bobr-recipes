@@ -25,7 +25,7 @@ fun pkgs =>
 
   let binutils_gen1 = {
     name = gen1_name,
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-nls",
@@ -37,7 +37,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = binutils_src,
     },
   }

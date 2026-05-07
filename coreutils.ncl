@@ -19,7 +19,7 @@ fun pkgs =>
 
   let coreutils_gen1 = {
     name = "coreutils-gen1-9.7",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-nls",
@@ -48,7 +48,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = coreutils_src,
     },
   }

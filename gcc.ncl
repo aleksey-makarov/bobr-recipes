@@ -19,7 +19,7 @@ fun pkgs =>
 
   let gcc_gen1 = {
     name = "gcc-gen1-15.2.0",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       pre_configure = {
         name = "link_gcc_prereqs",
@@ -45,7 +45,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = gcc_src,
       gmp = pkgs.gmp_src,
       mpfr = pkgs.mpfr_src,

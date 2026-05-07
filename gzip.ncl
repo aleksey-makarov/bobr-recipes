@@ -19,12 +19,12 @@ fun pkgs =>
 
   let gzip_gen1 = {
     name = "gzip-gen1-1.14",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = ["--disable-nls"],
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       source = gzip_src,
     },
   }

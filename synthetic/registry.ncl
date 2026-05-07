@@ -176,6 +176,7 @@ let lower_autotools_node = fun node =>
 in
 let lower_binary_autotools_node = fun node => lower_autotools_node node "Binary" in
 let lower_container_autotools_node = fun node => lower_autotools_node node "Container" in
+let lower_sandbox_autotools_node = fun node => lower_autotools_node node "Sandbox" in
 let lower_makefile_node = fun node =>
   let node_config = node.config in
   let source_root_expr = synthetic_source_root_expr node_config in
@@ -424,6 +425,7 @@ in
 {
   "Autotools" = lower_binary_autotools_node,
   "AutotoolsContainer" = lower_container_autotools_node,
+  "AutotoolsSandbox" = lower_sandbox_autotools_node,
   "Makefile" = lower_makefile_node,
   "Meson" = lower_meson_node,
   "PerlModule" = lower_perl_module_node,
