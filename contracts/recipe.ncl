@@ -12,6 +12,7 @@ let KnownTags = [
   "Ext4Rootfs",
   "Rootfs",
   "Image",
+  "OciExtract",
 ]
 in
 let KnownTag =
@@ -315,6 +316,9 @@ in
 let RootfsConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
+let OciExtractConfig =
+  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
+in
 let TextInputs = {}
 in
 let TreeInputs = {}
@@ -341,6 +345,12 @@ let ImageInputsShape = {
     | optional
     | doc "Optional base image recipe node.",
   ..
+}
+in
+let OciExtractInputsShape = {
+  image
+    | Dyn
+    | doc "Single OCI image layout input to extract into a filesystem tree.",
 }
 in
 let Ext4RootfsInputsShape = { .. }
@@ -458,6 +468,11 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | RootfsConfig,
       }
+    else if checked.tag == "OciExtract" then
+      checked
+      & {
+        config = checked.config | OciExtractConfig,
+      }
     else
       checked
       & {
@@ -548,6 +563,12 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_oci_extract_inputs = fun inputs =>
+      let checked = inputs | OciExtractInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_ext4_rootfs_inputs = fun inputs =>
       let checked = inputs | Ext4RootfsInputsShape in
       std.record.map
@@ -626,6 +647,12 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | RootfsConfig,
         inputs = validate_rootfs_inputs checked.inputs,
       }
+    else if checked.tag == "OciExtract" then
+      checked
+      & {
+        config = checked.config | OciExtractConfig,
+        inputs = validate_oci_extract_inputs checked.inputs,
+      }
     else
       checked
       & {
@@ -680,6 +707,9 @@ in
   image_config
     | doc "Config contract for `Image` recipe nodes."
     = ImageConfig,
+  oci_extract_config
+    | doc "Config contract for `OciExtract` recipe nodes."
+    = OciExtractConfig,
   shallow_recipe
     | doc "Validate one recipe node shallowly: full top-level shape and tag-specific config, but leave `inputs` as `Dyn`."
     =

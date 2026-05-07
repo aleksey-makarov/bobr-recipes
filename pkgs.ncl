@@ -17,6 +17,7 @@
 #   `(mkPkgs [])` directly
 let base_modules = [
   import "images.ncl",
+  import "image-rootfs.ncl",
   import "iana-etc.ncl",
   import "binutils.ncl",
   import "bzip2.ncl",
