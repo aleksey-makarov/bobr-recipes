@@ -95,6 +95,7 @@ let base_modules = [
   import "e2fsprogs.ncl",
   import "tests/test-image.ncl",
   import "tests/test-reports.ncl",
+  import "tests/temp-tree.ncl",
   import "vim.ncl",
 ]
 in
