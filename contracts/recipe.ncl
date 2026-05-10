@@ -2,13 +2,16 @@ let KnownTags = [
   "Source",
   "Text",
   "Tree",
+  "TreeMerge",
   "Autotools",
   "AutotoolsContainer",
+  "AutotoolsSandbox",
   "Makefile",
   "Meson",
   "PerlModule",
   "Binary",
   "Container",
+  "Sandbox",
   "Ext4Rootfs",
   "Rootfs",
   "Image",
@@ -262,6 +265,16 @@ let AutotoolsConfig = {
 in
 let AutotoolsContainerConfig = AutotoolsConfig
 in
+let AutotoolsSandboxConfig = {
+  configure_args | Array String | optional,
+  make_args | Array String | optional,
+  env | Dyn | optional,
+  "in-tree" | Bool | optional,
+  source_subdir | String | optional,
+  pre_configure | AutotoolsHook | optional,
+  post_install | AutotoolsHook | optional,
+}
+in
 let MakefileConfig = {
   make_args | Array String | optional,
   env | Dyn | optional,
@@ -316,6 +329,9 @@ in
 let RootfsConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
+let TreeMergeConfig =
+  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
+in
 let OciExtractConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
@@ -331,6 +347,22 @@ let BinaryInputsShape = {
 }
 in
 let ContainerConfig = BinaryConfig
+in
+let SandboxConfig = {
+  steps
+    | Array {
+      name | String,
+      run_as | std.contract.from_predicate (fun value => std.array.elem value ["build-user", "root"]),
+      cwd | String,
+      argv | Array String,
+      env | Dyn | optional,
+    }
+    | doc "Execution plan steps for the generic Sandbox executor.",
+  script_config
+    | Dyn
+    | optional
+    | doc "Optional script configuration payload passed through to the build script.",
+}
 in
 let ContainerInputsShape = {
   rootfs
@@ -356,6 +388,8 @@ in
 let Ext4RootfsInputsShape = { .. }
 in
 let RootfsInputsShape = { .. }
+in
+let TreeMergeInputsShape = { .. }
 in
 let AutotoolsInputsShape = {
   image | Dyn,
@@ -433,6 +467,11 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | AutotoolsContainerConfig,
       }
+    else if checked.tag == "AutotoolsSandbox" then
+      checked
+      & {
+        config = checked.config | AutotoolsSandboxConfig,
+      }
     else if checked.tag == "Makefile" then
       checked
       & {
@@ -458,6 +497,11 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | ContainerConfig,
       }
+    else if checked.tag == "Sandbox" then
+      checked
+      & {
+        config = checked.config | SandboxConfig,
+      }
     else if checked.tag == "Ext4Rootfs" then
       checked
       & {
@@ -467,6 +511,11 @@ let ValidateRecipeShallow = fun recipe =>
       checked
       & {
         config = checked.config | RootfsConfig,
+      }
+    else if checked.tag == "TreeMerge" then
+      checked
+      & {
+        config = checked.config | TreeMergeConfig,
       }
     else if checked.tag == "OciExtract" then
       checked
@@ -511,6 +560,12 @@ let rec ValidateRecipe = fun recipe =>
         checked
     in
     let validate_autotools_container_inputs = fun inputs =>
+      let checked = inputs | AutotoolsContainerInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_autotools_sandbox_inputs = fun inputs =>
       let checked = inputs | AutotoolsContainerInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
@@ -581,6 +636,12 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_tree_merge_inputs = fun inputs =>
+      let checked = inputs | TreeMergeInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     if checked.tag == "Text" then
       checked
       & {
@@ -604,6 +665,12 @@ let rec ValidateRecipe = fun recipe =>
       & {
         config = checked.config | AutotoolsContainerConfig,
         inputs = validate_autotools_container_inputs checked.inputs,
+      }
+    else if checked.tag == "AutotoolsSandbox" then
+      checked
+      & {
+        config = checked.config | AutotoolsSandboxConfig,
+        inputs = validate_autotools_sandbox_inputs checked.inputs,
       }
     else if checked.tag == "Makefile" then
       checked
@@ -635,6 +702,12 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | ContainerConfig,
         inputs = validate_container_inputs checked.inputs,
       }
+    else if checked.tag == "Sandbox" then
+      checked
+      & {
+        config = checked.config | SandboxConfig,
+        inputs = validate_container_inputs checked.inputs,
+      }
     else if checked.tag == "Ext4Rootfs" then
       checked
       & {
@@ -646,6 +719,12 @@ let rec ValidateRecipe = fun recipe =>
       & {
         config = checked.config | RootfsConfig,
         inputs = validate_rootfs_inputs checked.inputs,
+      }
+    else if checked.tag == "TreeMerge" then
+      checked
+      & {
+        config = checked.config | TreeMergeConfig,
+        inputs = validate_tree_merge_inputs checked.inputs,
       }
     else if checked.tag == "OciExtract" then
       checked
@@ -683,6 +762,9 @@ in
   autotools_container_config
     | doc "Config contract for synthetic `AutotoolsContainer` recipe nodes."
     = AutotoolsContainerConfig,
+  autotools_sandbox_config
+    | doc "Config contract for synthetic `AutotoolsSandbox` recipe nodes."
+    = AutotoolsSandboxConfig,
   makefile_config
     | doc "Config contract for synthetic `Makefile` recipe nodes."
     = MakefileConfig,
@@ -698,12 +780,18 @@ in
   container_config
     | doc "Config contract for `Container` recipe nodes."
     = ContainerConfig,
+  sandbox_config
+    | doc "Config contract for `Sandbox` recipe nodes."
+    = SandboxConfig,
   ext4_rootfs_config
     | doc "Config contract for `Ext4Rootfs` recipe nodes."
     = Ext4RootfsConfig,
   rootfs_config
     | doc "Config contract for `Rootfs` recipe nodes."
     = RootfsConfig,
+  tree_merge_config
+    | doc "Config contract for `TreeMerge` recipe nodes."
+    = TreeMergeConfig,
   image_config
     | doc "Config contract for `Image` recipe nodes."
     = ImageConfig,

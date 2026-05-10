@@ -161,7 +161,7 @@ let lower_autotools_node = fun node =>
         script_config = lowered_script_config,
       }
       & (
-        if std.record.has_field "install" node_config then
+        if lowered_tag != "Sandbox" && std.record.has_field "install" node_config then
           { install = node_config.install }
         else
           {}
