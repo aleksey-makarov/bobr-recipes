@@ -36,7 +36,7 @@ fun pkgs =>
 
   let system_rootfs_0 = {
     name = "system-rootfs-0",
-    tag = "Rootfs",
+    tag = "TreeMerge",
     config = {},
     inputs =
       recipe.numbered_inputs [

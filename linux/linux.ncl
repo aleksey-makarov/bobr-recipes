@@ -36,7 +36,7 @@ fun pkgs =>
 
   let linux_headers = {
     name = headers_name,
-    tag = "Binary",
+    tag = "Sandbox",
     config = {
       steps = [
         {
@@ -73,7 +73,7 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.buildpack_deps_rootfs,
       script = buildscript_linux_headers,
       source = linux_src,
     },
