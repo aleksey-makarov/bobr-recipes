@@ -30,28 +30,14 @@ fun pkgs =>
   }
   in
 
-  let glibc_bootstrap_image = {
-    name = "glibc-bootstrap-image",
-    tag = "Image",
-    config =
-      { ref_name | default = "glibc-bootstrap-image" }
-      & {
-        mode = "layered",
-      },
-    inputs = {
-      base = pkgs.buildpack_deps_image,
-      in000 = pkgs.gawk_gen1,
-      in001 = pkgs.bison_gen1,
-    },
-  }
-  in
-
   let glibc_bootstrap_rootfs = {
     name = "glibc-bootstrap-rootfs",
-    tag = "OciExtract",
+    tag = "TreeMerge",
     config = {},
     inputs = {
-      image = glibc_bootstrap_image,
+      base = pkgs.buildpack_deps_rootfs,
+      gawk = pkgs.gawk_gen1,
+      bison = pkgs.bison_gen1,
     },
   }
   in
@@ -141,7 +127,6 @@ fun pkgs =>
   {
     include [
       glibc_src,
-      glibc_bootstrap_image,
       glibc_bootstrap_rootfs,
       glibc_gen1,
       glibc,

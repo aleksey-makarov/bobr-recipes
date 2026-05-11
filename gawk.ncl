@@ -31,6 +31,22 @@ fun pkgs =>
           "sed -i 's/extras//' Makefile.in",
         ],
       },
+      post_install = {
+        name = "remove_awk_symlink",
+        run_as = "root",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            if [ -L "@{out}/usr/bin/awk" ]; then
+              rm -v "@{out}/usr/bin/awk"
+            elif [ -e "@{out}/usr/bin/awk" ]; then
+              echo "refusing to remove non-symlink @{out}/usr/bin/awk" >&2
+              exit 1
+            fi
+          "%,
+        ],
+      },
     },
     inputs = {
       rootfs = pkgs.buildpack_deps_rootfs,
