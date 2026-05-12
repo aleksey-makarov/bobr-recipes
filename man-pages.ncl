@@ -2,11 +2,10 @@ fun pkgs =>
   let man_pages_src = {
     name = "man-pages-src-6.15",
     tag = "Source",
-    object_hash = "c8baa2b13275f7652cef9b1ead3a0ab551cae69f51f964451f7fc2dd0400b6a9",
+    object_hash = "f81bc7e91955f916841db24ca2fb355c800ba92d5f891404241a31bf861936aa",
     origin = {
       type = "http",
       url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-6.15.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

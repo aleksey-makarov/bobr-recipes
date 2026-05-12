@@ -4,14 +4,13 @@ fun pkgs =>
   let patch_src = {
     name = "patch-src-2.8",
     tag = "Source",
-    object_hash = "c4fa1fcb69e29607159a469efebda0757341028d4f68e70d3540110425788e9a",
+    object_hash = "68437bdee29f8ff21172329eddfc21165cf931c41261faaaba78761dec10cda9",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz",
         "https://mirrors.kernel.org/gnu/patch/patch-2.8.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

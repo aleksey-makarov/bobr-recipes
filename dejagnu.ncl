@@ -4,14 +4,13 @@ fun pkgs =>
   let dejagnu_src = {
     name = "dejagnu-src-1.6.3",
     tag = "Source",
-    object_hash = "703e572179478abc82c20ad18c6aa98f84cb864a2153f96e68361e4bf9680bf8",
+    object_hash = "18edf6477404a75c1ea7e0e76910d9c88c9adb52d8eb82c6a5d5f79bb69fb0c9",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/dejagnu/dejagnu-1.6.3.tar.gz",
         "https://mirrors.kernel.org/gnu/dejagnu/dejagnu-1.6.3.tar.gz",
       ],
-      unpack = true,
     },
     meta = {},
   }

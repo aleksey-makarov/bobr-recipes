@@ -85,7 +85,7 @@ let SourceHttpOrigin = {
   unpack
     | Bool
     | optional
-    | doc "Whether the downloaded payload should be unpacked into a directory object.",
+    | doc "Whether the downloaded payload should be unpacked into a directory object; defaults to false.",
   archive_format
     | ArchiveFormat
     | optional

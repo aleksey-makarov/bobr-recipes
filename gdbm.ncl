@@ -4,14 +4,13 @@ fun pkgs =>
   let gdbm_src = {
     name = "gdbm-src-1.26",
     tag = "Source",
-    object_hash = "633737ebb34cfe68bf9ffcd84050ba454612b421115c57803a23ed7742719914",
+    object_hash = "a4085e565a62f920d72da4fddb21366a05ca499bb504c37712895352bf48259a",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/gdbm/gdbm-1.26.tar.gz",
         "https://mirrors.kernel.org/gnu/gdbm/gdbm-1.26.tar.gz",
       ],
-      unpack = true,
     },
     meta = {},
   }

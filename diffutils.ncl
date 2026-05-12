@@ -4,14 +4,13 @@ fun pkgs =>
   let diffutils_src = {
     name = "diffutils-src-3.12",
     tag = "Source",
-    object_hash = "b25f86cc6065a6fa173176105f4fb5999514d05ba1672ce56fe431944549a53a",
+    object_hash = "f4f22c6a73db50f41e0254ce32e15fb112dfbe99616eb63364196f958a6f9e3e",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/diffutils/diffutils-3.12.tar.xz",
         "https://mirrors.kernel.org/gnu/diffutils/diffutils-3.12.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

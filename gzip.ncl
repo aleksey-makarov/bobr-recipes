@@ -4,14 +4,13 @@ fun pkgs =>
   let gzip_src = {
     name = "gzip-src-1.14",
     tag = "Source",
-    object_hash = "a009c1099d792fae2a9854734d7297a5d50f86c184cf7e81c5fdc90b3d31038c",
+    object_hash = "8c091a9bc716af4d0c6eac50d3466bd6cafa7534099368dc5c74d7b2cced3fb6",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/gzip/gzip-1.14.tar.xz",
         "https://mirrors.kernel.org/gnu/gzip/gzip-1.14.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

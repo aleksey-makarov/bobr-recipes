@@ -4,11 +4,10 @@ fun pkgs =>
   let xml_parser_src = {
     name = "xml-parser-src-2.47",
     tag = "Source",
-    object_hash = "961203edf594304f0b6c5b547c7bf7fd0b8a7c6a2fd3647e79b837dcb912d6dc",
+    object_hash = "9c0675229f11d6c28c8e57c26de8b57a42f24d5b886a33f1ebb8bbda4fda2e53",
     origin = {
       type = "http",
       url = "https://cpan.metacpan.org/authors/id/T/TO/TODDR/XML-Parser-2.47.tar.gz",
-      unpack = true,
     },
     meta = {},
   }

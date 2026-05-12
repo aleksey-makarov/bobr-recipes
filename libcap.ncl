@@ -4,11 +4,10 @@ fun pkgs =>
   let libcap_src = {
     name = "libcap-src-2.76",
     tag = "Source",
-    object_hash = "4408f342e49af7bbd7156d75ee6f1c2940beca650122b8300c456f6d51a32259",
+    object_hash = "0b4ab42297fcc500b2f6bf7e84541f5efbe5bb2160343733bd153cb8ecbca4c5",
     origin = {
       type = "http",
       url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.76.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

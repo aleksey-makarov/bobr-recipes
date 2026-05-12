@@ -4,11 +4,10 @@ fun pkgs =>
   let kmod_src = {
     name = "kmod-src-34.2",
     tag = "Source",
-    object_hash = "8ff0492fbf5fc62aa6d89c75960cf81f7efc21b95d7b3c8a5ffeb5de5f4f6a9d",
+    object_hash = "fed8dc21c764926311375101d5d1c008c3cad651302f8d7d93470c33c3ddf9ae",
     origin = {
       type = "http",
       url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

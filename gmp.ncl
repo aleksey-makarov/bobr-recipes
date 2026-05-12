@@ -4,14 +4,13 @@ fun pkgs =>
   let gmp_src = {
     name = "gmp-src-6.3.0",
     tag = "Source",
-    object_hash = "6296dabb91962e057b9dfe2de2ebd7fea07b3b4f02381e37544cef0ffa36a3eb",
+    object_hash = "e86ea25598752f10e3e24ee9480f4043bf5a207e900a2c49a952450f620b7d51",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz",
         "https://mirrors.kernel.org/gnu/gmp/gmp-6.3.0.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

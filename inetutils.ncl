@@ -4,14 +4,13 @@ fun pkgs =>
   let inetutils_src = {
     name = "inetutils-src-2.6",
     tag = "Source",
-    object_hash = "c1f6873149c20580acce0e08b6840bef2f0340eab274541477aca7c548efd4cb",
+    object_hash = "2cd7031b5aec0a25df16cb66eeaf3a8c36693cbc086f9088cdfadbcb3822817f",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/inetutils/inetutils-2.6.tar.xz",
         "https://mirrors.kernel.org/gnu/inetutils/inetutils-2.6.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

@@ -4,11 +4,10 @@ fun pkgs =>
   let bzip2_src = {
     name = "bzip2-src-1.0.8",
     tag = "Source",
-    object_hash = "737219fba6343796a0f2c2186cf2e3f2d5185fd5468e802628699a39f82b0a55",
+    object_hash = "f382e89751370f5f2989ca9c0ad93a8cdf2309512b6d5387df7e57d81a6c7e13",
     origin = {
       type = "http",
       url = "https://www.sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
-      unpack = true,
     },
     meta = {},
   }
@@ -21,7 +20,6 @@ fun pkgs =>
     origin = {
       type = "http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/bzip2-1.0.8-install_docs-1.patch",
-      unpack = false,
     },
     meta = {},
   }

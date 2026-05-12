@@ -4,11 +4,10 @@ fun pkgs =>
   let iproute2_src = {
     name = "iproute2-src-6.16.0",
     tag = "Source",
-    object_hash = "1741ed1137f11d7218abaa176338c50af6abd6e0876841bbdcc62fe960aaabd2",
+    object_hash = "5f574f0c0c90971c342eecf5751cd7cdb61494bef06aea53fd8ebc8f459bef18",
     origin = {
       type = "http",
       url = "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-6.16.0.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

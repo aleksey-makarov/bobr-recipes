@@ -4,14 +4,13 @@ fun pkgs =>
   let texinfo_src = {
     name = "texinfo-src-7.2",
     tag = "Source",
-    object_hash = "bf7334808d0c4c23a617aa9d92fc6958bad23d092a354c00a5b2537920ccecf7",
+    object_hash = "1b62d2456d5314709f83c6e6cca7832eb723956369e51b6e1dd31bfa330d20ac",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/texinfo/texinfo-7.2.tar.xz",
         "https://mirrors.kernel.org/gnu/texinfo/texinfo-7.2.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

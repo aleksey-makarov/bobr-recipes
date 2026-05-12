@@ -4,11 +4,10 @@ fun pkgs =>
   let dbus_src = {
     name = "dbus-src-1.16.2",
     tag = "Source",
-    object_hash = "35855b72dc24b6a9afa65e9695dd7a00a12aab0ed2511096afc6779e1891a8c4",
+    object_hash = "08aec5f9691e5835c19df328d7962b2fc98b770addbf816b2a6804190f2b6818",
     origin = {
       type = "http",
       url = "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

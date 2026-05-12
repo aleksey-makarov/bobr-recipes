@@ -4,11 +4,10 @@ fun pkgs =>
   let util_linux_src = {
     name = "util-linux-src-2.41.1",
     tag = "Source",
-    object_hash = "92efaf044d9ab279282bbe4a4d7543f49b275b099a183ab3843fd3a6129b57fc",
+    object_hash = "783f3d20a602e8115a9a9977b4d4d6f7f8e099451e287358a7d3991b1c5c1136",
     origin = {
       type = "http",
       url = "https://www.kernel.org/pub/linux/utils/util-linux/v2.41/util-linux-2.41.1.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

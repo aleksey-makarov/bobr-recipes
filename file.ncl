@@ -4,11 +4,10 @@ fun pkgs =>
   let file_src = {
     name = "file-src-5.46",
     tag = "Source",
-    object_hash = "86dcad02a676f63c74767540161ae441ea16e77abaa1c50a6668853297a9f43b",
+    object_hash = "cd04b661bb96d5ad89124e96e3faecda267fcfab56929da15e72c6bacdbe8312",
     origin = {
       type = "http",
       url = "https://astron.com/pub/file/file-5.46.tar.gz",
-      unpack = true,
     },
     meta = {},
   }

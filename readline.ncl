@@ -4,14 +4,13 @@ fun pkgs =>
   let readline_src = {
     name = "readline-src-8.3",
     tag = "Source",
-    object_hash = "14d0e394c31d3aaf7cd8f3af259eed02cafe862949e13af7a7363dea5774b9d9",
+    object_hash = "a112092958ba47aea0270c071517c9665aa64fa64bf05e8321fdc9f7a8c3f308",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz",
         "https://mirrors.kernel.org/gnu/readline/readline-8.3.tar.gz",
       ],
-      unpack = true,
     },
     meta = {},
   }

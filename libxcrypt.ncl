@@ -4,11 +4,10 @@ fun pkgs =>
   let libxcrypt_src = {
     name = "libxcrypt-src-4.4.38",
     tag = "Source",
-    object_hash = "312c70fc5072cf879077124cbec78e2b3e39263f5a35e0b0d2947142d2f279ee",
+    object_hash = "3e8fe066132eb4300604bb5769f9d80fdfe1d443025978ea867ecef693afacd0",
     origin = {
       type = "http",
       url = "https://github.com/besser82/libxcrypt/releases/download/v4.4.38/libxcrypt-4.4.38.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

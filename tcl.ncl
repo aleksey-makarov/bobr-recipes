@@ -2,14 +2,13 @@ fun pkgs =>
   let tcl_src = {
     name = "tcl-src-8.6.16",
     tag = "Source",
-    object_hash = "cbd06d9431a55b67ed89e1b0a49b6d53d2baedaa6ae7ae5d6435d9d3b069c70b",
+    object_hash = "29af15338ae522c3da77be6961ad094dcb3c8436543b5327a58c2d0f6f3c70cc",
     origin = {
       type = "http",
       url = [
         "https://downloads.sourceforge.net/project/tcl/Tcl/8.6.16/tcl8.6.16-src.tar.gz",
         "https://sourceforge.net/projects/tcl/files/Tcl/8.6.16/tcl8.6.16-src.tar.gz/download",
       ],
-      unpack = true,
     },
     meta = {},
   }

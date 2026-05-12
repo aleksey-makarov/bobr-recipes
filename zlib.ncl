@@ -4,11 +4,10 @@ fun pkgs =>
   let zlib_src = {
     name = "zlib-src-1.3.1",
     tag = "Source",
-    object_hash = "d916134715c36c4535c9a83759f6d48bcbf0aeed3ef2261e929151bfbfc8033f",
+    object_hash = "1cbe3faca1e06ad72608148a8451eb8bd555200216adedd8ef2417fa9c539304",
     origin = {
       type = "http",
       url = "https://zlib.net/fossils/zlib-1.3.1.tar.gz",
-      unpack = true,
     },
     meta = {},
   }

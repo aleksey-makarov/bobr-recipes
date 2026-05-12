@@ -4,13 +4,12 @@ fun pkgs =>
   let vim_src = {
     name = "vim-src-9.1.1629",
     tag = "Source",
-    object_hash = "3a5ee65443c8edee9f53ced99f89568b6ef3dc5988301f2d0fb920511f58713f",
+    object_hash = "26169f05b9b8fba0aa69ae18d342fcffbe9a8512db287d1cb975112e9879e952",
     origin = {
       type = "http",
       url = [
         "https://github.com/vim/vim/archive/v9.1.1629/vim-9.1.1629.tar.gz",
       ],
-      unpack = true,
     },
     meta = {},
   }

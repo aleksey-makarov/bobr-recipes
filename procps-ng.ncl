@@ -4,14 +4,13 @@ fun pkgs =>
   let procps_ng_src = {
     name = "procps-ng-src-4.0.5",
     tag = "Source",
-    object_hash = "10da56c9dc78efa7f7abdc4cc35253661d969eb3d18bcb42ad6e4990a2db2139",
+    object_hash = "c41fd9e5e30b6aed75c309f53461634c8a76879e50a18891dbec413836f4e0c8",
     origin = {
       type = "http",
       url = [
         "https://downloads.sourceforge.net/project/procps-ng/Production/procps-ng-4.0.5.tar.xz",
         "https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-4.0.5.tar.xz/download",
       ],
-      unpack = true,
     },
     meta = {},
   }

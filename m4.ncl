@@ -4,14 +4,13 @@ fun pkgs =>
   let m4_src = {
     name = "m4-src-1.4.20",
     tag = "Source",
-    object_hash = "b4411f1e520623d5280b41d7133987e068318ea369b8866f61a0633ae7e58691",
+    object_hash = "548c7869cf48b65967f41c44132f1c5c0d8b4eb484dccac7e18a62959f4d322a",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/m4/m4-1.4.20.tar.xz",
         "https://mirrors.kernel.org/gnu/m4/m4-1.4.20.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

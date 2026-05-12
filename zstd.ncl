@@ -4,11 +4,10 @@ fun pkgs =>
   let zstd_src = {
     name = "zstd-src-1.5.7",
     tag = "Source",
-    object_hash = "21c1e49af79310cf1e8b44549cd3b174d83097a83797bf3c7b97e419fbb44aa0",
+    object_hash = "257a6a752fbf3cd7158d29e3babb73d7a9b0ea2e568932b7bf3d6fc7ee273287",
     origin = {
       type = "http",
       url = "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz",
-      unpack = true,
     },
     meta = {},
   }

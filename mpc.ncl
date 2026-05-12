@@ -4,14 +4,13 @@ fun pkgs =>
   let mpc_src = {
     name = "mpc-src-1.3.1",
     tag = "Source",
-    object_hash = "43e5127bf0025b5518a123cbcb44bf3f7c7de939184bfead6d0c748aef2e1af5",
+    object_hash = "0dbb9db1b4bf66eda95139d5a0358f6db38718481507ab3a32a34efcd870f2e8",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz",
         "https://mirrors.kernel.org/gnu/mpc/mpc-1.3.1.tar.gz",
       ],
-      unpack = true,
     },
     meta = {},
   }

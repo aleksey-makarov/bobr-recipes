@@ -4,11 +4,10 @@ fun pkgs =>
   let elfutils_src = {
     name = "elfutils-src-0.193",
     tag = "Source",
-    object_hash = "f269f2c78fef52f24088404a8bf6ec3d7b74458b49e05ffcbe110f487a2adcc9",
+    object_hash = "4a388608efa2361f96d243752cbb19eda5f376ca5be827c4dd2012d08a3b53a9",
     origin = {
       type = "http",
       url = "https://sourceware.org/ftp/elfutils/0.193/elfutils-0.193.tar.bz2",
-      unpack = true,
     },
     meta = {},
   }

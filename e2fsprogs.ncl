@@ -4,11 +4,10 @@ fun pkgs =>
   let e2fsprogs_src = {
     name = "e2fsprogs-src-1.47.3",
     tag = "Source",
-    object_hash = "0f4a433c0409d55e04ef2a638c9ea04a835b38f42881c4d4140de3683ef54142",
+    object_hash = "23ada8c7f6b8b50ab0ba770bc662ab0c99243972aaccf34114ce1db02692583a",
     origin = {
       type = "http",
       url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.3/e2fsprogs-1.47.3.tar.gz",
-      unpack = true,
     },
     meta = {},
   }

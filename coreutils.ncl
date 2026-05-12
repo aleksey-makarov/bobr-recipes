@@ -4,14 +4,13 @@ fun pkgs =>
   let coreutils_src = {
     name = "coreutils-src-9.7",
     tag = "Source",
-    object_hash = "9b9ce647d9013a0f978cc564ebfc2e7fa86c838e011d4979af05d519255c9899",
+    object_hash = "8c2767ed9bc9711613a3b0026564e87cbeed79480ccb4f158fc2d239a7da92d2",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz",
         "https://mirrors.kernel.org/gnu/coreutils/coreutils-9.7.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

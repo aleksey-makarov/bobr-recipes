@@ -4,14 +4,13 @@ fun pkgs =>
   let gettext_src = {
     name = "gettext-src-0.26",
     tag = "Source",
-    object_hash = "f601d9cd3fd141e65e1baf6e222de3b9b94fdc139eca58aa707f3f30bd080c00",
+    object_hash = "fd515db9aa1ffe75113a0345fdcd3baf95f885988b94de37aec41b9b8a22d263",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.xz",
         "https://mirrors.kernel.org/gnu/gettext/gettext-0.26.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

@@ -11,11 +11,10 @@ fun pkgs =>
   let linux_src = {
     name = source_name,
     tag = "Source",
-    object_hash = "9dd1683dd83a8808063e6ccdd2d5604247c518c41b3052f4eda26d773aaca951",
+    object_hash = "91c880a309524138bf58dda3187ffa58e1656b95857b9a43ce772d09fb59a4f5",
     origin = {
       type = "http",
       url = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-6.18.10.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

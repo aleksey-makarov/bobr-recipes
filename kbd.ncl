@@ -4,11 +4,10 @@ fun pkgs =>
   let kbd_src = {
     name = "kbd-src-2.8.0",
     tag = "Source",
-    object_hash = "264b06aef2d195e374e8045d482722a43f609e24fb261096430d22381f96c08e",
+    object_hash = "f2c22be2fabadc5fd2465e1e2ae20dd9af7027c410cdbd12e0d9b491c302f4c3",
     origin = {
       type = "http",
       url = "https://www.kernel.org/pub/linux/utils/kbd/kbd-2.8.0.tar.xz",
-      unpack = true,
     },
     meta = {},
   }
@@ -21,7 +20,6 @@ fun pkgs =>
     origin = {
       type = "http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/kbd-2.8.0-backspace-1.patch",
-      unpack = false,
     },
     meta = {},
   }

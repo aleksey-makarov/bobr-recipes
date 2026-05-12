@@ -4,14 +4,13 @@ fun pkgs =>
   let expect_src = {
     name = "expect-src-5.45.4",
     tag = "Source",
-    object_hash = "1b04d81daae40a60d9df051fa6c006bf51a5ecd62f0bad01452f60a377c59330",
+    object_hash = "f2927159478023e45bdf4d1a4974610d2029d99d1a876a39739edde46b331d1d",
     origin = {
       type = "http",
       url = [
         "https://downloads.sourceforge.net/project/expect/Expect/5.45.4/expect5.45.4.tar.gz",
         "https://sourceforge.net/projects/expect/files/Expect/5.45.4/expect5.45.4.tar.gz/download",
       ],
-      unpack = true,
     },
     meta = {},
   }
@@ -24,7 +23,6 @@ fun pkgs =>
     origin = {
       type = "http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/expect-5.45.4-gcc15-1.patch",
-      unpack = false,
     },
     meta = {},
   }

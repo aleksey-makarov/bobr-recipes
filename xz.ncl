@@ -4,11 +4,10 @@ fun pkgs =>
   let xz_src = {
     name = "xz-src-5.8.1",
     tag = "Source",
-    object_hash = "2859a998c1fc494241345f5dae5362f0b2d44087d98edc1fa72f74c294b93902",
+    object_hash = "74e8e63e33f82cd950ec6ab7a6e1d477cb0bc359772fa96b6e75d37c9364dd59",
     origin = {
       type = "http",
       url = "https://github.com/tukaani-project/xz/releases/download/v5.8.1/xz-5.8.1.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

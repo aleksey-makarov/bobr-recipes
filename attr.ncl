@@ -4,11 +4,10 @@ fun pkgs =>
   let attr_src = {
     name = "attr-src-2.5.2",
     tag = "Source",
-    object_hash = "c0132672e62d9b4830b8e3ed6725b2cd0cd02eb448fffa127685b7bf444007b4",
+    object_hash = "62530c618f7f6b7594e0b0e886f509775efd10b11ecf348d6768e24fedabde7c",
     origin = {
       type = "http",
       url = "https://download.savannah.gnu.org/releases/attr/attr-2.5.2.tar.gz",
-      unpack = true,
     },
     meta = {},
   }

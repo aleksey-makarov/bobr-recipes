@@ -4,14 +4,13 @@ fun pkgs =>
   let bash_src = {
     name = "bash-src-5.3",
     tag = "Source",
-    object_hash = "cc575a185ee150d8d366912315792fbef3bf61b060bd3b79b3b932385b5d0ba5",
+    object_hash = "c5e99dc9b938b5934034609d191ee1faa4530a37a1732b60333d716086cf2e8a",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/bash/bash-5.3.tar.gz",
         "https://mirrors.kernel.org/gnu/bash/bash-5.3.tar.gz",
       ],
-      unpack = true,
     },
     meta = {},
   }

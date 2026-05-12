@@ -4,11 +4,10 @@ fun pkgs =>
   let libpipeline_src = {
     name = "libpipeline-src-1.5.8",
     tag = "Source",
-    object_hash = "3ba72e22d3e98c09f642df382f45c251a4f381d24d54f749f85ac5e9c1f49cf7",
+    object_hash = "d60f9f8f20452ec2a2c421c1b92cc6978b5f9ae640cc3148a8251852f23ba08e",
     origin = {
       type = "http",
       url = "https://download.savannah.gnu.org/releases/libpipeline/libpipeline-1.5.8.tar.gz",
-      unpack = true,
     },
     meta = {},
   }

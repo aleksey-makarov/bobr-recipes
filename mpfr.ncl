@@ -4,14 +4,13 @@ fun pkgs =>
   let mpfr_src = {
     name = "mpfr-src-4.2.2",
     tag = "Source",
-    object_hash = "f4df0e1987dc5541119a349fdd45ad5e69700f494dfab5b2c4fa2d4e0ee74a20",
+    object_hash = "e04bf6225b30a6ca872935e6f74f6a8072b898e147e97b23dad9f2d4ea758994",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz",
         "https://mirrors.kernel.org/gnu/mpfr/mpfr-4.2.2.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

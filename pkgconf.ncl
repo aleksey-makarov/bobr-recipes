@@ -4,11 +4,10 @@ fun pkgs =>
   let pkgconf_src = {
     name = "pkgconf-src-2.5.1",
     tag = "Source",
-    object_hash = "e711b652e2bba08164fa9073df53a11c284b6caae71431d30b5ca0eb28df0ae5",
+    object_hash = "cff856e6799a70d5a236c4b5761fd37be48acf1ad5f39a3c2d1aa93a5081abfc",
     origin = {
       type = "http",
       url = "https://distfiles.ariadne.space/pkgconf/pkgconf-2.5.1.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

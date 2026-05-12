@@ -4,11 +4,10 @@ fun pkgs =>
   let shadow_src = {
     name = "shadow-src-4.18.0",
     tag = "Source",
-    object_hash = "0773f7449b18d0c4b943e7f87ab1aeea6308fa5f5c4aa7a50f43525bb31368bd",
+    object_hash = "06a05b0ff7c6a9a249f9c5cf1783a122d6f5a4b1b0a7f7c00eea73240fb5cce1",
     origin = {
       type = "http",
       url = "https://github.com/shadow-maint/shadow/releases/download/4.18.0/shadow-4.18.0.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

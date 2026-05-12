@@ -4,14 +4,13 @@ fun pkgs =>
   let grub_src = {
     name = "grub-src-2.12",
     tag = "Source",
-    object_hash = "22e18f36eecd9968594ecd303dd7470560bf0ad480abe2199d90d56bbdd45228",
+    object_hash = "d665fdc6e3c5432995783be9f16ce22b1f6363422ee2f85b902d7bc06ebf4119",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/grub/grub-2.12.tar.xz",
         "https://mirrors.kernel.org/gnu/grub/grub-2.12.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

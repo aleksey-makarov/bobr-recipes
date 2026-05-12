@@ -8,7 +8,6 @@ fun pkgs =>
     origin = {
       type = "http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch",
-      unpack = false,
     },
     meta = {},
   }
@@ -17,14 +16,13 @@ fun pkgs =>
   let glibc_src = {
     name = "glibc-src-2.42",
     tag = "Source",
-    object_hash = "fe4dd5420cafd78fd66805b9fe4b2f5c7e981a9f68410b3d273e2c5b355dbba4",
+    object_hash = "1fd37aa7476218a0f497a3d81e5434243d7aa0abe4f6f014a64190448431f205",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz",
         "https://mirrors.kernel.org/gnu/glibc/glibc-2.42.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

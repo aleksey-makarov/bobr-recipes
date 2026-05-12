@@ -2,11 +2,10 @@ fun pkgs =>
   let iana_etc_src = {
     name = "iana-etc-src-20250807",
     tag = "Source",
-    object_hash = "2fc770111c89a46004e8f1b1f5f8a0308b976dba3c164665930f8c04904badc3",
+    object_hash = "0b860de93a69527dd8b72156779c94e324b66831b89853a0b4ea672c21a8a431",
     origin = {
       type = "http",
       url = "https://github.com/Mic92/iana-etc/releases/download/20250807/iana-etc-20250807.tar.gz",
-      unpack = true,
     },
     meta = {},
   }

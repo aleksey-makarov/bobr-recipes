@@ -4,11 +4,10 @@ fun pkgs =>
   let intltool_src = {
     name = "intltool-src-0.51.0",
     tag = "Source",
-    object_hash = "c44bf1e9e67947aba535a53800875ca3645a4e9265479744b01a477b15b184e3",
+    object_hash = "1e2ff2a47dd7c74c37371c1f7beb5fdfe410d6632385f2885abd5ed2054be305",
     origin = {
       type = "http",
       url = "https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz",
-      unpack = true,
     },
     meta = {},
   }

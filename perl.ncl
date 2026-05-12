@@ -17,11 +17,10 @@ fun pkgs =>
   let perl_src = {
     name = "perl-src-5.42.0",
     tag = "Source",
-    object_hash = "31df3e5ba7152f4f48ce98c8b7b892cebff07943fd08a6bf655142fc47309ab8",
+    object_hash = "ce0aace744ab7aeb6f42594af5afb7044b14377a6e16bb2be20dd50492926e90",
     origin = {
       type = "http",
       url = "https://www.cpan.org/src/5.0/perl-5.42.0.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

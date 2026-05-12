@@ -4,11 +4,10 @@ fun pkgs =>
   let flex_src = {
     name = "flex-src-2.6.4",
     tag = "Source",
-    object_hash = "5df5ea9e7af9b55a453c038e840e245efe79baf84da6f37c66505dfa0f51124f",
+    object_hash = "55aaa592f5879374928227b3c2de5e0b40b359db9f3959189aadc6bedd3698ed",
     origin = {
       type = "http",
       url = "https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz",
-      unpack = true,
     },
     meta = {},
   }

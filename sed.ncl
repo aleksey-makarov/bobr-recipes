@@ -4,14 +4,13 @@ fun pkgs =>
   let sed_src = {
     name = "sed-src-4.9",
     tag = "Source",
-    object_hash = "51f4169cb5f56f544a72cef9168c3bdd7114a031db13085bb7492140a2a0ed5b",
+    object_hash = "9194a87abb3243d375c349b457c16fb763275af0db65512b45b4f573a947bf32",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz",
         "https://mirrors.kernel.org/gnu/sed/sed-4.9.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

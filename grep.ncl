@@ -4,14 +4,13 @@ fun pkgs =>
   let grep_src = {
     name = "grep-src-3.12",
     tag = "Source",
-    object_hash = "c6c60e306b7865d331607e6f0317afaf4e0d1721ca4b2661f62a8bf5c08ace88",
+    object_hash = "1bca0554f8ff216fab035954dfac3218ae1edaa533a29680ceb675404ede5b93",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz",
         "https://mirrors.kernel.org/gnu/grep/grep-3.12.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

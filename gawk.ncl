@@ -4,14 +4,13 @@ fun pkgs =>
   let gawk_src = {
     name = "gawk-src-5.3.2",
     tag = "Source",
-    object_hash = "6c94095ba63575383478eab9fae4dcffd400747f99242f8a9eec5fb7e07722ef",
+    object_hash = "c602835611656dd7e6eaa74419f7f8856e73033c4b0ca0149c79124496e0c25a",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz",
         "https://mirrors.kernel.org/gnu/gawk/gawk-5.3.2.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

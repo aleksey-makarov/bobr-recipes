@@ -4,14 +4,13 @@ fun pkgs =>
   let make_src = {
     name = "make-src-4.4.1",
     tag = "Source",
-    object_hash = "88e0b8e7c89559379fd6005c7b2faa37454b6107cf1f1c447d14446a13841b0e",
+    object_hash = "8fe22ea52de2f8b5a65902fc322dc947f1b472f73cd7c7198c2a639e79c6d4a6",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz",
         "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",
       ],
-      unpack = true,
     },
     meta = {},
   }

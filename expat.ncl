@@ -4,11 +4,10 @@ fun pkgs =>
   let expat_src = {
     name = "expat-src-2.7.1",
     tag = "Source",
-    object_hash = "17be589489d3ce4b1745b0ee9b87b459a63e15dda3b096f59276d0179c7cd98c",
+    object_hash = "abdbb1ff22e063a4fafeebf73a0f250ea166a52cd264d557ef25a13cc93cd9bf",
     origin = {
       type = "http",
       url = "https://github.com/libexpat/libexpat/releases/download/R_2_7_1/expat-2.7.1.tar.xz",
-      unpack = true,
     },
     meta = {},
   }

@@ -4,14 +4,13 @@ fun pkgs =>
   let tar_src = {
     name = "tar-src-1.35",
     tag = "Source",
-    object_hash = "687da4655985992a12ec70eda7c7cacbe979f04618d93f9a599d8631ee57a905",
+    object_hash = "ac0a4bf36f64e93e380880d2e48138caa6cf941f6cc460aeb0bdf232022a1b69",
     origin = {
       type = "http",
       url = [
         "https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz",
         "https://mirrors.kernel.org/gnu/tar/tar-1.35.tar.xz",
       ],
-      unpack = true,
     },
     meta = {},
   }

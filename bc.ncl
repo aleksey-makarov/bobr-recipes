@@ -4,11 +4,10 @@ fun pkgs =>
   let bc_src = {
     name = "bc-src-7.0.3",
     tag = "Source",
-    object_hash = "31e2e5aceea232645423625c5250bbfddce3797565af380db798e283cde0e5ba",
+    object_hash = "bbe519b53980f899bb5a9ecba390aa077cf0db48e4047a41e566aa73116a391c",
     origin = {
       type = "http",
       url = "https://github.com/gavinhoward/bc/archive/c8dabac65d39fd527a9264a5e505a99b1d8df3d8.tar.gz",
-      unpack = true,
     },
     meta = {},
   }

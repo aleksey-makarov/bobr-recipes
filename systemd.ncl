@@ -4,11 +4,10 @@ fun pkgs =>
   let systemd_src = {
     name = "systemd-src-257.8",
     tag = "Source",
-    object_hash = "75d455ae708777bd383ce8d4e8d5eea67c2b8da2875a3e91dd8ecf1f8b91f17b",
+    object_hash = "205fac8b8602a9b692c9bac232f9cac70a52050d9af9a44fc7e24144d7b67e50",
     origin = {
       type = "http",
       url = "https://github.com/systemd/systemd/archive/v257.8/systemd-257.8.tar.gz",
-      unpack = true,
     },
     meta = {},
   }
@@ -21,7 +20,6 @@ fun pkgs =>
     origin = {
       type = "http",
       url = "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-257.8.tar.xz",
-      unpack = false,
     },
     meta = {},
   }
