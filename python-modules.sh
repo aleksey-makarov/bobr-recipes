@@ -56,6 +56,7 @@ install_python_module() {
 export PATH="${out_dir}/usr/bin:${PATH}"
 export PYTHONHOME="${out_dir}/usr"
 export LD_LIBRARY_PATH="${out_dir}/usr/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+export PIP_DISABLE_PIP_VERSION_CHECK=1
 hash -r
 
 if [ ! -x "${live_python}" ]; then
@@ -72,12 +73,7 @@ if [ -d "${cfg}/python_modules" ]; then
   done < <(find "${cfg}/python_modules" -mindepth 1 -maxdepth 1 -type f -print0 | sort -z)
 fi
 
-ninja_src_dir="/__mbuild/inputs/ninja"
-
-if [ ! -d "${ninja_src_dir}" ]; then
-  echo "python-modules: ninja source input is not a directory" >&2
-  exit 1
-fi
+ninja_src_dir="$(prepare_python_module_source ninja)"
 
 pushd "${ninja_src_dir}" >/dev/null
 "${live_python}" configure.py --bootstrap --verbose
