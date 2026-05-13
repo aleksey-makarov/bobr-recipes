@@ -15,7 +15,7 @@ fun pkgs =>
 
   let bc = {
     name = "bc-7.0.3",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-history",
@@ -24,7 +24,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.system_rootfs_1,
       source = bc_src,
     },
   }

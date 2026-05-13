@@ -15,14 +15,14 @@ fun pkgs =>
 
   let flex = {
     name = "flex-2.6.4",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-nls",
       ],
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.system_rootfs_1,
       source = flex_src,
     },
   }

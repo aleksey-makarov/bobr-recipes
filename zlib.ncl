@@ -15,14 +15,14 @@ fun pkgs =>
 
   let zlib = {
     name = "zlib-1.3.1",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--libdir=/usr/lib64",
       ],
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = pkgs.system_rootfs_1,
       source = zlib_src,
     },
   }

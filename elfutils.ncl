@@ -13,9 +13,20 @@ fun pkgs =>
   }
   in
 
+  let elfutils_rootfs = {
+    name = "elfutils-rootfs-0.193",
+    tag = "TreeMerge",
+    config = {},
+    inputs = {
+      base = pkgs.system_rootfs_1,
+      zlib = pkgs.zlib,
+    },
+  }
+  in
+
   let elfutils = {
     name = "elfutils-0.193",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-debuginfod",
@@ -28,7 +39,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.buildpack_deps_image,
+      rootfs = elfutils_rootfs,
       source = elfutils_src,
     },
   }
@@ -37,6 +48,7 @@ fun pkgs =>
   {
     include [
       elfutils_src,
+      elfutils_rootfs,
       elfutils,
     ],
   }
