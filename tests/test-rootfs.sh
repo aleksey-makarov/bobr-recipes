@@ -6,7 +6,7 @@ name="$(cat "${cfg}/name")"
 dest="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
 
 if [ -z "$name" ]; then
-  echo "test-image: config name must not be empty" >&2
+  echo "test-rootfs: config name must not be empty" >&2
   exit 1
 fi
 
@@ -111,24 +111,6 @@ check_shebang_interpreter() {
   esac
 }
 
-run_live_usr_check() {
-  local marker="/usr/bin/mbuild-live-usr-smoke"
-  local output=""
-
-  log_check "live /usr is writable and executable"
-
-  cp -f /bin/sh "${marker}"
-  chmod 0755 "${marker}"
-
-  output="$("${marker}" -c "printf '%s\n' 'mbuild live usr smoke ok'")"
-  if [ "${output}" = "mbuild live usr smoke ok" ]; then
-    log_ok "live /usr smoke marker created and executed (${marker})"
-    echo "INFO  live-usr output: ${output}"
-  else
-    log_fail "live /usr smoke marker returned unexpected output (${output})"
-  fi
-}
-
 run_python_check() {
   local cmd version import_output
 
@@ -215,7 +197,7 @@ if ! command -v ldd >/dev/null 2>&1; then
 fi
 
 {
-  echo "test-image report"
+  echo "test-rootfs report"
   echo "name: ${name}"
   echo "kernel: $(uname -srmo)"
   echo "ldd: $(command -v ldd || echo missing)"
@@ -261,13 +243,6 @@ fi
     esac
   done < <(enumerate_paths)
   log_ok "filesystem scan complete (checked: ${checked})"
-
-  echo
-  if config_flag check_live_usr; then
-    run_live_usr_check
-  else
-    echo "INFO  live /usr check disabled"
-  fi
 
   echo
   if config_flag check_python; then

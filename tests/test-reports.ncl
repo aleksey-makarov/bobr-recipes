@@ -30,10 +30,10 @@ fun pkgs =>
     inputs = {
       image = pkgs.buildpack_deps_image,
       script = test_reports_script_source,
-      report000 = pkgs.test_system_image_0,
-      report001 = pkgs.test_system_image_1,
-      report002 = pkgs.test_system_image_2,
-      report003 = pkgs.test_system_image,
+      report000 = pkgs.test_system_rootfs_0,
+      report001 = pkgs.test_system_rootfs_1,
+      report002 = pkgs.test_system_rootfs_2,
+      report003 = pkgs.test_system_rootfs,
     },
   }
   in

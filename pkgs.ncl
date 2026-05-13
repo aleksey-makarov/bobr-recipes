@@ -94,7 +94,7 @@ let base_modules = [
   import "texinfo.ncl",
   import "util-linux.ncl",
   import "e2fsprogs.ncl",
-  import "tests/test-image.ncl",
+  import "tests/test-rootfs.ncl",
   import "tests/test-reports.ncl",
   import "vim.ncl",
 ]

@@ -1,26 +1,25 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let test_image_script_source = {
-    name = "test-image-script-source",
+  let test_rootfs_script_source = {
+    name = "test-rootfs-script-source",
     tag = "Source",
-    object_hash = import "test-image.sh.fsobj-hash" as 'Text,
+    object_hash = import "test-rootfs.sh.fsobj-hash" as 'Text,
     origin = {
       type = "path",
-      path = "tests/test-image.sh",
+      path = "tests/test-rootfs.sh",
       mode = "direct",
     },
     meta = {},
   }
   in
 
-  let test_system_image_0 = {
-    name = "test-system-image-0",
-    tag = "Binary",
+  let test_system_rootfs_0 = {
+    name = "test-system-rootfs-0",
+    tag = "Sandbox",
     config = {
       script_config = {
-        check_live_usr = "true",
-        name = "system-image-0",
+        name = "system-rootfs-0",
       },
       steps = [
         {
@@ -32,18 +31,18 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_0,
-      script = test_image_script_source,
+      rootfs = pkgs.system_rootfs_0,
+      script = test_rootfs_script_source,
     },
   }
   in
 
-  let test_system_image_1 = {
-    name = "test-system-image-1",
-    tag = "Binary",
+  let test_system_rootfs_1 = {
+    name = "test-system-rootfs-1",
+    tag = "Sandbox",
     config = {
       script_config = {
-        name = "system-image-1",
+        name = "system-rootfs-1",
       },
       steps = [
         {
@@ -55,19 +54,18 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_1,
-      script = test_image_script_source,
+      rootfs = pkgs.system_rootfs_1,
+      script = test_rootfs_script_source,
     },
   }
   in
 
-  let test_system_image_2 = {
-    name = "test-system-image-2",
-    tag = "Binary",
+  let test_system_rootfs_2 = {
+    name = "test-system-rootfs-2",
+    tag = "Sandbox",
     config = {
       script_config = {
-        name = "system-image-2",
-        check_live_usr = "true",
+        name = "system-rootfs-2",
       },
       steps = [
         {
@@ -79,18 +77,18 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_2,
-      script = test_image_script_source,
+      rootfs = pkgs.system_rootfs_2,
+      script = test_rootfs_script_source,
     },
   }
   in
 
-  let test_system_image = {
-    name = "test-system-image",
-    tag = "Binary",
+  let test_system_rootfs = {
+    name = "test-system-rootfs",
+    tag = "Sandbox",
     config = {
       script_config = {
-        name = "system-image",
+        name = "system-rootfs",
         check_python = "true",
       },
       steps = [
@@ -103,17 +101,17 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image,
-      script = test_image_script_source,
+      rootfs = pkgs.system_rootfs,
+      script = test_rootfs_script_source,
     },
   }
   in
 
   {
     include [
-      test_system_image_0,
-      test_system_image_1,
-      test_system_image_2,
-      test_system_image,
+      test_system_rootfs_0,
+      test_system_rootfs_1,
+      test_system_rootfs_2,
+      test_system_rootfs,
     ],
   }
