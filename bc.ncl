@@ -22,6 +22,10 @@ fun pkgs =>
         "--disable-man-pages",
         "--disable-nls",
       ],
+      env = {
+        CC = "gcc -std=c99",
+        HOSTCC = "gcc -std=c99",
+      },
     },
     inputs = {
       rootfs = pkgs.system_rootfs_1,
