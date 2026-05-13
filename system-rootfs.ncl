@@ -20,6 +20,7 @@ fun pkgs =>
         pkgs.sed_gen1,
         pkgs.grep_gen1,
         pkgs.gzip_gen1,
+        pkgs.xz_gen1,
         pkgs.tar_gen1,
         pkgs.patch_gen1,
         pkgs.findutils_gen1,

@@ -13,6 +13,22 @@ fun pkgs =>
   }
   in
 
+  let xz_gen1 = {
+    name = "xz-gen1-5.8.1",
+    tag = "AutotoolsSandbox",
+    config = {
+      configure_args = [
+        "--disable-static",
+        "--docdir=/usr/share/doc/xz-5.8.1",
+      ],
+    },
+    inputs = {
+      rootfs = pkgs.buildpack_deps_rootfs,
+      source = xz_src,
+    },
+  }
+  in
+
   let xz = {
     name = "xz-5.8.1",
     tag = "AutotoolsSandbox",
@@ -32,6 +48,7 @@ fun pkgs =>
   {
     include [
       xz_src,
+      xz_gen1,
       xz,
     ],
   }
