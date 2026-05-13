@@ -25,12 +25,12 @@ fun pkgs =>
   }
   in
 
-  let systemd_build_image = {
-    name = "systemd-build-image",
-    tag = "Image",
-    config = { ref_name | default = "systemd-build-image" } & {},
+  let systemd_build_rootfs = {
+    name = "systemd-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image }
+      { base = pkgs.system_rootfs }
       & recipe.numbered_inputs [
         pkgs.attr,
         pkgs.acl,
@@ -47,7 +47,7 @@ fun pkgs =>
 
   let systemd = {
     name = "systemd-257.8",
-    tag = "Meson",
+    tag = "MesonSandbox",
     config = {
       pre_configure = {
         name = "patch_udev_rules",
@@ -100,7 +100,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = systemd_build_image,
+      rootfs = systemd_build_rootfs,
       source = systemd_src,
       man_pages = systemd_man_pages_src,
     },

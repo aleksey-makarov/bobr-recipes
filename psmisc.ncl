@@ -18,10 +18,10 @@ fun pkgs =>
 
   let psmisc = {
     name = "psmisc-23.7",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {},
     inputs = {
-      image = pkgs.system_image,
+      rootfs = pkgs.system_rootfs,
       source = psmisc_src,
     },
   }

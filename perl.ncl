@@ -26,12 +26,12 @@ fun pkgs =>
   }
   in
 
-  let perl_build_image = {
-    name = "perl-build-image",
-    tag = "Image",
-    config = { ref_name | default = "perl-build-image" } & {},
+  let perl_build_rootfs = {
+    name = "perl-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image_2 }
+      { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.zlib,
         pkgs.bzip2,
@@ -42,34 +42,35 @@ fun pkgs =>
 
   let perl = {
     name = "perl-5.42.0",
-    tag = "Binary",
+    tag = "Sandbox",
     config = {
       steps = [
+        recipe.prepare_source_step,
         {
           name = "configure",
           run_as = "build-user",
           cwd = "@{build}",
           argv = ["@{script}", "configure"],
-          env = { MBUILD_SOURCE_DIR = "@{source}" },
+          env = { MBUILD_SOURCE_DIR = "@{build}/source" },
         },
         {
           name = "build",
           run_as = "build-user",
           cwd = "@{build}",
           argv = ["@{script}", "build"],
-          env = { MBUILD_SOURCE_DIR = "@{source}" },
+          env = { MBUILD_SOURCE_DIR = "@{build}/source" },
         },
         {
           name = "install",
           run_as = "root",
           cwd = "@{build}",
           argv = ["@{script}", "install"],
-          env = { MBUILD_SOURCE_DIR = "@{source}" },
+          env = { MBUILD_SOURCE_DIR = "@{build}/source" },
         },
       ],
     },
     inputs = {
-      image = perl_build_image,
+      rootfs = perl_build_rootfs,
       script = buildscript_perl_configure,
       source = perl_src,
     },

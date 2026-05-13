@@ -13,12 +13,12 @@ fun pkgs =>
   }
   in
 
-  let e2fsprogs_build_image = {
-    name = "e2fsprogs-build-image",
-    tag = "Image",
-    config = { ref_name | default = "e2fsprogs-build-image" } & {},
+  let e2fsprogs_build_rootfs = {
+    name = "e2fsprogs-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image }
+      { base = pkgs.system_rootfs }
       & recipe.numbered_inputs [
         pkgs.util_linux,
         pkgs.texinfo,
@@ -85,16 +85,17 @@ fun pkgs =>
 
   let e2fsprogs = {
     name = "e2fsprogs-1.47.3",
-    tag = "Binary",
+    tag = "Sandbox",
     config = {
       steps = [
+        recipe.prepare_source_step,
         {
           name = "install",
           run_as = "root",
           cwd = "@{build}",
           argv = ["@{script}"],
           env = {
-            MBUILD_SOURCE_DIR = "@{source}",
+            MBUILD_SOURCE_DIR = "@{build}/source",
             MBUILD_INSTALL_DIR = "@{out}",
           },
         },
@@ -102,7 +103,7 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      image = e2fsprogs_build_image,
+      rootfs = e2fsprogs_build_rootfs,
       script = buildscript_e2fsprogs,
       source = e2fsprogs_src,
     },

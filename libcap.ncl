@@ -15,7 +15,7 @@ fun pkgs =>
 
   let libcap = {
     name = "libcap-2.76",
-    tag = "Makefile",
+    tag = "MakefileSandbox",
     config = {
       pre_build = {
         name = "drop_static_install_rule",
@@ -32,7 +32,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_2,
+      rootfs = pkgs.system_rootfs_2,
       source = libcap_src,
     },
   }

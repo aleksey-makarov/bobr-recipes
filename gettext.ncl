@@ -18,7 +18,7 @@ fun pkgs =>
 
   let gettext = {
     name = "gettext-0.26",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-static",
@@ -36,7 +36,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.system_image,
+      rootfs = pkgs.system_rootfs,
       source = gettext_src,
     },
   }

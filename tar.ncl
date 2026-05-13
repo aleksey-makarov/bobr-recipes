@@ -34,7 +34,7 @@ fun pkgs =>
 
   let tar = {
     name = "tar-1.35",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-nls",
@@ -42,7 +42,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_1,
+      rootfs = pkgs.system_rootfs_1,
       source = tar_src,
     },
   }

@@ -1,3 +1,5 @@
+let recipe = import "recipe-lib.ncl" in
+
 fun pkgs =>
   let openssl_src = {
     name = "openssl-src-3.5.2",
@@ -47,16 +49,17 @@ fun pkgs =>
 
   let openssl = {
     name = "openssl-3.5.2",
-    tag = "Binary",
+    tag = "Sandbox",
     config = {
       steps = [
+        recipe.prepare_source_step,
         {
           name = "install",
           run_as = "root",
           cwd = "@{build}",
           argv = ["@{script}"],
           env = {
-            MBUILD_SOURCE_DIR = "@{source}",
+            MBUILD_SOURCE_DIR = "@{build}/source",
             MBUILD_INSTALL_DIR = "@{out}",
           },
         },
@@ -64,7 +67,7 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      image = pkgs.system_image,
+      rootfs = pkgs.system_rootfs,
       script = buildscript_openssl,
       source = openssl_src,
     },

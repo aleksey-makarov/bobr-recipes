@@ -140,12 +140,12 @@ fun pkgs =>
   }
   in
 
-  let python_build_image = {
-    name = "python-build-image",
-    tag = "Image",
-    config = { ref_name | default = "python-build-image" } & {},
+  let python_build_rootfs = {
+    name = "python-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image_2 }
+      { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.expat,
         pkgs.libffi,
@@ -168,7 +168,7 @@ fun pkgs =>
             cat > Modules/Setup.local <<'EOF_INNER'
             # Minimal bootstrap Python: keep a self-contained interpreter and
             # disable optional extension modules that would otherwise auto-detect
-            # host libraries and leak them into system-image-0.
+            # host libraries and leak them into system-rootfs-0.
             *disabled*
             _uuid
             _ssl
@@ -211,7 +211,7 @@ fun pkgs =>
 
   let python = {
     name = "python-3.13.7",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--enable-shared",
@@ -251,7 +251,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = python_build_image,
+      rootfs = python_build_rootfs,
       source = python_src,
       modules_helper = python_modules_helper,
       flit_core = flit_core_src,

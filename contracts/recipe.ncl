@@ -7,8 +7,11 @@ let KnownTags = [
   "AutotoolsContainer",
   "AutotoolsSandbox",
   "Makefile",
+  "MakefileSandbox",
   "Meson",
+  "MesonSandbox",
   "PerlModule",
+  "PerlModuleSandbox",
   "Binary",
   "Container",
   "Sandbox",
@@ -285,6 +288,15 @@ let MakefileConfig = {
   install | InstallMeta | optional,
 }
 in
+let MakefileSandboxConfig = {
+  make_args | Array String | optional,
+  env | Dyn | optional,
+  source_subdir | String | optional,
+  pre_build | AutotoolsHook | optional,
+  post_install | AutotoolsHook | optional,
+  skip_install | Bool | optional,
+}
+in
 let MesonConfig = {
   setup_args | Array String | optional,
   env | Dyn | optional,
@@ -295,6 +307,15 @@ let MesonConfig = {
   install | InstallMeta | optional,
 }
 in
+let MesonSandboxConfig = {
+  setup_args | Array String | optional,
+  env | Dyn | optional,
+  source_subdir | String | optional,
+  build_dir | String | optional,
+  pre_configure | AutotoolsHook | optional,
+  post_install | AutotoolsHook | optional,
+}
+in
 let PerlModuleConfig = {
   perl_args | Array String | optional,
   make_args | Array String | optional,
@@ -303,6 +324,15 @@ let PerlModuleConfig = {
   pre_configure | AutotoolsHook | optional,
   post_install | AutotoolsHook | optional,
   install | InstallMeta | optional,
+}
+in
+let PerlModuleSandboxConfig = {
+  perl_args | Array String | optional,
+  make_args | Array String | optional,
+  env | Dyn | optional,
+  source_subdir | String | optional,
+  pre_configure | AutotoolsHook | optional,
+  post_install | AutotoolsHook | optional,
 }
 in
 let ImageConfig = {
@@ -409,14 +439,32 @@ let MakefileInputsShape = {
   ..
 }
 in
+let MakefileSandboxInputsShape = {
+  rootfs | Dyn,
+  source | Dyn,
+  ..
+}
+in
 let MesonInputsShape = {
   image | Dyn,
   source | Dyn,
   ..
 }
 in
+let MesonSandboxInputsShape = {
+  rootfs | Dyn,
+  source | Dyn,
+  ..
+}
+in
 let PerlModuleInputsShape = {
   image | Dyn,
+  source | Dyn,
+  ..
+}
+in
+let PerlModuleSandboxInputsShape = {
+  rootfs | Dyn,
   source | Dyn,
   ..
 }
@@ -477,15 +525,30 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | MakefileConfig,
       }
+    else if checked.tag == "MakefileSandbox" then
+      checked
+      & {
+        config = checked.config | MakefileSandboxConfig,
+      }
     else if checked.tag == "Meson" then
       checked
       & {
         config = checked.config | MesonConfig,
       }
+    else if checked.tag == "MesonSandbox" then
+      checked
+      & {
+        config = checked.config | MesonSandboxConfig,
+      }
     else if checked.tag == "PerlModule" then
       checked
       & {
         config = checked.config | PerlModuleConfig,
+      }
+    else if checked.tag == "PerlModuleSandbox" then
+      checked
+      & {
+        config = checked.config | PerlModuleSandboxConfig,
       }
     else if checked.tag == "Binary" then
       checked
@@ -577,14 +640,32 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_makefile_sandbox_inputs = fun inputs =>
+      let checked = inputs | MakefileSandboxInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_meson_inputs = fun inputs =>
       let checked = inputs | MesonInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_meson_sandbox_inputs = fun inputs =>
+      let checked = inputs | MesonSandboxInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_perl_module_inputs = fun inputs =>
       let checked = inputs | PerlModuleInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_perl_module_sandbox_inputs = fun inputs =>
+      let checked = inputs | PerlModuleSandboxInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -678,17 +759,35 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | MakefileConfig,
         inputs = validate_makefile_inputs checked.inputs,
       }
+    else if checked.tag == "MakefileSandbox" then
+      checked
+      & {
+        config = checked.config | MakefileSandboxConfig,
+        inputs = validate_makefile_sandbox_inputs checked.inputs,
+      }
     else if checked.tag == "Meson" then
       checked
       & {
         config = checked.config | MesonConfig,
         inputs = validate_meson_inputs checked.inputs,
       }
+    else if checked.tag == "MesonSandbox" then
+      checked
+      & {
+        config = checked.config | MesonSandboxConfig,
+        inputs = validate_meson_sandbox_inputs checked.inputs,
+      }
     else if checked.tag == "PerlModule" then
       checked
       & {
         config = checked.config | PerlModuleConfig,
         inputs = validate_perl_module_inputs checked.inputs,
+      }
+    else if checked.tag == "PerlModuleSandbox" then
+      checked
+      & {
+        config = checked.config | PerlModuleSandboxConfig,
+        inputs = validate_perl_module_sandbox_inputs checked.inputs,
       }
     else if checked.tag == "Binary" then
       checked
@@ -768,12 +867,21 @@ in
   makefile_config
     | doc "Config contract for synthetic `Makefile` recipe nodes."
     = MakefileConfig,
+  makefile_sandbox_config
+    | doc "Config contract for synthetic `MakefileSandbox` recipe nodes."
+    = MakefileSandboxConfig,
   meson_config
     | doc "Config contract for synthetic `Meson` recipe nodes."
     = MesonConfig,
+  meson_sandbox_config
+    | doc "Config contract for synthetic `MesonSandbox` recipe nodes."
+    = MesonSandboxConfig,
   perl_module_config
     | doc "Config contract for synthetic `PerlModule` recipe nodes."
     = PerlModuleConfig,
+  perl_module_sandbox_config
+    | doc "Config contract for synthetic `PerlModuleSandbox` recipe nodes."
+    = PerlModuleSandboxConfig,
   binary_config
     | doc "Config contract for `Binary` recipe nodes."
     = BinaryConfig,

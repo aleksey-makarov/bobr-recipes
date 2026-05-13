@@ -87,7 +87,7 @@ let base_modules = [
   import "filesystem/runtime-files.ncl",
   import "linux/kernel.ncl",
   import "filesystem/qemu_rootfs.ncl",
-  import "system-image.ncl",
+  import "system-rootfs.ncl",
   import "tcl.ncl",
   import "expect.ncl",
   import "dejagnu.ncl",

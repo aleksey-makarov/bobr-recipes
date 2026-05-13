@@ -13,12 +13,12 @@ fun pkgs =>
   }
   in
 
-  let intltool_build_image = {
-    name = "intltool-build-image",
-    tag = "Image",
-    config = { ref_name | default = "intltool-build-image" } & {},
+  let intltool_build_rootfs = {
+    name = "intltool-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image }
+      { base = pkgs.system_rootfs }
       & recipe.numbered_inputs [
         pkgs.xml_parser,
       ],
@@ -27,7 +27,7 @@ fun pkgs =>
 
   let intltool = {
     name = "intltool-0.51.0",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       pre_configure = {
         name = "patch_intltool_update",
@@ -53,7 +53,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = intltool_build_image,
+      rootfs = intltool_build_rootfs,
       source = intltool_src,
     },
   }

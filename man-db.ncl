@@ -13,12 +13,12 @@ fun pkgs =>
   }
   in
 
-  let man_db_build_image = {
-    name = "man-db-build-image",
-    tag = "Image",
-    config = { ref_name | default = "man-db-build-image" } & {},
+  let man_db_build_rootfs = {
+    name = "man-db-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image }
+      { base = pkgs.system_rootfs }
       & recipe.numbered_inputs [
         pkgs.gdbm,
         pkgs.groff,
@@ -29,7 +29,7 @@ fun pkgs =>
 
   let man_db = {
     name = "man-db-2.13.1",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--docdir=/usr/share/doc/man-db-2.13.1",
@@ -44,7 +44,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = man_db_build_image,
+      rootfs = man_db_build_rootfs,
       source = man_db_src,
     },
   }

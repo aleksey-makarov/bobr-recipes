@@ -27,7 +27,7 @@ fun pkgs =>
 
   let kbd = {
     name = "kbd-2.8.0",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       pre_configure = {
         name = "prepare_kbd_sources",
@@ -59,7 +59,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.system_image,
+      rootfs = pkgs.system_rootfs,
       source = kbd_src,
       backspace_patch = kbd_backspace_patch,
     },

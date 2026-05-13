@@ -29,10 +29,10 @@ fun pkgs =>
 
   let bison = {
     name = "bison-3.8.2",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {},
     inputs = {
-      image = pkgs.system_image_1,
+      rootfs = pkgs.system_rootfs_1,
       source = bison_src,
     },
   }

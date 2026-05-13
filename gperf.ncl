@@ -18,12 +18,12 @@ fun pkgs =>
 
   let gperf = {
     name = "gperf-3.3",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = ["--docdir=/usr/share/doc/gperf-3.3"],
     },
     inputs = {
-      image = pkgs.system_image_2,
+      rootfs = pkgs.system_rootfs_2,
       source = gperf_src,
     },
   }

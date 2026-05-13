@@ -13,12 +13,12 @@ fun pkgs =>
   }
   in
 
-  let dbus_build_image = {
-    name = "dbus-build-image",
-    tag = "Image",
-    config = { ref_name | default = "dbus-build-image" } & {},
+  let dbus_build_rootfs = {
+    name = "dbus-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image }
+      { base = pkgs.system_rootfs }
       & recipe.numbered_inputs [
         pkgs.libcap,
         pkgs.systemd,
@@ -28,7 +28,7 @@ fun pkgs =>
 
   let dbus = {
     name = "dbus-1.16.2",
-    tag = "Meson",
+    tag = "MesonSandbox",
     config = {
       setup_args = [
         "--buildtype=release",
@@ -85,7 +85,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = dbus_build_image,
+      rootfs = dbus_build_rootfs,
       source = dbus_src,
     },
   }

@@ -18,7 +18,7 @@ fun pkgs =>
 
   let libtool = {
     name = "libtool-2.5.4",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       post_install = {
         name = "remove_static_libltdl",
@@ -31,7 +31,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.system_image,
+      rootfs = pkgs.system_rootfs,
       source = libtool_src,
     },
   }

@@ -16,12 +16,12 @@ fun pkgs =>
   }
   in
 
-  let mpfr_build_image = {
-    name = "mpfr-build-image",
-    tag = "Image",
-    config = { ref_name | default = "mpfr-build-image" } & {},
+  let mpfr_build_rootfs = {
+    name = "mpfr-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image }
+      { base = pkgs.system_rootfs }
       & recipe.numbered_inputs [
         pkgs.gmp,
       ],
@@ -30,7 +30,7 @@ fun pkgs =>
 
   let mpfr = {
     name = "mpfr-4.2.2",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-static",
@@ -39,7 +39,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = mpfr_build_image,
+      rootfs = mpfr_build_rootfs,
       source = mpfr_src,
     },
   }

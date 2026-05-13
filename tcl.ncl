@@ -1,3 +1,5 @@
+let recipe = import "recipe-lib.ncl" in
+
 fun pkgs =>
   let tcl_src = {
     name = "tcl-src-8.6.16",
@@ -64,16 +66,17 @@ fun pkgs =>
 
   let tcl = {
     name = "tcl-8.6.16",
-    tag = "Binary",
+    tag = "Sandbox",
     config = {
       steps = [
+        recipe.prepare_source_step,
         {
           name = "install",
           run_as = "root",
           cwd = "@{build}",
           argv = ["@{script}"],
           env = {
-            MBUILD_SOURCE_DIR = "@{source}",
+            MBUILD_SOURCE_DIR = "@{build}/source",
             MBUILD_INSTALL_DIR = "@{out}",
           },
         },
@@ -81,7 +84,7 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      image = pkgs.system_image,
+      rootfs = pkgs.system_rootfs,
       script = buildscript_tcl,
       source = tcl_src,
     },

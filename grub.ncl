@@ -18,7 +18,7 @@ fun pkgs =>
 
   let grub = {
     name = "grub-2.12",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       pre_configure = {
         name = "prepare_grub_sources",
@@ -55,7 +55,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.system_image,
+      rootfs = pkgs.system_rootfs,
       source = grub_src,
     },
   }

@@ -17,7 +17,7 @@ fun pkgs =>
 
   let ncurses = {
     name = "ncurses-6.6",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--mandir=/usr/share/man",
@@ -71,7 +71,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_2,
+      rootfs = pkgs.system_rootfs_2,
       source = ncurses_src,
     },
   }

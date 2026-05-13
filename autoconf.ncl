@@ -21,12 +21,12 @@ fun pkgs =>
   }
   in
 
-  let autoconf_build_image = {
-    name = "autoconf-build-image",
-    tag = "Image",
-    config = { ref_name | default = "autoconf-build-image" } & {},
+  let autoconf_build_rootfs = {
+    name = "autoconf-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image_2 }
+      { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.perl,
         pkgs.inetutils,
@@ -36,10 +36,10 @@ fun pkgs =>
 
   let autoconf = {
     name = "autoconf-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {},
     inputs = {
-      image = autoconf_build_image,
+      rootfs = autoconf_build_rootfs,
       source = autoconf_src,
     },
   }

@@ -13,12 +13,12 @@ fun pkgs =>
   }
   in
 
-  let file_build_image = {
-    name = "file-build-image",
-    tag = "Image",
-    config = { ref_name | default = "file-build-image" } & {},
+  let file_build_rootfs = {
+    name = "file-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image_2 }
+      { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.bzip2,
         pkgs.xz,
@@ -28,12 +28,12 @@ fun pkgs =>
 
   let file = {
     name = "file-5.46",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [],
     },
     inputs = {
-      image = file_build_image,
+      rootfs = file_build_rootfs,
       source = file_src,
     },
   }

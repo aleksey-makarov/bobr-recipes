@@ -29,10 +29,10 @@ fun pkgs =>
 
   let m4 = {
     name = "m4-1.4.20",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {},
     inputs = {
-      image = pkgs.system_image_1,
+      rootfs = pkgs.system_rootfs_1,
       source = m4_src,
     },
   }

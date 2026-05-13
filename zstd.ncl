@@ -15,7 +15,7 @@ fun pkgs =>
 
   let zstd = {
     name = "zstd-1.5.7",
-    tag = "Makefile",
+    tag = "MakefileSandbox",
     config = {
       make_args = [
         "prefix=/usr",
@@ -31,7 +31,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.system_image_2,
+      rootfs = pkgs.system_rootfs_2,
       source = zstd_src,
     },
   }

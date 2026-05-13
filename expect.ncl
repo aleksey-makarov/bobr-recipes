@@ -28,12 +28,12 @@ fun pkgs =>
   }
   in
 
-  let expect_build_image = {
-    name = "expect-build-image",
-    tag = "Image",
-    config = { ref_name | default = "expect-build-image" } & {},
+  let expect_build_rootfs = {
+    name = "expect-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image }
+      { base = pkgs.system_rootfs }
       & recipe.numbered_inputs [
         pkgs.tcl,
       ],
@@ -42,7 +42,7 @@ fun pkgs =>
 
   let expect = {
     name = "expect-5.45.4",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       pre_configure = {
         name = "apply_gcc15_patch",
@@ -73,7 +73,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = expect_build_image,
+      rootfs = expect_build_rootfs,
       source = expect_src,
       gcc15_patch = expect_gcc15_patch,
     },

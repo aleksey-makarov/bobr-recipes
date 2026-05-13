@@ -29,32 +29,33 @@ fun pkgs =>
 
   let qemu_kernel = {
     name = "qemu-kernel",
-    tag = "Binary",
+    tag = "Sandbox",
     config = {
       script_config = {},
       steps = [
+        recipe.prepare_source_step,
         {
           name = "configure",
           run_as = "build-user",
           cwd = "@{build}",
-          argv = ["@{script}", "@{source}", "@{out}"],
+          argv = ["@{script}", "@{build}/source", "@{out}"],
         },
         {
           name = "build",
           run_as = "build-user",
           cwd = "@{build}",
-          argv = ["@{script}", "@{source}", "@{out}"],
+          argv = ["@{script}", "@{build}/source", "@{out}"],
         },
         {
           name = "install",
           run_as = "root",
           cwd = "@{build}",
-          argv = ["@{script}", "@{source}", "@{out}"],
+          argv = ["@{script}", "@{build}/source", "@{out}"],
         },
       ],
     },
     inputs = {
-      image = pkgs.system_image_2,
+      rootfs = pkgs.system_rootfs_2,
       script = qemu_kernel_buildscript,
       source = pkgs.linux_src,
       kernel_config = qemu_kernel_config,

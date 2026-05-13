@@ -44,7 +44,7 @@ fun pkgs =>
 
   let bash = {
     name = "bash-5.3",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--without-bash-malloc",
@@ -61,7 +61,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.system_image_1,
+      rootfs = pkgs.system_rootfs_1,
       source = bash_src,
     },
   }

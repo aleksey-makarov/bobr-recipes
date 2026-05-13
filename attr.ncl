@@ -15,7 +15,7 @@ fun pkgs =>
 
   let attr = {
     name = "attr-2.5.2",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-static",
@@ -24,7 +24,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_2,
+      rootfs = pkgs.system_rootfs_2,
       source = attr_src,
     },
   }

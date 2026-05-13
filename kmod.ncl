@@ -13,12 +13,12 @@ fun pkgs =>
   }
   in
 
-  let kmod_build_image = {
-    name = "kmod-build-image",
-    tag = "Image",
-    config = { ref_name | default = "kmod-build-image" } & {},
+  let kmod_build_rootfs = {
+    name = "kmod-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image }
+      { base = pkgs.system_rootfs }
       & recipe.numbered_inputs [
         pkgs.openssl,
         pkgs.xz,
@@ -29,7 +29,7 @@ fun pkgs =>
 
   let kmod = {
     name = "kmod-34.2",
-    tag = "Meson",
+    tag = "MesonSandbox",
     config = {
       pre_configure = {
         name = "patch_requires_private",
@@ -47,7 +47,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = kmod_build_image,
+      rootfs = kmod_build_rootfs,
       source = kmod_src,
     },
   }

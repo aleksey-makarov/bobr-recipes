@@ -75,6 +75,44 @@ in
 
   numbered_inputs = numbered_inputs_fn,
 
+  prepare_source_step = {
+    name = "prepare_source",
+    run_as = "build-user",
+    cwd = "@{build}",
+    argv = [
+      "/bin/sh",
+      "-ec",
+      m%"
+        source_input="@{source}"
+        source_dir="@{build}/source"
+        marker="@{build}/.mbuild-source-prepared"
+
+        if [ -f "$marker" ]; then
+          exit 0
+        fi
+
+        rm -rf "$source_dir"
+        mkdir -p "$source_dir"
+
+        if [ -d "$source_input" ]; then
+          tar -C "$source_input" -cf - . | tar -C "$source_dir" -xf -
+        elif [ -f "$source_input" ]; then
+          tar -C "$source_dir" -xf "$source_input"
+          set -- "$source_dir"/*
+          if [ "$#" -eq 1 ] && [ -d "$1" ] && [ ! -L "$1" ]; then
+            find "$1" -mindepth 1 -maxdepth 1 -exec mv -t "$source_dir" -- {} +
+            rmdir "$1"
+          fi
+        else
+          echo "prepare_source: source input is neither file nor directory: $source_input" >&2
+          exit 1
+        fi
+
+        touch "$marker"
+      "%,
+    ],
+  },
+
   to_request = fun root_node =>
     let lowered_root_node = lower_node root_node in
     let rec collect = fun seen =>

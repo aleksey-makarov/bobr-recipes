@@ -16,12 +16,12 @@ fun pkgs =>
   }
   in
 
-  let readline_build_image = {
-    name = "readline-build-image",
-    tag = "Image",
-    config = { ref_name | default = "readline-build-image" } & {},
+  let readline_build_rootfs = {
+    name = "readline-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image_2 }
+      { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.ncurses,
       ],
@@ -30,7 +30,7 @@ fun pkgs =>
 
   let readline = {
     name = "readline-8.3",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       pre_configure = {
         name = "patch_readline_build",
@@ -53,7 +53,7 @@ fun pkgs =>
       env = { SHLIB_LIBS = "-lncursesw" },
     },
     inputs = {
-      image = readline_build_image,
+      rootfs = readline_build_rootfs,
       source = readline_src,
     },
   }

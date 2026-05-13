@@ -15,7 +15,7 @@ fun pkgs =>
 
   let lz4 = {
     name = "lz4-1.10.0",
-    tag = "Makefile",
+    tag = "MakefileSandbox",
     config = {
       make_args = [
         "BUILD_STATIC=no",
@@ -23,7 +23,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_2,
+      rootfs = pkgs.system_rootfs_2,
       source = lz4_src,
     },
   }

@@ -16,12 +16,12 @@ fun pkgs =>
   }
   in
 
-  let procps_ng_build_image = {
-    name = "procps-ng-build-image",
-    tag = "Image",
-    config = { ref_name | default = "procps-ng-build-image" } & {},
+  let procps_ng_build_rootfs = {
+    name = "procps-ng-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image }
+      { base = pkgs.system_rootfs }
       & recipe.numbered_inputs [
         pkgs.libcap,
         pkgs.systemd,
@@ -31,7 +31,7 @@ fun pkgs =>
 
   let procps_ng = {
     name = "procps-ng-4.0.5",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--docdir=/usr/share/doc/procps-ng-4.0.5",
@@ -42,7 +42,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = procps_ng_build_image,
+      rootfs = procps_ng_build_rootfs,
       source = procps_ng_src,
     },
   }

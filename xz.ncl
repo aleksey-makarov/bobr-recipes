@@ -15,7 +15,7 @@ fun pkgs =>
 
   let xz = {
     name = "xz-5.8.1",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-static",
@@ -23,7 +23,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_2,
+      rootfs = pkgs.system_rootfs_2,
       source = xz_src,
     },
   }

@@ -13,12 +13,12 @@ fun pkgs =>
   }
   in
 
-  let libxcrypt_build_image = {
-    name = "libxcrypt-build-image",
-    tag = "Image",
-    config = { ref_name | default = "libxcrypt-build-image" } & {},
+  let libxcrypt_build_rootfs = {
+    name = "libxcrypt-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image_2 }
+      { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.perl,
       ],
@@ -27,7 +27,7 @@ fun pkgs =>
 
   let libxcrypt = {
     name = "libxcrypt-4.4.38",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--enable-hashes=strong,glibc",
@@ -37,7 +37,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = libxcrypt_build_image,
+      rootfs = libxcrypt_build_rootfs,
       source = libxcrypt_src,
     },
   }

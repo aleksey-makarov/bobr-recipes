@@ -13,12 +13,12 @@ fun pkgs =>
   }
   in
 
-  let acl_build_image = {
-    name = "acl-build-image",
-    tag = "Image",
-    config = { ref_name | default = "acl-build-image" } & {},
+  let acl_build_rootfs = {
+    name = "acl-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image_2 }
+      { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.attr,
       ],
@@ -27,7 +27,7 @@ fun pkgs =>
 
   let acl = {
     name = "acl-2.3.2",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-static",
@@ -35,7 +35,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = acl_build_image,
+      rootfs = acl_build_rootfs,
       source = acl_src,
     },
   }

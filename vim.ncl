@@ -17,7 +17,7 @@ fun pkgs =>
 
   let vim = {
     name = "vim-9.1.1629",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       "in-tree" = true,
       pre_configure = {
@@ -67,7 +67,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.system_image,
+      rootfs = pkgs.system_rootfs,
       source = vim_src,
     },
   }

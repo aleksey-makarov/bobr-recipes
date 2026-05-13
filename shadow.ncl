@@ -13,12 +13,12 @@ fun pkgs =>
   }
   in
 
-  let shadow_build_image = {
-    name = "shadow-build-image",
-    tag = "Image",
-    config = { ref_name | default = "shadow-build-image" } & {},
+  let shadow_build_rootfs = {
+    name = "shadow-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image_2 }
+      { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.libxcrypt,
       ],
@@ -27,7 +27,7 @@ fun pkgs =>
 
   let shadow = {
     name = "shadow-4.18.0",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       pre_configure = [
         {
@@ -80,7 +80,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = shadow_build_image,
+      rootfs = shadow_build_rootfs,
       source = shadow_src,
     },
   }

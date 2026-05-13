@@ -18,14 +18,14 @@ fun pkgs =>
 
   let automake = {
     name = "automake-1.18.1",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--docdir=/usr/share/doc/automake-1.18.1",
       ],
     },
     inputs = {
-      image = pkgs.system_image,
+      rootfs = pkgs.system_rootfs,
       source = automake_src,
     },
   }

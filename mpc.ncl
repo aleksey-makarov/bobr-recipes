@@ -16,12 +16,12 @@ fun pkgs =>
   }
   in
 
-  let mpc_build_image = {
-    name = "mpc-build-image",
-    tag = "Image",
-    config = { ref_name | default = "mpc-build-image" } & {},
+  let mpc_build_rootfs = {
+    name = "mpc-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image }
+      { base = pkgs.system_rootfs }
       & recipe.numbered_inputs [
         pkgs.gmp,
         pkgs.mpfr,
@@ -31,7 +31,7 @@ fun pkgs =>
 
   let mpc = {
     name = "mpc-1.3.1",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-static",
@@ -39,7 +39,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = mpc_build_image,
+      rootfs = mpc_build_rootfs,
       source = mpc_src,
     },
   }

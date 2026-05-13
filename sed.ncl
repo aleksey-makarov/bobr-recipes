@@ -31,12 +31,12 @@ fun pkgs =>
 
   let sed = {
     name = "sed-4.9",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = ["--disable-nls", "--without-selinux"],
     },
     inputs = {
-      image = pkgs.system_image_1,
+      rootfs = pkgs.system_rootfs_1,
       source = sed_src,
     },
   }

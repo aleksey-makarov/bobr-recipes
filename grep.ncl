@@ -31,12 +31,12 @@ fun pkgs =>
 
   let grep = {
     name = "grep-3.12",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = ["--disable-nls", "--disable-perl-regexp"],
     },
     inputs = {
-      image = pkgs.system_image_1,
+      rootfs = pkgs.system_rootfs_1,
       source = grep_src,
     },
   }

@@ -35,7 +35,7 @@ fun pkgs =>
 
   let findutils = {
     name = "findutils-4.10.0",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--disable-nls",
@@ -44,7 +44,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_1,
+      rootfs = pkgs.system_rootfs_1,
       source = findutils_src,
     },
   }

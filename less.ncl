@@ -13,12 +13,12 @@ fun pkgs =>
   }
   in
 
-  let less_build_image = {
-    name = "less-build-image",
-    tag = "Image",
-    config = { ref_name | default = "less-build-image" } & {},
+  let less_build_rootfs = {
+    name = "less-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image_2 }
+      { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.ncurses,
       ],
@@ -27,14 +27,14 @@ fun pkgs =>
 
   let less = {
     name = "less-679",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--sysconfdir=/etc",
       ],
     },
     inputs = {
-      image = less_build_image,
+      rootfs = less_build_rootfs,
       source = less_src,
     },
   }

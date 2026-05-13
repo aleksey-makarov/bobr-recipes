@@ -72,7 +72,7 @@ fun pkgs =>
 
   let gcc = {
     name = "gcc-15.2.0",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       pre_configure = gcc_prereqs_pre_configure,
       configure_args = [
@@ -97,7 +97,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.system_image_0,
+      rootfs = pkgs.system_rootfs_0,
       source = gcc_src,
       gmp = pkgs.gmp_src,
       mpfr = pkgs.mpfr_src,

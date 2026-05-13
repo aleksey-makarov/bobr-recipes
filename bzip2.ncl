@@ -27,7 +27,7 @@ fun pkgs =>
 
   let bzip2 = {
     name = "bzip2-1.0.8",
-    tag = "Makefile",
+    tag = "MakefileSandbox",
     config = {
       pre_build = {
         name = "prepare_source",
@@ -72,7 +72,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.system_image_2,
+      rootfs = pkgs.system_rootfs_2,
       source = bzip2_src,
       install_docs_patch = bzip2_install_docs_patch,
     },

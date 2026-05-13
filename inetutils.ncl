@@ -16,12 +16,12 @@ fun pkgs =>
   }
   in
 
-  let inetutils_build_image = {
-    name = "inetutils-build-image",
-    tag = "Image",
-    config = { ref_name | default = "inetutils-build-image" } & {},
+  let inetutils_build_rootfs = {
+    name = "inetutils-build-rootfs",
+    tag = "TreeMerge",
+    config = {},
     inputs =
-      { base = pkgs.system_image_2 }
+      { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.ncurses,
       ],
@@ -30,7 +30,7 @@ fun pkgs =>
 
   let inetutils = {
     name = "inetutils-2.6",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       pre_configure = {
         name = "patch_telnet",
@@ -68,7 +68,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = inetutils_build_image,
+      rootfs = inetutils_build_rootfs,
       source = inetutils_src,
     },
   }

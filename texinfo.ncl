@@ -18,7 +18,7 @@ fun pkgs =>
 
   let texinfo = {
     name = "texinfo-7.2",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       pre_configure = {
         name = "patch_texinfo_sources",
@@ -41,7 +41,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.system_image,
+      rootfs = pkgs.system_rootfs,
       source = texinfo_src,
     },
   }

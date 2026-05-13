@@ -56,7 +56,7 @@ fun pkgs =>
 
   let gawk = {
     name = "gawk-5.3.2",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = ["--without-readline"],
       pre_configure = {
@@ -70,7 +70,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      image = pkgs.system_image_1,
+      rootfs = pkgs.system_rootfs_1,
       source = gawk_src,
     },
   }

@@ -82,7 +82,7 @@ fun pkgs =>
 
   let glibc = {
     name = "glibc-2.42",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "libc_cv_slibdir=/usr/lib64",
@@ -115,7 +115,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_0,
+      rootfs = pkgs.system_rootfs_0,
       source = glibc_src,
       fhs_patch = glibc_fhs_patch_2_42,
     },

@@ -44,7 +44,7 @@ fun pkgs =>
 
   let binutils = {
     name = "binutils-2.45",
-    tag = "Autotools",
+    tag = "AutotoolsSandbox",
     config = {
       configure_args = [
         "--libdir=/usr/lib64",
@@ -59,7 +59,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      image = pkgs.system_image_0,
+      rootfs = pkgs.system_rootfs_0,
       source = binutils_src,
     },
   }

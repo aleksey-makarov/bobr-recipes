@@ -230,6 +230,7 @@ let lower_binary_autotools_node = fun node => lower_autotools_node node "Binary"
 let lower_container_autotools_node = fun node => lower_autotools_node node "Container" in
 let lower_sandbox_autotools_node = fun node => lower_autotools_node node "Sandbox" in
 let lower_makefile_node = fun node =>
+  fun lowered_tag =>
   let node_config = node.config in
   let source_root_expr = synthetic_source_root_expr node_config in
   let pre_build_steps =
@@ -266,7 +267,7 @@ let lower_makefile_node = fun node =>
   in
   {
     name = node.name,
-    tag = "Binary",
+    tag = lowered_tag,
     config = (
       {
         steps =
@@ -292,7 +293,7 @@ let lower_makefile_node = fun node =>
         script_config = lowered_script_config,
       }
       & (
-        if std.record.has_field "install" node_config then
+        if lowered_tag != "Sandbox" && std.record.has_field "install" node_config then
           { install = node_config.install }
         else
           {}
@@ -302,7 +303,10 @@ let lower_makefile_node = fun node =>
       synthetic_inputs buildscript_gnu_make node.inputs,
   }
 in
+let lower_binary_makefile_node = fun node => lower_makefile_node node "Binary" in
+let lower_sandbox_makefile_node = fun node => lower_makefile_node node "Sandbox" in
 let lower_meson_node = fun node =>
+  fun lowered_tag =>
   let node_config = node.config in
   let source_root_expr = synthetic_source_root_expr node_config in
   let pre_configure_steps =
@@ -339,7 +343,7 @@ let lower_meson_node = fun node =>
   in
   {
     name = node.name,
-    tag = "Binary",
+    tag = lowered_tag,
     config = (
       {
         steps =
@@ -372,7 +376,7 @@ let lower_meson_node = fun node =>
         script_config = lowered_script_config,
       }
       & (
-        if std.record.has_field "install" node_config then
+        if lowered_tag != "Sandbox" && std.record.has_field "install" node_config then
           { install = node_config.install }
         else
           {}
@@ -382,7 +386,10 @@ let lower_meson_node = fun node =>
       synthetic_inputs buildscript_meson node.inputs,
   }
 in
+let lower_binary_meson_node = fun node => lower_meson_node node "Binary" in
+let lower_sandbox_meson_node = fun node => lower_meson_node node "Sandbox" in
 let lower_perl_module_node = fun node =>
+  fun lowered_tag =>
   let node_config = node.config in
   let source_root_expr = synthetic_source_root_expr node_config in
   let pre_configure_steps =
@@ -419,7 +426,7 @@ let lower_perl_module_node = fun node =>
   in
   {
     name = node.name,
-    tag = "Binary",
+    tag = lowered_tag,
     config = (
       {
         steps =
@@ -452,7 +459,7 @@ let lower_perl_module_node = fun node =>
         script_config = lowered_script_config,
       }
       & (
-        if std.record.has_field "install" node_config then
+        if lowered_tag != "Sandbox" && std.record.has_field "install" node_config then
           { install = node_config.install }
         else
           {}
@@ -462,11 +469,16 @@ let lower_perl_module_node = fun node =>
       synthetic_inputs buildscript_perl_module node.inputs,
   }
 in
+let lower_binary_perl_module_node = fun node => lower_perl_module_node node "Binary" in
+let lower_sandbox_perl_module_node = fun node => lower_perl_module_node node "Sandbox" in
 {
   "Autotools" = lower_binary_autotools_node,
   "AutotoolsContainer" = lower_container_autotools_node,
   "AutotoolsSandbox" = lower_sandbox_autotools_node,
-  "Makefile" = lower_makefile_node,
-  "Meson" = lower_meson_node,
-  "PerlModule" = lower_perl_module_node,
+  "Makefile" = lower_binary_makefile_node,
+  "MakefileSandbox" = lower_sandbox_makefile_node,
+  "Meson" = lower_binary_meson_node,
+  "MesonSandbox" = lower_sandbox_meson_node,
+  "PerlModule" = lower_binary_perl_module_node,
+  "PerlModuleSandbox" = lower_sandbox_perl_module_node,
 }
