@@ -12,16 +12,34 @@ fi
 live_pip=("${live_python}" -m pip)
 output_root="$out_dir"
 wheels_root="${work_dir}/python-wheels"
+sources_root="${work_dir}/python-module-sources"
+
+prepare_python_module_source() {
+  local package_name="$1"
+  local input_path="/__mbuild/inputs/${package_name}"
+  local source_dir="${sources_root}/${package_name}"
+
+  if [ -d "${input_path}" ]; then
+    printf '%s\n' "${input_path}"
+    return
+  fi
+
+  if [ ! -f "${input_path}" ]; then
+    echo "python-modules: source input ${package_name} is not a file or directory" >&2
+    exit 1
+  fi
+
+  rm -rf "${source_dir}"
+  mkdir -p "${source_dir}"
+  tar -xf "${input_path}" -C "${source_dir}" --strip-components=1
+  printf '%s\n' "${source_dir}"
+}
 
 install_python_module() {
   local package_name="$1"
-  local src_dir="/__mbuild/inputs/${package_name}"
   local wheel_dir="${wheels_root}/${package_name}"
-
-  if [ ! -d "${src_dir}" ]; then
-    echo "python-modules: source input ${package_name} is not a directory" >&2
-    exit 1
-  fi
+  local src_dir
+  src_dir="$(prepare_python_module_source "${package_name}")"
 
   echo "python-modules: building ${package_name}"
   rm -rf "${wheel_dir}"
