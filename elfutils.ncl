@@ -20,6 +20,7 @@ fun pkgs =>
     inputs = {
       base = pkgs.system_rootfs_1,
       bzip2 = pkgs.bzip2_gen1,
+      pkgconf = pkgs.pkgconf_gen1,
       zlib = pkgs.zlib,
     },
   }
