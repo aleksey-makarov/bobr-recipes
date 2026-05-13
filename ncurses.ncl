@@ -64,7 +64,7 @@ fun pkgs =>
             "-ec",
             m%"
               mkdir -p "@{out}/usr/share/doc"
-              cp -v -R "@{source}/doc" -T "@{out}/usr/share/doc/ncurses-6.6"
+              cp -v -R "@{build}/source/doc" -T "@{out}/usr/share/doc/ncurses-6.6"
             "%,
           ],
         },
