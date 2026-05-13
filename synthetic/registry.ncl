@@ -10,6 +10,18 @@ let buildscript_autotools = {
   meta = {},
 }
 in
+let buildscript_common = {
+  name = "buildscript-synthetic-common",
+  tag = "Source",
+  object_hash = import "common.sh.fsobj-hash" as 'Text,
+  origin = {
+    type = "path",
+    path = "synthetic/common.sh",
+    mode = "direct",
+  },
+  meta = {},
+}
+in
 let buildscript_gnu_make = {
   name = "buildscript-gnu-make",
   tag = "Source",
@@ -56,9 +68,53 @@ let record_get_or = fun field =>
 in
 let synthetic_source_root_expr = fun node_config =>
   if std.record.has_field "source_subdir" node_config then
-    "@{source}/" ++ node_config.source_subdir
+    "@{build}/source/" ++ node_config.source_subdir
   else
-    "@{source}"
+    "@{build}/source"
+in
+let synthetic_patch_input_paths = fun inputs =>
+  std.string.join
+    " "
+    (
+      std.array.map
+        (fun name => "@{" ++ name ++ "}")
+        (
+          std.array.sort
+            std.string.compare
+            (
+              std.array.filter
+                (fun name => std.string.is_match "^patch" name)
+                (std.record.fields inputs)
+            )
+        )
+    )
+in
+let synthetic_step_env = fun node => {
+  MBUILD_SOURCE_INPUT = "@{source}",
+  MBUILD_SOURCE_DIR = "@{build}/source",
+  MBUILD_SYNTHETIC_COMMON = "@{synthetic_common}",
+  MBUILD_PATCH_INPUTS = synthetic_patch_input_paths node.inputs,
+}
+in
+let synthetic_prepare_step = fun step_env => {
+  name = "prepare_source",
+  run_as = "build-user",
+  cwd = "@{build}",
+  argv = ["@{script}", "prepare"],
+  env = step_env,
+}
+in
+let synthetic_inputs = fun script =>
+  fun inputs =>
+    std.record.insert
+      "synthetic_common"
+      buildscript_common
+      (
+        std.record.insert
+          "script"
+          script
+          inputs
+      )
 in
 let normalize_hook_steps = fun node_config =>
   fun field_name =>
@@ -123,9 +179,7 @@ let lower_autotools_node = fun node =>
     else
       with_python_modules
   in
-  let autotools_step_env = {
-    MBUILD_SOURCE_DIR = "@{source}",
-  }
+  let autotools_step_env = synthetic_step_env node
   in
   {
     name = node.name,
@@ -133,7 +187,8 @@ let lower_autotools_node = fun node =>
     config = (
       {
         steps =
-          pre_configure_steps
+          [synthetic_prepare_step autotools_step_env]
+          @ pre_configure_steps
           @ [
             {
               name = "configure",
@@ -168,10 +223,7 @@ let lower_autotools_node = fun node =>
       )
     ),
     inputs =
-      std.record.insert
-        "script"
-        buildscript_autotools
-        node.inputs,
+      synthetic_inputs buildscript_autotools node.inputs,
   }
 in
 let lower_binary_autotools_node = fun node => lower_autotools_node node "Binary" in
@@ -210,9 +262,7 @@ let lower_makefile_node = fun node =>
     else
       with_source_subdir
   in
-  let makefile_step_env = {
-    MBUILD_SOURCE_DIR = source_root_expr,
-  }
+  let makefile_step_env = synthetic_step_env node
   in
   {
     name = node.name,
@@ -220,19 +270,20 @@ let lower_makefile_node = fun node =>
     config = (
       {
         steps =
-          pre_build_steps
+          [synthetic_prepare_step makefile_step_env]
+          @ pre_build_steps
           @ [
             {
               name = "build",
               run_as = "build-user",
-              cwd = source_root_expr,
+              cwd = "@{build}",
               argv = ["@{script}", "build"],
               env = makefile_step_env,
             },
             {
               name = "install",
               run_as = "root",
-              cwd = source_root_expr,
+              cwd = "@{build}",
               argv = ["@{script}", "install"],
               env = makefile_step_env,
             },
@@ -248,10 +299,7 @@ let lower_makefile_node = fun node =>
       )
     ),
     inputs =
-      std.record.insert
-        "script"
-        buildscript_gnu_make
-        node.inputs,
+      synthetic_inputs buildscript_gnu_make node.inputs,
   }
 in
 let lower_meson_node = fun node =>
@@ -287,9 +335,7 @@ let lower_meson_node = fun node =>
     else
       with_source_subdir
   in
-  let meson_step_env = {
-    MBUILD_SOURCE_DIR = "@{source}",
-  }
+  let meson_step_env = synthetic_step_env node
   in
   {
     name = node.name,
@@ -297,7 +343,8 @@ let lower_meson_node = fun node =>
     config = (
       {
         steps =
-          pre_configure_steps
+          [synthetic_prepare_step meson_step_env]
+          @ pre_configure_steps
           @ [
             {
               name = "configure",
@@ -332,10 +379,7 @@ let lower_meson_node = fun node =>
       )
     ),
     inputs =
-      std.record.insert
-        "script"
-        buildscript_meson
-        node.inputs,
+      synthetic_inputs buildscript_meson node.inputs,
   }
 in
 let lower_perl_module_node = fun node =>
@@ -371,9 +415,7 @@ let lower_perl_module_node = fun node =>
     else
       with_env
   in
-  let perl_module_step_env = {
-    MBUILD_SOURCE_DIR = "@{source}",
-  }
+  let perl_module_step_env = synthetic_step_env node
   in
   {
     name = node.name,
@@ -381,7 +423,8 @@ let lower_perl_module_node = fun node =>
     config = (
       {
         steps =
-          pre_configure_steps
+          [synthetic_prepare_step perl_module_step_env]
+          @ pre_configure_steps
           @ [
             {
               name = "configure",
@@ -416,10 +459,7 @@ let lower_perl_module_node = fun node =>
       )
     ),
     inputs =
-      std.record.insert
-        "script"
-        buildscript_perl_module
-        node.inputs,
+      synthetic_inputs buildscript_perl_module node.inputs,
   }
 in
 {

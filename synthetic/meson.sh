@@ -7,6 +7,9 @@ step="${step:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
 out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
 default_build_dir="${MBUILD_BUILD_DIR:-${source_dir}/build}"
+synthetic_common="${MBUILD_SYNTHETIC_COMMON:?MBUILD_SYNTHETIC_COMMON is required}"
+
+. "$synthetic_common"
 
 load_env_files() {
   if [ -d "${cfg}/env" ]; then
@@ -94,8 +97,10 @@ step_install() {
 }
 
 load_env_files
+mbuild_prepare_source
 
 case "$step" in
+  prepare) : ;;
   configure) step_configure ;;
   build) step_build ;;
   install) step_install ;;

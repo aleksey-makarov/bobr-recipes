@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Smoke-test the recipe contract with synthetic cases and then shallow-
-# validate every raw recipe from pkgs.ncl.
+# Smoke-test the recipe contract and selected recipe-lib lowering behavior,
+# then shallow-validate every raw recipe from pkgs.ncl.
 # Run this when editing recipe contracts, pkgs wiring, or recipe shapes.
 
 set -euo pipefail
@@ -76,6 +76,100 @@ run_case "bad-source-http-archive-format" fail '{"name":"src","tag":"Source","ob
 run_case "bad-ext4-rootfs-size" fail '{"name":"rootfs","tag":"Ext4Rootfs","config":{"label":"rootfs"},"inputs":{}}'
 run_case "bad-rootfs-config" fail '{"name":"rootfs-dir","tag":"Rootfs","config":{"base":true},"inputs":{}}'
 run_case "bad-tree-merge-config" fail '{"name":"merged-tree","tag":"TreeMerge","config":{"base":true},"inputs":{}}'
+
+cat > "${tmpdir}/check-synthetic-lowering.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let source_src = {
+  name = "src",
+  tag = "Source",
+  object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  origin = {
+    type = "http",
+    url = "https://example.invalid/src.tar.xz",
+  },
+  meta = {},
+} in
+let image_src = {
+  name = "img",
+  tag = "Source",
+  object_hash = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  origin = {
+    type = "oci-registry",
+    image = "docker.io/library/alpine:latest",
+    digest = "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  },
+  meta = {},
+} in
+let patch_src = {
+  name = "patch-src",
+  tag = "Source",
+  object_hash = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  origin = {
+    type = "http",
+    url = "https://example.invalid/a.patch",
+    unpack = false,
+  },
+  meta = {},
+} in
+let patch_extra_src = {
+  name = "patch-extra-src",
+  tag = "Source",
+  object_hash = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  origin = {
+    type = "http",
+    url = "https://example.invalid/b.patch",
+    unpack = false,
+  },
+  meta = {},
+} in
+let aux_src = {
+  name = "aux-src",
+  tag = "Source",
+  object_hash = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  origin = {
+    type = "http",
+    url = "https://example.invalid/aux.txt",
+    unpack = false,
+  },
+  meta = {},
+} in
+recipe.to_request {
+  name = "pkg",
+  tag = "Autotools",
+  config = {
+    source_subdir = "subdir",
+    pre_configure = {
+      name = "pre",
+      run_as = "build-user",
+      argv = ["true"],
+    },
+  },
+  inputs = {
+    image = image_src,
+    source = source_src,
+    patch_extra = patch_extra_src,
+    patch = patch_src,
+    aux = aux_src,
+  },
+}
+EOF_INNER
+
+synthetic_lowering_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-synthetic-lowering.ncl --format json
+)"
+
+jq -e '
+  .root.tag == "Binary"
+  and .root.config.steps[0].name == "prepare_source"
+  and .root.config.steps[0].env.MBUILD_SOURCE_INPUT == "@{source}"
+  and .root.config.steps[0].env.MBUILD_SOURCE_DIR == "@{build}/source"
+  and .root.config.steps[0].env.MBUILD_SYNTHETIC_COMMON == "@{synthetic_common}"
+  and .root.config.steps[0].env.MBUILD_PATCH_INPUTS == "@{patch} @{patch_extra}"
+  and .root.config.steps[1].cwd == "@{build}/source/subdir"
+  and (.root.inputs | has("script"))
+  and (.root.inputs | has("synthetic_common"))
+' <<<"${synthetic_lowering_json}" >/dev/null
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER
 let raw_pkgs = (import "${repo_root}/pkgs.ncl") [] in

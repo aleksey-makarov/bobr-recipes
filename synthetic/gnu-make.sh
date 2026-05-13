@@ -6,6 +6,9 @@ step="${1:-${MBUILD_STEP_NAME:-}}"
 step="${step:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
 out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
+synthetic_common="${MBUILD_SYNTHETIC_COMMON:?MBUILD_SYNTHETIC_COMMON is required}"
+
+. "$synthetic_common"
 
 load_env_files() {
   if [ -d "${cfg}/env" ]; then
@@ -32,21 +35,38 @@ prepare_tmpdir() {
   export TMPDIR="${TMPDIR:-$cwd/.tmp}"
 }
 
+resolve_project_source_dir() {
+  local project_source_dir="$source_dir"
+
+  if [ -f "${cfg}/source_subdir" ]; then
+    project_source_dir="${source_dir}/$(cat "${cfg}/source_subdir")"
+  fi
+
+  if [ ! -d "$project_source_dir" ]; then
+    echo "gnu-make build-script: project source dir is not a directory: ${project_source_dir}" >&2
+    exit 1
+  fi
+
+  printf '%s\n' "$project_source_dir"
+}
+
 step_build() {
-  local jobs
+  local project_source_dir jobs
   local make_args=()
-  cd "$source_dir"
-  prepare_tmpdir "$source_dir"
+  project_source_dir="$(resolve_project_source_dir)"
+  cd "$project_source_dir"
+  prepare_tmpdir "$project_source_dir"
   append_dir_files_to_array "${cfg}/make_args" make_args
   jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
   make -j"$jobs" "${make_args[@]}"
 }
 
 step_install() {
-  local skip_install
+  local project_source_dir skip_install
   local make_args=()
-  cd "$source_dir"
-  prepare_tmpdir "$source_dir"
+  project_source_dir="$(resolve_project_source_dir)"
+  cd "$project_source_dir"
+  prepare_tmpdir "$project_source_dir"
   append_dir_files_to_array "${cfg}/make_args" make_args
   mkdir -p "$out_dir"
   skip_install="false"
@@ -63,8 +83,10 @@ step_post_install() {
 }
 
 load_env_files
+mbuild_prepare_source
 
 case "$step" in
+  prepare) : ;;
   build) step_build ;;
   install) step_install ;;
   post_install) step_post_install ;;
