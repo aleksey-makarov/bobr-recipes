@@ -33,7 +33,6 @@ fun pkgs =>
     inputs =
       { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
-        pkgs.zlib,
         pkgs.bzip2,
         pkgs.less,
       ],
