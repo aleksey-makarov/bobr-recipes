@@ -16,24 +16,41 @@ fun pkgs =>
   }
   in
 
+  let gcc_prereqs_pre_configure = {
+    name = "prepare_gcc_prereqs",
+    run_as = "build-user",
+    argv = [
+      "/bin/sh",
+      "-ec",
+      m%"
+        unpack_prereq() {
+          name="$1"
+          archive="$2"
+          tmp="$(mktemp -d)"
+          tar -C "$tmp" -xf "$archive"
+          set -- "$tmp"/*
+          if [ "$#" -ne 1 ] || [ ! -d "$1" ]; then
+            echo "expected one top-level directory in $archive" >&2
+            exit 1
+          fi
+          rm -rf "$name"
+          mv "$1" "$name"
+          rmdir "$tmp"
+        }
+
+        unpack_prereq gmp "@{gmp}"
+        unpack_prereq mpfr "@{mpfr}"
+        unpack_prereq mpc "@{mpc}"
+      "%,
+    ],
+  }
+  in
+
   let gcc_gen1 = {
     name = "gcc-gen1-15.2.0",
     tag = "AutotoolsSandbox",
     config = {
-      pre_configure = {
-        name = "link_gcc_prereqs",
-        run_as = "build-user",
-        argv = [
-          "/bin/sh",
-          "-ec",
-          m%"
-            rm -rf gmp mpfr mpc
-            ln -s "@{gmp}" gmp
-            ln -s "@{mpfr}" mpfr
-            ln -s "@{mpc}" mpc
-          "%,
-        ],
-      },
+      pre_configure = gcc_prereqs_pre_configure,
       configure_args = [
         "--enable-languages=c,c++",
         "--disable-multilib",
@@ -57,20 +74,7 @@ fun pkgs =>
     name = "gcc-15.2.0",
     tag = "Autotools",
     config = {
-      pre_configure = {
-        name = "link_gcc_prereqs",
-        run_as = "build-user",
-        argv = [
-          "/bin/sh",
-          "-ec",
-          m%"
-            rm -rf gmp mpfr mpc
-            ln -s "@{gmp}" gmp
-            ln -s "@{mpfr}" mpfr
-            ln -s "@{mpc}" mpc
-          "%,
-        ],
-      },
+      pre_configure = gcc_prereqs_pre_configure,
       configure_args = [
         "--enable-languages=c,c++",
         "--enable-default-pie",
