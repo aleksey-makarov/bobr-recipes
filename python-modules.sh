@@ -53,6 +53,19 @@ install_python_module() {
   fi
 }
 
+rewrite_python_shebangs() {
+  local script
+
+  for script in "${out_dir}/usr/bin/"*; do
+    [ -f "${script}" ] || continue
+    if head -n 1 "${script}" | grep -qx "#!${out_dir}/usr/bin/python3"; then
+      sed -i '1s|^.*$|#!/usr/bin/python3|' "${script}"
+    elif head -n 1 "${script}" | grep -qx "#!${out_dir}/usr/bin/python3.13"; then
+      sed -i '1s|^.*$|#!/usr/bin/python3|' "${script}"
+    fi
+  done
+}
+
 export PATH="${out_dir}/usr/bin:${PATH}"
 export PYTHONHOME="${out_dir}/usr"
 export LD_LIBRARY_PATH="${out_dir}/usr/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
@@ -81,3 +94,5 @@ install -vm755 ninja "${output_root}/usr/bin/ninja"
 install -vDm644 misc/bash-completion "${output_root}/usr/share/bash-completion/completions/ninja"
 install -vDm644 misc/zsh-completion "${output_root}/usr/share/zsh/site-functions/_ninja"
 popd >/dev/null
+
+rewrite_python_shebangs

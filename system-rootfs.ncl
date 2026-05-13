@@ -115,6 +115,7 @@ fun pkgs =>
         pkgs.sed,
         pkgs.grep,
         pkgs.gzip,
+        pkgs.xz,
         pkgs.tar,
         pkgs.patch,
         pkgs.findutils,
