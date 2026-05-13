@@ -54,6 +54,29 @@ fun pkgs =>
   }
   in
 
+  let awk_symlink = {
+    name = "awk-symlink",
+    tag = "Tree",
+    config = {
+      tree = {
+        entries = [
+          {
+            type = "symlink",
+            path = "usr/bin/awk",
+            target = "gawk",
+          },
+        ],
+      },
+      install = {
+        rules = [
+          recipe.install.root_default_rule,
+        ],
+      },
+    },
+    inputs = {},
+  }
+  in
+
   let gawk = {
     name = "gawk-5.3.2",
     tag = "AutotoolsSandbox",
@@ -80,6 +103,7 @@ fun pkgs =>
     include [
       gawk_src,
       gawk_gen1,
+      awk_symlink,
       gawk,
     ],
   }
