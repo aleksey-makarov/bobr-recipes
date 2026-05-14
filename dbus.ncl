@@ -36,6 +36,7 @@ fun pkgs =>
         "-Dsystemd=enabled",
         "-Dsystemd_system_unitdir=/usr/lib/systemd/system",
       ],
+      build_dir = "build",
       post_install = {
         name = "install_systemd_units",
         run_as = "root",
@@ -43,7 +44,7 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            dbus_src_root="@{source}"
+            dbus_src_root="@{build}/source"
 
             install -vdm755 \
                 "@{out}/usr/lib/systemd/system/multi-user.target.wants" \
