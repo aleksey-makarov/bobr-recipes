@@ -12,6 +12,12 @@
     },
     {
       type = "file",
+      path = "etc/fstab",
+      text = import "runtime-files-tree-src/etc/fstab" as 'Text,
+      executable = false,
+    },
+    {
+      type = "file",
       path = "etc/hostname",
       text = import "runtime-files-tree-src/etc/hostname" as 'Text,
       executable = false,
@@ -77,6 +83,20 @@
     {
       type = "dir",
       path = "sys",
+    },
+    {
+      type = "dir",
+      path = "var/lib/systemd",
+    },
+    {
+      type = "symlink",
+      path = "var/lock",
+      target = "../run/lock",
+    },
+    {
+      type = "symlink",
+      path = "var/run",
+      target = "../run",
     },
   ],
 }
