@@ -7,6 +7,12 @@
     },
     {
       type = "file",
+      path = "etc/environment",
+      text = import "base-filesystem-tree-src/etc/environment" as 'Text,
+      executable = false,
+    },
+    {
+      type = "file",
       path = "etc/group",
       text = import "base-filesystem-tree-src/etc/group" as 'Text,
       executable = false,

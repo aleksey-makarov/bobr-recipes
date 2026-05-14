@@ -94,6 +94,13 @@ fun pkgs =>
                 -C "@{out}/usr/share/man"
             install -vdm755 "@{out}/etc"
             : > "@{out}/etc/machine-id"
+
+            for shared_lib in "@{out}"/usr/lib/systemd/libsystemd-shared-*.so; do
+                [ -e "$shared_lib" ]
+                shared_lib_name="$(basename "$shared_lib")"
+                ln -sfv "systemd/$shared_lib_name" \
+                    "@{out}/usr/lib/$shared_lib_name"
+            done
           "%,
         ],
       },
