@@ -40,7 +40,6 @@ fun pkgs =>
         pkgs.libxcrypt,
         pkgs.openssl,
         pkgs.util_linux,
-        pkgs.xz,
       ],
   }
   in

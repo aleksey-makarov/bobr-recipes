@@ -21,7 +21,6 @@ fun pkgs =>
       { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.bzip2,
-        pkgs.xz,
       ],
   }
   in

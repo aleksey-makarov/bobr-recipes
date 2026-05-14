@@ -21,7 +21,6 @@ fun pkgs =>
       { base = pkgs.system_rootfs }
       & recipe.numbered_inputs [
         pkgs.openssl,
-        pkgs.xz,
         pkgs.zstd,
       ],
   }
