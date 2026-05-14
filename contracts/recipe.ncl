@@ -266,7 +266,6 @@ let MesonSandboxConfig = {
   setup_args | Array String | optional,
   env | Dyn | optional,
   source_subdir | String | optional,
-  build_dir | String | optional,
   pre_configure | AutotoolsHook | optional,
   post_install | AutotoolsHook | optional,
 }

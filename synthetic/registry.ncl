@@ -310,10 +310,7 @@ let lower_meson_node = fun node =>
       else
         with_env
     in
-    if std.record.has_field "build_dir" node_config then
-      std.record.insert "build_dir" node_config.build_dir with_source_subdir
-    else
-      with_source_subdir
+    with_source_subdir
   in
   let meson_step_env = synthetic_step_env node
   in

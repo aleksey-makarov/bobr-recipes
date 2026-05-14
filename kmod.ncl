@@ -39,7 +39,6 @@ fun pkgs =>
           "sed -i '/requires_private : libkmod_deps,/d' meson.build",
         ],
       },
-      build_dir = "build",
       setup_args = [
         "--buildtype=release",
         "-Dmanpages=false",

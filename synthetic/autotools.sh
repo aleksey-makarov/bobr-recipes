@@ -6,7 +6,7 @@ step="${1:-${MBUILD_STEP_NAME:-}}"
 step="${step:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
 out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
-default_build_dir="${MBUILD_BUILD_DIR:?MBUILD_BUILD_DIR is required}"
+build_workspace_dir="${MBUILD_BUILD_DIR:?MBUILD_BUILD_DIR is required}"
 synthetic_common="${MBUILD_SYNTHETIC_COMMON:?MBUILD_SYNTHETIC_COMMON is required}"
 
 . "$synthetic_common"
@@ -87,7 +87,7 @@ resolve_build_dir() {
     printf '%s\n' "$project_source_dir"
     return
   fi
-  printf '%s\n' "$default_build_dir"
+  printf '%s\n' "${build_workspace_dir}/build"
 }
 
 prepare_tmpdir() {

@@ -61,7 +61,6 @@ fun pkgs =>
           "%,
         ],
       },
-      build_dir = "build",
       setup_args = [
         "--buildtype=release",
         "--libdir=/usr/lib",

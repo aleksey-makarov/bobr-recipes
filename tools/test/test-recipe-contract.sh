@@ -53,7 +53,7 @@ run_case "source-http" pass "${source_node}"
 run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"type":"oci-registry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},"meta":{}}'
 run_case "autotools-sandbox" pass '{"name":"pkg-sandbox","tag":"AutotoolsSandbox","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "makefile-sandbox" pass '{"name":"pkg-sandbox","tag":"MakefileSandbox","config":{"make_args":["PREFIX=/usr"],"pre_build":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}],"skip_install":true},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "meson-sandbox" pass '{"name":"pkg-sandbox","tag":"MesonSandbox","config":{"setup_args":["--buildtype=release"],"build_dir":"build","pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "meson-sandbox" pass '{"name":"pkg-sandbox","tag":"MesonSandbox","config":{"setup_args":["--buildtype=release"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "perl-module-sandbox" pass '{"name":"pkg-sandbox","tag":"PerlModuleSandbox","config":{"perl_args":["INSTALLDIRS=vendor"],"make_args":["DESTDIR=/tmp/out"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "sandbox" pass '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "erofs-rootfs" pass '{"name":"rootfs-erofs","tag":"ErofsRootfs","config":{"compression":null,"label":null},"inputs":{"tree0":'"${rootfs_tree}"'}}'
@@ -77,6 +77,7 @@ run_case "tree-symlink-missing-target" fail '{"name":"runtime-tree","tag":"Tree"
 run_case "missing-sandbox-rootfs" fail '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"'}}'
 run_case "sandbox-install-rejected" fail '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"'}}'
 run_case "autotools-sandbox-install-rejected" fail '{"name":"pkg-sandbox","tag":"AutotoolsSandbox","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
+run_case "meson-sandbox-build-dir-rejected" fail '{"name":"pkg-sandbox","tag":"MesonSandbox","config":{"build_dir":"build"},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "extra-top-level-field" fail '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{},"extra":true}'
 run_case "wrong-many-shape" fail '{"name":"img2","tag":"Image","config":{"mode":"bootstrap"},"inputs":{"base":null,"inputs":[]}}'
 run_case "bad-source-http-archive-format" fail '{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"type":"http","url":"https://example.invalid/src.tar.xz","archive_format":"tar-zst"},"meta":{}}'
@@ -176,6 +177,60 @@ jq -e '
   and (.root.inputs | has("script"))
   and (.root.inputs | has("synthetic_common"))
 ' <<<"${synthetic_lowering_json}" >/dev/null
+
+cat > "${tmpdir}/check-meson-synthetic-lowering.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let source_src = {
+  name = "src",
+  tag = "Source",
+  object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  origin = {
+    type = "http",
+    url = "https://example.invalid/src.tar.xz",
+  },
+  meta = {},
+} in
+let rootfs_tree = {
+  name = "rootfs-tree",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "bin" }],
+    },
+  },
+  inputs = {},
+} in
+recipe.to_request {
+  name = "pkg",
+  tag = "MesonSandbox",
+  config = {
+    source_subdir = "subdir",
+    setup_args = ["--buildtype=release"],
+    pre_configure = {
+      name = "pre",
+      run_as = "build-user",
+      argv = ["true"],
+    },
+  },
+  inputs = {
+    rootfs = rootfs_tree,
+    source = source_src,
+  },
+}
+EOF_INNER
+
+meson_synthetic_lowering_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-meson-synthetic-lowering.ncl --format json
+)"
+
+jq -e '
+  .root.tag == "Sandbox"
+  and .root.config.steps[0].name == "prepare_source"
+  and .root.config.steps[0].env.MBUILD_SOURCE_DIR == "@{build}/source"
+  and .root.config.steps[1].cwd == "@{build}/source/subdir"
+  and (.root.config.script_config | has("build_dir") | not)
+' <<<"${meson_synthetic_lowering_json}" >/dev/null
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER
 let raw_pkgs = (import "${repo_root}/pkgs.ncl") [] in

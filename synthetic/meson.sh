@@ -6,7 +6,7 @@ step="${1:-${MBUILD_STEP_NAME:-}}"
 step="${step:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
 out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
-default_build_dir="${MBUILD_BUILD_DIR:-${source_dir}/build}"
+build_workspace_dir="${MBUILD_BUILD_DIR:?MBUILD_BUILD_DIR is required}"
 synthetic_common="${MBUILD_SYNTHETIC_COMMON:?MBUILD_SYNTHETIC_COMMON is required}"
 
 . "$synthetic_common"
@@ -46,19 +46,7 @@ resolve_project_source_dir() {
 }
 
 resolve_build_dir() {
-  local project_source_dir="$1"
-
-  if [ -f "${cfg}/build_dir" ]; then
-    local configured_build_dir
-    configured_build_dir="$(cat "${cfg}/build_dir")"
-    if [[ "$configured_build_dir" = /* ]]; then
-      printf '%s\n' "$configured_build_dir"
-    else
-      printf '%s\n' "$project_source_dir/$configured_build_dir"
-    fi
-  else
-    printf '%s\n' "$default_build_dir"
-  fi
+  printf '%s\n' "${build_workspace_dir}/build"
 }
 
 prepare_tmpdir() {
