@@ -65,34 +65,10 @@ fun pkgs =>
   }
   in
 
-  let binutils_container = {
-    name = "binutils-container-2.45",
-    tag = "AutotoolsContainer",
-    config = {
-      configure_args = [
-        "--libdir=/usr/lib64",
-        "--enable-shared",
-        "--enable-64-bit-bfd",
-        "--enable-new-dtags",
-        "--enable-default-hash-style=gnu",
-        "--disable-nls",
-        "--disable-werror",
-        "--disable-gprofng",
-        "--without-zstd",
-      ],
-    },
-    inputs = {
-      rootfs = pkgs.system_rootfs_0,
-      source = binutils_src,
-    },
-  }
-  in
-
   {
     include [
       binutils_src,
       binutils_gen1,
       binutils,
-      binutils_container,
     ],
   }

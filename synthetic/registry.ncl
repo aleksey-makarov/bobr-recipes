@@ -134,7 +134,6 @@ let normalize_hook_steps = fun node_config =>
         []
 in
 let lower_autotools_node = fun node =>
-  fun lowered_tag =>
   let node_config = node.config in
   let source_root_expr = synthetic_source_root_expr node_config in
   let pre_configure_steps =
@@ -183,54 +182,42 @@ let lower_autotools_node = fun node =>
   in
   {
     name = node.name,
-    tag = lowered_tag,
-    config = (
-      {
-        steps =
-          [synthetic_prepare_step autotools_step_env]
-          @ pre_configure_steps
-          @ [
-            {
-              name = "configure",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "configure"],
-              env = autotools_step_env,
-            },
-            {
-              name = "build",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "build"],
-              env = autotools_step_env,
-            },
-            {
-              name = "install",
-              run_as = "root",
-              cwd = "@{build}",
-              argv = ["@{script}", "install"],
-              env = autotools_step_env,
-            },
-          ]
-          @ post_install_steps,
-        script_config = lowered_script_config,
-      }
-      & (
-        if lowered_tag != "Sandbox" && std.record.has_field "install" node_config then
-          { install = node_config.install }
-        else
-          {}
-      )
-    ),
+    tag = "Sandbox",
+    config = {
+      steps =
+        [synthetic_prepare_step autotools_step_env]
+        @ pre_configure_steps
+        @ [
+          {
+            name = "configure",
+            run_as = "build-user",
+            cwd = "@{build}",
+            argv = ["@{script}", "configure"],
+            env = autotools_step_env,
+          },
+          {
+            name = "build",
+            run_as = "build-user",
+            cwd = "@{build}",
+            argv = ["@{script}", "build"],
+            env = autotools_step_env,
+          },
+          {
+            name = "install",
+            run_as = "root",
+            cwd = "@{build}",
+            argv = ["@{script}", "install"],
+            env = autotools_step_env,
+          },
+        ]
+        @ post_install_steps,
+      script_config = lowered_script_config,
+    },
     inputs =
       synthetic_inputs buildscript_autotools node.inputs,
   }
 in
-let lower_binary_autotools_node = fun node => lower_autotools_node node "Binary" in
-let lower_container_autotools_node = fun node => lower_autotools_node node "Container" in
-let lower_sandbox_autotools_node = fun node => lower_autotools_node node "Sandbox" in
 let lower_makefile_node = fun node =>
-  fun lowered_tag =>
   let node_config = node.config in
   let source_root_expr = synthetic_source_root_expr node_config in
   let pre_build_steps =
@@ -267,46 +254,35 @@ let lower_makefile_node = fun node =>
   in
   {
     name = node.name,
-    tag = lowered_tag,
-    config = (
-      {
-        steps =
-          [synthetic_prepare_step makefile_step_env]
-          @ pre_build_steps
-          @ [
-            {
-              name = "build",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "build"],
-              env = makefile_step_env,
-            },
-            {
-              name = "install",
-              run_as = "root",
-              cwd = "@{build}",
-              argv = ["@{script}", "install"],
-              env = makefile_step_env,
-            },
-          ]
-          @ post_install_steps,
-        script_config = lowered_script_config,
-      }
-      & (
-        if lowered_tag != "Sandbox" && std.record.has_field "install" node_config then
-          { install = node_config.install }
-        else
-          {}
-      )
-    ),
+    tag = "Sandbox",
+    config = {
+      steps =
+        [synthetic_prepare_step makefile_step_env]
+        @ pre_build_steps
+        @ [
+          {
+            name = "build",
+            run_as = "build-user",
+            cwd = "@{build}",
+            argv = ["@{script}", "build"],
+            env = makefile_step_env,
+          },
+          {
+            name = "install",
+            run_as = "root",
+            cwd = "@{build}",
+            argv = ["@{script}", "install"],
+            env = makefile_step_env,
+          },
+        ]
+        @ post_install_steps,
+      script_config = lowered_script_config,
+    },
     inputs =
       synthetic_inputs buildscript_gnu_make node.inputs,
   }
 in
-let lower_binary_makefile_node = fun node => lower_makefile_node node "Binary" in
-let lower_sandbox_makefile_node = fun node => lower_makefile_node node "Sandbox" in
 let lower_meson_node = fun node =>
-  fun lowered_tag =>
   let node_config = node.config in
   let source_root_expr = synthetic_source_root_expr node_config in
   let pre_configure_steps =
@@ -343,53 +319,42 @@ let lower_meson_node = fun node =>
   in
   {
     name = node.name,
-    tag = lowered_tag,
-    config = (
-      {
-        steps =
-          [synthetic_prepare_step meson_step_env]
-          @ pre_configure_steps
-          @ [
-            {
-              name = "configure",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "configure"],
-              env = meson_step_env,
-            },
-            {
-              name = "build",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "build"],
-              env = meson_step_env,
-            },
-            {
-              name = "install",
-              run_as = "root",
-              cwd = "@{build}",
-              argv = ["@{script}", "install"],
-              env = meson_step_env,
-            },
-          ]
-          @ post_install_steps,
-        script_config = lowered_script_config,
-      }
-      & (
-        if lowered_tag != "Sandbox" && std.record.has_field "install" node_config then
-          { install = node_config.install }
-        else
-          {}
-      )
-    ),
+    tag = "Sandbox",
+    config = {
+      steps =
+        [synthetic_prepare_step meson_step_env]
+        @ pre_configure_steps
+        @ [
+          {
+            name = "configure",
+            run_as = "build-user",
+            cwd = "@{build}",
+            argv = ["@{script}", "configure"],
+            env = meson_step_env,
+          },
+          {
+            name = "build",
+            run_as = "build-user",
+            cwd = "@{build}",
+            argv = ["@{script}", "build"],
+            env = meson_step_env,
+          },
+          {
+            name = "install",
+            run_as = "root",
+            cwd = "@{build}",
+            argv = ["@{script}", "install"],
+            env = meson_step_env,
+          },
+        ]
+        @ post_install_steps,
+      script_config = lowered_script_config,
+    },
     inputs =
       synthetic_inputs buildscript_meson node.inputs,
   }
 in
-let lower_binary_meson_node = fun node => lower_meson_node node "Binary" in
-let lower_sandbox_meson_node = fun node => lower_meson_node node "Sandbox" in
 let lower_perl_module_node = fun node =>
-  fun lowered_tag =>
   let node_config = node.config in
   let source_root_expr = synthetic_source_root_expr node_config in
   let pre_configure_steps =
@@ -426,59 +391,44 @@ let lower_perl_module_node = fun node =>
   in
   {
     name = node.name,
-    tag = lowered_tag,
-    config = (
-      {
-        steps =
-          [synthetic_prepare_step perl_module_step_env]
-          @ pre_configure_steps
-          @ [
-            {
-              name = "configure",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "configure"],
-              env = perl_module_step_env,
-            },
-            {
-              name = "build",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "build"],
-              env = perl_module_step_env,
-            },
-            {
-              name = "install",
-              run_as = "root",
-              cwd = "@{build}",
-              argv = ["@{script}", "install"],
-              env = perl_module_step_env,
-            },
-          ]
-          @ post_install_steps,
-        script_config = lowered_script_config,
-      }
-      & (
-        if lowered_tag != "Sandbox" && std.record.has_field "install" node_config then
-          { install = node_config.install }
-        else
-          {}
-      )
-    ),
+    tag = "Sandbox",
+    config = {
+      steps =
+        [synthetic_prepare_step perl_module_step_env]
+        @ pre_configure_steps
+        @ [
+          {
+            name = "configure",
+            run_as = "build-user",
+            cwd = "@{build}",
+            argv = ["@{script}", "configure"],
+            env = perl_module_step_env,
+          },
+          {
+            name = "build",
+            run_as = "build-user",
+            cwd = "@{build}",
+            argv = ["@{script}", "build"],
+            env = perl_module_step_env,
+          },
+          {
+            name = "install",
+            run_as = "root",
+            cwd = "@{build}",
+            argv = ["@{script}", "install"],
+            env = perl_module_step_env,
+          },
+        ]
+        @ post_install_steps,
+      script_config = lowered_script_config,
+    },
     inputs =
       synthetic_inputs buildscript_perl_module node.inputs,
   }
 in
-let lower_binary_perl_module_node = fun node => lower_perl_module_node node "Binary" in
-let lower_sandbox_perl_module_node = fun node => lower_perl_module_node node "Sandbox" in
 {
-  "Autotools" = lower_binary_autotools_node,
-  "AutotoolsContainer" = lower_container_autotools_node,
-  "AutotoolsSandbox" = lower_sandbox_autotools_node,
-  "Makefile" = lower_binary_makefile_node,
-  "MakefileSandbox" = lower_sandbox_makefile_node,
-  "Meson" = lower_binary_meson_node,
-  "MesonSandbox" = lower_sandbox_meson_node,
-  "PerlModule" = lower_binary_perl_module_node,
-  "PerlModuleSandbox" = lower_sandbox_perl_module_node,
+  "AutotoolsSandbox" = lower_autotools_node,
+  "MakefileSandbox" = lower_makefile_node,
+  "MesonSandbox" = lower_meson_node,
+  "PerlModuleSandbox" = lower_perl_module_node,
 }
