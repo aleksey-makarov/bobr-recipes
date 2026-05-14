@@ -31,16 +31,6 @@ fun pkgs =>
     config = {
       pre_configure = [
         {
-          name = "prepare_live_usr",
-          run_as = "root",
-          cwd = "@{build}",
-          argv = [
-            "/bin/sh",
-            "-ec",
-            "mkdir -p /usr/bin && touch /usr/bin/passwd",
-          ],
-        },
-        {
           name = "prepare_shadow_sources",
           run_as = "build-user",
           argv = [

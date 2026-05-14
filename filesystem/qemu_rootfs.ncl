@@ -3,11 +3,8 @@ let recipe = import "../recipe-lib.ncl" in
 fun pkgs =>
   let qemu_rootfs = {
     name = "qemu-rootfs",
-    tag = "Ext4Rootfs",
-    config = {
-      size_mib = 4096,
-      label = "qemu-rootfs",
-    },
+    tag = "TreeMerge",
+    config = {},
     inputs =
       recipe.numbered_inputs [
         pkgs.base_filesystem,

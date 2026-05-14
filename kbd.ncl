@@ -53,7 +53,7 @@ fun pkgs =>
           "-ec",
           m%"
             install -vdm755 "@{out}/usr/share/doc"
-            cp -R -v "@{source}/docs/doc" -T "@{out}/usr/share/doc/kbd-2.8.0"
+            cp -R -v "@{build}/source/docs/doc" -T "@{out}/usr/share/doc/kbd-2.8.0"
           "%,
         ],
       },

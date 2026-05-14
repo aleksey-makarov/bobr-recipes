@@ -47,7 +47,7 @@ fun pkgs =>
           "install",
           "-v",
           "-Dm644",
-          "@{source}/doc/I18N-HOWTO",
+          "@{build}/source/doc/I18N-HOWTO",
           "@{out}/usr/share/doc/intltool-0.51.0/I18N-HOWTO",
         ],
       },
