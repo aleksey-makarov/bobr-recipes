@@ -3,6 +3,7 @@ let KnownTags = [
   "Text",
   "Tree",
   "TreeMerge",
+  "ErofsRootfs",
   "Autotools",
   "AutotoolsContainer",
   "AutotoolsSandbox",
@@ -362,6 +363,20 @@ in
 let TreeMergeConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
+let ErofsNullableString =
+  std.contract.from_predicate (fun value => value == null || std.is_string value && value != "")
+in
+let ErofsRootfsConfig = {
+  compression
+    | ErofsNullableString
+    | optional
+    | doc "Optional EROFS compression setting. `null` means plain EROFS.",
+  label
+    | ErofsNullableString
+    | optional
+    | doc "Optional EROFS filesystem label. `null` means no label.",
+}
+in
 let OciExtractConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
@@ -420,6 +435,8 @@ in
 let RootfsInputsShape = { .. }
 in
 let TreeMergeInputsShape = { .. }
+in
+let ErofsRootfsInputsShape = { .. }
 in
 let AutotoolsInputsShape = {
   image | Dyn,
@@ -580,6 +597,11 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | TreeMergeConfig,
       }
+    else if checked.tag == "ErofsRootfs" then
+      checked
+      & {
+        config = checked.config | ErofsRootfsConfig,
+      }
     else if checked.tag == "OciExtract" then
       checked
       & {
@@ -723,6 +745,12 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_erofs_rootfs_inputs = fun inputs =>
+      let checked = inputs | ErofsRootfsInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     if checked.tag == "Text" then
       checked
       & {
@@ -825,6 +853,12 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | TreeMergeConfig,
         inputs = validate_tree_merge_inputs checked.inputs,
       }
+    else if checked.tag == "ErofsRootfs" then
+      checked
+      & {
+        config = checked.config | ErofsRootfsConfig,
+        inputs = validate_erofs_rootfs_inputs checked.inputs,
+      }
     else if checked.tag == "OciExtract" then
       checked
       & {
@@ -900,6 +934,9 @@ in
   tree_merge_config
     | doc "Config contract for `TreeMerge` recipe nodes."
     = TreeMergeConfig,
+  erofs_rootfs_config
+    | doc "Config contract for `ErofsRootfs` recipe nodes."
+    = ErofsRootfsConfig,
   image_config
     | doc "Config contract for `Image` recipe nodes."
     = ImageConfig,
