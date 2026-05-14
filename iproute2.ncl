@@ -36,7 +36,7 @@ fun pkgs =>
       post_install = {
         name = "install_docs",
         run_as = "root",
-        cwd = "@{source}",
+        cwd = "@{build}/source",
         argv = [
           "/bin/sh",
           "-ec",
