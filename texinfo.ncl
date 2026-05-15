@@ -32,7 +32,7 @@ fun pkgs =>
       post_install = {
         name = "install_tex_support",
         run_as = "root",
-        cwd = "@{build}",
+        cwd = "@{build}/build",
         argv = [
           "/bin/sh",
           "-ec",
