@@ -27,7 +27,7 @@ fun pkgs =>
 
   let shadow = {
     name = "shadow-4.18.0",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       pre_configure = [
         {

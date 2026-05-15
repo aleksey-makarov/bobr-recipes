@@ -15,7 +15,7 @@ fun pkgs =>
 
   let xz_gen1 = {
     name = "xz-gen1-5.8.1",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-static",
@@ -31,7 +31,7 @@ fun pkgs =>
 
   let xz = {
     name = "xz-5.8.1",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-static",

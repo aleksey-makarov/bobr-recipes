@@ -31,7 +31,7 @@ fun pkgs =>
 
   let procps_ng = {
     name = "procps-ng-4.0.5",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--docdir=/usr/share/doc/procps-ng-4.0.5",

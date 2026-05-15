@@ -15,7 +15,7 @@ fun pkgs =>
 
   let iproute2 = {
     name = "iproute2-6.16.0",
-    tag = "MakefileSandbox",
+    tag = "Makefile",
     config = {
       pre_build = {
         name = "prepare_iproute2_sources",

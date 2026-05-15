@@ -24,7 +24,7 @@ fun pkgs =>
 
   let binutils_gen1 = {
     name = gen1_name,
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-nls",
@@ -44,7 +44,7 @@ fun pkgs =>
 
   let binutils = {
     name = "binutils-2.45",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--libdir=/usr/lib64",

@@ -15,7 +15,7 @@ fun pkgs =>
 
   let util_linux = {
     name = "util-linux-2.41.1",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       pre_configure = {
         name = "patch_permissions",

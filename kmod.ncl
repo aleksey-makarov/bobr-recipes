@@ -28,7 +28,7 @@ fun pkgs =>
 
   let kmod = {
     name = "kmod-34.2",
-    tag = "MesonSandbox",
+    tag = "Meson",
     config = {
       pre_configure = {
         name = "patch_requires_private",

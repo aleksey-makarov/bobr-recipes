@@ -27,7 +27,7 @@ fun pkgs =>
 
   let intltool = {
     name = "intltool-0.51.0",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       pre_configure = {
         name = "patch_intltool_update",

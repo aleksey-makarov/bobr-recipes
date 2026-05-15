@@ -18,7 +18,7 @@ fun pkgs =>
 
   let sed_gen1 = {
     name = "sed-gen1-4.9",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = ["--disable-nls", "--without-selinux"],
     },
@@ -31,7 +31,7 @@ fun pkgs =>
 
   let sed = {
     name = "sed-4.9",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = ["--disable-nls", "--without-selinux"],
     },

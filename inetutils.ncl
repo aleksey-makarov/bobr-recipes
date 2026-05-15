@@ -30,7 +30,7 @@ fun pkgs =>
 
   let inetutils = {
     name = "inetutils-2.6",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       pre_configure = {
         name = "patch_telnet",

@@ -15,7 +15,7 @@ fun pkgs =>
 
   let xml_parser = {
     name = "xml-parser-2.47",
-    tag = "PerlModuleSandbox",
+    tag = "PerlModule",
     config = {},
     inputs = {
       rootfs = pkgs.system_rootfs,

@@ -18,7 +18,7 @@ fun pkgs =>
 
   let texinfo = {
     name = "texinfo-7.2",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       pre_configure = {
         name = "patch_texinfo_sources",

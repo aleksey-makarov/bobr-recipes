@@ -31,7 +31,7 @@ fun pkgs =>
 
   let mpc = {
     name = "mpc-1.3.1",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-static",

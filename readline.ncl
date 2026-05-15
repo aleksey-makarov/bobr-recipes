@@ -30,7 +30,7 @@ fun pkgs =>
 
   let readline = {
     name = "readline-8.3",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       pre_configure = {
         name = "patch_readline_build",

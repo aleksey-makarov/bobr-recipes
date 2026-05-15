@@ -18,7 +18,7 @@ fun pkgs =>
 
   let bash_gen1 = {
     name = "bash-gen1-5.3",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--without-bash-malloc",
@@ -44,7 +44,7 @@ fun pkgs =>
 
   let bash = {
     name = "bash-5.3",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--without-bash-malloc",

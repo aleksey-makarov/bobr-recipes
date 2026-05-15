@@ -18,7 +18,7 @@ fun pkgs =>
 
   let gettext = {
     name = "gettext-0.26",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-static",

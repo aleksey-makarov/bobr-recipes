@@ -28,7 +28,7 @@ fun pkgs =>
 
   let dbus = {
     name = "dbus-1.16.2",
-    tag = "MesonSandbox",
+    tag = "Meson",
     config = {
       setup_args = [
         "--buildtype=release",

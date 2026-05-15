@@ -36,7 +36,7 @@ fun pkgs =>
 
   let autoconf = {
     name = "autoconf-%{version}",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {},
     inputs = {
       rootfs = autoconf_build_rootfs,

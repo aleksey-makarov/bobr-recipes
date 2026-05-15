@@ -155,7 +155,7 @@ fun pkgs =>
 
   let python_gen1 = {
     name = "python-gen1-3.13.7",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       in-tree = true,
       pre_configure = {
@@ -211,7 +211,7 @@ fun pkgs =>
 
   let python = {
     name = "python-3.13.7",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--enable-shared",

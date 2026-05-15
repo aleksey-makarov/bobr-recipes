@@ -18,7 +18,7 @@ fun pkgs =>
 
   let gdbm = {
     name = "gdbm-1.26",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-static",

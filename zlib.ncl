@@ -15,7 +15,7 @@ fun pkgs =>
 
   let zlib = {
     name = "zlib-1.3.1",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--libdir=/usr/lib64",

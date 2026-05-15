@@ -27,7 +27,7 @@ fun pkgs =>
 
   let kbd = {
     name = "kbd-2.8.0",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       pre_configure = {
         name = "prepare_kbd_sources",

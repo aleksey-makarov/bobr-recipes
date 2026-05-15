@@ -27,7 +27,7 @@ fun pkgs =>
 
   let libxcrypt = {
     name = "libxcrypt-4.4.38",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--enable-hashes=strong,glibc",

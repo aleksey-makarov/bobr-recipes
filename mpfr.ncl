@@ -30,7 +30,7 @@ fun pkgs =>
 
   let mpfr = {
     name = "mpfr-4.2.2",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-static",

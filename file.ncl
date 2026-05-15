@@ -27,7 +27,7 @@ fun pkgs =>
 
   let file = {
     name = "file-5.46",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [],
     },

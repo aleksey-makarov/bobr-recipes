@@ -15,7 +15,7 @@ fun pkgs =>
 
   let bc = {
     name = "bc-7.0.3",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-history",

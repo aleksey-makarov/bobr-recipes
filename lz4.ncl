@@ -15,7 +15,7 @@ fun pkgs =>
 
   let lz4 = {
     name = "lz4-1.10.0",
-    tag = "MakefileSandbox",
+    tag = "Makefile",
     config = {
       make_args = [
         "BUILD_STATIC=no",

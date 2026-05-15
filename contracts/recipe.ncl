@@ -4,10 +4,10 @@ let KnownTags = [
   "Tree",
   "TreeMerge",
   "ErofsRootfs",
-  "AutotoolsSandbox",
-  "MakefileSandbox",
-  "MesonSandbox",
-  "PerlModuleSandbox",
+  "Autotools",
+  "Makefile",
+  "Meson",
+  "PerlModule",
   "Sandbox",
   "Image",
   "OciExtract",
@@ -243,7 +243,7 @@ let AutotoolsHook =
     Array HookStep,
   ]
 in
-let AutotoolsSandboxConfig = {
+let AutotoolsConfig = {
   configure_args | Array String | optional,
   make_args | Array String | optional,
   env | Dyn | optional,
@@ -253,7 +253,7 @@ let AutotoolsSandboxConfig = {
   post_install | AutotoolsHook | optional,
 }
 in
-let MakefileSandboxConfig = {
+let MakefileConfig = {
   make_args | Array String | optional,
   env | Dyn | optional,
   source_subdir | String | optional,
@@ -262,7 +262,7 @@ let MakefileSandboxConfig = {
   skip_install | Bool | optional,
 }
 in
-let MesonSandboxConfig = {
+let MesonConfig = {
   setup_args | Array String | optional,
   env | Dyn | optional,
   source_subdir | String | optional,
@@ -270,7 +270,7 @@ let MesonSandboxConfig = {
   post_install | AutotoolsHook | optional,
 }
 in
-let PerlModuleSandboxConfig = {
+let PerlModuleConfig = {
   perl_args | Array String | optional,
   make_args | Array String | optional,
   env | Dyn | optional,
@@ -339,19 +339,19 @@ let TreeMergeInputsShape = { .. }
 in
 let ErofsRootfsInputsShape = { .. }
 in
-let MakefileSandboxInputsShape = {
+let MakefileInputsShape = {
   rootfs | Dyn,
   source | Dyn,
   ..
 }
 in
-let MesonSandboxInputsShape = {
+let MesonInputsShape = {
   rootfs | Dyn,
   source | Dyn,
   ..
 }
 in
-let PerlModuleSandboxInputsShape = {
+let PerlModuleInputsShape = {
   rootfs | Dyn,
   source | Dyn,
   ..
@@ -393,25 +393,25 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = validate_tree_config checked.config,
       }
-    else if checked.tag == "AutotoolsSandbox" then
+    else if checked.tag == "Autotools" then
       checked
       & {
-        config = checked.config | AutotoolsSandboxConfig,
+        config = checked.config | AutotoolsConfig,
       }
-    else if checked.tag == "MakefileSandbox" then
+    else if checked.tag == "Makefile" then
       checked
       & {
-        config = checked.config | MakefileSandboxConfig,
+        config = checked.config | MakefileConfig,
       }
-    else if checked.tag == "MesonSandbox" then
+    else if checked.tag == "Meson" then
       checked
       & {
-        config = checked.config | MesonSandboxConfig,
+        config = checked.config | MesonConfig,
       }
-    else if checked.tag == "PerlModuleSandbox" then
+    else if checked.tag == "PerlModule" then
       checked
       & {
-        config = checked.config | PerlModuleSandboxConfig,
+        config = checked.config | PerlModuleConfig,
       }
     else if checked.tag == "Sandbox" then
       checked
@@ -465,25 +465,25 @@ let rec ValidateRecipe = fun recipe =>
       inputs | TreeInputs
     in
     let validate_autotools_sandbox_inputs = fun inputs =>
-      let checked = inputs | MakefileSandboxInputsShape in
+      let checked = inputs | MakefileInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
     in
     let validate_makefile_sandbox_inputs = fun inputs =>
-      let checked = inputs | MakefileSandboxInputsShape in
+      let checked = inputs | MakefileInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
     in
     let validate_meson_sandbox_inputs = fun inputs =>
-      let checked = inputs | MesonSandboxInputsShape in
+      let checked = inputs | MesonInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
     in
     let validate_perl_module_sandbox_inputs = fun inputs =>
-      let checked = inputs | PerlModuleSandboxInputsShape in
+      let checked = inputs | PerlModuleInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -541,28 +541,28 @@ let rec ValidateRecipe = fun recipe =>
         config = validate_tree_config checked.config,
         inputs = validate_tree_inputs checked.inputs,
       }
-    else if checked.tag == "AutotoolsSandbox" then
+    else if checked.tag == "Autotools" then
       checked
       & {
-        config = checked.config | AutotoolsSandboxConfig,
+        config = checked.config | AutotoolsConfig,
         inputs = validate_autotools_sandbox_inputs checked.inputs,
       }
-    else if checked.tag == "MakefileSandbox" then
+    else if checked.tag == "Makefile" then
       checked
       & {
-        config = checked.config | MakefileSandboxConfig,
+        config = checked.config | MakefileConfig,
         inputs = validate_makefile_sandbox_inputs checked.inputs,
       }
-    else if checked.tag == "MesonSandbox" then
+    else if checked.tag == "Meson" then
       checked
       & {
-        config = checked.config | MesonSandboxConfig,
+        config = checked.config | MesonConfig,
         inputs = validate_meson_sandbox_inputs checked.inputs,
       }
-    else if checked.tag == "PerlModuleSandbox" then
+    else if checked.tag == "PerlModule" then
       checked
       & {
-        config = checked.config | PerlModuleSandboxConfig,
+        config = checked.config | PerlModuleConfig,
         inputs = validate_perl_module_sandbox_inputs checked.inputs,
       }
     else if checked.tag == "Sandbox" then
@@ -614,17 +614,17 @@ in
     | doc "Structural contract for `Source` recipe nodes."
     = SourceRecipe,
   autotools_sandbox_config
-    | doc "Config contract for synthetic `AutotoolsSandbox` recipe nodes."
-    = AutotoolsSandboxConfig,
+    | doc "Config contract for synthetic `Autotools` recipe nodes."
+    = AutotoolsConfig,
   makefile_sandbox_config
-    | doc "Config contract for synthetic `MakefileSandbox` recipe nodes."
-    = MakefileSandboxConfig,
+    | doc "Config contract for synthetic `Makefile` recipe nodes."
+    = MakefileConfig,
   meson_sandbox_config
-    | doc "Config contract for synthetic `MesonSandbox` recipe nodes."
-    = MesonSandboxConfig,
+    | doc "Config contract for synthetic `Meson` recipe nodes."
+    = MesonConfig,
   perl_module_sandbox_config
-    | doc "Config contract for synthetic `PerlModuleSandbox` recipe nodes."
-    = PerlModuleSandboxConfig,
+    | doc "Config contract for synthetic `PerlModule` recipe nodes."
+    = PerlModuleConfig,
   sandbox_config
     | doc "Config contract for `Sandbox` recipe nodes."
     = SandboxConfig,

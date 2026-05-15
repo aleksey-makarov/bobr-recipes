@@ -72,7 +72,7 @@ fun pkgs =>
 
   let bzip2_gen1 = {
     name = "bzip2-gen1-1.0.8",
-    tag = "MakefileSandbox",
+    tag = "Makefile",
     config = bzip2_config,
     inputs = {
       rootfs = pkgs.system_rootfs_1,
@@ -84,7 +84,7 @@ fun pkgs =>
 
   let bzip2 = {
     name = "bzip2-1.0.8",
-    tag = "MakefileSandbox",
+    tag = "Makefile",
     config = bzip2_config,
     inputs = {
       rootfs = pkgs.system_rootfs_2,

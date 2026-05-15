@@ -15,7 +15,7 @@ fun pkgs =>
 
   let libffi = {
     name = "libffi-3.5.2",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-static",

@@ -42,7 +42,7 @@ fun pkgs =>
 
   let glibc_gen1 = {
     name = "glibc-gen1-2.42",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "libc_cv_slibdir=/usr/lib64",
@@ -82,7 +82,7 @@ fun pkgs =>
 
   let glibc = {
     name = "glibc-2.42",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "libc_cv_slibdir=/usr/lib64",

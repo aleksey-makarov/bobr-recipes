@@ -45,7 +45,7 @@ fun pkgs =>
 
   let pkgconf_gen1 = {
     name = "pkgconf-gen1-2.5.1",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = pkgconf_config,
     inputs = {
       rootfs = pkgs.system_rootfs_1,
@@ -56,7 +56,7 @@ fun pkgs =>
 
   let pkgconf = {
     name = "pkgconf-2.5.1",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = pkgconf_config,
     inputs = {
       rootfs = pkgs.system_rootfs_2,

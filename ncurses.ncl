@@ -17,7 +17,7 @@ fun pkgs =>
 
   let ncurses = {
     name = "ncurses-6.6",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--mandir=/usr/share/man",

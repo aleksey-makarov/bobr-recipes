@@ -15,7 +15,7 @@ fun pkgs =>
 
   let expat = {
     name = "expat-2.7.1",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-static",

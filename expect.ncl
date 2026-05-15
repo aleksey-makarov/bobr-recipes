@@ -42,7 +42,7 @@ fun pkgs =>
 
   let expect = {
     name = "expect-5.45.4",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       pre_configure = {
         name = "apply_gcc15_patch",

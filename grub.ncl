@@ -18,7 +18,7 @@ fun pkgs =>
 
   let grub = {
     name = "grub-2.12",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       pre_configure = {
         name = "prepare_grub_sources",

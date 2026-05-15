@@ -18,7 +18,7 @@ fun pkgs =>
 
   let gperf = {
     name = "gperf-3.3",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = ["--docdir=/usr/share/doc/gperf-3.3"],
     },

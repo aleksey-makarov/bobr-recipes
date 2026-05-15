@@ -18,7 +18,7 @@ fun pkgs =>
 
   let libtool = {
     name = "libtool-2.5.4",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       post_install = {
         name = "remove_static_libltdl",

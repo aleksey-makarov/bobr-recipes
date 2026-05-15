@@ -18,7 +18,7 @@ fun pkgs =>
 
   let m4_gen1 = {
     name = "m4-gen1-1.4.20",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {},
     inputs = {
       rootfs = pkgs.buildpack_deps_rootfs,
@@ -29,7 +29,7 @@ fun pkgs =>
 
   let m4 = {
     name = "m4-1.4.20",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {},
     inputs = {
       rootfs = pkgs.system_rootfs_1,

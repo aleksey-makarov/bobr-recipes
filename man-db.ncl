@@ -29,7 +29,7 @@ fun pkgs =>
 
   let man_db = {
     name = "man-db-2.13.1",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--docdir=/usr/share/doc/man-db-2.13.1",

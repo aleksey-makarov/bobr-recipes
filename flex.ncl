@@ -15,7 +15,7 @@ fun pkgs =>
 
   let flex = {
     name = "flex-2.6.4",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-nls",

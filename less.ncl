@@ -27,7 +27,7 @@ fun pkgs =>
 
   let less = {
     name = "less-679",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--sysconfdir=/etc",

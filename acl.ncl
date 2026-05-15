@@ -27,7 +27,7 @@ fun pkgs =>
 
   let acl = {
     name = "acl-2.3.2",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-static",

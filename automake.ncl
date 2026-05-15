@@ -18,7 +18,7 @@ fun pkgs =>
 
   let automake = {
     name = "automake-1.18.1",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--docdir=/usr/share/doc/automake-1.18.1",

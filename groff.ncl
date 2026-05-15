@@ -18,7 +18,7 @@ fun pkgs =>
 
   let groff = {
     name = "groff-1.23.0",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       env = {
         PAGE = "A4",

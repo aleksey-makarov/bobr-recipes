@@ -18,7 +18,7 @@ fun pkgs =>
 
   let gmp = {
     name = "gmp-6.3.0",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       pre_configure = {
         name = "patch_configure",

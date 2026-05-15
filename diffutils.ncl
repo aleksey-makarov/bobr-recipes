@@ -18,7 +18,7 @@ fun pkgs =>
 
   let diffutils_gen1 = {
     name = "diffutils-gen1-3.12",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = ["--disable-nls"],
       env = { gl_cv_func_strcasecmp_works = "y" },
@@ -32,7 +32,7 @@ fun pkgs =>
 
   let diffutils = {
     name = "diffutils-3.12",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = ["--disable-nls"],
       env = { gl_cv_func_strcasecmp_works = "y" },

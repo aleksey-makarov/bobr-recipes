@@ -18,7 +18,7 @@ fun pkgs =>
 
   let patch_gen1 = {
     name = "patch-gen1-2.8",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = ["--disable-nls"],
     },
@@ -31,7 +31,7 @@ fun pkgs =>
 
   let patch = {
     name = "patch-2.8",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = ["--disable-nls"],
     },

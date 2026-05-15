@@ -28,7 +28,7 @@ fun pkgs =>
 
   let elfutils = {
     name = "elfutils-0.193",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {
       configure_args = [
         "--disable-debuginfod",

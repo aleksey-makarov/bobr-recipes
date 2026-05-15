@@ -424,8 +424,8 @@ let lower_perl_module_node = fun node =>
   }
 in
 {
-  "AutotoolsSandbox" = lower_autotools_node,
-  "MakefileSandbox" = lower_makefile_node,
-  "MesonSandbox" = lower_meson_node,
-  "PerlModuleSandbox" = lower_perl_module_node,
+  "Autotools" = lower_autotools_node,
+  "Makefile" = lower_makefile_node,
+  "Meson" = lower_meson_node,
+  "PerlModule" = lower_perl_module_node,
 }

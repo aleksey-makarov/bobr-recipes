@@ -15,7 +15,7 @@ fun pkgs =>
 
   let libpipeline = {
     name = "libpipeline-1.5.8",
-    tag = "AutotoolsSandbox",
+    tag = "Autotools",
     config = {},
     inputs = {
       rootfs = pkgs.system_rootfs,

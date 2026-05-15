@@ -46,7 +46,7 @@ fun pkgs =>
 
   let systemd = {
     name = "systemd-257.8",
-    tag = "MesonSandbox",
+    tag = "Meson",
     config = {
       pre_configure = {
         name = "patch_udev_rules",
