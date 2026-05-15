@@ -9,7 +9,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${repo_root}/env.sh"
 rootfs_path="${store_root}/object-refs/qemu-erofs-rootfs"
-kernel_path="${store_root}/object-refs/qemu-kernel/boot/bzImage"
+kernel_path="${store_root}/object-refs/qemu-kernel/root/boot/bzImage"
 qemu_bin="$(command -v qemu-system-x86_64 || true)"
 mem_mb="${QEMU_MEM_MB:-1024}"
 smp_count="${QEMU_SMP:-2}"
