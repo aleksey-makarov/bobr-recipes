@@ -10,7 +10,7 @@ copied=0
 copy_reports_from_dir() {
   local report_dir="$1"
 
-  [ -d "$report_dir" ] || return
+  [ -d "$report_dir" ] || return 0
 
   while IFS= read -r -d '' report; do
     cp "$report" "$dest/"

@@ -28,7 +28,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
+      rootfs = pkgs.buildpack_deps_rootfs,
       script = test_reports_script_source,
       report000 = pkgs.test_system_rootfs_0,
       report001 = pkgs.test_system_rootfs_1,
