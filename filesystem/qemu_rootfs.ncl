@@ -2,8 +2,7 @@ let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let qemu_rootfs_deps = [
-    pkgs.base_filesystem,
-    pkgs.qemu_runtime_files,
+    pkgs.system_runtime_files,
     pkgs.man_pages,
     pkgs.iana_etc,
     pkgs.linux_headers,

@@ -84,7 +84,7 @@ let base_modules = [
   import "gcc.ncl",
   import "glibc.ncl",
   import "filesystem/base-filesystem.ncl",
-  import "filesystem/runtime-files.ncl",
+  import "filesystem/system-runtime-files.ncl",
   import "linux/kernel.ncl",
   import "filesystem/qemu_rootfs.ncl",
   import "system-rootfs.ncl",

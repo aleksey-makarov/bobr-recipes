@@ -1,9 +1,9 @@
 let recipe = import "../recipe-lib.ncl" in
-let tree_data = import "runtime-files-tree.ncl" in
+let tree_data = import "system-runtime-files-tree.ncl" in
 
 fun _pkgs =>
-  let qemu_runtime_files = {
-    name = "qemu-runtime-files",
+  let system_runtime_files = {
+    name = "system-runtime-files",
     tag = "Tree",
     config = {
       tree = tree_data,
@@ -19,6 +19,6 @@ fun _pkgs =>
 
   {
     include [
-      qemu_runtime_files,
+      system_runtime_files,
     ],
   }
