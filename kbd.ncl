@@ -27,7 +27,10 @@ fun pkgs =>
     name = "kbd-2.8.0",
     tag = "AutotoolsPackage",
     deps = {
-      build = [],
+      build = [
+        pkgs.flex,
+        pkgs.pkgconf,
+      ],
       runtime = [
         pkgs.glibc,
       ],

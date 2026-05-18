@@ -22,6 +22,7 @@ fun pkgs =>
       build = [
         pkgs.bison,
         pkgs.flex,
+        pkgs.python,
       ],
       runtime = [
         pkgs.glibc,
