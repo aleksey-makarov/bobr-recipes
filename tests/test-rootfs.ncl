@@ -10,7 +10,6 @@ fun pkgs =>
       path = "tests/test-rootfs.sh",
       mode = "direct",
     },
-    meta = {},
   }
   in
 

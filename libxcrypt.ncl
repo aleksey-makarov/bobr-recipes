@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://github.com/besser82/libxcrypt/releases/download/v4.4.38/libxcrypt-4.4.38.tar.xz",
     },
-    meta = {},
   }
   in
 

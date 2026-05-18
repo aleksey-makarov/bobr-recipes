@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/sed/sed-4.9.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

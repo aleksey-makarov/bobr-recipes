@@ -10,7 +10,6 @@ fun pkgs =>
       path = "perl-configure.sh",
       mode = "direct",
     },
-    meta = {},
   }
   in
 
@@ -22,7 +21,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.cpan.org/src/5.0/perl-5.42.0.tar.xz",
     },
-    meta = {},
   }
   in
 

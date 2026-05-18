@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/dejagnu/dejagnu-1.6.3.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 

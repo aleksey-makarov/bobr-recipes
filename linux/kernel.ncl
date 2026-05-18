@@ -10,7 +10,6 @@ fun pkgs =>
       path = "linux/.config",
       mode = "direct",
     },
-    meta = {},
   }
   in
 
@@ -23,7 +22,6 @@ fun pkgs =>
       path = "linux/kernel.sh",
       mode = "direct",
     },
-    meta = {},
   }
   in
 

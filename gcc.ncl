@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

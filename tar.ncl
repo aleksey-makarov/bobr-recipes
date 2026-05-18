@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/tar/tar-1.35.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

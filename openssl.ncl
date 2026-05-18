@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz",
     },
-    meta = {},
   }
   in
 

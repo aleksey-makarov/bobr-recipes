@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.3/e2fsprogs-1.47.3.tar.gz",
     },
-    meta = {},
   }
   in
 

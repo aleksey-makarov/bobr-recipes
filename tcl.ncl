@@ -12,7 +12,6 @@ fun pkgs =>
         "https://sourceforge.net/projects/tcl/files/Tcl/8.6.16/tcl8.6.16-src.tar.gz/download",
       ],
     },
-    meta = {},
   }
   in
 

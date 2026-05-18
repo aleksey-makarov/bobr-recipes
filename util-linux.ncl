@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.kernel.org/pub/linux/utils/util-linux/v2.41/util-linux-2.41.1.tar.xz",
     },
-    meta = {},
   }
   in
 

@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/gawk/gawk-5.3.2.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

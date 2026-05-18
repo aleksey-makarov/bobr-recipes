@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz",
     },
-    meta = {},
   }
   in
 

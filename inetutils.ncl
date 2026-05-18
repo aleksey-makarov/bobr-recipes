@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/inetutils/inetutils-2.6.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

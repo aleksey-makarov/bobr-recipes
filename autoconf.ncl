@@ -17,7 +17,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/autoconf/autoconf-%{version}.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

@@ -10,7 +10,6 @@ fun pkgs =>
       path = "tests/test-reports.sh",
       mode = "direct",
     },
-    meta = {},
   }
   in
 

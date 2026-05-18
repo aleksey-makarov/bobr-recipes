@@ -12,7 +12,6 @@ fun pkgs =>
         "https://sourceforge.net/projects/psmisc/files/psmisc/psmisc-23.7.tar.xz/download",
       ],
     },
-    meta = {},
   }
   in
 

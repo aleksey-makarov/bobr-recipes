@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/m4/m4-1.4.20.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

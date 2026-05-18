@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/gettext/gettext-0.26.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

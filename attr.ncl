@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://download.savannah.gnu.org/releases/attr/attr-2.5.2.tar.gz",
     },
-    meta = {},
   }
   in
 

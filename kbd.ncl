@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.kernel.org/pub/linux/utils/kbd/kbd-2.8.0.tar.xz",
     },
-    meta = {},
   }
   in
 
@@ -21,7 +20,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/kbd-2.8.0-backspace-1.patch",
     },
-    meta = {},
   }
   in
 

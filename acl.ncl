@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://download.savannah.gnu.org/releases/acl/acl-2.3.2.tar.xz",
     },
-    meta = {},
   }
   in
 

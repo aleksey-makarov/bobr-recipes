@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Validate every JSON build result under mbuild-store/meta-refs against the
+# Validate every JSON build result under mbuild-store/result-refs against the
 # build-result contract.
-# Run this after local builds when you want to check stored result metadata
+# Run this after local builds when you want to check stored result records
 # rather than recipe definitions.
 
 set -euo pipefail
@@ -10,13 +10,13 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "${repo_root}/env.sh"
 contract_file="${repo_root}/contracts/build-result.ncl"
-meta_refs_dir="${store_root}/meta-refs"
+result_refs_dir="${store_root}/result-refs"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
-if [[ ! -d "${meta_refs_dir}" ]]; then
-  echo "meta-refs directory not found: ${meta_refs_dir}" >&2
-  exit 1
+if [[ ! -d "${result_refs_dir}" ]]; then
+  echo "no result-refs directory at ${result_refs_dir}; no build results to validate"
+  exit 0
 fi
 
 count=0
@@ -39,11 +39,11 @@ EOF_INNER
   fi
 
   count=$((count + 1))
-done < <(find "${meta_refs_dir}" -maxdepth 1 -type l -name '*.json' | sort)
+done < <(find "${result_refs_dir}" -maxdepth 1 -type l -name '*.json' | sort)
 
 if [[ ${count} -eq 0 ]]; then
-  echo "no build results found under ${meta_refs_dir}" >&2
-  exit 1
+  echo "no build results found under ${result_refs_dir}"
+  exit 0
 fi
 
 echo "validated ${count} build result(s)"

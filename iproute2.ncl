@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-6.16.0.tar.xz",
     },
-    meta = {},
   }
   in
 

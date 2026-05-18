@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://astron.com/pub/file/file-5.46.tar.gz",
     },
-    meta = {},
   }
   in
 

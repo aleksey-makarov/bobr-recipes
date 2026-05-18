@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/gperf/gperf-3.3.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 

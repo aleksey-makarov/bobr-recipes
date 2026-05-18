@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://download.savannah.gnu.org/releases/man-db/man-db-2.13.1.tar.xz",
     },
-    meta = {},
   }
   in
 

@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/grep/grep-3.12.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

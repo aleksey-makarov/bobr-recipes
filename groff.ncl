@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/groff/groff-1.23.0.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 

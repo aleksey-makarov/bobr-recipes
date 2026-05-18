@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://github.com/systemd/systemd/archive/v257.8/systemd-257.8.tar.gz",
     },
-    meta = {},
   }
   in
 
@@ -21,7 +20,6 @@ fun pkgs =>
       type = "http",
       url = "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-257.8.tar.xz",
     },
-    meta = {},
   }
   in
 

@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/gdbm/gdbm-1.26.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 

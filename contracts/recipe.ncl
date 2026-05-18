@@ -127,12 +127,11 @@ let SourceRecipe = {
     | doc "Special node tag for recipes with predeclared payload object identity.",
   object_hash
     | String
-    | doc "Declared payload object hash materialized from `origin`; `result_id` is derived later from `object_hash` and `meta`.",
+    | doc "Declared payload object hash materialized from `origin`; `result_id` is derived later from `object_hash`.",
   origin
     | SourceOrigin
     | optional
     | doc "Optional source origin. If omitted, the canonical result must already exist in store.",
-  meta | { .. },
 }
 in
 let TextConfig = {
@@ -165,11 +164,6 @@ let InstallMeta = {
   rules
     | Array InstallRule
     | doc "Install rules applied when the result is used as an installable object.",
-}
-in
-let SourceMeta = {
-  install | InstallMeta | optional,
-  ..
 }
 in
 let TreeFileEntry = {
@@ -379,8 +373,7 @@ let PerlModuleInputsShape = {
 in
 let ValidateRecipeShallow = fun recipe =>
   if recipe.tag == "Source" then
-    let checked = recipe | SourceRecipe in
-    checked & { meta = checked.meta | SourceMeta }
+    recipe | SourceRecipe
   else
     let checked = recipe | ShallowBaseRecipe in
     let validate_tree_entry = fun entry =>
@@ -471,8 +464,7 @@ in
 # small smoke cases, not for full-package-set validation.
 let rec ValidateRecipe = fun recipe =>
   if recipe.tag == "Source" then
-    let checked = recipe | SourceRecipe in
-    checked & { meta = checked.meta | SourceMeta }
+    recipe | SourceRecipe
   else
     let checked = recipe | BaseRecipe in
     let validate_tree_entry = fun entry =>

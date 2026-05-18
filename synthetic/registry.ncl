@@ -7,7 +7,6 @@ let buildscript_autotools = {
     path = "synthetic/autotools.sh",
     mode = "direct",
   },
-  meta = {},
 }
 in
 let buildscript_common = {
@@ -19,7 +18,6 @@ let buildscript_common = {
     path = "synthetic/common.sh",
     mode = "direct",
   },
-  meta = {},
 }
 in
 let buildscript_gnu_make = {
@@ -31,7 +29,6 @@ let buildscript_gnu_make = {
     path = "synthetic/gnu-make.sh",
     mode = "direct",
   },
-  meta = {},
 }
 in
 let buildscript_meson = {
@@ -43,7 +40,6 @@ let buildscript_meson = {
     path = "synthetic/meson.sh",
     mode = "direct",
   },
-  meta = {},
 }
 in
 let buildscript_perl_module = {
@@ -55,7 +51,6 @@ let buildscript_perl_module = {
     path = "synthetic/perl-module.sh",
     mode = "direct",
   },
-  meta = {},
 }
 in
 let record_get_or = fun field =>

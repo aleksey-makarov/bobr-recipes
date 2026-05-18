@@ -12,7 +12,6 @@ fun pkgs =>
         "https://sourceforge.net/projects/expect/files/Expect/5.45.4/expect5.45.4.tar.gz/download",
       ],
     },
-    meta = {},
   }
   in
 
@@ -24,7 +23,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/expect-5.45.4-gcc15-1.patch",
     },
-    meta = {},
   }
   in
 

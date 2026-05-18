@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz",
     },
-    meta = {},
   }
   in
 

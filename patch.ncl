@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/patch/patch-2.8.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

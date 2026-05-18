@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/grub/grub-2.12.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

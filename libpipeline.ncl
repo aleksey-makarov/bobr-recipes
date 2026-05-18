@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://download.savannah.gnu.org/releases/libpipeline/libpipeline-1.5.8.tar.gz",
     },
-    meta = {},
   }
   in
 

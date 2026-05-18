@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-6.15.tar.xz",
     },
-    meta = {},
   }
   in
 

@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz",
     },
-    meta = {},
   }
   in
 

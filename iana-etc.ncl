@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://github.com/Mic92/iana-etc/releases/download/20250807/iana-etc-20250807.tar.gz",
     },
-    meta = {},
   }
   in
 

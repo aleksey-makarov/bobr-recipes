@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/findutils/findutils-4.10.0.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

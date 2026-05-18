@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/bison/bison-3.8.2.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://cpan.metacpan.org/authors/id/T/TO/TODDR/XML-Parser-2.47.tar.gz",
     },
-    meta = {},
   }
   in
 

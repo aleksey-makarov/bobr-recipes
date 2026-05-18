@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz",
     },
-    meta = {},
   }
   in
 

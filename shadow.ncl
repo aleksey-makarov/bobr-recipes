@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://github.com/shadow-maint/shadow/releases/download/4.18.0/shadow-4.18.0.tar.xz",
     },
-    meta = {},
   }
   in
 

@@ -18,7 +18,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/binutils/binutils-2.45.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

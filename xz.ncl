@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://github.com/tukaani-project/xz/releases/download/v5.8.1/xz-5.8.1.tar.xz",
     },
-    meta = {},
   }
   in
 

@@ -12,7 +12,6 @@ fun pkgs =>
         "https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-4.0.5.tar.xz/download",
       ],
     },
-    meta = {},
   }
   in
 

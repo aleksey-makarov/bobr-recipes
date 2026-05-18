@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://github.com/libexpat/libexpat/releases/download/R_2_7_1/expat-2.7.1.tar.xz",
     },
-    meta = {},
   }
   in
 

@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 

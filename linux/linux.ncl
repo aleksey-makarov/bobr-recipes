@@ -16,7 +16,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-6.18.10.tar.xz",
     },
-    meta = {},
   }
   in
 
@@ -29,7 +28,6 @@ fun pkgs =>
       path = "linux/linux-headers.sh",
       mode = "direct",
     },
-    meta = {},
   }
   in
 

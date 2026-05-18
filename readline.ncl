@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/readline/readline-8.3.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 

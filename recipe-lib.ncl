@@ -187,7 +187,6 @@ in
                 name = node.name,
                 tag = node.tag,
                 object_hash = node.object_hash,
-                meta = node.meta,
               }
               in
               source_base

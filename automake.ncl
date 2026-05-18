@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/automake/automake-1.18.1.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

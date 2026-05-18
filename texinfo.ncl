@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/texinfo/texinfo-7.2.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

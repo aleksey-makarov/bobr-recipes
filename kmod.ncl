@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.xz",
     },
-    meta = {},
   }
   in
 

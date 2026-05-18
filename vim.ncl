@@ -11,7 +11,6 @@ fun pkgs =>
         "https://github.com/vim/vim/archive/v9.1.1629/vim-9.1.1629.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 

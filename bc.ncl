@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://github.com/gavinhoward/bc/archive/c8dabac65d39fd527a9264a5e505a99b1d8df3d8.tar.gz",
     },
-    meta = {},
   }
   in
 

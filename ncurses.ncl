@@ -11,7 +11,6 @@ fun pkgs =>
         "https://invisible-mirror.net/archives/ncurses/ncurses-6.6.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 

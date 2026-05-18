@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.greenwoodsoftware.com/less/less-679.tar.gz",
     },
-    meta = {},
   }
   in
 

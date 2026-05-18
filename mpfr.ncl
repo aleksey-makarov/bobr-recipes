@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/mpfr/mpfr-4.2.2.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch",
     },
-    meta = {},
   }
   in
 
@@ -24,7 +23,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/glibc/glibc-2.42.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

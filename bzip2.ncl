@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
     },
-    meta = {},
   }
   in
 
@@ -21,7 +20,6 @@ fun pkgs =>
       type = "http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/bzip2-1.0.8-install_docs-1.patch",
     },
-    meta = {},
   }
   in
 

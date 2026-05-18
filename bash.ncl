@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/bash/bash-5.3.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 

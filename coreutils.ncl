@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/coreutils/coreutils-9.7.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

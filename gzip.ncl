@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/gzip/gzip-1.14.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 

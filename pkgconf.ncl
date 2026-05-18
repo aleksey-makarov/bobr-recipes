@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://distfiles.ariadne.space/pkgconf/pkgconf-2.5.1.tar.xz",
     },
-    meta = {},
   }
   in
 

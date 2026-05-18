@@ -11,7 +11,6 @@ fun pkgs =>
         "https://www.python.org/ftp/python/3.13.7/Python-3.13.7.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 
@@ -25,7 +24,6 @@ fun pkgs =>
         "https://pypi.org/packages/source/f/flit-core/flit_core-3.12.0.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 
@@ -39,7 +37,6 @@ fun pkgs =>
         "https://files.pythonhosted.org/packages/source/p/packaging/packaging-25.0.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 
@@ -53,7 +50,6 @@ fun pkgs =>
         "https://pypi.org/packages/source/w/wheel/wheel-0.46.1.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 
@@ -67,7 +63,6 @@ fun pkgs =>
         "https://pypi.org/packages/source/s/setuptools/setuptools-80.9.0.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 
@@ -81,7 +76,6 @@ fun pkgs =>
         "https://pypi.org/packages/source/M/MarkupSafe/markupsafe-3.0.2.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 
@@ -95,7 +89,6 @@ fun pkgs =>
         "https://pypi.org/packages/source/J/Jinja2/jinja2-3.1.6.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 
@@ -109,7 +102,6 @@ fun pkgs =>
         "https://github.com/mesonbuild/meson/releases/download/1.8.3/meson-1.8.3.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 
@@ -123,7 +115,6 @@ fun pkgs =>
         "https://github.com/ninja-build/ninja/archive/v1.13.1/ninja-1.13.1.tar.gz",
       ],
     },
-    meta = {},
   }
   in
 
@@ -136,7 +127,6 @@ fun pkgs =>
       path = "python-modules.sh",
       mode = "direct",
     },
-    meta = {},
   }
   in
 

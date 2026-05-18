@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://zlib.net/fossils/zlib-1.3.1.tar.gz",
     },
-    meta = {},
   }
   in
 

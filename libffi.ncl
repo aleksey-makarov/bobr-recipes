@@ -9,7 +9,6 @@ fun pkgs =>
       type = "http",
       url = "https://github.com/libffi/libffi/releases/download/v3.5.2/libffi-3.5.2.tar.gz",
     },
-    meta = {},
   }
   in
 

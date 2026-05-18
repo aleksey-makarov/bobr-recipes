@@ -12,7 +12,6 @@ fun pkgs =>
         "https://mirrors.kernel.org/gnu/libtool/libtool-2.5.4.tar.xz",
       ],
     },
-    meta = {},
   }
   in
 
