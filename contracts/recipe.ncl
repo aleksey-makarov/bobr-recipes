@@ -354,7 +354,6 @@ let MakefileInputsShape = {
 }
 in
 let AutotoolsPackageInputsShape = {
-  build_base | Dyn,
   source | Dyn,
   ..
 }

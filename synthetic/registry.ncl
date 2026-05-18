@@ -1,3 +1,4 @@
+fun pkgs =>
 let buildscript_autotools = {
   name = "buildscript-autotools",
   tag = "Source",
@@ -135,15 +136,31 @@ let sorted_closure_nodes = fun closure_set =>
     (fun name => std.record.get name closure_set)
     (std.array.sort std.string.compare (std.record.fields closure_set))
 in
+let autotools_package_default_build_deps = [
+  pkgs.linux_headers,
+  pkgs.glibc,
+  pkgs.binutils,
+  pkgs.gcc,
+  pkgs.bash,
+  pkgs.make,
+  pkgs.coreutils,
+  pkgs.gawk,
+  pkgs.sed,
+  pkgs.grep,
+  pkgs.tar,
+  pkgs.gzip,
+  pkgs.xz,
+  pkgs.patch,
+  pkgs.findutils,
+  pkgs.diffutils,
+  pkgs.autoconf,
+  pkgs.m4,
+  pkgs.perl,
+]
+in
 let build_rootfs_for = fun node =>
-  let inputs = node.inputs in
-  let build_base =
-    if std.record.has_field "build_base" inputs then
-      inputs.build_base
-    else
-      fail ("AutotoolsPackage '" ++ node.name ++ "' is missing inputs.build_base")
-  in
-  let build_deps = build_deps_or_empty node in
+  let build_base = pkgs.base_filesystem in
+  let build_deps = autotools_package_default_build_deps @ build_deps_or_empty node in
   let closure_nodes = sorted_closure_nodes (runtime_closure_set build_deps) in
   if std.array.length closure_nodes == 0 then
     build_base
@@ -312,7 +329,7 @@ let lower_autotools_package_node = fun node =>
     std.record.insert
       "rootfs"
       build_rootfs
-      (std.record.remove "build_base" node.inputs)
+      node.inputs
   in
   lower_autotools_node (
     node

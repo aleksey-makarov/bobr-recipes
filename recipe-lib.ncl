@@ -1,9 +1,11 @@
-let synthetic_registry = import "synthetic/registry.ncl" in
-let lower_node = fun node =>
-  if std.record.has_field node.tag synthetic_registry then
-    (std.record.get node.tag synthetic_registry) node
-  else
-    node
+let synthetic_registry_for = import "synthetic/registry.ncl" in
+let lower_node = fun pkgs =>
+  fun node =>
+    let synthetic_registry = synthetic_registry_for pkgs in
+    if std.record.has_field node.tag synthetic_registry then
+      (std.record.get node.tag synthetic_registry) node
+    else
+      node
 in
 let node_inputs = fun node =>
   if node.tag == "Source" then
@@ -113,11 +115,13 @@ in
     ],
   },
 
-  to_request = fun root_node =>
-    let lowered_root_node = lower_node root_node in
+  to_request = fun pkgs =>
+    fun root_node =>
+    let lower = lower_node pkgs in
+    let lowered_root_node = lower root_node in
     let rec collect = fun seen =>
       fun node =>
-        let lowered_node = lower_node node in
+        let lowered_node = lower node in
         if std.record.has_field lowered_node.name seen then
           seen
         else
@@ -180,7 +184,7 @@ in
     std.record.from_array (
       std.array.map
         (fun name =>
-          let node = lower_node (std.record.get name unique_nodes) in
+          let node = lower (std.record.get name unique_nodes) in
           let node_value =
             if node.tag == "Source" then
               let source_base = {

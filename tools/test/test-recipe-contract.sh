@@ -51,7 +51,7 @@ run_case "tree-merge" pass '{"name":"merged-tree","tag":"TreeMerge","config":{},
 run_case "source-http" pass "${source_node}"
 run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"type":"oci-registry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}'
 run_case "autotools-sandbox" pass '{"name":"pkg-sandbox","tag":"Autotools","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "autotools-package" pass '{"name":"pkg-package","tag":"AutotoolsPackage","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"configure_args":["--disable-nls"]},"inputs":{"build_base":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "autotools-package" pass '{"name":"pkg-package","tag":"AutotoolsPackage","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"configure_args":["--disable-nls"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "makefile-sandbox" pass '{"name":"pkg-sandbox","tag":"Makefile","config":{"make_args":["PREFIX=/usr"],"pre_build":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}],"skip_install":true},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "meson-sandbox" pass '{"name":"pkg-sandbox","tag":"Meson","config":{"setup_args":["--buildtype=release"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "perl-module-sandbox" pass '{"name":"pkg-sandbox","tag":"PerlModule","config":{"perl_args":["INSTALLDIRS=vendor"],"make_args":["DESTDIR=/tmp/out"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
@@ -74,7 +74,7 @@ run_case "tree-bad-install-shape" fail '{"name":"runtime-tree","tag":"Tree","con
 run_case "tree-bad-entry-type" fail '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"pipe","path":"lib"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
 run_case "tree-symlink-missing-target" fail '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"symlink","path":"lib"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
 run_case "missing-sandbox-rootfs" fail '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"'}}'
-run_case "missing-autotools-package-build-base" fail '{"name":"pkg-package","tag":"AutotoolsPackage","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"source":'"${source_node}"'}}'
+run_case "missing-autotools-package-source" fail '{"name":"pkg-package","tag":"AutotoolsPackage","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"patch":'"${patch_node}"'}}'
 run_case "sandbox-install-rejected" fail '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"'}}'
 run_case "autotools-sandbox-install-rejected" fail '{"name":"pkg-sandbox","tag":"Autotools","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "meson-sandbox-build-dir-rejected" fail '{"name":"pkg-sandbox","tag":"Meson","config":{"build_dir":"build"},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
@@ -135,7 +135,7 @@ let aux_src = {
     unpack = false,
   },
 } in
-recipe.to_request {
+recipe.to_request {} {
   name = "pkg",
   tag = "Autotools",
   config = {
@@ -223,7 +223,43 @@ let tool_tree = {
   },
   inputs = {},
 } in
-recipe.to_request {
+let default_tool_tree = {
+  name = "default-autotools-tool",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "default-tool" }],
+    },
+  },
+  inputs = {},
+} in
+let fake_pkgs = {
+  base_filesystem = base_tree,
+  linux_headers = default_tool_tree,
+  glibc = default_tool_tree,
+  binutils = default_tool_tree,
+  gcc = default_tool_tree,
+  bash = default_tool_tree,
+  make = default_tool_tree,
+  coreutils = default_tool_tree,
+  gawk = default_tool_tree,
+  sed = default_tool_tree,
+  grep = default_tool_tree,
+  tar = default_tool_tree,
+  gzip = default_tool_tree,
+  xz = default_tool_tree,
+  patch = default_tool_tree,
+  findutils = default_tool_tree,
+  diffutils = default_tool_tree,
+  autoconf = default_tool_tree,
+  m4 = default_tool_tree,
+  perl = default_tool_tree,
+} in
+recipe.to_request fake_pkgs {
   name = "pkg",
   tag = "AutotoolsPackage",
   deps = {
@@ -234,7 +270,6 @@ recipe.to_request {
     configure_args = ["--disable-nls"],
   },
   inputs = {
-    build_base = base_tree,
     source = source_src,
   },
 }
@@ -249,8 +284,9 @@ jq -e '
   .root.tag == "Sandbox"
   and (.root.inputs | has("rootfs"))
   and ([.[] | select(.name == "pkg-build-rootfs" and .tag == "TreeMerge")] | length == 1)
-  and ([.[] | select(.name == "pkg-build-rootfs")][0].inputs | length == 3)
+  and ([.[] | select(.name == "pkg-build-rootfs")][0].inputs | length == 4)
   and ([.[] | select(.name == "base-filesystem")] | length == 1)
+  and ([.[] | select(.name == "default-autotools-tool")] | length == 1)
   and ([.[] | select(.name == "lib-runtime")] | length == 1)
   and ([.[] | select(.name == "tool-runtime")] | length == 1)
 ' <<<"${autotools_package_lowering_json}" >/dev/null
@@ -304,7 +340,43 @@ let tool_tree = {
   },
   inputs = {},
 } in
-recipe.to_request {
+let default_tool_tree = {
+  name = "default-autotools-tool",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "default-tool" }],
+    },
+  },
+  inputs = {},
+} in
+let fake_pkgs = {
+  base_filesystem = base_tree,
+  linux_headers = default_tool_tree,
+  glibc = default_tool_tree,
+  binutils = default_tool_tree,
+  gcc = default_tool_tree,
+  bash = default_tool_tree,
+  make = default_tool_tree,
+  coreutils = default_tool_tree,
+  gawk = default_tool_tree,
+  sed = default_tool_tree,
+  grep = default_tool_tree,
+  tar = default_tool_tree,
+  gzip = default_tool_tree,
+  xz = default_tool_tree,
+  patch = default_tool_tree,
+  findutils = default_tool_tree,
+  diffutils = default_tool_tree,
+  autoconf = default_tool_tree,
+  m4 = default_tool_tree,
+  perl = default_tool_tree,
+} in
+recipe.to_request fake_pkgs {
   name = "pkg",
   tag = "AutotoolsPackage",
   deps = {
@@ -315,7 +387,6 @@ recipe.to_request {
     configure_args = ["--disable-nls"],
   },
   inputs = {
-    build_base = base_tree,
     source = source_src,
   },
 }
@@ -382,7 +453,43 @@ let rec cycle = {
     inputs = {},
   },
 } in
-recipe.to_request {
+let default_tool_tree = {
+  name = "default-autotools-tool",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "default-tool" }],
+    },
+  },
+  inputs = {},
+} in
+let fake_pkgs = {
+  base_filesystem = base_tree,
+  linux_headers = default_tool_tree,
+  glibc = default_tool_tree,
+  binutils = default_tool_tree,
+  gcc = default_tool_tree,
+  bash = default_tool_tree,
+  make = default_tool_tree,
+  coreutils = default_tool_tree,
+  gawk = default_tool_tree,
+  sed = default_tool_tree,
+  grep = default_tool_tree,
+  tar = default_tool_tree,
+  gzip = default_tool_tree,
+  xz = default_tool_tree,
+  patch = default_tool_tree,
+  findutils = default_tool_tree,
+  diffutils = default_tool_tree,
+  autoconf = default_tool_tree,
+  m4 = default_tool_tree,
+  perl = default_tool_tree,
+} in
+recipe.to_request fake_pkgs {
   name = "pkg",
   tag = "AutotoolsPackage",
   deps = {
@@ -391,7 +498,6 @@ recipe.to_request {
   },
   config = {},
   inputs = {
-    build_base = base_tree,
     source = source_src,
   },
 }
@@ -428,7 +534,7 @@ let rootfs_tree = {
   },
   inputs = {},
 } in
-recipe.to_request {
+recipe.to_request {} {
   name = "pkg",
   tag = "Meson",
   config = {

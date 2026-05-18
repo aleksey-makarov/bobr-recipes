@@ -14,7 +14,7 @@
 # The returned value has this outer shape:
 # - `paths.store = store_path`
 # - `paths.local = local_path` when provided
-# - `nodes = recipe.to_request (...)`
+# - `nodes = recipe.to_request raw (...)`
 let mkPkgs = import "pkgs.ncl" in
 let recipe = import "recipe-lib.ncl" in
 let RequestArgs = {
@@ -40,7 +40,7 @@ let request | RequestArgs -> Dyn = fun args =>
     let raw = mkPkgs [] in
     {
       paths = request_paths,
-      nodes = recipe.to_request (std.record.get target_name raw),
+      nodes = recipe.to_request raw (std.record.get target_name raw),
     }
 in
 

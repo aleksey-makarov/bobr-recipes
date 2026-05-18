@@ -14,7 +14,13 @@ fun pkgs =>
 
   let libffi = {
     name = "libffi-3.5.2",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc,
+      ],
+    },
     config = {
       configure_args = [
         "--disable-static",
@@ -22,7 +28,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_2,
       source = libffi_src,
     },
   }
