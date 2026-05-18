@@ -17,7 +17,14 @@ fun pkgs =>
 
   let gmp = {
     name = "gmp-6.3.0",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc,
+        pkgs.gcc,
+      ],
+    },
     config = {
       pre_configure = {
         name = "patch_configure",
@@ -35,7 +42,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = gmp_src,
     },
   }

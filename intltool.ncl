@@ -12,21 +12,18 @@ fun pkgs =>
   }
   in
 
-  let intltool_build_rootfs = {
-    name = "intltool-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs }
-      & recipe.numbered_inputs [
-        pkgs.xml_parser,
-      ],
-  }
-  in
-
   let intltool = {
     name = "intltool-0.51.0",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
+        pkgs.xml_parser,
+      ],
+      runtime = [
+        pkgs.perl,
+        pkgs.xml_parser,
+      ],
+    },
     config = {
       pre_configure = {
         name = "patch_intltool_update",
@@ -52,7 +49,6 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = intltool_build_rootfs,
       source = intltool_src,
     },
   }

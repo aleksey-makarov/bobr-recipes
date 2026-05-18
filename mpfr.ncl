@@ -15,21 +15,18 @@ fun pkgs =>
   }
   in
 
-  let mpfr_build_rootfs = {
-    name = "mpfr-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs }
-      & recipe.numbered_inputs [
-        pkgs.gmp,
-      ],
-  }
-  in
-
   let mpfr = {
     name = "mpfr-4.2.2",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
+        pkgs.gmp,
+      ],
+      runtime = [
+        pkgs.glibc,
+        pkgs.gmp,
+      ],
+    },
     config = {
       configure_args = [
         "--disable-static",
@@ -38,7 +35,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = mpfr_build_rootfs,
       source = mpfr_src,
     },
   }

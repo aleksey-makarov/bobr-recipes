@@ -14,7 +14,17 @@ fun pkgs =>
 
   let util_linux = {
     name = "util-linux-2.41.1",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
+        pkgs.ncurses,
+        pkgs.pkgconf,
+      ],
+      runtime = [
+        pkgs.glibc,
+        pkgs.ncurses,
+      ],
+    },
     config = {
       pre_configure = {
         name = "patch_permissions",
@@ -48,7 +58,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = util_linux_src,
     },
   }

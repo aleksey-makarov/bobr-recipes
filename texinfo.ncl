@@ -17,7 +17,17 @@ fun pkgs =>
 
   let texinfo = {
     name = "texinfo-7.2",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
+        pkgs.ncurses,
+      ],
+      runtime = [
+        pkgs.glibc,
+        pkgs.ncurses,
+        pkgs.perl,
+      ],
+    },
     config = {
       pre_configure = {
         name = "patch_texinfo_sources",
@@ -40,7 +50,6 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = texinfo_src,
     },
   }

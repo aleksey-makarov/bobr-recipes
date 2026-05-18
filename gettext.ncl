@@ -17,7 +17,13 @@ fun pkgs =>
 
   let gettext = {
     name = "gettext-0.26",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc,
+      ],
+    },
     config = {
       configure_args = [
         "--disable-static",
@@ -35,7 +41,6 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = gettext_src,
     },
   }

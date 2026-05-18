@@ -17,14 +17,21 @@ fun pkgs =>
 
   let automake = {
     name = "automake-1.18.1",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.autoconf,
+        pkgs.m4,
+        pkgs.perl,
+      ],
+    },
     config = {
       configure_args = [
         "--docdir=/usr/share/doc/automake-1.18.1",
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = automake_src,
     },
   }

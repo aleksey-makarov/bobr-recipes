@@ -16,7 +16,16 @@ fun pkgs =>
 
   let vim = {
     name = "vim-9.1.1629",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
+        pkgs.ncurses,
+      ],
+      runtime = [
+        pkgs.glibc,
+        pkgs.ncurses,
+      ],
+    },
     config = {
       "in-tree" = true,
       pre_configure = {
@@ -66,7 +75,6 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = vim_src,
     },
   }

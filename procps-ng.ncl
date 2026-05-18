@@ -15,22 +15,23 @@ fun pkgs =>
   }
   in
 
-  let procps_ng_build_rootfs = {
-    name = "procps-ng-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs }
-      & recipe.numbered_inputs [
+  let procps_ng = {
+    name = "procps-ng-4.0.5",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
+        pkgs.pkgconf,
+        pkgs.ncurses,
         pkgs.libcap,
         pkgs.systemd,
       ],
-  }
-  in
-
-  let procps_ng = {
-    name = "procps-ng-4.0.5",
-    tag = "Autotools",
+      runtime = [
+        pkgs.glibc,
+        pkgs.ncurses,
+        pkgs.libcap,
+        pkgs.systemd,
+      ],
+    },
     config = {
       configure_args = [
         "--docdir=/usr/share/doc/procps-ng-4.0.5",
@@ -41,7 +42,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = procps_ng_build_rootfs,
       source = procps_ng_src,
     },
   }

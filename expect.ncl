@@ -26,21 +26,18 @@ fun pkgs =>
   }
   in
 
-  let expect_build_rootfs = {
-    name = "expect-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs }
-      & recipe.numbered_inputs [
-        pkgs.tcl,
-      ],
-  }
-  in
-
   let expect = {
     name = "expect-5.45.4",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
+        pkgs.tcl,
+      ],
+      runtime = [
+        pkgs.glibc,
+        pkgs.tcl,
+      ],
+    },
     config = {
       pre_configure = {
         name = "apply_gcc15_patch",
@@ -71,7 +68,6 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = expect_build_rootfs,
       source = expect_src,
       gcc15_patch = expect_gcc15_patch,
     },

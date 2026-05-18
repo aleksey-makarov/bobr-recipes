@@ -15,22 +15,20 @@ fun pkgs =>
   }
   in
 
-  let mpc_build_rootfs = {
-    name = "mpc-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs }
-      & recipe.numbered_inputs [
+  let mpc = {
+    name = "mpc-1.3.1",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
         pkgs.gmp,
         pkgs.mpfr,
       ],
-  }
-  in
-
-  let mpc = {
-    name = "mpc-1.3.1",
-    tag = "Autotools",
+      runtime = [
+        pkgs.glibc,
+        pkgs.gmp,
+        pkgs.mpfr,
+      ],
+    },
     config = {
       configure_args = [
         "--disable-static",
@@ -38,7 +36,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = mpc_build_rootfs,
       source = mpc_src,
     },
   }

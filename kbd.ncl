@@ -25,7 +25,13 @@ fun pkgs =>
 
   let kbd = {
     name = "kbd-2.8.0",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc,
+      ],
+    },
     config = {
       pre_configure = {
         name = "prepare_kbd_sources",
@@ -57,7 +63,6 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = kbd_src,
       backspace_patch = kbd_backspace_patch,
     },

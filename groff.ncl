@@ -17,14 +17,21 @@ fun pkgs =>
 
   let groff = {
     name = "groff-1.23.0",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc,
+        pkgs.gcc,
+        pkgs.perl,
+      ],
+    },
     config = {
       env = {
         PAGE = "A4",
       },
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = groff_src,
     },
   }

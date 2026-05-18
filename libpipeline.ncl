@@ -14,10 +14,15 @@ fun pkgs =>
 
   let libpipeline = {
     name = "libpipeline-1.5.8",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc,
+      ],
+    },
     config = {},
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = libpipeline_src,
     },
   }

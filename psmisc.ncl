@@ -17,10 +17,18 @@ fun pkgs =>
 
   let psmisc = {
     name = "psmisc-23.7",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
+        pkgs.ncurses,
+      ],
+      runtime = [
+        pkgs.glibc,
+        pkgs.ncurses,
+      ],
+    },
     config = {},
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = psmisc_src,
     },
   }

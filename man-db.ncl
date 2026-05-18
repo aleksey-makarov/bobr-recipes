@@ -12,23 +12,23 @@ fun pkgs =>
   }
   in
 
-  let man_db_build_rootfs = {
-    name = "man-db-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs }
-      & recipe.numbered_inputs [
+  let man_db = {
+    name = "man-db-2.13.1",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
+        pkgs.pkgconf,
         pkgs.gdbm,
         pkgs.groff,
         pkgs.libpipeline,
       ],
-  }
-  in
-
-  let man_db = {
-    name = "man-db-2.13.1",
-    tag = "Autotools",
+      runtime = [
+        pkgs.glibc,
+        pkgs.gdbm,
+        pkgs.groff,
+        pkgs.libpipeline,
+      ],
+    },
     config = {
       configure_args = [
         "--docdir=/usr/share/doc/man-db-2.13.1",
@@ -43,7 +43,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = man_db_build_rootfs,
       source = man_db_src,
     },
   }

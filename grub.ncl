@@ -17,7 +17,16 @@ fun pkgs =>
 
   let grub = {
     name = "grub-2.12",
-    tag = "Autotools",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
+        pkgs.bison,
+        pkgs.flex,
+      ],
+      runtime = [
+        pkgs.glibc,
+      ],
+    },
     config = {
       pre_configure = {
         name = "prepare_grub_sources",
@@ -54,7 +63,6 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = grub_src,
     },
   }
