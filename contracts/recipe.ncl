@@ -4,6 +4,7 @@ let KnownTags = [
   "Tree",
   "TreeMerge",
   "ErofsRootfs",
+  "AutotoolsPackage",
   "Autotools",
   "Makefile",
   "Meson",
@@ -20,6 +21,11 @@ let ArchiveFormat =
   std.contract.from_predicate (fun value => std.array.elem value ["tar-gz", "tar-xz", "tar-bz2", "zip"]
   )
 in
+let RecipeDeps = {
+  build | Array Dyn,
+  runtime | Array Dyn,
+}
+in
 let UrlField = std.contract.any_of [ String, Array String ] in
 let BaseRecipe = {
   name
@@ -35,6 +41,10 @@ let BaseRecipe = {
   inputs
     | { .. }
     | doc "Builder-specific input object.",
+  deps
+    | RecipeDeps
+    | optional
+    | doc "Optional Nickel-level direct build/runtime dependencies for dependency-aware synthetic recipes.",
 }
 in
 let ShallowBaseRecipe = {
@@ -51,6 +61,10 @@ let ShallowBaseRecipe = {
   inputs
     | Dyn
     | doc "Builder-specific input object left unvalidated in shallow mode.",
+  deps
+    | RecipeDeps
+    | optional
+    | doc "Optional Nickel-level direct build/runtime dependencies for dependency-aware synthetic recipes.",
 }
 in
 let SourcePathMode =
@@ -345,6 +359,12 @@ let MakefileInputsShape = {
   ..
 }
 in
+let AutotoolsPackageInputsShape = {
+  build_base | Dyn,
+  source | Dyn,
+  ..
+}
+in
 let MesonInputsShape = {
   rootfs | Dyn,
   source | Dyn,
@@ -397,6 +417,12 @@ let ValidateRecipeShallow = fun recipe =>
       checked
       & {
         config = checked.config | AutotoolsConfig,
+      }
+    else if checked.tag == "AutotoolsPackage" then
+      checked
+      & {
+        config = checked.config | AutotoolsConfig,
+        deps = checked.deps | RecipeDeps,
       }
     else if checked.tag == "Makefile" then
       checked
@@ -466,6 +492,12 @@ let rec ValidateRecipe = fun recipe =>
     in
     let validate_autotools_sandbox_inputs = fun inputs =>
       let checked = inputs | MakefileInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_autotools_package_inputs = fun inputs =>
+      let checked = inputs | AutotoolsPackageInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -546,6 +578,13 @@ let rec ValidateRecipe = fun recipe =>
       & {
         config = checked.config | AutotoolsConfig,
         inputs = validate_autotools_sandbox_inputs checked.inputs,
+      }
+    else if checked.tag == "AutotoolsPackage" then
+      checked
+      & {
+        config = checked.config | AutotoolsConfig,
+        deps = checked.deps | RecipeDeps,
+        inputs = validate_autotools_package_inputs checked.inputs,
       }
     else if checked.tag == "Makefile" then
       checked

@@ -28,9 +28,52 @@ fun pkgs =>
   }
   in
 
+  let zlib_autotools_package = {
+    name = "zlib-autotools-package-1.3.1",
+    tag = "AutotoolsPackage",
+    deps = {
+      build = [
+        pkgs.linux_headers,
+        pkgs.glibc,
+        pkgs.binutils,
+        pkgs.gcc,
+        pkgs.bash_gen1,
+        pkgs.gawk_gen1,
+        pkgs.awk_symlink,
+        pkgs.bison_gen1,
+        pkgs.make_gen1,
+        pkgs.coreutils_gen1,
+        pkgs.sed_gen1,
+        pkgs.grep_gen1,
+        pkgs.gzip_gen1,
+        pkgs.xz_gen1,
+        pkgs.tar_gen1,
+        pkgs.patch_gen1,
+        pkgs.findutils_gen1,
+        pkgs.diffutils_gen1,
+        pkgs.m4_gen1,
+        pkgs.python_gen1,
+      ],
+      runtime = [
+        pkgs.glibc,
+      ],
+    },
+    config = {
+      configure_args = [
+        "--libdir=/usr/lib64",
+      ],
+    },
+    inputs = {
+      build_base = pkgs.base_filesystem,
+      source = zlib_src,
+    },
+  }
+  in
+
   {
     include [
       zlib_src,
       zlib,
+      zlib_autotools_package,
     ],
   }

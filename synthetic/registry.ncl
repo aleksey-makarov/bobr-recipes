@@ -66,6 +66,100 @@ let record_get_or = fun field =>
       else
         fallback
 in
+let fail = fun message =>
+  std.record.get message {}
+in
+let pad3 = fun n =>
+  let digits = std.string.from_number n in
+  if n < 10 then
+    "00" ++ digits
+  else if n < 100 then
+    "0" ++ digits
+  else
+    digits
+in
+let numbered_inputs = fun inputs =>
+  std.record.from_array (
+    std.array.map_with_index
+      (fun idx =>
+        fun input =>
+          {
+            field = "n" ++ pad3 idx,
+            value = input,
+          }
+      )
+      inputs
+  )
+in
+let deps_or_empty = fun node =>
+  record_get_or "deps" { build = [], runtime = [] } node
+in
+let runtime_deps_or_empty = fun node =>
+  record_get_or "runtime" [] (deps_or_empty node)
+in
+let build_deps_or_empty = fun node =>
+  record_get_or "build" [] (deps_or_empty node)
+in
+let dependency_cycle_error = fun stack =>
+  fun name =>
+    fail (
+      "runtime dependency cycle: "
+      ++ std.string.join " -> " (stack @ [name])
+    )
+in
+let runtime_closure_set = fun roots =>
+  let rec visit = fun visiting =>
+    fun visited =>
+      fun stack =>
+        fun node =>
+          let name = node.name in
+          if std.record.has_field name visiting then
+            dependency_cycle_error stack name
+          else if std.record.has_field name visited then
+            visited
+          else
+            let visiting_with_node = std.record.insert name true visiting in
+            let visited_with_deps =
+              std.array.fold_left
+                (fun acc =>
+                  fun dep =>
+                    visit visiting_with_node acc (stack @ [name]) dep
+                )
+                visited
+                (runtime_deps_or_empty node)
+            in
+            std.record.insert name node visited_with_deps
+  in
+  std.array.fold_left
+    (fun acc => fun node => visit {} acc [] node)
+    {}
+    roots
+in
+let sorted_closure_nodes = fun closure_set =>
+  std.array.map
+    (fun name => std.record.get name closure_set)
+    (std.array.sort std.string.compare (std.record.fields closure_set))
+in
+let build_rootfs_for = fun node =>
+  let inputs = node.inputs in
+  let build_base =
+    if std.record.has_field "build_base" inputs then
+      inputs.build_base
+    else
+      fail ("AutotoolsPackage '" ++ node.name ++ "' is missing inputs.build_base")
+  in
+  let build_deps = build_deps_or_empty node in
+  let closure_nodes = sorted_closure_nodes (runtime_closure_set build_deps) in
+  if std.array.length closure_nodes == 0 then
+    build_base
+  else
+    {
+      name = node.name ++ "-build-rootfs",
+      tag = "TreeMerge",
+      config = {},
+      inputs = numbered_inputs ([build_base] @ closure_nodes),
+    }
+in
 let synthetic_source_root_expr = fun node_config =>
   if std.record.has_field "source_subdir" node_config then
     "@{build}/source/" ++ node_config.source_subdir
@@ -216,6 +310,22 @@ let lower_autotools_node = fun node =>
     inputs =
       synthetic_inputs buildscript_autotools node.inputs,
   }
+in
+let lower_autotools_package_node = fun node =>
+  let build_rootfs = build_rootfs_for node in
+  let package_inputs =
+    std.record.insert
+      "rootfs"
+      build_rootfs
+      (std.record.remove "build_base" node.inputs)
+  in
+  lower_autotools_node (
+    node
+    & {
+      tag = "Autotools",
+      inputs = package_inputs,
+    }
+  )
 in
 let lower_makefile_node = fun node =>
   let node_config = node.config in
@@ -424,6 +534,7 @@ let lower_perl_module_node = fun node =>
   }
 in
 {
+  "AutotoolsPackage" = lower_autotools_package_node,
   "Autotools" = lower_autotools_node,
   "Makefile" = lower_makefile_node,
   "Meson" = lower_meson_node,

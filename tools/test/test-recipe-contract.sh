@@ -52,6 +52,7 @@ run_case "tree-merge" pass '{"name":"merged-tree","tag":"TreeMerge","config":{},
 run_case "source-http" pass "${source_node}"
 run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"type":"oci-registry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},"meta":{}}'
 run_case "autotools-sandbox" pass '{"name":"pkg-sandbox","tag":"Autotools","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "autotools-package" pass '{"name":"pkg-package","tag":"AutotoolsPackage","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"configure_args":["--disable-nls"]},"inputs":{"build_base":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "makefile-sandbox" pass '{"name":"pkg-sandbox","tag":"Makefile","config":{"make_args":["PREFIX=/usr"],"pre_build":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}],"skip_install":true},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "meson-sandbox" pass '{"name":"pkg-sandbox","tag":"Meson","config":{"setup_args":["--buildtype=release"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "perl-module-sandbox" pass '{"name":"pkg-sandbox","tag":"PerlModule","config":{"perl_args":["INSTALLDIRS=vendor"],"make_args":["DESTDIR=/tmp/out"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
@@ -75,6 +76,7 @@ run_case "source-http-bad-install-shape" fail '{"name":"src","tag":"Source","obj
 run_case "tree-bad-entry-type" fail '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"pipe","path":"lib"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
 run_case "tree-symlink-missing-target" fail '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"symlink","path":"lib"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
 run_case "missing-sandbox-rootfs" fail '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"'}}'
+run_case "missing-autotools-package-build-base" fail '{"name":"pkg-package","tag":"AutotoolsPackage","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"source":'"${source_node}"'}}'
 run_case "sandbox-install-rejected" fail '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"'}}'
 run_case "autotools-sandbox-install-rejected" fail '{"name":"pkg-sandbox","tag":"Autotools","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "meson-sandbox-build-dir-rejected" fail '{"name":"pkg-sandbox","tag":"Meson","config":{"build_dir":"build"},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
@@ -177,6 +179,242 @@ jq -e '
   and (.root.inputs | has("script"))
   and (.root.inputs | has("synthetic_common"))
 ' <<<"${synthetic_lowering_json}" >/dev/null
+
+cat > "${tmpdir}/check-autotools-package-lowering.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let source_src = {
+  name = "src",
+  tag = "Source",
+  object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  origin = {
+    type = "http",
+    url = "https://example.invalid/src.tar.xz",
+  },
+  meta = {},
+} in
+let base_tree = {
+  name = "base-filesystem",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "bin" }],
+    },
+  },
+  inputs = {},
+} in
+let lib_tree = {
+  name = "lib-runtime",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "lib" }],
+    },
+  },
+  inputs = {},
+} in
+let tool_tree = {
+  name = "tool-runtime",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [lib_tree],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "usr/bin" }],
+    },
+  },
+  inputs = {},
+} in
+recipe.to_request {
+  name = "pkg",
+  tag = "AutotoolsPackage",
+  deps = {
+    build = [lib_tree, tool_tree, tool_tree],
+    runtime = [],
+  },
+  config = {
+    configure_args = ["--disable-nls"],
+  },
+  inputs = {
+    build_base = base_tree,
+    source = source_src,
+  },
+}
+EOF_INNER
+
+autotools_package_lowering_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-autotools-package-lowering.ncl --format json
+)"
+
+jq -e '
+  .root.tag == "Sandbox"
+  and (.root.inputs | has("rootfs"))
+  and ([.[] | select(.name == "pkg-build-rootfs" and .tag == "TreeMerge")] | length == 1)
+  and ([.[] | select(.name == "pkg-build-rootfs")][0].inputs | length == 3)
+  and ([.[] | select(.name == "base-filesystem")] | length == 1)
+  and ([.[] | select(.name == "lib-runtime")] | length == 1)
+  and ([.[] | select(.name == "tool-runtime")] | length == 1)
+' <<<"${autotools_package_lowering_json}" >/dev/null
+
+cat > "${tmpdir}/check-autotools-package-lowering-direct-only.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let source_src = {
+  name = "src",
+  tag = "Source",
+  object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  origin = {
+    type = "http",
+    url = "https://example.invalid/src.tar.xz",
+  },
+  meta = {},
+} in
+let base_tree = {
+  name = "base-filesystem",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "bin" }],
+    },
+  },
+  inputs = {},
+} in
+let lib_tree = {
+  name = "lib-runtime",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "lib" }],
+    },
+  },
+  inputs = {},
+} in
+let tool_tree = {
+  name = "tool-runtime",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [lib_tree],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "usr/bin" }],
+    },
+  },
+  inputs = {},
+} in
+recipe.to_request {
+  name = "pkg",
+  tag = "AutotoolsPackage",
+  deps = {
+    build = [tool_tree],
+    runtime = [],
+  },
+  config = {
+    configure_args = ["--disable-nls"],
+  },
+  inputs = {
+    build_base = base_tree,
+    source = source_src,
+  },
+}
+EOF_INNER
+
+autotools_package_direct_only_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-autotools-package-lowering-direct-only.ncl --format json
+)"
+
+diff -u \
+  <(jq '[.[] | select(.name == "pkg-build-rootfs")][0]' <<<"${autotools_package_lowering_json}") \
+  <(jq '[.[] | select(.name == "pkg-build-rootfs")][0]' <<<"${autotools_package_direct_only_json}") \
+  >/dev/null
+
+cat > "${tmpdir}/check-autotools-package-cycle.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let source_src = {
+  name = "src",
+  tag = "Source",
+  object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  origin = {
+    type = "http",
+    url = "https://example.invalid/src.tar.xz",
+  },
+  meta = {},
+} in
+let base_tree = {
+  name = "base-filesystem",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "bin" }],
+    },
+  },
+  inputs = {},
+} in
+let rec cycle = {
+  left = {
+    name = "left-runtime",
+    tag = "Tree",
+    deps = {
+      build = [],
+      runtime = [cycle.right],
+    },
+    config = {
+      tree = {
+        entries = [{ type = "dir", path = "left" }],
+      },
+    },
+    inputs = {},
+  },
+  right = {
+    name = "right-runtime",
+    tag = "Tree",
+    deps = {
+      build = [],
+      runtime = [cycle.left],
+    },
+    config = {
+      tree = {
+        entries = [{ type = "dir", path = "right" }],
+      },
+    },
+    inputs = {},
+  },
+} in
+recipe.to_request {
+  name = "pkg",
+  tag = "AutotoolsPackage",
+  deps = {
+    build = [cycle.left],
+    runtime = [],
+  },
+  config = {},
+  inputs = {
+    build_base = base_tree,
+    source = source_src,
+  },
+}
+EOF_INNER
+
+if (cd "${tmpdir}" && nickel export check-autotools-package-cycle.ncl --format json >"${tmpdir}/cycle.out" 2>"${tmpdir}/cycle.err"); then
+  echo "expected runtime dependency cycle failure for AutotoolsPackage" >&2
+  exit 1
+fi
+if ! rg "runtime dependency cycle: left-runtime -> right-runtime -> left-runtime" "${tmpdir}/cycle.err" >/dev/null; then
+  echo "expected runtime dependency cycle diagnostic for AutotoolsPackage" >&2
+  cat "${tmpdir}/cycle.err" >&2
+  exit 1
+fi
 
 cat > "${tmpdir}/check-meson-synthetic-lowering.ncl" <<EOF_INNER
 let recipe = import "${repo_root}/recipe-lib.ncl" in
