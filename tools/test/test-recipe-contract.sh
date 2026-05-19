@@ -48,6 +48,7 @@ run_case "tree-file" pass '{"name":"hello-tree","tag":"Tree","config":{"tree":{"
 run_case "tree-dir" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"dev"},{"type":"file","path":"etc/hostname","text":"mbuild\n","executable":false}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
 run_case "tree-symlink" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"usr/bin"},{"type":"symlink","path":"bin","target":"usr/bin"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
 run_case "tree-merge" pass '{"name":"merged-tree","tag":"TreeMerge","config":{},"inputs":{"left":{"name":"left-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"bin"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}},"right":{"name":"right-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"etc"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}}}'
+run_case "rootfs-closure" pass '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{},"inputs":{"root":'"${rootfs_tree}"'}}'
 run_case "source-http" pass "${source_node}"
 run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"type":"oci-registry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}'
 run_case "autotools-sandbox" pass '{"name":"pkg-sandbox","tag":"Autotools","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
@@ -82,6 +83,7 @@ run_case "extra-top-level-field" fail '{"name":"hello","tag":"Text","config":{"s
 run_case "wrong-many-shape" fail '{"name":"img2","tag":"Image","config":{"mode":"bootstrap"},"inputs":{"base":null,"inputs":[]}}'
 run_case "bad-source-http-archive-format" fail '{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"type":"http","url":"https://example.invalid/src.tar.xz","archive_format":"tar-zst"}}'
 run_case "bad-tree-merge-config" fail '{"name":"merged-tree","tag":"TreeMerge","config":{"base":true},"inputs":{}}'
+run_case "bad-rootfs-closure-config" fail '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{"base":true},"inputs":{"root":'"${rootfs_tree}"'}}'
 run_case "bad-erofs-rootfs-config" fail '{"name":"rootfs-erofs","tag":"ErofsRootfs","config":{"compression":"","label":null},"inputs":{}}'
 
 cat > "${tmpdir}/check-synthetic-lowering.ncl" <<EOF_INNER
@@ -510,6 +512,175 @@ fi
 if ! rg "runtime dependency cycle: left-runtime -> right-runtime -> left-runtime" "${tmpdir}/cycle.err" >/dev/null; then
   echo "expected runtime dependency cycle diagnostic for AutotoolsPackage" >&2
   cat "${tmpdir}/cycle.err" >&2
+  exit 1
+fi
+
+cat > "${tmpdir}/check-rootfs-closure-lowering.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let base_tree = {
+  name = "base-filesystem",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "bin" }],
+    },
+  },
+  inputs = {},
+} in
+let leaf_runtime = {
+  name = "leaf-runtime",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "leaf" }],
+    },
+  },
+  inputs = {},
+} in
+let tool_runtime = {
+  name = "tool-runtime",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [leaf_runtime],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "tool" }],
+    },
+  },
+  inputs = {},
+} in
+let no_deps_runtime = {
+  name = "no-deps-runtime",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "no-deps" }],
+    },
+  },
+  inputs = {},
+} in
+recipe.to_request { base_filesystem = base_tree } {
+  name = "pkg-rootfs",
+  tag = "RootfsClosure",
+  config = {},
+  inputs = {
+    tool = tool_runtime,
+    no_deps = no_deps_runtime,
+    duplicate_tool = tool_runtime,
+  },
+}
+EOF_INNER
+
+rootfs_closure_lowering_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-rootfs-closure-lowering.ncl --format json
+)"
+
+jq -e '
+  .root.tag == "TreeMerge"
+  and .root.name == "pkg-rootfs"
+  and ([.[] | select(.name == "base-filesystem")] | length == 1)
+  and ([.[] | select(.name == "tool-runtime")] | length == 1)
+  and ([.[] | select(.name == "leaf-runtime")] | length == 1)
+  and ([.[] | select(.name == "no-deps-runtime")] | length == 1)
+  and (.root.inputs | length == 4)
+' <<<"${rootfs_closure_lowering_json}" >/dev/null
+
+cat > "${tmpdir}/check-rootfs-closure-cycle.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let base_tree = {
+  name = "base-filesystem",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "bin" }],
+    },
+  },
+  inputs = {},
+} in
+let rec cycle = {
+  left = {
+    name = "left-runtime",
+    tag = "Tree",
+    deps = {
+      build = [],
+      runtime = [cycle.right],
+    },
+    config = {
+      tree = {
+        entries = [{ type = "dir", path = "left" }],
+      },
+    },
+    inputs = {},
+  },
+  right = {
+    name = "right-runtime",
+    tag = "Tree",
+    deps = {
+      build = [],
+      runtime = [cycle.left],
+    },
+    config = {
+      tree = {
+        entries = [{ type = "dir", path = "right" }],
+      },
+    },
+    inputs = {},
+  },
+} in
+recipe.to_request { base_filesystem = base_tree } {
+  name = "pkg-rootfs",
+  tag = "RootfsClosure",
+  config = {},
+  inputs = {
+    root = cycle.left,
+  },
+}
+EOF_INNER
+
+if (cd "${tmpdir}" && nickel export check-rootfs-closure-cycle.ncl --format json >"${tmpdir}/rootfs-cycle.out" 2>"${tmpdir}/rootfs-cycle.err"); then
+  echo "expected runtime dependency cycle failure for RootfsClosure" >&2
+  exit 1
+fi
+if ! rg "runtime dependency cycle: left-runtime -> right-runtime -> left-runtime" "${tmpdir}/rootfs-cycle.err" >/dev/null; then
+  echo "expected runtime dependency cycle diagnostic for RootfsClosure" >&2
+  cat "${tmpdir}/rootfs-cycle.err" >&2
+  exit 1
+fi
+
+cat > "${tmpdir}/check-rootfs-closure-empty.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let base_tree = {
+  name = "base-filesystem",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "bin" }],
+    },
+  },
+  inputs = {},
+} in
+recipe.to_request { base_filesystem = base_tree } {
+  name = "empty-rootfs",
+  tag = "RootfsClosure",
+  config = {},
+  inputs = {},
+}
+EOF_INNER
+
+if (cd "${tmpdir}" && nickel export check-rootfs-closure-empty.ncl --format json >"${tmpdir}/rootfs-empty.out" 2>"${tmpdir}/rootfs-empty.err"); then
+  echo "expected empty input failure for RootfsClosure" >&2
+  exit 1
+fi
+if ! rg "RootfsClosure 'empty-rootfs' must have at least one input" "${tmpdir}/rootfs-empty.err" >/dev/null; then
+  echo "expected empty input diagnostic for RootfsClosure" >&2
+  cat "${tmpdir}/rootfs-empty.err" >&2
   exit 1
 fi
 

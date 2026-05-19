@@ -3,6 +3,7 @@ let KnownTags = [
   "Text",
   "Tree",
   "TreeMerge",
+  "RootfsClosure",
   "ErofsRootfs",
   "AutotoolsPackage",
   "Autotools",
@@ -345,6 +346,8 @@ let OciExtractInputsShape = {
 in
 let TreeMergeInputsShape = { .. }
 in
+let RootfsClosureInputsShape = { .. }
+in
 let ErofsRootfsInputsShape = { .. }
 in
 let MakefileInputsShape = {
@@ -437,6 +440,11 @@ let ValidateRecipeShallow = fun recipe =>
         config = checked.config | SandboxConfig,
       }
     else if checked.tag == "TreeMerge" then
+      checked
+      & {
+        config = checked.config | TreeMergeConfig,
+      }
+    else if checked.tag == "RootfsClosure" then
       checked
       & {
         config = checked.config | TreeMergeConfig,
@@ -546,6 +554,12 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_rootfs_closure_inputs = fun inputs =>
+      let checked = inputs | RootfsClosureInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_erofs_rootfs_inputs = fun inputs =>
       let checked = inputs | ErofsRootfsInputsShape in
       std.record.map
@@ -606,6 +620,12 @@ let rec ValidateRecipe = fun recipe =>
       & {
         config = checked.config | TreeMergeConfig,
         inputs = validate_tree_merge_inputs checked.inputs,
+      }
+    else if checked.tag == "RootfsClosure" then
+      checked
+      & {
+        config = checked.config | TreeMergeConfig,
+        inputs = validate_rootfs_closure_inputs checked.inputs,
       }
     else if checked.tag == "ErofsRootfs" then
       checked

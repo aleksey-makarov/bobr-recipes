@@ -172,6 +172,19 @@ let build_rootfs_for = fun node =>
       inputs = numbered_inputs ([build_base] @ closure_nodes),
     }
 in
+let rootfs_closure_for = fun node =>
+  let root_fields = std.array.sort std.string.compare (std.record.fields node.inputs) in
+  let roots = std.array.map (fun field => std.record.get field node.inputs) root_fields in
+  if std.array.length roots == 0 then
+    fail ("RootfsClosure '" ++ node.name ++ "' must have at least one input")
+  else
+    {
+      name = node.name,
+      tag = "TreeMerge",
+      config = {},
+      inputs = numbered_inputs ([pkgs.base_filesystem] @ sorted_closure_nodes (runtime_closure_set roots)),
+    }
+in
 let synthetic_source_root_expr = fun node_config =>
   if std.record.has_field "source_subdir" node_config then
     "@{build}/source/" ++ node_config.source_subdir
@@ -546,6 +559,7 @@ let lower_perl_module_node = fun node =>
   }
 in
 {
+  "RootfsClosure" = rootfs_closure_for,
   "AutotoolsPackage" = lower_autotools_package_node,
   "Autotools" = lower_autotools_node,
   "Makefile" = lower_makefile_node,
