@@ -24,7 +24,7 @@ fun pkgs =>
     inputs =
       recipe.numbered_inputs [
         pkgs.test_reports,
-        pkgs.qemu_kernel,
+        pkgs.linux,
         pkgs.qemu_erofs_rootfs,
       ],
   }

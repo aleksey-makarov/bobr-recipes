@@ -8,7 +8,7 @@ fun pkgs =>
     inputs =
       recipe.numbered_inputs [
         pkgs.base_filesystem,
-        pkgs.linux_headers,
+        pkgs.linux_headers_gen1,
         pkgs.glibc_gen1,
         pkgs.binutils_gen1,
         pkgs.gcc_gen1,
@@ -39,7 +39,7 @@ fun pkgs =>
     inputs =
       recipe.numbered_inputs [
         pkgs.base_filesystem,
-        pkgs.linux_headers,
+        pkgs.linux_headers_gen1,
         pkgs.glibc,
         pkgs.binutils,
         pkgs.gcc,
@@ -70,7 +70,7 @@ fun pkgs =>
     inputs =
       recipe.numbered_inputs [
         pkgs.base_filesystem,
-        pkgs.linux_headers,
+        pkgs.linux_headers_gen1,
         pkgs.glibc,
         pkgs.binutils,
         pkgs.gcc,
