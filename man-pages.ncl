@@ -35,7 +35,15 @@ fun pkgs =>
 
   let man_pages = {
     name = "man-pages-6.15",
-    tag = "Sandbox",
+    tag = "SandboxPackage",
+    deps = {
+      build = [
+        pkgs.coreutils,
+        pkgs.findutils,
+        pkgs.make,
+      ],
+      runtime = [],
+    },
     config = {
       steps = [
         recipe.prepare_source_step,
@@ -53,7 +61,6 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       script = buildscript_man_pages,
       source = man_pages_src,
     },

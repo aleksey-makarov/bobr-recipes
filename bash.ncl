@@ -44,6 +44,12 @@ fun pkgs =>
   let bash = {
     name = "bash-5.3",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {
       configure_args = [
         "--without-bash-malloc",

@@ -14,7 +14,17 @@ fun pkgs =>
 
   let iproute2 = {
     name = "iproute2-6.16.0",
-    tag = "Makefile",
+    tag = "MakefilePackage",
+    deps = {
+      build = [
+        pkgs.bison,
+        pkgs.flex,
+        pkgs.pkgconf,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {
       pre_build = {
         name = "prepare_iproute2_sources",
@@ -44,7 +54,6 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = iproute2_src,
     },
   }

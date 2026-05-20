@@ -48,7 +48,27 @@ fun pkgs =>
 
   let openssl = {
     name = "openssl-3.5.2",
-    tag = "Sandbox",
+    tag = "SandboxPackage",
+    deps = {
+      build = [
+        pkgs.linux_headers,
+        pkgs.glibc,
+        pkgs.binutils,
+        pkgs.gcc,
+        pkgs.make,
+        pkgs.coreutils,
+        pkgs.gawk,
+        pkgs.sed,
+        pkgs.grep,
+        pkgs.findutils,
+        pkgs.diffutils,
+        pkgs.perl,
+        pkgs.zlib,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {
       steps = [
         recipe.prepare_source_step,
@@ -66,7 +86,6 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       script = buildscript_openssl,
       source = openssl_src,
     },

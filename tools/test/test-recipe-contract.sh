@@ -55,9 +55,13 @@ run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":
 run_case "autotools-sandbox" pass '{"name":"pkg-sandbox","tag":"Autotools","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "autotools-package" pass '{"name":"pkg-package","tag":"AutotoolsPackage","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"configure_args":["--disable-nls"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "makefile-sandbox" pass '{"name":"pkg-sandbox","tag":"Makefile","config":{"make_args":["PREFIX=/usr"],"pre_build":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}],"skip_install":true},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "makefile-package" pass '{"name":"pkg-package","tag":"MakefilePackage","deps":{"build":[],"runtime":[]},"config":{"make_args":["PREFIX=/usr"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "meson-sandbox" pass '{"name":"pkg-sandbox","tag":"Meson","config":{"setup_args":["--buildtype=release"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "meson-package" pass '{"name":"pkg-package","tag":"MesonPackage","deps":{"build":[],"runtime":[]},"config":{"setup_args":["--buildtype=release"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "perl-module-sandbox" pass '{"name":"pkg-sandbox","tag":"PerlModule","config":{"perl_args":["INSTALLDIRS=vendor"],"make_args":["DESTDIR=/tmp/out"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "perl-module-package" pass '{"name":"pkg-package","tag":"PerlModulePackage","deps":{"build":[],"runtime":[]},"config":{"perl_args":["INSTALLDIRS=vendor"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "sandbox" pass '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
+run_case "sandbox-package" pass '{"name":"sandbox-package","tag":"SandboxPackage","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "erofs-rootfs" pass '{"name":"rootfs-erofs","tag":"ErofsRootfs","config":{"compression":null,"label":null},"inputs":{"tree0":'"${rootfs_tree}"'}}'
 run_case "image" pass '{"name":"img2","tag":"Image","config":{"mode":"bootstrap"},"inputs":{"in000":{"name":"tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"usr/bin"}]}},"inputs":{}}}}'
 run_case "oci-extract" pass '{"name":"img-rootfs","tag":"OciExtract","config":{},"inputs":{"image":{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"type":"oci-registry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}}}'
@@ -77,6 +81,8 @@ run_case "tree-bad-entry-type" fail '{"name":"runtime-tree","tag":"Tree","config
 run_case "tree-symlink-missing-target" fail '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"symlink","path":"lib"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
 run_case "missing-sandbox-rootfs" fail '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"'}}'
 run_case "missing-autotools-package-source" fail '{"name":"pkg-package","tag":"AutotoolsPackage","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"patch":'"${patch_node}"'}}'
+run_case "missing-makefile-package-source" fail '{"name":"pkg-package","tag":"MakefilePackage","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"patch":'"${patch_node}"'}}'
+run_case "missing-meson-package-deps" fail '{"name":"pkg-package","tag":"MesonPackage","config":{},"inputs":{"source":'"${source_node}"'}}'
 run_case "sandbox-install-rejected" fail '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"'}}'
 run_case "autotools-sandbox-install-rejected" fail '{"name":"pkg-sandbox","tag":"Autotools","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "meson-sandbox-build-dir-rejected" fail '{"name":"pkg-sandbox","tag":"Meson","config":{"build_dir":"build"},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
@@ -257,6 +263,7 @@ let fake_pkgs = {
   grep = default_tool_tree,
   tar = default_tool_tree,
   gzip = default_tool_tree,
+  bzip2 = default_tool_tree,
   xz = default_tool_tree,
   patch = default_tool_tree,
   findutils = default_tool_tree,
@@ -374,6 +381,7 @@ let fake_pkgs = {
   grep = default_tool_tree,
   tar = default_tool_tree,
   gzip = default_tool_tree,
+  bzip2 = default_tool_tree,
   xz = default_tool_tree,
   patch = default_tool_tree,
   findutils = default_tool_tree,
@@ -407,6 +415,151 @@ diff -u \
   <(jq '[.[] | select(.name == "pkg-build-rootfs")][0]' <<<"${autotools_package_lowering_json}") \
   <(jq '[.[] | select(.name == "pkg-build-rootfs")][0]' <<<"${autotools_package_direct_only_json}") \
   >/dev/null
+
+cat > "${tmpdir}/check-meson-package-lowering.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let source_src = {
+  name = "src",
+  tag = "Source",
+  object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  origin = {
+    type = "http",
+    url = "https://example.invalid/src.tar.xz",
+  },
+} in
+let base_tree = {
+  name = "base-filesystem",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "bin" }],
+    },
+  },
+  inputs = {},
+} in
+let common_tool_tree = {
+  name = "common-native-tool",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "common" }],
+    },
+  },
+  inputs = {},
+} in
+let pkgconf_tool_tree = {
+  name = "pkgconf-tool",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "pkgconf" }],
+    },
+  },
+  inputs = {},
+} in
+let python_tool_tree = {
+  name = "python-tool",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "python" }],
+    },
+  },
+  inputs = {},
+} in
+let lib_tree = {
+  name = "lib-runtime",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "lib" }],
+    },
+  },
+  inputs = {},
+} in
+let tool_tree = {
+  name = "tool-runtime",
+  tag = "Tree",
+  deps = {
+    build = [],
+    runtime = [lib_tree],
+  },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "usr/bin" }],
+    },
+  },
+  inputs = {},
+} in
+let fake_pkgs = {
+  base_filesystem = base_tree,
+  linux_headers = common_tool_tree,
+  glibc = common_tool_tree,
+  binutils = common_tool_tree,
+  gcc = common_tool_tree,
+  bash = common_tool_tree,
+  make = common_tool_tree,
+  coreutils = common_tool_tree,
+  gawk = common_tool_tree,
+  sed = common_tool_tree,
+  grep = common_tool_tree,
+  tar = common_tool_tree,
+  gzip = common_tool_tree,
+  bzip2 = common_tool_tree,
+  xz = common_tool_tree,
+  patch = common_tool_tree,
+  findutils = common_tool_tree,
+  diffutils = common_tool_tree,
+  pkgconf = pkgconf_tool_tree,
+  python = python_tool_tree,
+} in
+recipe.to_request fake_pkgs {
+  name = "pkg",
+  tag = "MesonPackage",
+  deps = {
+    build = [tool_tree],
+    runtime = [],
+  },
+  config = {
+    setup_args = ["--buildtype=release"],
+  },
+  inputs = {
+    source = source_src,
+  },
+}
+EOF_INNER
+
+meson_package_lowering_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-meson-package-lowering.ncl --format json
+)"
+
+jq -e '
+  .root.tag == "Sandbox"
+  and (.root.inputs | has("rootfs"))
+  and ([.[] | select(.name == "pkg-build-rootfs" and .tag == "TreeMerge")] | length == 1)
+  and ([.[] | select(.name == "common-native-tool")] | length == 1)
+  and ([.[] | select(.name == "pkgconf-tool")] | length == 1)
+  and ([.[] | select(.name == "python-tool")] | length == 1)
+  and ([.[] | select(.name == "lib-runtime")] | length == 1)
+  and ([.[] | select(.name == "tool-runtime")] | length == 1)
+' <<<"${meson_package_lowering_json}" >/dev/null
 
 cat > "${tmpdir}/check-autotools-package-cycle.ncl" <<EOF_INNER
 let recipe = import "${repo_root}/recipe-lib.ncl" in
@@ -487,6 +640,7 @@ let fake_pkgs = {
   grep = default_tool_tree,
   tar = default_tool_tree,
   gzip = default_tool_tree,
+  bzip2 = default_tool_tree,
   xz = default_tool_tree,
   patch = default_tool_tree,
   findutils = default_tool_tree,

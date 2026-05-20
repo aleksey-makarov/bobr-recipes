@@ -202,6 +202,13 @@ fun pkgs =>
   let python = {
     name = "python-3.13.7",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.zlib,
+      ],
+    },
     config = {
       configure_args = [
         "--enable-shared",

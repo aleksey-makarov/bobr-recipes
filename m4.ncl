@@ -29,6 +29,12 @@ fun pkgs =>
   let m4 = {
     name = "m4-1.4.20",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {},
     inputs = {
       rootfs = pkgs.system_rootfs_1,

@@ -15,6 +15,12 @@ fun pkgs =>
   let expat = {
     name = "expat-2.7.1",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {
       configure_args = [
         "--disable-static",

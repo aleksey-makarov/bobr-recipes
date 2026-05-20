@@ -7,6 +7,10 @@ let KnownTags = [
   "RootfsClosure",
   "ErofsRootfs",
   "AutotoolsPackage",
+  "MakefilePackage",
+  "MesonPackage",
+  "PerlModulePackage",
+  "SandboxPackage",
   "Autotools",
   "Makefile",
   "Meson",
@@ -375,6 +379,23 @@ let AutotoolsPackageInputsShape = {
   ..
 }
 in
+let MakefilePackageInputsShape = {
+  source | Dyn,
+  ..
+}
+in
+let MesonPackageInputsShape = {
+  source | Dyn,
+  ..
+}
+in
+let PerlModulePackageInputsShape = {
+  source | Dyn,
+  ..
+}
+in
+let SandboxPackageInputsShape = { .. }
+in
 let MesonInputsShape = {
   rootfs | Dyn,
   source | Dyn,
@@ -438,20 +459,44 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | MakefileConfig,
       }
+    else if checked.tag == "MakefilePackage" then
+      checked
+      & {
+        config = checked.config | MakefileConfig,
+        deps = checked.deps | RecipeDeps,
+      }
     else if checked.tag == "Meson" then
       checked
       & {
         config = checked.config | MesonConfig,
+      }
+    else if checked.tag == "MesonPackage" then
+      checked
+      & {
+        config = checked.config | MesonConfig,
+        deps = checked.deps | RecipeDeps,
       }
     else if checked.tag == "PerlModule" then
       checked
       & {
         config = checked.config | PerlModuleConfig,
       }
+    else if checked.tag == "PerlModulePackage" then
+      checked
+      & {
+        config = checked.config | PerlModuleConfig,
+        deps = checked.deps | RecipeDeps,
+      }
     else if checked.tag == "Sandbox" then
       checked
       & {
         config = checked.config | SandboxConfig,
+      }
+    else if checked.tag == "SandboxPackage" then
+      checked
+      & {
+        config = checked.config | SandboxConfig,
+        deps = checked.deps | RecipeDeps,
       }
     else if checked.tag == "TreeMerge" then
       checked
@@ -520,14 +565,32 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_makefile_package_inputs = fun inputs =>
+      let checked = inputs | MakefilePackageInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_makefile_sandbox_inputs = fun inputs =>
       let checked = inputs | MakefileInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_meson_package_inputs = fun inputs =>
+      let checked = inputs | MesonPackageInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_meson_sandbox_inputs = fun inputs =>
       let checked = inputs | MesonInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_perl_module_package_inputs = fun inputs =>
+      let checked = inputs | PerlModulePackageInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -551,6 +614,12 @@ let rec ValidateRecipe = fun recipe =>
     in
     let validate_sandbox_inputs = fun inputs =>
       let checked = inputs | SandboxInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_sandbox_package_inputs = fun inputs =>
+      let checked = inputs | SandboxPackageInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -622,11 +691,25 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | MakefileConfig,
         inputs = validate_makefile_sandbox_inputs checked.inputs,
       }
+    else if checked.tag == "MakefilePackage" then
+      checked
+      & {
+        config = checked.config | MakefileConfig,
+        deps = checked.deps | RecipeDeps,
+        inputs = validate_makefile_package_inputs checked.inputs,
+      }
     else if checked.tag == "Meson" then
       checked
       & {
         config = checked.config | MesonConfig,
         inputs = validate_meson_sandbox_inputs checked.inputs,
+      }
+    else if checked.tag == "MesonPackage" then
+      checked
+      & {
+        config = checked.config | MesonConfig,
+        deps = checked.deps | RecipeDeps,
+        inputs = validate_meson_package_inputs checked.inputs,
       }
     else if checked.tag == "PerlModule" then
       checked
@@ -634,11 +717,25 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | PerlModuleConfig,
         inputs = validate_perl_module_sandbox_inputs checked.inputs,
       }
+    else if checked.tag == "PerlModulePackage" then
+      checked
+      & {
+        config = checked.config | PerlModuleConfig,
+        deps = checked.deps | RecipeDeps,
+        inputs = validate_perl_module_package_inputs checked.inputs,
+      }
     else if checked.tag == "Sandbox" then
       checked
       & {
         config = checked.config | SandboxConfig,
         inputs = validate_sandbox_inputs checked.inputs,
+      }
+    else if checked.tag == "SandboxPackage" then
+      checked
+      & {
+        config = checked.config | SandboxConfig,
+        deps = checked.deps | RecipeDeps,
+        inputs = validate_sandbox_package_inputs checked.inputs,
       }
     else if checked.tag == "TreeMerge" then
       checked

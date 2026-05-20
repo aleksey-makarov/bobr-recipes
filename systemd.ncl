@@ -23,13 +23,11 @@ fun pkgs =>
   }
   in
 
-  let systemd_build_rootfs = {
-    name = "systemd-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs }
-      & recipe.numbered_inputs [
+  let systemd = {
+    name = "systemd-257.8",
+    tag = "MesonPackage",
+    deps = {
+      build = [
         pkgs.attr,
         pkgs.acl,
         pkgs.gperf,
@@ -39,14 +37,6 @@ fun pkgs =>
         pkgs.openssl,
         pkgs.util_linux,
       ],
-  }
-  in
-
-  let systemd = {
-    name = "systemd-257.8",
-    tag = "Meson",
-    deps = {
-      build = [],
       runtime = [
         pkgs.glibc_libs,
         pkgs.acl_libs,
@@ -114,7 +104,6 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = systemd_build_rootfs,
       source = systemd_src,
       man_pages = systemd_man_pages_src,
     },

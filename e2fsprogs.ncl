@@ -12,19 +12,6 @@ fun pkgs =>
   }
   in
 
-  let e2fsprogs_build_rootfs = {
-    name = "e2fsprogs-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs }
-      & recipe.numbered_inputs [
-        pkgs.util_linux,
-        pkgs.texinfo,
-      ],
-  }
-  in
-
   let buildscript_e2fsprogs = {
     name = "buildscript-e2fsprogs",
     tag = "Text",
@@ -84,7 +71,28 @@ fun pkgs =>
 
   let e2fsprogs = {
     name = "e2fsprogs-1.47.3",
-    tag = "Sandbox",
+    tag = "SandboxPackage",
+    deps = {
+      build = [
+        pkgs.linux_headers,
+        pkgs.glibc,
+        pkgs.binutils,
+        pkgs.gcc,
+        pkgs.make,
+        pkgs.coreutils,
+        pkgs.gawk,
+        pkgs.sed,
+        pkgs.grep,
+        pkgs.findutils,
+        pkgs.diffutils,
+        pkgs.pkgconf,
+        pkgs.util_linux,
+        pkgs.texinfo,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {
       steps = [
         recipe.prepare_source_step,
@@ -102,7 +110,6 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      rootfs = e2fsprogs_build_rootfs,
       script = buildscript_e2fsprogs,
       source = e2fsprogs_src,
     },

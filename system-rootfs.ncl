@@ -96,52 +96,10 @@ fun pkgs =>
   }
   in
 
-  let system_rootfs = {
-    name = "system-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      recipe.numbered_inputs [
-        pkgs.base_filesystem,
-        pkgs.linux_headers,
-        pkgs.glibc,
-        pkgs.binutils,
-        pkgs.gcc,
-        pkgs.bash,
-        pkgs.gawk,
-        pkgs.bison,
-        pkgs.make,
-        pkgs.coreutils,
-        pkgs.sed,
-        pkgs.grep,
-        pkgs.gzip,
-        pkgs.xz,
-        pkgs.tar,
-        pkgs.patch,
-        pkgs.findutils,
-        pkgs.diffutils,
-        pkgs.m4,
-        pkgs.bc,
-        pkgs.flex,
-        pkgs.zlib,
-        pkgs.elfutils,
-        pkgs.autoconf,
-        pkgs.bzip2,
-        pkgs.ncurses,
-        pkgs.perl,
-        pkgs.pkgconf,
-        pkgs.python,
-        pkgs.expat,
-        pkgs.libffi,
-      ],
-  }
-  in
-
   {
     include [
       system_rootfs_0,
       system_rootfs_1,
       system_rootfs_2,
-      system_rootfs,
     ],
   }

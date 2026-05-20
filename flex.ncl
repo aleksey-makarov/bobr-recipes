@@ -15,6 +15,13 @@ fun pkgs =>
   let flex = {
     name = "flex-2.6.4",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.m4,
+      ],
+    },
     config = {
       configure_args = [
         "--disable-nls",

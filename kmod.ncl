@@ -12,22 +12,20 @@ fun pkgs =>
   }
   in
 
-  let kmod_build_rootfs = {
-    name = "kmod-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs }
-      & recipe.numbered_inputs [
+  let kmod = {
+    name = "kmod-34.2",
+    tag = "MesonPackage",
+    deps = {
+      build = [
         pkgs.openssl,
         pkgs.zstd,
       ],
-  }
-  in
-
-  let kmod = {
-    name = "kmod-34.2",
-    tag = "Meson",
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.openssl_libs,
+        pkgs.zstd,
+      ],
+    },
     config = {
       pre_configure = {
         name = "patch_requires_private",
@@ -44,7 +42,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = kmod_build_rootfs,
       source = kmod_src,
     },
   }

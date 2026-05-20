@@ -15,20 +15,6 @@ fun pkgs =>
   }
   in
 
-  let dejagnu_build_rootfs = {
-    name = "dejagnu-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs }
-      & recipe.numbered_inputs [
-        pkgs.tcl,
-        pkgs.expect,
-        pkgs.texinfo,
-      ],
-  }
-  in
-
   let buildscript_dejagnu = {
     name = "buildscript-dejagnu",
     tag = "Text",
@@ -61,7 +47,30 @@ fun pkgs =>
 
   let dejagnu = {
     name = "dejagnu-1.6.3",
-    tag = "Sandbox",
+    tag = "SandboxPackage",
+    deps = {
+      build = [
+        pkgs.linux_headers,
+        pkgs.glibc,
+        pkgs.binutils,
+        pkgs.gcc,
+        pkgs.make,
+        pkgs.coreutils,
+        pkgs.gawk,
+        pkgs.sed,
+        pkgs.grep,
+        pkgs.findutils,
+        pkgs.diffutils,
+        pkgs.tcl,
+        pkgs.expect,
+        pkgs.texinfo,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.expect,
+        pkgs.tcl,
+      ],
+    },
     config = {
       steps = [
         recipe.prepare_source_step,
@@ -79,7 +88,6 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      rootfs = dejagnu_build_rootfs,
       script = buildscript_dejagnu,
       source = dejagnu_src,
     },

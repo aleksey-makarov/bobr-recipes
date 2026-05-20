@@ -62,6 +62,19 @@ let record_get_or = fun field =>
       else
         fallback
 in
+let record_replace = fun field =>
+  fun value =>
+    fun record =>
+      std.record.insert
+        field
+        value
+        (
+          if std.record.has_field field record then
+            std.record.remove field record
+          else
+            record
+        )
+in
 let fail = fun message =>
   std.record.get message {}
 in
@@ -136,7 +149,7 @@ let sorted_closure_nodes = fun closure_set =>
     (fun name => std.record.get name closure_set)
     (std.array.sort std.string.compare (std.record.fields closure_set))
 in
-let autotools_package_default_build_deps = [
+let common_native_package_default_build_deps = [
   pkgs.linux_headers,
   pkgs.glibc,
   pkgs.binutils,
@@ -149,28 +162,59 @@ let autotools_package_default_build_deps = [
   pkgs.grep,
   pkgs.tar,
   pkgs.gzip,
+  pkgs.bzip2,
   pkgs.xz,
   pkgs.patch,
   pkgs.findutils,
   pkgs.diffutils,
-  pkgs.autoconf,
-  pkgs.m4,
-  pkgs.perl,
 ]
 in
-let build_rootfs_for = fun node =>
-  let build_base = pkgs.base_filesystem in
-  let build_deps = autotools_package_default_build_deps @ build_deps_or_empty node in
-  let closure_nodes = sorted_closure_nodes (runtime_closure_set build_deps) in
-  if std.array.length closure_nodes == 0 then
-    build_base
-  else
-    {
-      name = node.name ++ "-build-rootfs",
-      tag = "TreeMerge",
-      config = {},
-      inputs = numbered_inputs ([build_base] @ closure_nodes),
-    }
+let autotools_package_default_build_deps =
+  common_native_package_default_build_deps
+  @ [
+    pkgs.autoconf,
+    pkgs.m4,
+    pkgs.perl,
+  ]
+in
+let makefile_package_default_build_deps = common_native_package_default_build_deps
+in
+let meson_package_default_build_deps =
+  common_native_package_default_build_deps
+  @ [
+    pkgs.pkgconf,
+    pkgs.python,
+  ]
+in
+let perl_module_package_default_build_deps =
+  common_native_package_default_build_deps
+  @ [
+    pkgs.perl,
+  ]
+in
+let sandbox_package_default_build_deps = [
+  pkgs.bash,
+  pkgs.tar,
+  pkgs.gzip,
+  pkgs.bzip2,
+  pkgs.xz,
+  pkgs.patch,
+]
+in
+let build_rootfs_for = fun default_build_deps =>
+  fun node =>
+    let build_base = pkgs.base_filesystem in
+    let build_deps = default_build_deps @ build_deps_or_empty node in
+    let closure_nodes = sorted_closure_nodes (runtime_closure_set build_deps) in
+    if std.array.length closure_nodes == 0 then
+      build_base
+    else
+      {
+        name = node.name ++ "-build-rootfs",
+        tag = "TreeMerge",
+        config = {},
+        inputs = numbered_inputs ([build_base] @ closure_nodes),
+      }
 in
 let rootfs_closure_for = fun node =>
   let root_fields = std.array.sort std.string.compare (std.record.fields node.inputs) in
@@ -337,19 +381,18 @@ let lower_autotools_node = fun node =>
   }
 in
 let lower_autotools_package_node = fun node =>
-  let build_rootfs = build_rootfs_for node in
+  let build_rootfs = build_rootfs_for autotools_package_default_build_deps node in
   let package_inputs =
-    std.record.insert
+    record_replace
       "rootfs"
       build_rootfs
       node.inputs
   in
   lower_autotools_node (
-    node
-    & {
-      tag = "Autotools",
-      inputs = package_inputs,
-    }
+    record_replace
+      "inputs"
+      package_inputs
+      (record_replace "tag" "Autotools" node)
   )
 in
 let lower_makefile_node = fun node =>
@@ -558,9 +601,71 @@ let lower_perl_module_node = fun node =>
       synthetic_inputs buildscript_perl_module node.inputs,
   }
 in
+let lower_makefile_package_node = fun node =>
+  let build_rootfs = build_rootfs_for makefile_package_default_build_deps node in
+  let package_inputs =
+    record_replace
+      "rootfs"
+      build_rootfs
+      node.inputs
+  in
+  lower_makefile_node (
+    record_replace
+      "inputs"
+      package_inputs
+      (record_replace "tag" "Makefile" node)
+  )
+in
+let lower_meson_package_node = fun node =>
+  let build_rootfs = build_rootfs_for meson_package_default_build_deps node in
+  let package_inputs =
+    record_replace
+      "rootfs"
+      build_rootfs
+      node.inputs
+  in
+  lower_meson_node (
+    record_replace
+      "inputs"
+      package_inputs
+      (record_replace "tag" "Meson" node)
+  )
+in
+let lower_perl_module_package_node = fun node =>
+  let build_rootfs = build_rootfs_for perl_module_package_default_build_deps node in
+  let package_inputs =
+    record_replace
+      "rootfs"
+      build_rootfs
+      node.inputs
+  in
+  lower_perl_module_node (
+    record_replace
+      "inputs"
+      package_inputs
+      (record_replace "tag" "PerlModule" node)
+  )
+in
+let lower_sandbox_package_node = fun node =>
+  let build_rootfs = build_rootfs_for sandbox_package_default_build_deps node in
+  let package_inputs =
+    record_replace
+      "rootfs"
+      build_rootfs
+      node.inputs
+  in
+  record_replace
+    "inputs"
+    package_inputs
+    (record_replace "tag" "Sandbox" node)
+in
 {
   "RootfsClosure" = rootfs_closure_for,
   "AutotoolsPackage" = lower_autotools_package_node,
+  "MakefilePackage" = lower_makefile_package_node,
+  "MesonPackage" = lower_meson_package_node,
+  "PerlModulePackage" = lower_perl_module_package_node,
+  "SandboxPackage" = lower_sandbox_package_node,
   "Autotools" = lower_autotools_node,
   "Makefile" = lower_makefile_node,
   "Meson" = lower_meson_node,

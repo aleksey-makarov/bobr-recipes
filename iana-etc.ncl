@@ -33,7 +33,14 @@ fun pkgs =>
 
   let iana_etc = {
     name = "iana-etc-20250807",
-    tag = "Sandbox",
+    tag = "SandboxPackage",
+    deps = {
+      build = [
+        pkgs.coreutils,
+        pkgs.findutils,
+      ],
+      runtime = [],
+    },
     config = {
       steps = [
         recipe.prepare_source_step,
@@ -51,7 +58,6 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       script = buildscript_iana_etc,
       source = iana_etc_src,
     },

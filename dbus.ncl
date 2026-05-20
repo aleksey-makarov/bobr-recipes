@@ -12,26 +12,18 @@ fun pkgs =>
   }
   in
 
-  let dbus_build_rootfs = {
-    name = "dbus-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs }
-      & recipe.numbered_inputs [
+  let dbus = {
+    name = "dbus-1.16.2",
+    tag = "MesonPackage",
+    deps = {
+      build = [
+        pkgs.expat,
         pkgs.libcap,
         pkgs.systemd,
       ],
-  }
-  in
-
-  let dbus = {
-    name = "dbus-1.16.2",
-    tag = "Meson",
-    deps = {
-      build = [],
       runtime = [
         pkgs.glibc_libs,
+        pkgs.expat,
         pkgs.systemd_libs,
       ],
     },
@@ -91,7 +83,6 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = dbus_build_rootfs,
       source = dbus_src,
     },
   }

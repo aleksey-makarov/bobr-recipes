@@ -65,7 +65,25 @@ fun pkgs =>
 
   let tcl = {
     name = "tcl-8.6.16",
-    tag = "Sandbox",
+    tag = "SandboxPackage",
+    deps = {
+      build = [
+        pkgs.linux_headers,
+        pkgs.glibc,
+        pkgs.binutils,
+        pkgs.gcc,
+        pkgs.make,
+        pkgs.coreutils,
+        pkgs.gawk,
+        pkgs.sed,
+        pkgs.grep,
+        pkgs.findutils,
+        pkgs.diffutils,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {
       steps = [
         recipe.prepare_source_step,
@@ -83,7 +101,6 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      rootfs = pkgs.system_rootfs,
       script = buildscript_tcl,
       source = tcl_src,
     },

@@ -14,7 +14,7 @@ fun pkgs =>
 
   let xml_parser = {
     name = "xml-parser-2.47",
-    tag = "PerlModule",
+    tag = "PerlModulePackage",
     deps = {
       build = [
         pkgs.expat,
@@ -26,7 +26,6 @@ fun pkgs =>
     },
     config = {},
     inputs = {
-      rootfs = pkgs.system_rootfs,
       source = xml_parser_src,
     },
   }

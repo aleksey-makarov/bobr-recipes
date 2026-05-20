@@ -29,6 +29,13 @@ fun pkgs =>
   let bison = {
     name = "bison-3.8.2",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.m4,
+      ],
+    },
     config = {},
     inputs = {
       rootfs = pkgs.system_rootfs_1,
