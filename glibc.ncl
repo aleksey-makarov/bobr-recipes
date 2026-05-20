@@ -120,22 +120,14 @@ fun pkgs =>
   }
   in
 
-  let glibc_libs = {
-    name = "glibc-libs-2.42",
-    tag = "TreeSubset",
-    deps = {
-      build = [],
-      runtime = [],
-    },
-    config = {
-      include = [
-        "usr/lib64/*.so*",
-      ],
-    },
-    inputs = {
-      tree = glibc,
-    },
-  }
+  let glibc_libs =
+    recipe.split.libs glibc "usr/lib64/*.so*"
+    & {
+      deps = {
+        build = [],
+        runtime = [],
+      },
+    }
   in
 
   {

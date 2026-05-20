@@ -73,10 +73,23 @@ fun pkgs =>
   }
   in
 
+  let openssl_libs =
+    recipe.split.libs openssl "usr/lib/*.so*"
+    & {
+      deps = {
+        build = [],
+        runtime = [
+          pkgs.glibc_libs,
+        ],
+      },
+    }
+  in
+
   {
     include [
       openssl_src,
       buildscript_openssl,
       openssl,
+      openssl_libs,
     ],
   }

@@ -29,9 +29,22 @@ fun pkgs =>
   }
   in
 
+  let attr_libs =
+    recipe.split.libs attr "usr/lib/*.so*"
+    & {
+      deps = {
+        build = [],
+        runtime = [
+          pkgs.glibc_libs,
+        ],
+      },
+    }
+  in
+
   {
     include [
       attr_src,
       attr,
+      attr_libs,
     ],
   }

@@ -35,6 +35,21 @@ let numbered_inputs_fn = fun inputs =>
       inputs
   )
 in
+let split_libs_name = fun base =>
+  let matched = std.string.find "^(.+)-([0-9].*)$" base.name in
+  if matched.index == 0 && std.array.length matched.groups == 2 then
+    std.array.at 0 matched.groups ++ "-libs-" ++ std.array.at 1 matched.groups
+  else
+    std.record.get
+      ("recipe.split.libs: base name '" ++ base.name ++ "' does not match package-version")
+      {}
+in
+let split_libs_include = fun globs =>
+  if std.is_string globs then
+    [globs]
+  else
+    globs
+in
 let old_style_input_error = fun node_name =>
   fun slot_name =>
     fun shape =>
@@ -76,6 +91,20 @@ in
   },
 
   numbered_inputs = numbered_inputs_fn,
+
+  split = {
+    libs = fun base =>
+      fun globs => {
+        name = split_libs_name base,
+        tag = "TreeSubset",
+        config = {
+          include = split_libs_include globs,
+        },
+        inputs = {
+          tree = base,
+        },
+      },
+  },
 
   prepare_source_step = {
     name = "prepare_source",

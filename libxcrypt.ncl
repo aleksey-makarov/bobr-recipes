@@ -42,9 +42,22 @@ fun pkgs =>
   }
   in
 
+  let libxcrypt_libs =
+    recipe.split.libs libxcrypt "usr/lib/*.so*"
+    & {
+      deps = {
+        build = [],
+        runtime = [
+          pkgs.glibc_libs,
+        ],
+      },
+    }
+  in
+
   {
     include [
       libxcrypt_src,
       libxcrypt,
+      libxcrypt_libs,
     ],
   }

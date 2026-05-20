@@ -63,9 +63,22 @@ fun pkgs =>
   }
   in
 
+  let util_linux_libs =
+    recipe.split.libs util_linux "usr/lib/*.so*"
+    & {
+      deps = {
+        build = [],
+        runtime = [
+          pkgs.glibc_libs,
+        ],
+      },
+    }
+  in
+
   {
     include [
       util_linux_src,
       util_linux,
+      util_linux_libs,
     ],
   }

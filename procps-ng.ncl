@@ -28,8 +28,8 @@ fun pkgs =>
       runtime = [
         pkgs.glibc_libs,
         pkgs.ncurses_libs,
-        pkgs.libcap,
-        pkgs.systemd,
+        pkgs.libcap_libs,
+        pkgs.systemd_libs,
       ],
     },
     config = {

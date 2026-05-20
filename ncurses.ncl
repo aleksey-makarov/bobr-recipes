@@ -83,27 +83,21 @@ fun pkgs =>
   }
   in
 
-  let ncurses_libs = {
-    name = "ncurses-libs-6.6",
-    tag = "TreeSubset",
-    deps = {
-      build = [],
-      runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
-      ],
-    },
-    config = {
-      include = [
-        "usr/lib/*.so*",
-        "usr/share/terminfo/**",
-        "usr/share/tabset/**",
-      ],
-    },
-    inputs = {
-      tree = ncurses,
-    },
-  }
+  let ncurses_libs =
+    recipe.split.libs ncurses [
+      "usr/lib/*.so*",
+      "usr/share/terminfo/**",
+      "usr/share/tabset/**",
+    ]
+    & {
+      deps = {
+        build = [],
+        runtime = [
+          pkgs.glibc_libs,
+          pkgs.gcc_libs,
+        ],
+      },
+    }
   in
 
   {

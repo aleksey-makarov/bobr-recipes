@@ -40,9 +40,23 @@ fun pkgs =>
   }
   in
 
+  let acl_libs =
+    recipe.split.libs acl "usr/lib/*.so*"
+    & {
+      deps = {
+        build = [],
+        runtime = [
+          pkgs.glibc_libs,
+          pkgs.attr_libs,
+        ],
+      },
+    }
+  in
+
   {
     include [
       acl_src,
       acl,
+      acl_libs,
     ],
   }

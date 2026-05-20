@@ -569,6 +569,41 @@ jq -e '
   and ([.[] | select(.name == "input-tree")] | length == 1)
 ' <<<"${tree_subset_lowering_json}" >/dev/null
 
+cat > "${tmpdir}/check-recipe-split-libs-helper.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let base = {
+  name = "systemd-257.8",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "usr/lib" }],
+    },
+  },
+  inputs = {},
+} in
+{
+  single = recipe.split.libs base "usr/lib/libsystemd.so*",
+  many = recipe.split.libs base [
+    "usr/lib/libsystemd.so*",
+    "usr/lib/libudev.so*",
+  ],
+}
+EOF_INNER
+
+recipe_split_libs_helper_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-recipe-split-libs-helper.ncl --format json
+)"
+
+jq -e '
+  .single.name == "systemd-libs-257.8"
+  and .single.tag == "TreeSubset"
+  and .single.config.include == ["usr/lib/libsystemd.so*"]
+  and .single.inputs.tree.name == "systemd-257.8"
+  and (.single | has("deps") | not)
+  and .many.config.include == ["usr/lib/libsystemd.so*", "usr/lib/libudev.so*"]
+' <<<"${recipe_split_libs_helper_json}" >/dev/null
+
 cat > "${tmpdir}/check-rootfs-closure-lowering.ncl" <<EOF_INNER
 let recipe = import "${repo_root}/recipe-lib.ncl" in
 let base_tree = {

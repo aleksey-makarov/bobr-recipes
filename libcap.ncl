@@ -37,9 +37,22 @@ fun pkgs =>
   }
   in
 
+  let libcap_libs =
+    recipe.split.libs libcap "usr/lib/*.so*"
+    & {
+      deps = {
+        build = [],
+        runtime = [
+          pkgs.glibc_libs,
+        ],
+      },
+    }
+  in
+
   {
     include [
       libcap_src,
       libcap,
+      libcap_libs,
     ],
   }

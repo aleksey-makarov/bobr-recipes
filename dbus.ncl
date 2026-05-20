@@ -28,6 +28,13 @@ fun pkgs =>
   let dbus = {
     name = "dbus-1.16.2",
     tag = "Meson",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.systemd_libs,
+      ],
+    },
     config = {
       setup_args = [
         "--buildtype=release",

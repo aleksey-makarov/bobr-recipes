@@ -45,6 +45,17 @@ fun pkgs =>
   let systemd = {
     name = "systemd-257.8",
     tag = "Meson",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.acl_libs,
+        pkgs.libcap_libs,
+        pkgs.libxcrypt_libs,
+        pkgs.openssl_libs,
+        pkgs.util_linux_libs,
+      ],
+    },
     config = {
       pre_configure = {
         name = "patch_udev_rules",
@@ -110,10 +121,27 @@ fun pkgs =>
   }
   in
 
+  let systemd_libs =
+    recipe.split.libs systemd [
+      "usr/lib/libsystemd.so*",
+      "usr/lib/libudev.so*",
+    ]
+    & {
+      deps = {
+        build = [],
+        runtime = [
+          pkgs.glibc_libs,
+          pkgs.libcap_libs,
+        ],
+      },
+    }
+  in
+
   {
     include [
       systemd_src,
       systemd_man_pages_src,
       systemd,
+      systemd_libs,
     ],
   }
