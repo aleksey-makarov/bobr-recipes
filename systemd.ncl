@@ -1,30 +1,41 @@
 let recipe = import "recipe-lib.ncl" in
+let version = "260.1" in
+let hashes = {
+  "257.8" = {
+    source = "205fac8b8602a9b692c9bac232f9cac70a52050d9af9a44fc7e24144d7b67e50",
+    man_pages = "b0c85b585ffc3cfa57c3ee9da936d2f1e0de9ef2fa1db4bff94005eee5bddc04",
+  },
+  "260.1" = {
+    source = "9828f807cb88b337f4794f19858c5d0a6314ecfd31a83f0f795f8fa377201cc0",
+    man_pages = "8e0e15ec0bb84e9a23a3813494fad7a5d2358e564a5efc98abba8997e168dc01",
+  },
+} in
 
 fun pkgs =>
   let systemd_src = {
-    name = "systemd-src-257.8",
+    name = "systemd-src-%{version}",
     tag = "Source",
-    object_hash = "205fac8b8602a9b692c9bac232f9cac70a52050d9af9a44fc7e24144d7b67e50",
+    object_hash = hashes."%{version}".source,
     origin = {
       type = "http",
-      url = "https://github.com/systemd/systemd/archive/v257.8/systemd-257.8.tar.gz",
+      url = "https://github.com/systemd/systemd/archive/v%{version}/systemd-%{version}.tar.gz",
     },
   }
   in
 
   let systemd_man_pages_src = {
-    name = "systemd-man-pages-src-257.8",
+    name = "systemd-man-pages-src-%{version}",
     tag = "Source",
-    object_hash = "b0c85b585ffc3cfa57c3ee9da936d2f1e0de9ef2fa1db4bff94005eee5bddc04",
+    object_hash = hashes."%{version}".man_pages,
     origin = {
       type = "http",
-      url = "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-257.8.tar.xz",
+      url = "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-%{version}.tar.xz",
     },
   }
   in
 
   let systemd = {
-    name = "systemd-257.8",
+    name = "systemd-%{version}",
     tag = "MesonPackage",
     deps = {
       build = [
@@ -77,7 +88,7 @@ fun pkgs =>
         "-Dnobody-group=nogroup",
         "-Dsysupdate=disabled",
         "-Dukify=disabled",
-        "-Ddocdir=/usr/share/doc/systemd-257.8",
+        "-Ddocdir=/usr/share/doc/systemd-%{version}",
       ],
       post_install = {
         name = "install_man_pages_and_machine_id",
