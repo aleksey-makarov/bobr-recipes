@@ -102,7 +102,7 @@ let base_modules = [
   import "tests/test-rootfs.ncl",
   import "tests/test-reports.ncl",
   import "vim.ncl",
-  import "aggregate-targets.ncl",
+  import "aggregate.ncl",
 ]
 in
 
