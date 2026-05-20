@@ -22,7 +22,7 @@ fun pkgs =>
       build = [],
       runtime = [
         pkgs.glibc,
-        pkgs.gcc,
+        pkgs.gcc_libs,
       ],
     },
     config = {

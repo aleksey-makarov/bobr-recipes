@@ -3,6 +3,7 @@ let KnownTags = [
   "Text",
   "Tree",
   "TreeMerge",
+  "TreeSubset",
   "RootfsClosure",
   "ErofsRootfs",
   "AutotoolsPackage",
@@ -302,6 +303,10 @@ in
 let TreeMergeConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
+let TreeSubsetConfig = {
+  include | Array String,
+}
+in
 let ErofsNullableString =
   std.contract.from_predicate (fun value => value == null || std.is_string value && value != "")
 in
@@ -345,6 +350,12 @@ let OciExtractInputsShape = {
 }
 in
 let TreeMergeInputsShape = { .. }
+in
+let TreeSubsetInputsShape = {
+  tree
+    | Dyn
+    | doc "Single fs-tree input to subset.",
+}
 in
 let RootfsClosureInputsShape = { .. }
 in
@@ -443,6 +454,11 @@ let ValidateRecipeShallow = fun recipe =>
       checked
       & {
         config = checked.config | TreeMergeConfig,
+      }
+    else if checked.tag == "TreeSubset" then
+      checked
+      & {
+        config = checked.config | TreeSubsetConfig,
       }
     else if checked.tag == "RootfsClosure" then
       checked
@@ -554,6 +570,12 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_tree_subset_inputs = fun inputs =>
+      let checked = inputs | TreeSubsetInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_rootfs_closure_inputs = fun inputs =>
       let checked = inputs | RootfsClosureInputsShape in
       std.record.map
@@ -620,6 +642,12 @@ let rec ValidateRecipe = fun recipe =>
       & {
         config = checked.config | TreeMergeConfig,
         inputs = validate_tree_merge_inputs checked.inputs,
+      }
+    else if checked.tag == "TreeSubset" then
+      checked
+      & {
+        config = checked.config | TreeSubsetConfig,
+        inputs = validate_tree_subset_inputs checked.inputs,
       }
     else if checked.tag == "RootfsClosure" then
       checked

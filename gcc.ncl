@@ -105,10 +105,33 @@ fun pkgs =>
   }
   in
 
+  let gcc_libs = {
+    name = "gcc-libs-15.2.0",
+    tag = "TreeSubset",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc,
+      ],
+    },
+    config = {
+      include = [
+        "usr/lib64/libgcc_s.so.1",
+        "usr/lib64/libstdc++.so.6",
+        "usr/lib64/libstdc++.so.6.0.34",
+      ],
+    },
+    inputs = {
+      tree = gcc,
+    },
+  }
+  in
+
   {
     include [
       gcc_src,
       gcc_gen1,
       gcc,
+      gcc_libs,
     ],
   }

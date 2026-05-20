@@ -48,6 +48,7 @@ run_case "tree-file" pass '{"name":"hello-tree","tag":"Tree","config":{"tree":{"
 run_case "tree-dir" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"dev"},{"type":"file","path":"etc/hostname","text":"mbuild\n","executable":false}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
 run_case "tree-symlink" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"usr/bin"},{"type":"symlink","path":"bin","target":"usr/bin"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
 run_case "tree-merge" pass '{"name":"merged-tree","tag":"TreeMerge","config":{},"inputs":{"left":{"name":"left-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"bin"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}},"right":{"name":"right-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"etc"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}}}'
+run_case "tree-subset" pass '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib64/libfoo.so*"]},"inputs":{"tree":'"${rootfs_tree}"'}}'
 run_case "rootfs-closure" pass '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{},"inputs":{"root":'"${rootfs_tree}"'}}'
 run_case "source-http" pass "${source_node}"
 run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"type":"oci-registry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}'
@@ -83,6 +84,8 @@ run_case "extra-top-level-field" fail '{"name":"hello","tag":"Text","config":{"s
 run_case "wrong-many-shape" fail '{"name":"img2","tag":"Image","config":{"mode":"bootstrap"},"inputs":{"base":null,"inputs":[]}}'
 run_case "bad-source-http-archive-format" fail '{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"type":"http","url":"https://example.invalid/src.tar.xz","archive_format":"tar-zst"}}'
 run_case "bad-tree-merge-config" fail '{"name":"merged-tree","tag":"TreeMerge","config":{"base":true},"inputs":{}}'
+run_case "bad-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":"usr/lib64/libfoo.so*"},"inputs":{"tree":'"${rootfs_tree}"'}}'
+run_case "missing-tree-subset-input" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib64/libfoo.so*"]},"inputs":{}}'
 run_case "bad-rootfs-closure-config" fail '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{"base":true},"inputs":{"root":'"${rootfs_tree}"'}}'
 run_case "bad-erofs-rootfs-config" fail '{"name":"rootfs-erofs","tag":"ErofsRootfs","config":{"compression":"","label":null},"inputs":{}}'
 
@@ -512,6 +515,90 @@ fi
 if ! rg "runtime dependency cycle: left-runtime -> right-runtime -> left-runtime" "${tmpdir}/cycle.err" >/dev/null; then
   echo "expected runtime dependency cycle diagnostic for AutotoolsPackage" >&2
   cat "${tmpdir}/cycle.err" >&2
+  exit 1
+fi
+
+cat > "${tmpdir}/check-tree-subset-lowering.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let rootfs_tree = {
+  name = "rootfs-tree",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "bin" }],
+    },
+  },
+  inputs = {},
+} in
+let input_tree = {
+  name = "input-tree",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "usr/lib64" }],
+    },
+  },
+  inputs = {},
+} in
+recipe.to_request { system_rootfs_0 = rootfs_tree } {
+  name = "pkg-subset",
+  tag = "TreeSubset",
+  config = {
+    include = ["usr/lib64/libfoo.so*"],
+  },
+  inputs = {
+    tree = input_tree,
+  },
+}
+EOF_INNER
+
+tree_subset_lowering_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-tree-subset-lowering.ncl --format json
+)"
+
+jq -e '
+  .root.tag == "Sandbox"
+  and .root.name == "pkg-subset"
+  and .root.config.script_config.include[0] == "usr/lib64/libfoo.so*"
+  and .root.config.steps[0].name == "subset_tree"
+  and (.root.inputs | has("rootfs"))
+  and (.root.inputs | has("tree"))
+  and ([.[] | select(.name == "buildscript-tree-subset")] | length == 1)
+  and ([.[] | select(.name == "input-tree")] | length == 1)
+' <<<"${tree_subset_lowering_json}" >/dev/null
+
+cat > "${tmpdir}/check-tree-subset-empty.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let rootfs_tree = {
+  name = "rootfs-tree",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = "bin" }],
+    },
+  },
+  inputs = {},
+} in
+recipe.to_request { system_rootfs_0 = rootfs_tree } {
+  name = "empty-subset",
+  tag = "TreeSubset",
+  config = {
+    include = [],
+  },
+  inputs = {
+    tree = rootfs_tree,
+  },
+}
+EOF_INNER
+
+if (cd "${tmpdir}" && nickel export check-tree-subset-empty.ncl --format json >"${tmpdir}/tree-subset-empty.out" 2>"${tmpdir}/tree-subset-empty.err"); then
+  echo "expected empty include failure for TreeSubset" >&2
+  exit 1
+fi
+if ! rg "TreeSubset 'empty-subset' must include at least one pattern" "${tmpdir}/tree-subset-empty.err" >/dev/null; then
+  echo "expected empty include diagnostic for TreeSubset" >&2
+  cat "${tmpdir}/tree-subset-empty.err" >&2
   exit 1
 fi
 
