@@ -7,9 +7,44 @@
 
 set -euo pipefail
 
+usage() {
+  echo "usage: $0 [--jobs N] [pkgs-attr]" >&2
+}
+
+jobs=""
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --jobs|-j)
+      if [ "$#" -lt 2 ]; then
+        usage
+        exit 2
+      fi
+      jobs="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --*)
+      usage
+      exit 2
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
 if [ "$#" -gt 1 ]; then
-  echo "usage: $0 [pkgs-attr]" >&2
-  exit 1
+  usage
+  exit 2
+fi
+
+if [ -n "${jobs}" ] && ! [[ "${jobs}" =~ ^[1-9][0-9]*$ ]]; then
+  echo "build-attr.sh: --jobs must be a positive integer" >&2
+  exit 2
 fi
 
 attr="${1:-all_artifacts}"
@@ -24,7 +59,23 @@ mkdir -p "${store_root}"
 echo "==> regenerate tree modules" >&2
 python3 "${tree_generator}"
 
-expr=$(cat <<EOF_INNER
+if [ -n "${jobs}" ]; then
+  expr=$(cat <<EOF_INNER
+let request = import "${request_file}" in
+let base = request {
+  store_path = "${store_root}",
+  local_path = "${local_root}",
+  target_name = "${attr}",
+} in
+base & {
+  options = {
+    jobs = ${jobs},
+  },
+}
+EOF_INNER
+  )
+else
+  expr=$(cat <<EOF_INNER
 let request = import "${request_file}" in
 request {
   store_path = "${store_root}",
@@ -32,9 +83,13 @@ request {
   target_name = "${attr}",
 }
 EOF_INNER
-)
+  )
+fi
 
 echo "==> export request for ${attr}" >&2
+if [ -n "${jobs}" ]; then
+  echo "==> use jobs=${jobs}" >&2
+fi
 echo "==> build ${attr}" >&2
 (
   cd "${workspace_root}"
