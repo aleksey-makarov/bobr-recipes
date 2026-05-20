@@ -26,6 +26,7 @@ fun pkgs =>
       ],
       runtime = [
         pkgs.glibc_libs,
+        pkgs.xz_libs,
       ],
     },
     config = {

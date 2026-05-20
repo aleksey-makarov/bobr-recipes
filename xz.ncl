@@ -31,6 +31,12 @@ fun pkgs =>
   let xz = {
     name = "xz-5.8.1",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {
       configure_args = [
         "--disable-static",
@@ -44,10 +50,23 @@ fun pkgs =>
   }
   in
 
+  let xz_libs =
+    recipe.split.libs xz "usr/lib/liblzma.so*"
+    & {
+      deps = {
+        build = [],
+        runtime = [
+          pkgs.glibc_libs,
+        ],
+      },
+    }
+  in
+
   {
     include [
       xz_src,
       xz_gen1,
       xz,
+      xz_libs,
     ],
   }
