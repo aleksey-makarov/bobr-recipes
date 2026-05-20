@@ -1,7 +1,15 @@
 let recipe = import "../recipe-lib.ncl" in
-let version = "6.18.10" in
+let version = "7.0.9" in
+let major_version =
+  let matched = std.string.find "^([0-9]+)[.]" version in
+  if matched.index == 0 && std.array.length matched.groups == 1 then
+    std.array.at 0 matched.groups
+  else
+    std.fail_with "linux.ncl: version must start with a major version"
+in
 let hashes = {
   "6.18.10" = "91c880a309524138bf58dda3187ffa58e1656b95857b9a43ce772d09fb59a4f5",
+  "7.0.9"   = "6e78d8e1838519b60d5c5af1df344fee13d281a7fbbdccb01b0ef3bbc8ca3a4f",
 } in
 
 fun pkgs =>
@@ -11,7 +19,7 @@ fun pkgs =>
     object_hash = hashes."%{version}",
     origin = {
       type = "http",
-      url = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-6.18.10.tar.xz",
+      url = "https://www.kernel.org/pub/linux/kernel/v%{major_version}.x/linux-%{version}.tar.xz",
     },
   }
   in
