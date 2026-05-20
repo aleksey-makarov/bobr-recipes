@@ -70,6 +70,7 @@ fun pkgs =>
     pkgs.procps_ng,
     pkgs.findutils,
     pkgs.gzip,
+    pkgs.rsync,
     pkgs.tar,
     pkgs.texinfo,
     pkgs.util_linux,
