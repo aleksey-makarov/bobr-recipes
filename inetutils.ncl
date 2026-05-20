@@ -30,6 +30,13 @@ fun pkgs =>
   let inetutils = {
     name = "inetutils-2.6",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.ncurses_libs,
+      ],
+    },
     config = {
       pre_configure = {
         name = "patch_telnet",

@@ -17,6 +17,13 @@ fun pkgs =>
   let ncurses = {
     name = "ncurses-6.6",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.gcc_libs,
+      ],
+    },
     config = {
       configure_args = [
         "--mandir=/usr/share/man",
@@ -76,9 +83,33 @@ fun pkgs =>
   }
   in
 
+  let ncurses_libs = {
+    name = "ncurses-libs-6.6",
+    tag = "TreeSubset",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.gcc_libs,
+      ],
+    },
+    config = {
+      include = [
+        "usr/lib/*.so*",
+        "usr/share/terminfo/**",
+        "usr/share/tabset/**",
+      ],
+    },
+    inputs = {
+      tree = ncurses,
+    },
+  }
+  in
+
   {
     include [
       ncurses_src,
       ncurses,
+      ncurses_libs,
     ],
   }

@@ -83,6 +83,12 @@ fun pkgs =>
   let bzip2 = {
     name = "bzip2-1.0.8",
     tag = "Makefile",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = bzip2_config,
     inputs = {
       rootfs = pkgs.system_rootfs_2,

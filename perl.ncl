@@ -40,6 +40,14 @@ fun pkgs =>
   let perl = {
     name = "perl-5.42.0",
     tag = "Sandbox",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.bzip2,
+        pkgs.zlib,
+      ],
+    },
     config = {
       steps = [
         recipe.prepare_source_step,

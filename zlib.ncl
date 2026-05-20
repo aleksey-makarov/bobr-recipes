@@ -15,6 +15,12 @@ fun pkgs =>
   let zlib = {
     name = "zlib-1.3.1",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {
       configure_args = [
         "--libdir=/usr/lib64",

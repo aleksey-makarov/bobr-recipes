@@ -27,6 +27,13 @@ fun pkgs =>
   let less = {
     name = "less-679",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.ncurses_libs,
+      ],
+    },
     config = {
       configure_args = [
         "--sysconfdir=/etc",

@@ -30,6 +30,13 @@ fun pkgs =>
   let readline = {
     name = "readline-8.3",
     tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.ncurses_libs,
+      ],
+    },
     config = {
       pre_configure = {
         name = "patch_readline_build",
