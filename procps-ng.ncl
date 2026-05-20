@@ -26,7 +26,7 @@ fun pkgs =>
         pkgs.systemd,
       ],
       runtime = [
-        pkgs.glibc,
+        pkgs.glibc_libs,
         pkgs.ncurses,
         pkgs.libcap,
         pkgs.systemd,

@@ -54,17 +54,6 @@ let buildscript_perl_module = {
   },
 }
 in
-let buildscript_tree_subset = {
-  name = "buildscript-tree-subset",
-  tag = "Source",
-  object_hash = import "tree-subset.py.fsobj-hash" as 'Text,
-  origin = {
-    type = "path",
-    path = "synthetic/tree-subset.py",
-    mode = "direct",
-  },
-}
-in
 let record_get_or = fun field =>
   fun fallback =>
     fun record =>
@@ -194,41 +183,6 @@ let rootfs_closure_for = fun node =>
       tag = "TreeMerge",
       config = {},
       inputs = numbered_inputs ([pkgs.base_filesystem] @ sorted_closure_nodes (runtime_closure_set roots)),
-    }
-in
-let lower_tree_subset_node = fun node =>
-  if std.array.length node.config.include == 0 then
-    fail ("TreeSubset '" ++ node.name ++ "' must include at least one pattern")
-  else
-    {
-      name = node.name,
-      tag = "Sandbox",
-      config = {
-        script_config = {
-          include = node.config.include,
-        },
-        steps = [
-          {
-            name = "subset_tree",
-            run_as = "root",
-            cwd = "@{out}",
-            argv = [
-              "@{script}",
-              "--input",
-              "@{tree}",
-              "--output",
-              "@{out}",
-              "--config",
-              "@{config}",
-            ],
-          },
-        ],
-      },
-      inputs = {
-        rootfs = pkgs.system_rootfs_0,
-        tree = node.inputs.tree,
-        script = buildscript_tree_subset,
-      },
     }
 in
 let synthetic_source_root_expr = fun node_config =>
@@ -605,7 +559,6 @@ let lower_perl_module_node = fun node =>
   }
 in
 {
-  "TreeSubset" = lower_tree_subset_node,
   "RootfsClosure" = rootfs_closure_for,
   "AutotoolsPackage" = lower_autotools_package_node,
   "Autotools" = lower_autotools_node,

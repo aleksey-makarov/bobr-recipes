@@ -21,7 +21,7 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc,
+        pkgs.glibc_libs,
       ],
     },
     config = {

@@ -21,7 +21,7 @@ fun pkgs =>
         pkgs.pkgconf,
       ],
       runtime = [
-        pkgs.glibc,
+        pkgs.glibc_libs,
         pkgs.ncurses,
       ],
     },

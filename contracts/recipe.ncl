@@ -303,8 +303,11 @@ in
 let TreeMergeConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
+let NonEmptyArray =
+  std.contract.from_predicate (fun value => std.array.length value > 0)
+in
 let TreeSubsetConfig = {
-  include | Array String,
+  include | Array String | NonEmptyArray,
 }
 in
 let ErofsNullableString =

@@ -120,11 +120,30 @@ fun pkgs =>
   }
   in
 
+  let glibc_libs = {
+    name = "glibc-libs-2.42",
+    tag = "TreeSubset",
+    deps = {
+      build = [],
+      runtime = [],
+    },
+    config = {
+      include = [
+        "usr/lib64/*.so*",
+      ],
+    },
+    inputs = {
+      tree = glibc,
+    },
+  }
+  in
+
   {
     include [
       glibc_src,
       glibc_bootstrap_rootfs,
       glibc_gen1,
       glibc,
+      glibc_libs,
     ],
   }

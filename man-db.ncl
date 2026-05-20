@@ -23,7 +23,7 @@ fun pkgs =>
         pkgs.libpipeline,
       ],
       runtime = [
-        pkgs.glibc,
+        pkgs.glibc_libs,
         pkgs.gdbm,
         pkgs.groff,
         pkgs.libpipeline,

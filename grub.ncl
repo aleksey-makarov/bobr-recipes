@@ -25,7 +25,7 @@ fun pkgs =>
         pkgs.python,
       ],
       runtime = [
-        pkgs.glibc,
+        pkgs.glibc_libs,
       ],
     },
     config = {

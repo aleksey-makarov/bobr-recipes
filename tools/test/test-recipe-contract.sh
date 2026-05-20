@@ -85,6 +85,7 @@ run_case "wrong-many-shape" fail '{"name":"img2","tag":"Image","config":{"mode":
 run_case "bad-source-http-archive-format" fail '{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"type":"http","url":"https://example.invalid/src.tar.xz","archive_format":"tar-zst"}}'
 run_case "bad-tree-merge-config" fail '{"name":"merged-tree","tag":"TreeMerge","config":{"base":true},"inputs":{}}'
 run_case "bad-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":"usr/lib64/libfoo.so*"},"inputs":{"tree":'"${rootfs_tree}"'}}'
+run_case "empty-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":[]},"inputs":{"tree":'"${rootfs_tree}"'}}'
 run_case "missing-tree-subset-input" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib64/libfoo.so*"]},"inputs":{}}'
 run_case "bad-rootfs-closure-config" fail '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{"base":true},"inputs":{"root":'"${rootfs_tree}"'}}'
 run_case "bad-erofs-rootfs-config" fail '{"name":"rootfs-erofs","tag":"ErofsRootfs","config":{"compression":"","label":null},"inputs":{}}'
@@ -558,49 +559,15 @@ tree_subset_lowering_json="$(
 )"
 
 jq -e '
-  .root.tag == "Sandbox"
+  .root.tag == "TreeSubset"
   and .root.name == "pkg-subset"
-  and .root.config.script_config.include[0] == "usr/lib64/libfoo.so*"
-  and .root.config.steps[0].name == "subset_tree"
-  and (.root.inputs | has("rootfs"))
+  and .root.config.include[0] == "usr/lib64/libfoo.so*"
   and (.root.inputs | has("tree"))
-  and ([.[] | select(.name == "buildscript-tree-subset")] | length == 1)
+  and (.root.inputs | has("rootfs") | not)
+  and (.root.inputs | has("script") | not)
+  and ([.[] | select(.name == "buildscript-tree-subset")] | length == 0)
   and ([.[] | select(.name == "input-tree")] | length == 1)
 ' <<<"${tree_subset_lowering_json}" >/dev/null
-
-cat > "${tmpdir}/check-tree-subset-empty.ncl" <<EOF_INNER
-let recipe = import "${repo_root}/recipe-lib.ncl" in
-let rootfs_tree = {
-  name = "rootfs-tree",
-  tag = "Tree",
-  config = {
-    tree = {
-      entries = [{ type = "dir", path = "bin" }],
-    },
-  },
-  inputs = {},
-} in
-recipe.to_request { system_rootfs_0 = rootfs_tree } {
-  name = "empty-subset",
-  tag = "TreeSubset",
-  config = {
-    include = [],
-  },
-  inputs = {
-    tree = rootfs_tree,
-  },
-}
-EOF_INNER
-
-if (cd "${tmpdir}" && nickel export check-tree-subset-empty.ncl --format json >"${tmpdir}/tree-subset-empty.out" 2>"${tmpdir}/tree-subset-empty.err"); then
-  echo "expected empty include failure for TreeSubset" >&2
-  exit 1
-fi
-if ! rg "TreeSubset 'empty-subset' must include at least one pattern" "${tmpdir}/tree-subset-empty.err" >/dev/null; then
-  echo "expected empty include diagnostic for TreeSubset" >&2
-  cat "${tmpdir}/tree-subset-empty.err" >&2
-  exit 1
-fi
 
 cat > "${tmpdir}/check-rootfs-closure-lowering.ncl" <<EOF_INNER
 let recipe = import "${repo_root}/recipe-lib.ncl" in

@@ -23,7 +23,7 @@ fun pkgs =>
         pkgs.gmp,
       ],
       runtime = [
-        pkgs.glibc,
+        pkgs.glibc_libs,
         pkgs.gmp,
       ],
     },
