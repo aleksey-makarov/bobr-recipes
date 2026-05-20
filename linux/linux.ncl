@@ -1,18 +1,14 @@
 let recipe = import "../recipe-lib.ncl" in
+let version = "6.18.10" in
+let hashes = {
+  "6.18.10" = "91c880a309524138bf58dda3187ffa58e1656b95857b9a43ce772d09fb59a4f5",
+} in
 
 fun pkgs =>
-  let pkg_name = "linux" in
-  let pkg_version = "6.18.10" in
-
-  let source_name = "%{pkg_name}-src-%{pkg_version}" in
-  let script_name = "buildscript-linux-%{pkg_version}" in
-  let headers_gen1_name = "linux-headers-gen1-%{pkg_version}" in
-  let headers_name = "linux-headers-%{pkg_version}" in
-
   let linux_source = {
-    name = source_name,
+    name = "linux-src-%{version}",
     tag = "Source",
-    object_hash = "91c880a309524138bf58dda3187ffa58e1656b95857b9a43ce772d09fb59a4f5",
+    object_hash = hashes."%{version}",
     origin = {
       type = "http",
       url = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-6.18.10.tar.xz",
@@ -21,7 +17,7 @@ fun pkgs =>
   in
 
   let linux_config = {
-    name = "linux-config-%{pkg_version}",
+    name = "linux-config-%{version}",
     tag = "Source",
     object_hash = import ".config.fsobj-hash" as 'Text,
     origin = {
@@ -33,7 +29,7 @@ fun pkgs =>
   in
 
   let buildscript_linux = {
-    name = script_name,
+    name = "buildscript-linux",
     tag = "Source",
     object_hash = import "linux.sh.fsobj-hash" as 'Text,
     origin = {
@@ -45,7 +41,7 @@ fun pkgs =>
   in
 
   let linux_headers_gen1 = {
-    name = headers_gen1_name,
+    name = "linux-headers-gen1-%{version}",
     tag = "Sandbox",
     config = {
       steps = [
@@ -95,7 +91,7 @@ fun pkgs =>
   in
 
   let linux = {
-    name = pkg_name,
+    name = "linux-%{version}",
     tag = "SandboxPackage",
     deps = {
       build = [
@@ -169,7 +165,7 @@ fun pkgs =>
   in
 
   let linux_headers = {
-    name = headers_name,
+    name = "linux-headers-%{version}",
     tag = "TreeSubset",
     deps = {
       build = [],

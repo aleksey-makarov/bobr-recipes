@@ -8,8 +8,13 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${repo_root}/env.sh"
+linux_name="$(
+  cd "${repo_root}"
+  printf '%s\n' 'let pkgs = (import "pkgs.ncl") [] in pkgs.linux.name' \
+    | nickel export --format text
+)"
 rootfs_path="${store_root}/object-refs/qemu-erofs-rootfs"
-kernel_path="${store_root}/object-refs/linux/root/boot/bzImage"
+kernel_path="${store_root}/object-refs/${linux_name}/root/boot/bzImage"
 qemu_bin="$(command -v qemu-system-x86_64 || true)"
 mem_mb="${QEMU_MEM_MB:-1024}"
 smp_count="${QEMU_SMP:-2}"
@@ -26,7 +31,7 @@ if [ ! -f "${rootfs_path}" ]; then
 fi
 
 if [ ! -f "${kernel_path}" ]; then
-  echo "missing linux kernel artifact: ${kernel_path}" >&2
+  echo "missing linux kernel artifact for ${linux_name}: ${kernel_path}" >&2
   exit 1
 fi
 
