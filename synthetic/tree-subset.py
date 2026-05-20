@@ -2,10 +2,10 @@
 
 import argparse
 import fnmatch
-import json
 import os
 import pathlib
 import shutil
+import stat
 import sys
 
 
@@ -38,28 +38,34 @@ def load_include_patterns(config_dir: pathlib.Path) -> list[str]:
     return patterns
 
 
-def load_manifest(input_dir: pathlib.Path) -> dict[str, dict]:
-    manifest_path = input_dir / "manifest.jsonl"
-    if not manifest_path.is_file():
-        fail(f"missing fs-tree manifest: {manifest_path}")
-    if not (input_dir / "root").is_dir():
-        fail(f"missing fs-tree root directory: {input_dir / 'root'}")
+def scan_tree(input_root: pathlib.Path) -> dict[str, dict]:
+    if not input_root.is_dir():
+        fail(f"input tree is not a directory: {input_root}")
 
-    entries: dict[str, dict] = {}
-    with manifest_path.open("r", encoding="utf-8") as handle:
-        for line_no, line in enumerate(handle, start=1):
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                entry = json.loads(line)
-            except json.JSONDecodeError as error:
-                fail(f"invalid manifest JSON at line {line_no}: {error}")
-            path = entry.get("p")
-            kind = entry.get("t")
-            if not isinstance(path, str) or kind not in {"d", "f", "l"}:
-                fail(f"invalid manifest entry at line {line_no}: {entry!r}")
-            entries[path] = entry
+    entries: dict[str, dict] = {"": {"t": "d", "m": stat.S_IMODE(input_root.lstat().st_mode)}}
+    for current_root, dirnames, filenames in os.walk(input_root, followlinks=False):
+        current = pathlib.Path(current_root)
+        rel_dir = current.relative_to(input_root).as_posix()
+        if rel_dir == ".":
+            rel_dir = ""
+
+        dirnames.sort()
+        filenames.sort()
+
+        for name in dirnames + filenames:
+            path = current / name
+            rel = path.relative_to(input_root).as_posix()
+            st = path.lstat()
+            mode = stat.S_IMODE(st.st_mode)
+            if path.is_symlink():
+                entries[rel] = {"t": "l", "x": os.readlink(path)}
+            elif path.is_dir():
+                entries[rel] = {"t": "d", "m": mode}
+            elif path.is_file():
+                entries[rel] = {"t": "f", "m": mode}
+            else:
+                fail(f"unsupported filesystem entry: {rel}")
+
     return entries
 
 
@@ -116,9 +122,7 @@ def copy_symlink(dst: pathlib.Path, target: str) -> None:
     os.symlink(target, dst)
 
 
-def materialize_subset(input_dir: pathlib.Path, output_dir: pathlib.Path, entries: dict[str, dict], selected: set[str]) -> None:
-    input_root = input_dir / "root"
-
+def materialize_subset(input_root: pathlib.Path, output_dir: pathlib.Path, entries: dict[str, dict], selected: set[str]) -> None:
     directories = sorted(path for path in selected if entries[path]["t"] == "d")
     leaves = sorted(path for path in selected if entries[path]["t"] != "d")
 
@@ -142,19 +146,19 @@ def materialize_subset(input_dir: pathlib.Path, output_dir: pathlib.Path, entrie
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input", required=True, help="input fs-tree object directory")
+    parser.add_argument("--input", required=True, help="input tree root directory")
     parser.add_argument("--output", required=True, help="output directory")
     parser.add_argument("--config", required=True, help="materialized script_config directory")
     args = parser.parse_args()
 
-    input_dir = pathlib.Path(args.input)
+    input_root = pathlib.Path(args.input)
     output_dir = pathlib.Path(args.output)
     config_dir = pathlib.Path(args.config)
 
     patterns = load_include_patterns(config_dir)
-    entries = load_manifest(input_dir)
+    entries = scan_tree(input_root)
     selected = select_paths(entries, patterns)
-    materialize_subset(input_dir, output_dir, entries, selected)
+    materialize_subset(input_root, output_dir, entries, selected)
     return 0
 
 

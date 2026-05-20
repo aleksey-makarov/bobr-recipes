@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Smoke-test the synthetic TreeSubset helper on a small fs-tree object.
+# Smoke-test the synthetic TreeSubset helper on a small mounted tree root.
 
 set -euo pipefail
 
@@ -9,8 +9,7 @@ helper="${repo_root}/synthetic/tree-subset.py"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
-input="${tmpdir}/input"
-root="${input}/root"
+root="${tmpdir}/input-root"
 config="${tmpdir}/config"
 out="${tmpdir}/out"
 
@@ -21,19 +20,9 @@ ln -s libfoo.so.1 "${root}/usr/lib64/libfoo.so"
 chmod 0755 "${root}/usr/lib64/libfoo.so.1"
 chmod 0755 "${root}/usr/bin/tool"
 
-cat > "${input}/manifest.jsonl" <<'EOF_INNER'
-{"p":"","t":"d","u":0,"g":0,"m":493}
-{"p":"usr","t":"d","u":0,"g":0,"m":493}
-{"p":"usr/bin","t":"d","u":0,"g":0,"m":493}
-{"p":"usr/bin/tool","t":"f","u":0,"g":0,"m":493}
-{"p":"usr/lib64","t":"d","u":0,"g":0,"m":493}
-{"p":"usr/lib64/libfoo.so","t":"l","u":0,"g":0,"x":"libfoo.so.1"}
-{"p":"usr/lib64/libfoo.so.1","t":"f","u":0,"g":0,"m":493}
-EOF_INNER
-
 printf '%s' 'usr/lib64/libfoo.so*' > "${config}/include/00000000"
 
-python3 "${helper}" --input "${input}" --output "${out}" --config "${config}"
+python3 "${helper}" --input "${root}" --output "${out}" --config "${config}"
 
 test -d "${out}/usr"
 test -d "${out}/usr/lib64"
@@ -42,14 +31,14 @@ test -L "${out}/usr/lib64/libfoo.so"
 test "$(readlink "${out}/usr/lib64/libfoo.so")" = "libfoo.so.1"
 test ! -e "${out}/usr/bin/tool"
 
-if python3 "${helper}" --input "${input}" --output "${tmpdir}/missing-out" --config "${tmpdir}/missing-config" >/dev/null 2>&1; then
+if python3 "${helper}" --input "${root}" --output "${tmpdir}/missing-out" --config "${tmpdir}/missing-config" >/dev/null 2>&1; then
   echo "expected missing include config failure" >&2
   exit 1
 fi
 
 mkdir -p "${tmpdir}/nomatch-config/include" "${tmpdir}/nomatch-out"
 printf '%s' 'usr/lib64/libmissing.so*' > "${tmpdir}/nomatch-config/include/00000000"
-if python3 "${helper}" --input "${input}" --output "${tmpdir}/nomatch-out" --config "${tmpdir}/nomatch-config" >/dev/null 2>&1; then
+if python3 "${helper}" --input "${root}" --output "${tmpdir}/nomatch-out" --config "${tmpdir}/nomatch-config" >/dev/null 2>&1; then
   echo "expected no-match include failure" >&2
   exit 1
 fi
