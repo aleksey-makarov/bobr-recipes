@@ -42,6 +42,7 @@ patch_node='{"name":"patch","tag":"Source","object_hash":"dddddddddddddddddddddd
 script_node='{"name":"script","tag":"Text","config":{"source":"#!/bin/sh\n","executable":true},"inputs":{}}'
 
 run_case "text" pass '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{}}'
+run_case "group" pass '{"name":"all","tag":"Group","config":{},"inputs":{"first":'"${script_node}"',"second":'"${rootfs_tree}"'}}'
 run_case "source" pass '{"name":"script","tag":"Source","object_hash":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","origin":{"type":"path","path":"tests/script.sh","mode":"direct"}}'
 run_case "source-cutoff" pass '{"name":"script","tag":"Source","object_hash":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}'
 run_case "tree-file" pass '{"name":"hello-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"hello.txt","text":"hi\n","executable":false}]}},"inputs":{}}'
@@ -87,6 +88,8 @@ run_case "sandbox-install-rejected" fail '{"name":"sandbox","tag":"Sandbox","con
 run_case "autotools-sandbox-install-rejected" fail '{"name":"pkg-sandbox","tag":"Autotools","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "meson-sandbox-build-dir-rejected" fail '{"name":"pkg-sandbox","tag":"Meson","config":{"build_dir":"build"},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "extra-top-level-field" fail '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{},"extra":true}'
+run_case "bad-group-config" fail '{"name":"all","tag":"Group","config":{"manifest":true},"inputs":{"first":'"${script_node}"'}}'
+run_case "empty-group-inputs" fail '{"name":"all","tag":"Group","config":{},"inputs":{}}'
 run_case "wrong-many-shape" fail '{"name":"img2","tag":"Image","config":{"mode":"bootstrap"},"inputs":{"base":null,"inputs":[]}}'
 run_case "bad-source-http-archive-format" fail '{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"type":"http","url":"https://example.invalid/src.tar.xz","archive_format":"tar-zst"}}'
 run_case "bad-tree-merge-config" fail '{"name":"merged-tree","tag":"TreeMerge","config":{"base":true},"inputs":{}}'

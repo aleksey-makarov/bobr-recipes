@@ -1,6 +1,7 @@
 let KnownTags = [
   "Source",
   "Text",
+  "Group",
   "Tree",
   "TreeMerge",
   "TreeSubset",
@@ -307,8 +308,14 @@ in
 let TreeMergeConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
+let GroupConfig =
+  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
+in
 let NonEmptyArray =
   std.contract.from_predicate (fun value => std.array.length value > 0)
+in
+let NonEmptyRecord =
+  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) > 0)
 in
 let TreeSubsetConfig = {
   include | Array String | NonEmptyArray,
@@ -332,6 +339,8 @@ let OciExtractConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
 let TextInputs = {}
+in
+let GroupInputsShape = NonEmptyRecord
 in
 let TreeInputs = {}
 in
@@ -437,6 +446,11 @@ let ValidateRecipeShallow = fun recipe =>
       checked
       & {
         config = checked.config | TextConfig,
+      }
+    else if checked.tag == "Group" then
+      checked
+      & {
+        config = checked.config | GroupConfig,
       }
     else if checked.tag == "Tree" then
       checked
@@ -553,6 +567,12 @@ let rec ValidateRecipe = fun recipe =>
     let validate_tree_inputs = fun inputs =>
       inputs | TreeInputs
     in
+    let validate_group_inputs = fun inputs =>
+      let checked = inputs | GroupInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_autotools_sandbox_inputs = fun inputs =>
       let checked = inputs | MakefileInputsShape in
       std.record.map
@@ -665,6 +685,12 @@ let rec ValidateRecipe = fun recipe =>
       & {
         config = checked.config | TextConfig,
         inputs = validate_text_inputs checked.inputs,
+      }
+    else if checked.tag == "Group" then
+      checked
+      & {
+        config = checked.config | GroupConfig,
+        inputs = validate_group_inputs checked.inputs,
       }
     else if checked.tag == "Tree" then
       checked
@@ -785,6 +811,9 @@ in
   text_config
     | doc "Config contract for `Text` recipe nodes."
     = TextConfig,
+  group_config
+    | doc "Config contract for `Group` recipe nodes."
+    = GroupConfig,
   tree_config
     | doc "Config contract for `Tree` recipe nodes."
     = TreeConfig,

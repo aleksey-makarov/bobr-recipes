@@ -12,7 +12,7 @@ if [ "$#" -gt 1 ]; then
   exit 1
 fi
 
-attr="${1:-test_reports}"
+attr="${1:-all_artifacts}"
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${repo_root}/env.sh"
 request_file="${repo_root}/request.ncl"
