@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Boot the locally built qemu EROFS rootfs artifact under qemu-system-x86_64.
-# Use this after qemu-erofs-rootfs and linux have already been built and
+# Boot the locally built EROFS rootfs artifact under qemu-system-x86_64.
+# Use this after erofs-rootfs, initrd, and linux have already been built and
 # you want an interactive runtime smoke check of the image.
 
 set -euo pipefail
@@ -13,12 +13,23 @@ linux_name="$(
   printf '%s\n' 'let pkgs = (import "pkgs.ncl") [] in pkgs.linux.name' \
     | nickel export --format text
 )"
-rootfs_path="${store_root}/object-refs/qemu-erofs-rootfs"
+rootfs_name="$(
+  cd "${repo_root}"
+  printf '%s\n' 'let pkgs = (import "pkgs.ncl") [] in pkgs.erofs_rootfs.name' \
+    | nickel export --format text
+)"
+initrd_name="$(
+  cd "${repo_root}"
+  printf '%s\n' 'let pkgs = (import "pkgs.ncl") [] in pkgs.initrd.name' \
+    | nickel export --format text
+)"
+rootfs_path="${store_root}/object-refs/${rootfs_name}"
+initrd_path="${store_root}/object-refs/${initrd_name}"
 kernel_path="${store_root}/object-refs/${linux_name}/root/boot/bzImage"
 qemu_bin="$(command -v qemu-system-x86_64 || true)"
 mem_mb="${QEMU_MEM_MB:-1024}"
 smp_count="${QEMU_SMP:-2}"
-append="root=/dev/vda ro rootfstype=erofs console=ttyS0 net.ifnames=0"
+append="root=/dev/vda ro rootfstype=erofs systemd.volatile=overlay console=ttyS0 net.ifnames=0"
 
 if [ -z "${qemu_bin}" ]; then
   echo "qemu-system-x86_64 not found in PATH" >&2
@@ -26,7 +37,12 @@ if [ -z "${qemu_bin}" ]; then
 fi
 
 if [ ! -f "${rootfs_path}" ]; then
-  echo "missing qemu rootfs artifact: ${rootfs_path}" >&2
+  echo "missing EROFS rootfs artifact for ${rootfs_name}: ${rootfs_path}" >&2
+  exit 1
+fi
+
+if [ ! -f "${initrd_path}" ]; then
+  echo "missing initrd artifact for ${initrd_name}: ${initrd_path}" >&2
   exit 1
 fi
 
@@ -46,6 +62,7 @@ exec "${qemu_bin}" \
   -m "${mem_mb}" \
   -smp "${smp_count}" \
   -kernel "${kernel_path}" \
+  -initrd "${initrd_path}" \
   -drive "file=${rootfs_path},format=raw,if=virtio,readonly=on" \
   -nic user,model=virtio-net-pci \
   -append "${append}" \

@@ -82,12 +82,12 @@ fun pkgs =>
   }
   in
 
-  let test_qemu_rootfs = {
-    name = "test-qemu-rootfs",
+  let test_rootfs = {
+    name = "test-rootfs",
     tag = "Sandbox",
     config = {
       script_config = {
-        name = "qemu-rootfs",
+        name = "rootfs",
         check_python = "true",
       },
       steps = [
@@ -100,7 +100,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.qemu_rootfs,
+      rootfs = pkgs.rootfs,
       script = test_rootfs_script_source,
     },
   }
@@ -111,6 +111,6 @@ fun pkgs =>
       test_system_rootfs_0,
       test_system_rootfs_1,
       test_system_rootfs_2,
-      test_qemu_rootfs,
+      test_rootfs,
     ],
   }

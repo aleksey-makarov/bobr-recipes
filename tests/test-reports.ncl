@@ -32,7 +32,7 @@ fun pkgs =>
       report000 = pkgs.test_system_rootfs_0,
       report001 = pkgs.test_system_rootfs_1,
       report002 = pkgs.test_system_rootfs_2,
-      report003 = pkgs.test_qemu_rootfs,
+      report003 = pkgs.test_rootfs,
     },
   }
   in

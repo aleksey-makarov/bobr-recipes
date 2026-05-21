@@ -1,7 +1,7 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let qemu_rootfs_deps = [
+  let rootfs_deps = [
     pkgs.system_runtime_files,
     pkgs.man_pages,
     pkgs.iana_etc,
@@ -78,27 +78,27 @@ fun pkgs =>
     pkgs.vim,
   ]
   in
-  let qemu_rootfs = {
-    name = "qemu-rootfs",
+  let rootfs = {
+    name = "rootfs",
     tag = "TreeMerge",
     config = {},
-    inputs = recipe.numbered_inputs qemu_rootfs_deps,
+    inputs = recipe.numbered_inputs rootfs_deps,
   }
   in
-  let qemu_erofs_rootfs = {
-    name = "qemu-erofs-rootfs",
+  let erofs_rootfs = {
+    name = "erofs-rootfs",
     tag = "ErofsRootfs",
     config = {
       compression = null,
       label = null,
     },
-    inputs = recipe.numbered_inputs qemu_rootfs_deps,
+    inputs = recipe.numbered_inputs rootfs_deps,
   }
   in
 
   {
     include [
-      qemu_rootfs,
-      qemu_erofs_rootfs,
+      rootfs,
+      erofs_rootfs,
     ],
   }
