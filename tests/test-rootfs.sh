@@ -209,6 +209,24 @@ fi
 
   echo
   log_check "filesystem and runtime references"
+  if [ -f /usr/lib/os-release ]; then
+    log_ok "/usr/lib/os-release exists"
+  else
+    log_fail "/usr/lib/os-release is missing"
+  fi
+
+  if [ -L /etc/os-release ] && [ "$(readlink /etc/os-release)" = "../usr/lib/os-release" ]; then
+    log_ok "/etc/os-release points to /usr/lib/os-release"
+  else
+    log_fail "/etc/os-release is not the expected relative symlink"
+  fi
+
+  if grep -qx 'ID=mbuild' /usr/lib/os-release 2>/dev/null; then
+    log_ok "os-release contains ID=mbuild"
+  else
+    log_fail "os-release does not contain ID=mbuild"
+  fi
+
   while IFS= read -r -d '' path; do
     checked=$((checked + 1))
 
