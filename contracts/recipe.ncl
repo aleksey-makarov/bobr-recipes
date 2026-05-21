@@ -7,6 +7,7 @@ let KnownTags = [
   "TreeSubset",
   "RootfsClosure",
   "ErofsRootfs",
+  "Initramfs",
   "AutotoolsPackage",
   "MakefilePackage",
   "MesonPackage",
@@ -335,6 +336,9 @@ let ErofsRootfsConfig = {
     | doc "Optional EROFS filesystem label. `null` means no label.",
 }
 in
+let InitramfsConfig =
+  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
+in
 let OciExtractConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
@@ -376,6 +380,8 @@ in
 let RootfsClosureInputsShape = { .. }
 in
 let ErofsRootfsInputsShape = { .. }
+in
+let InitramfsInputsShape = { .. }
 in
 let MakefileInputsShape = {
   rootfs | Dyn,
@@ -532,6 +538,11 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | ErofsRootfsConfig,
       }
+    else if checked.tag == "Initramfs" then
+      checked
+      & {
+        config = checked.config | InitramfsConfig,
+      }
     else if checked.tag == "OciExtract" then
       checked
       & {
@@ -680,6 +691,12 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_initramfs_inputs = fun inputs =>
+      let checked = inputs | InitramfsInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     if checked.tag == "Text" then
       checked
       & {
@@ -787,6 +804,12 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | ErofsRootfsConfig,
         inputs = validate_erofs_rootfs_inputs checked.inputs,
       }
+    else if checked.tag == "Initramfs" then
+      checked
+      & {
+        config = checked.config | InitramfsConfig,
+        inputs = validate_initramfs_inputs checked.inputs,
+      }
     else if checked.tag == "OciExtract" then
       checked
       & {
@@ -841,6 +864,9 @@ in
   erofs_rootfs_config
     | doc "Config contract for `ErofsRootfs` recipe nodes."
     = ErofsRootfsConfig,
+  initramfs_config
+    | doc "Config contract for `Initramfs` recipe nodes."
+    = InitramfsConfig,
   image_config
     | doc "Config contract for `Image` recipe nodes."
     = ImageConfig,
