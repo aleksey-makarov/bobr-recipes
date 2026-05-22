@@ -56,6 +56,9 @@ fun pkgs =>
         "ADJTIME_PATH=/var/lib/hwclock/adjtime",
         "--docdir=/usr/share/doc/util-linux-2.41.1",
       ],
+      make_args = [
+        "usrsbin_execdir=/usr/bin",
+      ],
     },
     inputs = {
       source = util_linux_src,

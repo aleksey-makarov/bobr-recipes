@@ -57,7 +57,10 @@ fun pkgs =>
         "--without-libbsd",
         "--with-group-name-max-length=32",
       ],
-      make_args = ["exec_prefix=/usr"],
+      make_args = [
+        "exec_prefix=/usr",
+        "usbindir=/usr/bin",
+      ],
       post_install = {
         name = "install_man_pages",
         run_as = "root",

@@ -44,6 +44,7 @@ fun pkgs =>
     config = {
       configure_args = [
         "libc_cv_slibdir=/usr/lib64",
+        "--sbindir=/usr/bin",
         "--disable-nscd",
         "--without-selinux",
         "--enable-kernel=5.4",
@@ -65,7 +66,7 @@ fun pkgs =>
           argv = [
             "/bin/sh",
             "-ec",
-            "mkdir -p \"@{build}/build\" && echo \"rootsbindir=/usr/bin\" > \"@{build}/build/configparms\"",
+            "mkdir -p \"@{build}/build\" && { echo \"rootsbindir=/usr/bin\"; echo \"sbindir=/usr/bin\"; } > \"@{build}/build/configparms\"",
           ],
         },
       ],
@@ -84,6 +85,7 @@ fun pkgs =>
     config = {
       configure_args = [
         "libc_cv_slibdir=/usr/lib64",
+        "--sbindir=/usr/bin",
         "--disable-werror",
         "--enable-kernel=4.19",
         "--enable-stack-protector=strong",
@@ -107,7 +109,7 @@ fun pkgs =>
           argv = [
             "/bin/sh",
             "-ec",
-            "mkdir -p \"@{build}/build\" && echo \"rootsbindir=/usr/bin\" > \"@{build}/build/configparms\"",
+            "mkdir -p \"@{build}/build\" && { echo \"rootsbindir=/usr/bin\"; echo \"sbindir=/usr/bin\"; } > \"@{build}/build/configparms\"",
           ],
         },
       ],

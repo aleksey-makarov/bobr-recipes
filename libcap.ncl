@@ -28,6 +28,7 @@ fun pkgs =>
       make_args = [
         "prefix=/usr",
         "lib=lib",
+        "sbin=bin",
       ],
     },
     inputs = {
