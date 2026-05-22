@@ -38,6 +38,7 @@ fun pkgs =>
       },
       setup_args = [
         "--buildtype=release",
+        "--sbindir=/usr/bin",
         "-Dmanpages=false",
       ],
     },

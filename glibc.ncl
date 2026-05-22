@@ -65,7 +65,7 @@ fun pkgs =>
           argv = [
             "/bin/sh",
             "-ec",
-            "mkdir -p \"@{build}/build\" && echo \"rootsbindir=/usr/sbin\" > \"@{build}/build/configparms\"",
+            "mkdir -p \"@{build}/build\" && echo \"rootsbindir=/usr/bin\" > \"@{build}/build/configparms\"",
           ],
         },
       ],
@@ -107,7 +107,7 @@ fun pkgs =>
           argv = [
             "/bin/sh",
             "-ec",
-            "mkdir -p \"@{build}/build\" && echo \"rootsbindir=/usr/sbin\" > \"@{build}/build/configparms\"",
+            "mkdir -p \"@{build}/build\" && echo \"rootsbindir=/usr/bin\" > \"@{build}/build/configparms\"",
           ],
         },
       ],

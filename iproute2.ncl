@@ -40,7 +40,7 @@ fun pkgs =>
       },
       make_args = [
         "NETNS_RUN_DIR=/run/netns",
-        "SBINDIR=/usr/sbin",
+        "SBINDIR=/usr/bin",
       ],
       post_install = {
         name = "install_docs",

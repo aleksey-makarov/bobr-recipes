@@ -148,7 +148,7 @@
     {
       type = "symlink",
       path = "sbin",
-      target = "usr/sbin",
+      target = "usr/bin",
     },
     {
       type = "dir",
@@ -181,8 +181,9 @@
       path = "usr/libexec",
     },
     {
-      type = "dir",
+      type = "symlink",
       path = "usr/sbin",
+      target = "bin",
     },
     {
       type = "dir",

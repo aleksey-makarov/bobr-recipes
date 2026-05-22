@@ -42,7 +42,7 @@ fun pkgs =>
         "--bindir=/usr/bin",
         "--libdir=/usr/lib",
         "--runstatedir=/run",
-        "--sbindir=/usr/sbin",
+        "--sbindir=/usr/bin",
         "--disable-chfn-chsh",
         "--disable-login",
         "--disable-nologin",

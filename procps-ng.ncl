@@ -35,6 +35,7 @@ fun pkgs =>
     config = {
       configure_args = [
         "--docdir=/usr/share/doc/procps-ng-4.0.5",
+        "--sbindir=/usr/bin",
         "--disable-static",
         "--disable-kill",
         "--enable-watch8bit",

@@ -55,7 +55,7 @@ has_elf_magic() {
 
 enumerate_paths() {
   local root
-  for root in /usr/bin /usr/sbin /usr/libexec /usr/lib /usr/lib64 /lib64; do
+  for root in /usr/bin /usr/libexec /usr/lib /usr/lib64 /lib64; do
     [ -e "$root" ] || continue
     find "$root" \( -type f -o -type l \) -print0 2>/dev/null
   done
@@ -209,6 +209,18 @@ fi
 
   echo
   log_check "filesystem and runtime references"
+  if [ -L /sbin ] && [ "$(readlink /sbin)" = "usr/bin" ]; then
+    log_ok "/sbin points to /usr/bin"
+  else
+    log_fail "/sbin is not the expected relative symlink"
+  fi
+
+  if [ -L /usr/sbin ] && [ "$(readlink /usr/sbin)" = "bin" ]; then
+    log_ok "/usr/sbin points to /usr/bin"
+  else
+    log_fail "/usr/sbin is not the expected relative symlink"
+  fi
+
   if [ -f /usr/lib/os-release ]; then
     log_ok "/usr/lib/os-release exists"
   else

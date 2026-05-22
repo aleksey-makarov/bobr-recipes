@@ -27,7 +27,7 @@ fun pkgs =>
         mkdir -p .tmp "${MBUILD_INSTALL_DIR}/usr/share/info"
         export TMPDIR="${TMPDIR:-$PWD/.tmp}"
 
-        ../configure --prefix=/usr --sysconfdir=/etc --enable-elf-shlibs --disable-libblkid --disable-libuuid --disable-uuidd --disable-fsck
+        ../configure --prefix=/usr --sbindir=/usr/bin --sysconfdir=/etc --enable-elf-shlibs --disable-libblkid --disable-libuuid --disable-uuidd --disable-fsck
 
         jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
         make -j"$jobs"

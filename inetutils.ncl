@@ -58,20 +58,6 @@ fun pkgs =>
         "--disable-rsh",
         "--disable-servers",
       ],
-      post_install = {
-        name = "move_ifconfig",
-        run_as = "root",
-        argv = [
-          "/bin/sh",
-          "-ec",
-          m%"
-            mkdir -p "@{out}/usr/sbin"
-            if [ -f "@{out}/usr/bin/ifconfig" ]; then
-              mv -v "@{out}/usr/bin/ifconfig" "@{out}/usr/sbin/ifconfig"
-            fi
-          "%,
-        ],
-      },
     },
     inputs = {
       rootfs = inetutils_build_rootfs,

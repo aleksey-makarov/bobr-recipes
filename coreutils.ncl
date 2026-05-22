@@ -33,9 +33,6 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            mkdir -pv "@{out}/usr/sbin"
-            mv -v "@{out}/usr/bin/chroot" \
-                  "@{out}/usr/sbin/chroot"
             mkdir -pv "@{out}/usr/share/man/man8"
             mv -v "@{out}/usr/share/man/man1/chroot.1" \
                   "@{out}/usr/share/man/man8/chroot.8"
@@ -70,9 +67,6 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            mkdir -pv "@{out}/usr/sbin"
-            mv -v "@{out}/usr/bin/chroot" \
-                  "@{out}/usr/sbin/chroot"
             mkdir -pv "@{out}/usr/share/man/man8"
             mv -v "@{out}/usr/share/man/man1/chroot.1" \
                   "@{out}/usr/share/man/man8/chroot.8"

@@ -33,6 +33,7 @@ fun pkgs =>
       configure_args = [
         "--docdir=/usr/share/doc/man-db-2.13.1",
         "--sysconfdir=/etc",
+        "--sbindir=/usr/bin",
         "--disable-setuid",
         "--enable-cache-owner=bin",
         "--with-systemdsystemunitdir=/usr/lib/systemd/system",

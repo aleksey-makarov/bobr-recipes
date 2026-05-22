@@ -20,7 +20,7 @@ fun pkgs =>
           {
             type = "symlink",
             path = "sbin",
-            target = "usr/sbin",
+            target = "usr/bin",
           },
           {
             type = "symlink",
@@ -117,8 +117,9 @@ fun pkgs =>
             path = "usr/lib/udev/rules.d",
           },
           {
-            type = "dir",
+            type = "symlink",
             path = "usr/sbin",
+            target = "bin",
           },
           {
             type = "dir",
@@ -247,12 +248,12 @@ fun pkgs =>
       include = [
         "usr/bin/kmod",
         "usr/lib64/libkmod.so*",
-        "usr/sbin/depmod",
-        "usr/sbin/insmod",
-        "usr/sbin/lsmod",
-        "usr/sbin/modinfo",
-        "usr/sbin/modprobe",
-        "usr/sbin/rmmod",
+        "usr/bin/depmod",
+        "usr/bin/insmod",
+        "usr/bin/lsmod",
+        "usr/bin/modinfo",
+        "usr/bin/modprobe",
+        "usr/bin/rmmod",
       ],
     },
     inputs = {

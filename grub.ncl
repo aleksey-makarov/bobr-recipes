@@ -44,6 +44,7 @@ fun pkgs =>
       },
       configure_args = [
         "--sysconfdir=/etc",
+        "--sbindir=/usr/bin",
         "--disable-efiemu",
         "--disable-werror",
       ],

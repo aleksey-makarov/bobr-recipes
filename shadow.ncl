@@ -50,6 +50,7 @@ fun pkgs =>
       ],
       configure_args = [
         "--sysconfdir=/etc",
+        "--sbindir=/usr/bin",
         "--disable-static",
         "--with-bcrypt",
         "--with-yescrypt",
