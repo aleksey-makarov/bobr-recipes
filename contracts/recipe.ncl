@@ -18,7 +18,6 @@ let KnownTags = [
   "Meson",
   "PerlModule",
   "Sandbox",
-  "Image",
   "OciExtract",
 ]
 in
@@ -295,17 +294,6 @@ let PerlModuleConfig = {
   post_install | AutotoolsHook | optional,
 }
 in
-let ImageConfig = {
-  ref_name
-    | String
-    | optional
-    | doc "Optional OCI ref-name annotation for the resulting image.",
-  mode
-    | String
-    | optional
-    | doc "Optional image build mode selector.",
-}
-in
 let TreeMergeConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
@@ -352,14 +340,6 @@ let SandboxInputsShape = {
   rootfs
     | Dyn
     | doc "Single recipe node for the rootfs directory input.",
-  ..
-}
-in
-let ImageInputsShape = {
-  base
-    | Dyn
-    | optional
-    | doc "Optional base image recipe node.",
   ..
 }
 in
@@ -550,9 +530,6 @@ let ValidateRecipeShallow = fun recipe =>
       }
     else
       checked
-      & {
-        config = checked.config | ImageConfig,
-      }
 in
 # WARNING:
 # `ValidateRecipe` performs a deep recursive traversal of the entire nested
@@ -651,12 +628,6 @@ let rec ValidateRecipe = fun recipe =>
     in
     let validate_sandbox_package_inputs = fun inputs =>
       let checked = inputs | SandboxPackageInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_image_inputs = fun inputs =>
-      let checked = inputs | ImageInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -818,10 +789,6 @@ let rec ValidateRecipe = fun recipe =>
       }
     else
       checked
-      & {
-        config = checked.config | ImageConfig,
-        inputs = validate_image_inputs checked.inputs,
-      }
 in
 {
   known_tags
@@ -867,9 +834,6 @@ in
   initramfs_config
     | doc "Config contract for `Initramfs` recipe nodes."
     = InitramfsConfig,
-  image_config
-    | doc "Config contract for `Image` recipe nodes."
-    = ImageConfig,
   oci_extract_config
     | doc "Config contract for `OciExtract` recipe nodes."
     = OciExtractConfig,
