@@ -47,7 +47,7 @@ if [ -n "${jobs}" ] && ! [[ "${jobs}" =~ ^[1-9][0-9]*$ ]]; then
   exit 2
 fi
 
-attr="${1:-all_artifacts}"
+attr="${1:-all_test_artifacts}"
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${repo_root}/env.sh"
 request_file="${repo_root}/request.ncl"
