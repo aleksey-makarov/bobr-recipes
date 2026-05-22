@@ -17,7 +17,7 @@ fun pkgs =>
 
   let gdbm = {
     name = "gdbm-1.26",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [],
       runtime = [

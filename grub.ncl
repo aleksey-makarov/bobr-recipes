@@ -17,7 +17,7 @@ fun pkgs =>
 
   let grub = {
     name = "grub-2.12",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.bison,

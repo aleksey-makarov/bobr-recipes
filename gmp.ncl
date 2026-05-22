@@ -17,7 +17,7 @@ fun pkgs =>
 
   let gmp = {
     name = "gmp-6.3.0",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [],
       runtime = [

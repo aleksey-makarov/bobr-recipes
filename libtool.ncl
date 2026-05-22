@@ -17,7 +17,7 @@ fun pkgs =>
 
   let libtool = {
     name = "libtool-2.5.4",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [],
       runtime = [

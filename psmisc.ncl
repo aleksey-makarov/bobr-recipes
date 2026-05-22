@@ -17,7 +17,7 @@ fun pkgs =>
 
   let psmisc = {
     name = "psmisc-23.7",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.ncurses,

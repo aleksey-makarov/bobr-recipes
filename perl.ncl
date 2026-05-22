@@ -39,7 +39,7 @@ fun pkgs =>
 
   let perl = {
     name = "perl-5.42.0",
-    tag = "Sandbox",
+    tag = "SandboxBuildRootfs",
     deps = {
       build = [],
       runtime = [

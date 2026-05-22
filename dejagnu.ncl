@@ -47,7 +47,7 @@ fun pkgs =>
 
   let dejagnu = {
     name = "dejagnu-1.6.3",
-    tag = "SandboxPackage",
+    tag = "SandboxBuild",
     deps = {
       build = [
         pkgs.linux_headers,

@@ -29,7 +29,7 @@ fun pkgs =>
 
   let readline = {
     name = "readline-8.3",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     deps = {
       build = [],
       runtime = [

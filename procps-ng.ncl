@@ -17,7 +17,7 @@ fun pkgs =>
 
   let procps_ng = {
     name = "procps-ng-4.0.5",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.pkgconf,

@@ -14,7 +14,7 @@ fun pkgs =>
 
   let libcap = {
     name = "libcap-2.76",
-    tag = "Makefile",
+    tag = "MakefileRootfs",
     config = {
       pre_build = {
         name = "drop_static_install_rule",

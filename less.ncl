@@ -26,7 +26,7 @@ fun pkgs =>
 
   let less = {
     name = "less-679",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     deps = {
       build = [],
       runtime = [

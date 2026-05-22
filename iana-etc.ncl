@@ -33,7 +33,7 @@ fun pkgs =>
 
   let iana_etc = {
     name = "iana-etc-20250807",
-    tag = "SandboxPackage",
+    tag = "SandboxBuild",
     deps = {
       build = [
         pkgs.coreutils,

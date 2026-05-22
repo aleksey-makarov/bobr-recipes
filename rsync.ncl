@@ -12,7 +12,7 @@ fun pkgs =>
 
   let rsync = {
     name = "rsync-3.4.2",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     deps = {
       build = [],
       runtime = [

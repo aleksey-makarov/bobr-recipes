@@ -14,7 +14,7 @@ fun pkgs =>
 
   let attr = {
     name = "attr-2.5.2",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = [
         "--disable-static",

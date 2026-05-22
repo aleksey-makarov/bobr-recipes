@@ -17,7 +17,7 @@ fun pkgs =>
 
   let findutils_gen1 = {
     name = "findutils-gen1-4.10.0",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = [
         "--disable-nls",
@@ -34,7 +34,7 @@ fun pkgs =>
 
   let findutils = {
     name = "findutils-4.10.0",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = [
         "--disable-nls",

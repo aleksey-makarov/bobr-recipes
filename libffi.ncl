@@ -14,7 +14,7 @@ fun pkgs =>
 
   let libffi = {
     name = "libffi-3.5.2",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [],
       runtime = [

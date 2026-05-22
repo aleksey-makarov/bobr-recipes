@@ -29,7 +29,7 @@ fun pkgs =>
 
   let inetutils = {
     name = "inetutils-2.6",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     deps = {
       build = [],
       runtime = [

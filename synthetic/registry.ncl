@@ -192,7 +192,7 @@ let perl_module_package_default_build_deps =
     pkgs.perl,
   ]
 in
-let sandbox_package_default_build_deps = [
+let sandbox_build_default_build_deps = [
   pkgs.bash,
   pkgs.tar,
   pkgs.gzip,
@@ -392,7 +392,7 @@ let lower_autotools_package_node = fun node =>
     record_replace
       "inputs"
       package_inputs
-      (record_replace "tag" "Autotools" node)
+      (record_replace "tag" "AutotoolsRootfs" node)
   )
 in
 let lower_makefile_node = fun node =>
@@ -613,7 +613,7 @@ let lower_makefile_package_node = fun node =>
     record_replace
       "inputs"
       package_inputs
-      (record_replace "tag" "Makefile" node)
+      (record_replace "tag" "MakefileRootfs" node)
   )
 in
 let lower_meson_package_node = fun node =>
@@ -628,7 +628,7 @@ let lower_meson_package_node = fun node =>
     record_replace
       "inputs"
       package_inputs
-      (record_replace "tag" "Meson" node)
+      (record_replace "tag" "MesonRootfs" node)
   )
 in
 let lower_perl_module_package_node = fun node =>
@@ -643,11 +643,11 @@ let lower_perl_module_package_node = fun node =>
     record_replace
       "inputs"
       package_inputs
-      (record_replace "tag" "PerlModule" node)
+      (record_replace "tag" "PerlModuleRootfs" node)
   )
 in
-let lower_sandbox_package_node = fun node =>
-  let build_rootfs = build_rootfs_for sandbox_package_default_build_deps node in
+let lower_sandbox_build_node = fun node =>
+  let build_rootfs = build_rootfs_for sandbox_build_default_build_deps node in
   let package_inputs =
     record_replace
       "rootfs"
@@ -659,15 +659,19 @@ let lower_sandbox_package_node = fun node =>
     package_inputs
     (record_replace "tag" "Sandbox" node)
 in
+let lower_sandbox_build_rootfs_node = fun node =>
+  record_replace "tag" "Sandbox" node
+in
 {
   "RootfsClosure" = rootfs_closure_for,
-  "AutotoolsPackage" = lower_autotools_package_node,
-  "MakefilePackage" = lower_makefile_package_node,
-  "MesonPackage" = lower_meson_package_node,
-  "PerlModulePackage" = lower_perl_module_package_node,
-  "SandboxPackage" = lower_sandbox_package_node,
-  "Autotools" = lower_autotools_node,
-  "Makefile" = lower_makefile_node,
-  "Meson" = lower_meson_node,
-  "PerlModule" = lower_perl_module_node,
+  "Autotools" = lower_autotools_package_node,
+  "Makefile" = lower_makefile_package_node,
+  "Meson" = lower_meson_package_node,
+  "PerlModule" = lower_perl_module_package_node,
+  "SandboxBuild" = lower_sandbox_build_node,
+  "AutotoolsRootfs" = lower_autotools_node,
+  "MakefileRootfs" = lower_makefile_node,
+  "MesonRootfs" = lower_meson_node,
+  "PerlModuleRootfs" = lower_perl_module_node,
+  "SandboxBuildRootfs" = lower_sandbox_build_rootfs_node,
 }

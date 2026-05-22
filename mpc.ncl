@@ -17,7 +17,7 @@ fun pkgs =>
 
   let mpc = {
     name = "mpc-1.3.1",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.gmp,

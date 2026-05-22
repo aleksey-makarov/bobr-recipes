@@ -54,16 +54,16 @@ run_case "rootfs-closure" pass '{"name":"pkg-rootfs","tag":"RootfsClosure","conf
 run_case "initramfs" pass '{"name":"initrd","tag":"Initramfs","config":{},"inputs":{"tree0":'"${rootfs_tree}"'}}'
 run_case "source-http" pass "${source_node}"
 run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"type":"oci-registry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}'
-run_case "autotools-sandbox" pass '{"name":"pkg-sandbox","tag":"Autotools","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "autotools-package" pass '{"name":"pkg-package","tag":"AutotoolsPackage","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"configure_args":["--disable-nls"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "makefile-sandbox" pass '{"name":"pkg-sandbox","tag":"Makefile","config":{"make_args":["PREFIX=/usr"],"pre_build":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}],"skip_install":true},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "makefile-package" pass '{"name":"pkg-package","tag":"MakefilePackage","deps":{"build":[],"runtime":[]},"config":{"make_args":["PREFIX=/usr"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "meson-sandbox" pass '{"name":"pkg-sandbox","tag":"Meson","config":{"setup_args":["--buildtype=release"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "meson-package" pass '{"name":"pkg-package","tag":"MesonPackage","deps":{"build":[],"runtime":[]},"config":{"setup_args":["--buildtype=release"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "perl-module-sandbox" pass '{"name":"pkg-sandbox","tag":"PerlModule","config":{"perl_args":["INSTALLDIRS=vendor"],"make_args":["DESTDIR=/tmp/out"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "perl-module-package" pass '{"name":"pkg-package","tag":"PerlModulePackage","deps":{"build":[],"runtime":[]},"config":{"perl_args":["INSTALLDIRS=vendor"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "sandbox" pass '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
-run_case "sandbox-package" pass '{"name":"sandbox-package","tag":"SandboxPackage","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
+run_case "autotools-rootfs" pass '{"name":"pkg-rootfs","tag":"AutotoolsRootfs","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "autotools-package" pass '{"name":"pkg-package","tag":"Autotools","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"configure_args":["--disable-nls"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "makefile-rootfs" pass '{"name":"pkg-rootfs","tag":"MakefileRootfs","config":{"make_args":["PREFIX=/usr"],"pre_build":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}],"skip_install":true},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "makefile-package" pass '{"name":"pkg-package","tag":"Makefile","deps":{"build":[],"runtime":[]},"config":{"make_args":["PREFIX=/usr"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "meson-rootfs" pass '{"name":"pkg-rootfs","tag":"MesonRootfs","config":{"setup_args":["--buildtype=release"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "meson-package" pass '{"name":"pkg-package","tag":"Meson","deps":{"build":[],"runtime":[]},"config":{"setup_args":["--buildtype=release"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "perl-module-rootfs" pass '{"name":"pkg-rootfs","tag":"PerlModuleRootfs","config":{"perl_args":["INSTALLDIRS=vendor"],"make_args":["DESTDIR=/tmp/out"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "perl-module-package" pass '{"name":"pkg-package","tag":"PerlModule","deps":{"build":[],"runtime":[]},"config":{"perl_args":["INSTALLDIRS=vendor"]},"inputs":{"source":'"${source_node}"'}}'
+run_case "sandbox-build-rootfs" pass '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
+run_case "sandbox-build-package" pass '{"name":"sandbox-build-package","tag":"SandboxBuild","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "erofs-rootfs" pass '{"name":"rootfs-erofs","tag":"ErofsRootfs","config":{"compression":null,"label":null},"inputs":{"tree0":'"${rootfs_tree}"'}}'
 run_case "oci-extract" pass '{"name":"img-rootfs","tag":"OciExtract","config":{},"inputs":{"image":{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"type":"oci-registry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}}}'
 
@@ -74,6 +74,13 @@ run_case "legacy-autotools-container-tag" fail '{"name":"pkg","tag":"AutotoolsCo
 run_case "legacy-makefile-sandbox-tag" fail '{"name":"pkg","tag":"MakefileSandbox","config":{},"inputs":{}}'
 run_case "legacy-meson-sandbox-tag" fail '{"name":"pkg","tag":"MesonSandbox","config":{},"inputs":{}}'
 run_case "legacy-perl-module-sandbox-tag" fail '{"name":"pkg","tag":"PerlModuleSandbox","config":{},"inputs":{}}'
+run_case "legacy-autotools-package-tag" fail '{"name":"pkg","tag":"AutotoolsPackage","config":{},"inputs":{}}'
+run_case "legacy-makefile-package-tag" fail '{"name":"pkg","tag":"MakefilePackage","config":{},"inputs":{}}'
+run_case "legacy-meson-package-tag" fail '{"name":"pkg","tag":"MesonPackage","config":{},"inputs":{}}'
+run_case "legacy-perl-module-package-tag" fail '{"name":"pkg","tag":"PerlModulePackage","config":{},"inputs":{}}'
+run_case "legacy-sandbox-package-tag" fail '{"name":"pkg","tag":"SandboxPackage","config":{},"inputs":{}}'
+run_case "legacy-sandbox-recipe-tag" fail '{"name":"pkg","tag":"Sandbox","config":{},"inputs":{}}'
+run_case "legacy-sandbox-rootfs-recipe-tag" fail '{"name":"pkg","tag":"SandboxRootfs","config":{},"inputs":{}}'
 run_case "legacy-binary-tag" fail '{"name":"bin","tag":"Binary","config":{},"inputs":{}}'
 run_case "legacy-container-tag" fail '{"name":"container","tag":"Container","config":{},"inputs":{}}'
 run_case "legacy-ext4-rootfs-tag" fail '{"name":"rootfs","tag":"Ext4Rootfs","config":{"size_mib":256},"inputs":{}}'
@@ -81,13 +88,13 @@ run_case "legacy-rootfs-tag" fail '{"name":"rootfs-dir","tag":"Rootfs","config":
 run_case "tree-bad-install-shape" fail '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"dev"}]},"install":{"rules":[{"path":"**","attrs":{"uid":"0","gid":0}}]}},"inputs":{}}'
 run_case "tree-bad-entry-type" fail '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"pipe","path":"lib"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
 run_case "tree-symlink-missing-target" fail '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"symlink","path":"lib"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
-run_case "missing-sandbox-rootfs" fail '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"'}}'
-run_case "missing-autotools-package-source" fail '{"name":"pkg-package","tag":"AutotoolsPackage","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"patch":'"${patch_node}"'}}'
-run_case "missing-makefile-package-source" fail '{"name":"pkg-package","tag":"MakefilePackage","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"patch":'"${patch_node}"'}}'
-run_case "missing-meson-package-deps" fail '{"name":"pkg-package","tag":"MesonPackage","config":{},"inputs":{"source":'"${source_node}"'}}'
-run_case "sandbox-install-rejected" fail '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"'}}'
-run_case "autotools-sandbox-install-rejected" fail '{"name":"pkg-sandbox","tag":"Autotools","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
-run_case "meson-sandbox-build-dir-rejected" fail '{"name":"pkg-sandbox","tag":"Meson","config":{"build_dir":"build"},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
+run_case "missing-sandbox-build-rootfs" fail '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"'}}'
+run_case "missing-autotools-package-source" fail '{"name":"pkg-package","tag":"Autotools","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"patch":'"${patch_node}"'}}'
+run_case "missing-makefile-package-source" fail '{"name":"pkg-package","tag":"Makefile","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"patch":'"${patch_node}"'}}'
+run_case "missing-meson-package-deps" fail '{"name":"pkg-package","tag":"Meson","config":{},"inputs":{"source":'"${source_node}"'}}'
+run_case "sandbox-build-rootfs-install-rejected" fail '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"'}}'
+run_case "autotools-rootfs-install-rejected" fail '{"name":"pkg-rootfs","tag":"AutotoolsRootfs","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
+run_case "meson-rootfs-build-dir-rejected" fail '{"name":"pkg-rootfs","tag":"MesonRootfs","config":{"build_dir":"build"},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "extra-top-level-field" fail '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{},"extra":true}'
 run_case "bad-group-config" fail '{"name":"all","tag":"Group","config":{"manifest":true},"inputs":{"first":'"${script_node}"'}}'
 run_case "empty-group-inputs" fail '{"name":"all","tag":"Group","config":{},"inputs":{}}'
@@ -152,7 +159,7 @@ let aux_src = {
 } in
 recipe.to_request {} {
   name = "pkg",
-  tag = "Autotools",
+  tag = "AutotoolsRootfs",
   config = {
     source_subdir = "subdir",
     pre_configure = {
@@ -277,7 +284,7 @@ let fake_pkgs = {
 } in
 recipe.to_request fake_pkgs {
   name = "pkg",
-  tag = "AutotoolsPackage",
+  tag = "Autotools",
   deps = {
     build = [lib_tree, tool_tree, tool_tree],
     runtime = [],
@@ -395,7 +402,7 @@ let fake_pkgs = {
 } in
 recipe.to_request fake_pkgs {
   name = "pkg",
-  tag = "AutotoolsPackage",
+  tag = "Autotools",
   deps = {
     build = [tool_tree],
     runtime = [],
@@ -534,7 +541,7 @@ let fake_pkgs = {
 } in
 recipe.to_request fake_pkgs {
   name = "pkg",
-  tag = "MesonPackage",
+  tag = "Meson",
   deps = {
     build = [tool_tree],
     runtime = [],
@@ -654,7 +661,7 @@ let fake_pkgs = {
 } in
 recipe.to_request fake_pkgs {
   name = "pkg",
-  tag = "AutotoolsPackage",
+  tag = "Autotools",
   deps = {
     build = [cycle.left],
     runtime = [],
@@ -667,11 +674,11 @@ recipe.to_request fake_pkgs {
 EOF_INNER
 
 if (cd "${tmpdir}" && nickel export check-autotools-package-cycle.ncl --format json >"${tmpdir}/cycle.out" 2>"${tmpdir}/cycle.err"); then
-  echo "expected runtime dependency cycle failure for AutotoolsPackage" >&2
+  echo "expected runtime dependency cycle failure for Autotools" >&2
   exit 1
 fi
 if ! rg "runtime dependency cycle: left-runtime -> right-runtime -> left-runtime" "${tmpdir}/cycle.err" >/dev/null; then
-  echo "expected runtime dependency cycle diagnostic for AutotoolsPackage" >&2
+  echo "expected runtime dependency cycle diagnostic for Autotools" >&2
   cat "${tmpdir}/cycle.err" >&2
   exit 1
 fi
@@ -953,7 +960,7 @@ let rootfs_tree = {
 } in
 recipe.to_request {} {
   name = "pkg",
-  tag = "Meson",
+  tag = "MesonRootfs",
   config = {
     source_subdir = "subdir",
     setup_args = ["--buildtype=release"],

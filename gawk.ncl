@@ -17,7 +17,7 @@ fun pkgs =>
 
   let gawk_gen1 = {
     name = "gawk-gen1-5.3.2",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = ["--without-readline"],
       pre_configure = {
@@ -78,7 +78,7 @@ fun pkgs =>
 
   let gawk = {
     name = "gawk-5.3.2",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = ["--without-readline"],
       pre_configure = {

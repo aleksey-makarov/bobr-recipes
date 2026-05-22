@@ -17,7 +17,7 @@ fun pkgs =>
 
   let automake = {
     name = "automake-1.18.1",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [],
       runtime = [

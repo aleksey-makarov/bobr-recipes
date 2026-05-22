@@ -15,7 +15,7 @@ fun pkgs =>
 
   let test_system_rootfs_0 = {
     name = "test-system-rootfs-0",
-    tag = "Sandbox",
+    tag = "SandboxBuildRootfs",
     config = {
       script_config = {
         name = "system-rootfs-0",
@@ -38,7 +38,7 @@ fun pkgs =>
 
   let test_system_rootfs_1 = {
     name = "test-system-rootfs-1",
-    tag = "Sandbox",
+    tag = "SandboxBuildRootfs",
     config = {
       script_config = {
         name = "system-rootfs-1",
@@ -61,7 +61,7 @@ fun pkgs =>
 
   let test_system_rootfs_2 = {
     name = "test-system-rootfs-2",
-    tag = "Sandbox",
+    tag = "SandboxBuildRootfs",
     config = {
       script_config = {
         name = "system-rootfs-2",
@@ -84,7 +84,7 @@ fun pkgs =>
 
   let test_rootfs = {
     name = "test-rootfs",
-    tag = "Sandbox",
+    tag = "SandboxBuildRootfs",
     config = {
       script_config = {
         name = "rootfs",

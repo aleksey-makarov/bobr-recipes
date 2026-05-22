@@ -71,7 +71,7 @@ fun pkgs =>
 
   let e2fsprogs = {
     name = "e2fsprogs-1.47.3",
-    tag = "SandboxPackage",
+    tag = "SandboxBuild",
     deps = {
       build = [
         pkgs.linux_headers,

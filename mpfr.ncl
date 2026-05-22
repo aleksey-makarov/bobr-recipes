@@ -17,7 +17,7 @@ fun pkgs =>
 
   let mpfr = {
     name = "mpfr-4.2.2",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.gmp,

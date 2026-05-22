@@ -17,7 +17,7 @@ fun pkgs =>
 
   let grep_gen1 = {
     name = "grep-gen1-3.12",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = ["--disable-nls", "--disable-perl-regexp"],
     },
@@ -30,7 +30,7 @@ fun pkgs =>
 
   let grep = {
     name = "grep-3.12",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = ["--disable-nls", "--disable-perl-regexp"],
     },

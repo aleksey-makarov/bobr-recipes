@@ -65,7 +65,7 @@ fun pkgs =>
 
   let tcl = {
     name = "tcl-8.6.16",
-    tag = "SandboxPackage",
+    tag = "SandboxBuild",
     deps = {
       build = [
         pkgs.linux_headers,

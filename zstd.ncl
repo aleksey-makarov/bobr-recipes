@@ -14,7 +14,7 @@ fun pkgs =>
 
   let zstd = {
     name = "zstd-1.5.7",
-    tag = "Makefile",
+    tag = "MakefileRootfs",
     config = {
       make_args = [
         "prefix=/usr",

@@ -35,7 +35,7 @@ fun pkgs =>
 
   let man_pages = {
     name = "man-pages-6.15",
-    tag = "SandboxPackage",
+    tag = "SandboxBuild",
     deps = {
       build = [
         pkgs.coreutils,

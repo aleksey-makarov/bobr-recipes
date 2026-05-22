@@ -17,7 +17,7 @@ fun pkgs =>
 
   let coreutils_gen1 = {
     name = "coreutils-gen1-9.7",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = [
         "--disable-nls",
@@ -51,7 +51,7 @@ fun pkgs =>
 
   let coreutils = {
     name = "coreutils-9.7",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = [
         "--disable-nls",

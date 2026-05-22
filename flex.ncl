@@ -14,7 +14,7 @@ fun pkgs =>
 
   let flex = {
     name = "flex-2.6.4",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     deps = {
       build = [],
       runtime = [

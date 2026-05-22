@@ -14,7 +14,7 @@ fun pkgs =>
 
   let bc = {
     name = "bc-7.0.3",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = [
         "--disable-history",

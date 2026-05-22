@@ -17,7 +17,7 @@ fun pkgs =>
 
   let gzip_gen1 = {
     name = "gzip-gen1-1.14",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = ["--disable-nls"],
     },
@@ -30,7 +30,7 @@ fun pkgs =>
 
   let gzip = {
     name = "gzip-1.14",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = ["--disable-nls"],
     },

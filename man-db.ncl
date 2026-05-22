@@ -14,7 +14,7 @@ fun pkgs =>
 
   let man_db = {
     name = "man-db-2.13.1",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.pkgconf,

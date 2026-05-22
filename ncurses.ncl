@@ -16,7 +16,7 @@ fun pkgs =>
 
   let ncurses = {
     name = "ncurses-6.6",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     deps = {
       build = [],
       runtime = [

@@ -17,7 +17,7 @@ fun pkgs =>
 
   let bison_gen1 = {
     name = "bison-gen1-3.8.2",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {},
     inputs = {
       rootfs = pkgs.buildpack_deps_rootfs,
@@ -28,7 +28,7 @@ fun pkgs =>
 
   let bison = {
     name = "bison-3.8.2",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     deps = {
       build = [],
       runtime = [

@@ -36,7 +36,7 @@ fun pkgs =>
 
   let systemd = {
     name = "systemd-%{version}",
-    tag = "MesonPackage",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.attr,

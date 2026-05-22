@@ -14,7 +14,7 @@ fun pkgs =>
 
   let libpipeline = {
     name = "libpipeline-1.5.8",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [],
       runtime = [

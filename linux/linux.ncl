@@ -50,7 +50,7 @@ fun pkgs =>
 
   let linux_headers_gen1 = {
     name = "linux-headers-gen1-%{version}",
-    tag = "Sandbox",
+    tag = "SandboxBuildRootfs",
     config = {
       steps = [
         recipe.prepare_source_step,
@@ -100,7 +100,7 @@ fun pkgs =>
 
   let linux = {
     name = "linux-%{version}",
-    tag = "SandboxPackage",
+    tag = "SandboxBuild",
     deps = {
       build = [
         pkgs.linux_headers_gen1,

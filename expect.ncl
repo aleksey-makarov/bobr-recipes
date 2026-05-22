@@ -28,7 +28,7 @@ fun pkgs =>
 
   let expect = {
     name = "expect-5.45.4",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.tcl,

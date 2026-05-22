@@ -8,16 +8,16 @@ let KnownTags = [
   "RootfsClosure",
   "ErofsRootfs",
   "Initramfs",
-  "AutotoolsPackage",
-  "MakefilePackage",
-  "MesonPackage",
-  "PerlModulePackage",
-  "SandboxPackage",
   "Autotools",
   "Makefile",
   "Meson",
   "PerlModule",
-  "Sandbox",
+  "SandboxBuild",
+  "AutotoolsRootfs",
+  "MakefileRootfs",
+  "MesonRootfs",
+  "PerlModuleRootfs",
+  "SandboxBuildRootfs",
   "OciExtract",
 ]
 in
@@ -336,7 +336,7 @@ let GroupInputsShape = NonEmptyRecord
 in
 let TreeInputs = {}
 in
-let SandboxInputsShape = {
+let SandboxBuildRootfsInputsShape = {
   rootfs
     | Dyn
     | doc "Single recipe node for the rootfs directory input.",
@@ -363,45 +363,18 @@ let ErofsRootfsInputsShape = { .. }
 in
 let InitramfsInputsShape = { .. }
 in
-let MakefileInputsShape = {
+let SyntheticRootfsInputsShape = {
   rootfs | Dyn,
   source | Dyn,
   ..
 }
 in
-let AutotoolsPackageInputsShape = {
+let SyntheticPackageInputsShape = {
   source | Dyn,
   ..
 }
 in
-let MakefilePackageInputsShape = {
-  source | Dyn,
-  ..
-}
-in
-let MesonPackageInputsShape = {
-  source | Dyn,
-  ..
-}
-in
-let PerlModulePackageInputsShape = {
-  source | Dyn,
-  ..
-}
-in
-let SandboxPackageInputsShape = { .. }
-in
-let MesonInputsShape = {
-  rootfs | Dyn,
-  source | Dyn,
-  ..
-}
-in
-let PerlModuleInputsShape = {
-  rootfs | Dyn,
-  source | Dyn,
-  ..
-}
+let SandboxInputsShape = { .. }
 in
 let ValidateRecipeShallow = fun recipe =>
   if recipe.tag == "Source" then
@@ -443,56 +416,56 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = validate_tree_config checked.config,
       }
-    else if checked.tag == "Autotools" then
+    else if checked.tag == "AutotoolsRootfs" then
       checked
       & {
         config = checked.config | AutotoolsConfig,
       }
-    else if checked.tag == "AutotoolsPackage" then
+    else if checked.tag == "Autotools" then
       checked
       & {
         config = checked.config | AutotoolsConfig,
         deps = checked.deps | RecipeDeps,
+      }
+    else if checked.tag == "MakefileRootfs" then
+      checked
+      & {
+        config = checked.config | MakefileConfig,
       }
     else if checked.tag == "Makefile" then
       checked
       & {
         config = checked.config | MakefileConfig,
+        deps = checked.deps | RecipeDeps,
       }
-    else if checked.tag == "MakefilePackage" then
+    else if checked.tag == "MesonRootfs" then
       checked
       & {
-        config = checked.config | MakefileConfig,
-        deps = checked.deps | RecipeDeps,
+        config = checked.config | MesonConfig,
       }
     else if checked.tag == "Meson" then
       checked
       & {
         config = checked.config | MesonConfig,
+        deps = checked.deps | RecipeDeps,
       }
-    else if checked.tag == "MesonPackage" then
+    else if checked.tag == "PerlModuleRootfs" then
       checked
       & {
-        config = checked.config | MesonConfig,
-        deps = checked.deps | RecipeDeps,
+        config = checked.config | PerlModuleConfig,
       }
     else if checked.tag == "PerlModule" then
       checked
       & {
         config = checked.config | PerlModuleConfig,
-      }
-    else if checked.tag == "PerlModulePackage" then
-      checked
-      & {
-        config = checked.config | PerlModuleConfig,
         deps = checked.deps | RecipeDeps,
       }
-    else if checked.tag == "Sandbox" then
+    else if checked.tag == "SandboxBuildRootfs" then
       checked
       & {
         config = checked.config | SandboxConfig,
       }
-    else if checked.tag == "SandboxPackage" then
+    else if checked.tag == "SandboxBuild" then
       checked
       & {
         config = checked.config | SandboxConfig,
@@ -561,50 +534,14 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
-    let validate_autotools_sandbox_inputs = fun inputs =>
-      let checked = inputs | MakefileInputsShape in
+    let validate_synthetic_rootfs_inputs = fun inputs =>
+      let checked = inputs | SyntheticRootfsInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
     in
-    let validate_autotools_package_inputs = fun inputs =>
-      let checked = inputs | AutotoolsPackageInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_makefile_package_inputs = fun inputs =>
-      let checked = inputs | MakefilePackageInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_makefile_sandbox_inputs = fun inputs =>
-      let checked = inputs | MakefileInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_meson_package_inputs = fun inputs =>
-      let checked = inputs | MesonPackageInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_meson_sandbox_inputs = fun inputs =>
-      let checked = inputs | MesonInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_perl_module_package_inputs = fun inputs =>
-      let checked = inputs | PerlModulePackageInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_perl_module_sandbox_inputs = fun inputs =>
-      let checked = inputs | PerlModuleInputsShape in
+    let validate_synthetic_package_inputs = fun inputs =>
+      let checked = inputs | SyntheticPackageInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -621,13 +558,13 @@ let rec ValidateRecipe = fun recipe =>
       }
     in
     let validate_sandbox_inputs = fun inputs =>
-      let checked = inputs | SandboxInputsShape in
+      let checked = inputs | SandboxBuildRootfsInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
     in
-    let validate_sandbox_package_inputs = fun inputs =>
-      let checked = inputs | SandboxPackageInputsShape in
+    let validate_sandbox_build_inputs = fun inputs =>
+      let checked = inputs | SandboxInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -686,70 +623,70 @@ let rec ValidateRecipe = fun recipe =>
         config = validate_tree_config checked.config,
         inputs = validate_tree_inputs checked.inputs,
       }
+    else if checked.tag == "AutotoolsRootfs" then
+      checked
+      & {
+        config = checked.config | AutotoolsConfig,
+        inputs = validate_synthetic_rootfs_inputs checked.inputs,
+      }
     else if checked.tag == "Autotools" then
       checked
       & {
         config = checked.config | AutotoolsConfig,
-        inputs = validate_autotools_sandbox_inputs checked.inputs,
+        deps = checked.deps | RecipeDeps,
+        inputs = validate_synthetic_package_inputs checked.inputs,
       }
-    else if checked.tag == "AutotoolsPackage" then
+    else if checked.tag == "MakefileRootfs" then
       checked
       & {
-        config = checked.config | AutotoolsConfig,
-        deps = checked.deps | RecipeDeps,
-        inputs = validate_autotools_package_inputs checked.inputs,
+        config = checked.config | MakefileConfig,
+        inputs = validate_synthetic_rootfs_inputs checked.inputs,
       }
     else if checked.tag == "Makefile" then
       checked
       & {
         config = checked.config | MakefileConfig,
-        inputs = validate_makefile_sandbox_inputs checked.inputs,
+        deps = checked.deps | RecipeDeps,
+        inputs = validate_synthetic_package_inputs checked.inputs,
       }
-    else if checked.tag == "MakefilePackage" then
+    else if checked.tag == "MesonRootfs" then
       checked
       & {
-        config = checked.config | MakefileConfig,
-        deps = checked.deps | RecipeDeps,
-        inputs = validate_makefile_package_inputs checked.inputs,
+        config = checked.config | MesonConfig,
+        inputs = validate_synthetic_rootfs_inputs checked.inputs,
       }
     else if checked.tag == "Meson" then
       checked
       & {
         config = checked.config | MesonConfig,
-        inputs = validate_meson_sandbox_inputs checked.inputs,
+        deps = checked.deps | RecipeDeps,
+        inputs = validate_synthetic_package_inputs checked.inputs,
       }
-    else if checked.tag == "MesonPackage" then
+    else if checked.tag == "PerlModuleRootfs" then
       checked
       & {
-        config = checked.config | MesonConfig,
-        deps = checked.deps | RecipeDeps,
-        inputs = validate_meson_package_inputs checked.inputs,
+        config = checked.config | PerlModuleConfig,
+        inputs = validate_synthetic_rootfs_inputs checked.inputs,
       }
     else if checked.tag == "PerlModule" then
       checked
       & {
         config = checked.config | PerlModuleConfig,
-        inputs = validate_perl_module_sandbox_inputs checked.inputs,
-      }
-    else if checked.tag == "PerlModulePackage" then
-      checked
-      & {
-        config = checked.config | PerlModuleConfig,
         deps = checked.deps | RecipeDeps,
-        inputs = validate_perl_module_package_inputs checked.inputs,
+        inputs = validate_synthetic_package_inputs checked.inputs,
       }
-    else if checked.tag == "Sandbox" then
+    else if checked.tag == "SandboxBuildRootfs" then
       checked
       & {
         config = checked.config | SandboxConfig,
         inputs = validate_sandbox_inputs checked.inputs,
       }
-    else if checked.tag == "SandboxPackage" then
+    else if checked.tag == "SandboxBuild" then
       checked
       & {
         config = checked.config | SandboxConfig,
         deps = checked.deps | RecipeDeps,
-        inputs = validate_sandbox_package_inputs checked.inputs,
+        inputs = validate_sandbox_build_inputs checked.inputs,
       }
     else if checked.tag == "TreeMerge" then
       checked
@@ -810,20 +747,20 @@ in
   source_recipe
     | doc "Structural contract for `Source` recipe nodes."
     = SourceRecipe,
-  autotools_sandbox_config
-    | doc "Config contract for synthetic `Autotools` recipe nodes."
+  autotools_config
+    | doc "Config contract for synthetic `Autotools` and `AutotoolsRootfs` recipe nodes."
     = AutotoolsConfig,
-  makefile_sandbox_config
-    | doc "Config contract for synthetic `Makefile` recipe nodes."
+  makefile_config
+    | doc "Config contract for synthetic `Makefile` and `MakefileRootfs` recipe nodes."
     = MakefileConfig,
-  meson_sandbox_config
-    | doc "Config contract for synthetic `Meson` recipe nodes."
+  meson_config
+    | doc "Config contract for synthetic `Meson` and `MesonRootfs` recipe nodes."
     = MesonConfig,
-  perl_module_sandbox_config
-    | doc "Config contract for synthetic `PerlModule` recipe nodes."
+  perl_module_config
+    | doc "Config contract for synthetic `PerlModule` and `PerlModuleRootfs` recipe nodes."
     = PerlModuleConfig,
   sandbox_config
-    | doc "Config contract for `Sandbox` recipe nodes."
+    | doc "Config contract for synthetic `SandboxBuild` and `SandboxBuildRootfs` recipe nodes."
     = SandboxConfig,
   tree_merge_config
     | doc "Config contract for `TreeMerge` recipe nodes."

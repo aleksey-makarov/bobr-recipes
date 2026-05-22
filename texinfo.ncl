@@ -17,7 +17,7 @@ fun pkgs =>
 
   let texinfo = {
     name = "texinfo-7.2",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.ncurses,

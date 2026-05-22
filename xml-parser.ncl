@@ -14,7 +14,7 @@ fun pkgs =>
 
   let xml_parser = {
     name = "xml-parser-2.47",
-    tag = "PerlModulePackage",
+    tag = "PerlModule",
     deps = {
       build = [
         pkgs.expat,

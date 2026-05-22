@@ -14,7 +14,7 @@ fun pkgs =>
 
   let kmod = {
     name = "kmod-34.2",
-    tag = "MesonPackage",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.openssl,

@@ -48,7 +48,7 @@ fun pkgs =>
 
   let openssl = {
     name = "openssl-3.5.2",
-    tag = "SandboxPackage",
+    tag = "SandboxBuild",
     deps = {
       build = [
         pkgs.linux_headers,

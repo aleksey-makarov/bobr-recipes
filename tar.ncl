@@ -17,7 +17,7 @@ fun pkgs =>
 
   let tar_gen1 = {
     name = "tar-gen1-1.35",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = [
         "--disable-nls",
@@ -33,7 +33,7 @@ fun pkgs =>
 
   let tar = {
     name = "tar-1.35",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = [
         "--disable-nls",

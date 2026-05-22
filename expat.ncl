@@ -14,7 +14,7 @@ fun pkgs =>
 
   let expat = {
     name = "expat-2.7.1",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     deps = {
       build = [],
       runtime = [

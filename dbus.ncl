@@ -14,7 +14,7 @@ fun pkgs =>
 
   let dbus = {
     name = "dbus-1.16.2",
-    tag = "MesonPackage",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.expat,

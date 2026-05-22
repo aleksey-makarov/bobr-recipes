@@ -26,7 +26,7 @@ fun pkgs =>
 
   let acl = {
     name = "acl-2.3.2",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = [
         "--disable-static",

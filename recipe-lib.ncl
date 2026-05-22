@@ -147,7 +147,6 @@ in
   to_request = fun pkgs =>
     fun root_node =>
     let lower = lower_node pkgs in
-    let lowered_root_node = lower root_node in
     let rec collect = fun seen =>
       fun node =>
         let lowered_node = lower node in
@@ -174,8 +173,8 @@ in
             (std.record.fields inputs)
     in
 
-    let unique_nodes = collect {} lowered_root_node in
-    let root_name = lowered_root_node.name in
+    let unique_nodes = collect {} root_node in
+    let root_name = root_node.name in
     let other_names =
       std.array.sort
         std.string.compare
@@ -213,7 +212,7 @@ in
     std.record.from_array (
       std.array.map
         (fun name =>
-          let node = lower (std.record.get name unique_nodes) in
+          let node = std.record.get name unique_nodes in
           let node_value =
             if node.tag == "Source" then
               let source_base = {

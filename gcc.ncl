@@ -47,7 +47,7 @@ fun pkgs =>
 
   let gcc_gen1 = {
     name = "gcc-gen1-15.2.0",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       pre_configure = gcc_prereqs_pre_configure,
       configure_args = [
@@ -71,7 +71,7 @@ fun pkgs =>
 
   let gcc = {
     name = "gcc-15.2.0",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       pre_configure = gcc_prereqs_pre_configure,
       configure_args = [

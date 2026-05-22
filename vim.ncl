@@ -16,7 +16,7 @@ fun pkgs =>
 
   let vim = {
     name = "vim-9.1.1629",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.ncurses,

@@ -25,7 +25,7 @@ fun pkgs =>
 
   let kbd = {
     name = "kbd-2.8.0",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.flex,

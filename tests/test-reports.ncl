@@ -15,7 +15,7 @@ fun pkgs =>
 
   let test_reports = {
     name = "test-reports",
-    tag = "Sandbox",
+    tag = "SandboxBuildRootfs",
     config = {
       steps = [
         {

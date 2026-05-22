@@ -14,7 +14,7 @@ fun pkgs =>
 
   let iproute2 = {
     name = "iproute2-6.16.0",
-    tag = "MakefilePackage",
+    tag = "Makefile",
     deps = {
       build = [
         pkgs.bison,

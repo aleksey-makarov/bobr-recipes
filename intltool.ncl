@@ -14,7 +14,7 @@ fun pkgs =>
 
   let intltool = {
     name = "intltool-0.51.0",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.xml_parser,

@@ -17,7 +17,7 @@ fun pkgs =>
 
   let groff = {
     name = "groff-1.23.0",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [],
       runtime = [

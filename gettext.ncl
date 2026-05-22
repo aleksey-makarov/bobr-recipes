@@ -17,7 +17,7 @@ fun pkgs =>
 
   let gettext = {
     name = "gettext-0.26",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [],
       runtime = [

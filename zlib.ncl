@@ -14,7 +14,7 @@ fun pkgs =>
 
   let zlib = {
     name = "zlib-1.3.1",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     deps = {
       build = [],
       runtime = [

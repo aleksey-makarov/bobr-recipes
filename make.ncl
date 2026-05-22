@@ -17,7 +17,7 @@ fun pkgs =>
 
   let make_gen1 = {
     name = "make-gen1-4.4.1",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = ["--disable-nls"],
     },
@@ -30,7 +30,7 @@ fun pkgs =>
 
   let make = {
     name = "make-4.4.1",
-    tag = "Autotools",
+    tag = "AutotoolsRootfs",
     config = {
       configure_args = ["--disable-nls"],
     },

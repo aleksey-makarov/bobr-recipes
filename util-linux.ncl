@@ -14,7 +14,7 @@ fun pkgs =>
 
   let util_linux = {
     name = "util-linux-2.41.1",
-    tag = "AutotoolsPackage",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.ncurses,
