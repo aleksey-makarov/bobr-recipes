@@ -93,5 +93,6 @@ fi
 echo "==> build ${attr}" >&2
 (
   cd "${workspace_root}"
-  printf '%s\n' "${expr}" | nickel export --format json | "${mbuild_bin}"
+  TIMEFORMAT="==> pipeline time: real %R s, user %U s, sys %S s"
+  time (printf '%s\n' "${expr}" | nickel export --format json | "${mbuild_bin}")
 )
