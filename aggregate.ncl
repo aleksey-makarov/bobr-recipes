@@ -1,6 +1,37 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
+  let source_attrs =
+    std.array.sort
+      std.string.compare
+      (
+        std.array.filter
+          (fun attr => std.string.is_match "_src$" attr)
+          (std.record.fields pkgs)
+      )
+  in
+
+  let source_inputs =
+    std.record.from_array (
+      std.array.map
+        (fun attr =>
+          {
+            field = attr,
+            value = std.record.get attr pkgs,
+          }
+        )
+        source_attrs
+    )
+  in
+
+  let all_sources = {
+    name = "all-sources",
+    tag = "Group",
+    config = {},
+    inputs = source_inputs,
+  }
+  in
+
   let all_image_rootfs = {
     name = "all-image-rootfs",
     tag = "Group",
@@ -45,6 +76,7 @@ fun pkgs =>
 
   {
     include [
+      all_sources,
       all_image_rootfs,
       all_test_artifacts,
       all_artifacts,
