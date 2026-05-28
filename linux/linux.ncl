@@ -31,7 +31,6 @@ fun pkgs =>
     origin = {
       type = "path",
       path = "linux/.config",
-      mode = "direct",
     },
   }
   in
@@ -43,7 +42,6 @@ fun pkgs =>
     origin = {
       type = "path",
       path = "linux/linux.sh",
-      mode = "direct",
     },
   }
   in

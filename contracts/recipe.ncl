@@ -74,9 +74,6 @@ let ShallowBaseRecipe = {
     | doc "Optional Nickel-level direct build/runtime dependencies for dependency-aware synthetic recipes.",
 }
 in
-let SourcePathMode =
-  std.contract.from_predicate (fun value => std.array.elem value ["direct", "tar"])
-in
 let RelativeSourcePath =
   std.contract.from_predicate (fun value =>
     std.is_string value
@@ -90,7 +87,10 @@ let SourcePathOrigin = {
   path
     | RelativeSourcePath
     | doc "Relative local source path without `..`, resolved from request `paths.local`.",
-  mode | SourcePathMode,
+  unpack
+    | Bool
+    | optional
+    | doc "Whether the local source archive should be unpacked into a directory object; defaults to false.",
 }
 in
 let SourceHttpOrigin = {

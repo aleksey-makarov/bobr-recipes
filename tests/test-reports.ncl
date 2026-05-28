@@ -8,7 +8,6 @@ fun pkgs =>
     origin = {
       type = "path",
       path = "tests/test-reports.sh",
-      mode = "direct",
     },
   }
   in

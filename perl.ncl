@@ -8,7 +8,6 @@ fun pkgs =>
     origin = {
       type = "path",
       path = "perl-configure.sh",
-      mode = "direct",
     },
   }
   in

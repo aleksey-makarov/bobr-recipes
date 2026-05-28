@@ -6,7 +6,6 @@ let buildscript_autotools = {
   origin = {
     type = "path",
     path = "synthetic/autotools.sh",
-    mode = "direct",
   },
 }
 in
@@ -17,7 +16,6 @@ let buildscript_common = {
   origin = {
     type = "path",
     path = "synthetic/common.sh",
-    mode = "direct",
   },
 }
 in
@@ -28,7 +26,6 @@ let buildscript_gnu_make = {
   origin = {
     type = "path",
     path = "synthetic/gnu-make.sh",
-    mode = "direct",
   },
 }
 in
@@ -39,7 +36,6 @@ let buildscript_meson = {
   origin = {
     type = "path",
     path = "synthetic/meson.sh",
-    mode = "direct",
   },
 }
 in
@@ -50,7 +46,6 @@ let buildscript_perl_module = {
   origin = {
     type = "path",
     path = "synthetic/perl-module.sh",
-    mode = "direct",
   },
 }
 in

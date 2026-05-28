@@ -125,7 +125,6 @@ fun pkgs =>
     origin = {
       type = "path",
       path = "python-modules.sh",
-      mode = "direct",
     },
   }
   in
