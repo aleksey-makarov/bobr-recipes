@@ -185,11 +185,12 @@ synthetic_lowering_json="$(
 
 jq -e '
   .root.tag == "Sandbox"
-  and .root.config.steps[0].name == "prepare_source"
+  and .root.config.steps[0].name == "mbuild_prepare_source"
   and .root.config.steps[0].env.MBUILD_SOURCE_INPUT == "@{source}"
   and .root.config.steps[0].env.MBUILD_SOURCE_DIR == "@{build}/source"
   and .root.config.steps[0].env.MBUILD_SYNTHETIC_COMMON == "@{synthetic_common}"
   and .root.config.steps[0].env.MBUILD_PATCH_INPUTS == "@{patch} @{patch_extra}"
+  and [.root.config.steps[].name] == ["mbuild_prepare_source", "pre", "mbuild_configure", "mbuild_build", "mbuild_install"]
   and .root.config.steps[1].cwd == "@{build}/source/subdir"
   and (.root.inputs | has("rootfs"))
   and (.root.inputs | has("script"))
@@ -985,8 +986,9 @@ meson_synthetic_lowering_json="$(
 
 jq -e '
   .root.tag == "Sandbox"
-  and .root.config.steps[0].name == "prepare_source"
+  and .root.config.steps[0].name == "mbuild_prepare_source"
   and .root.config.steps[0].env.MBUILD_SOURCE_DIR == "@{build}/source"
+  and [.root.config.steps[].name] == ["mbuild_prepare_source", "pre", "mbuild_configure", "mbuild_build", "mbuild_install"]
   and .root.config.steps[1].cwd == "@{build}/source/subdir"
   and (.root.config.script_config | has("build_dir") | not)
 ' <<<"${meson_synthetic_lowering_json}" >/dev/null

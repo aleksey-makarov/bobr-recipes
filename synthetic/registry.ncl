@@ -255,7 +255,7 @@ let synthetic_step_env = fun node => {
 }
 in
 let synthetic_prepare_step = fun step_env => {
-  name = "prepare_source",
+  name = "mbuild_prepare_source",
   run_as = "build-user",
   cwd = "@{build}",
   argv = ["@{script}", "prepare"],
@@ -347,21 +347,21 @@ let lower_autotools_node = fun node =>
         @ pre_configure_steps
         @ [
           {
-            name = "configure",
+            name = "mbuild_configure",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "configure"],
             env = autotools_step_env,
           },
           {
-            name = "build",
+            name = "mbuild_build",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "build"],
             env = autotools_step_env,
           },
           {
-            name = "install",
+            name = "mbuild_install",
             run_as = "root",
             cwd = "@{build}",
             argv = ["@{script}", "install"],
@@ -434,14 +434,14 @@ let lower_makefile_node = fun node =>
         @ pre_build_steps
         @ [
           {
-            name = "build",
+            name = "mbuild_build",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "build"],
             env = makefile_step_env,
           },
           {
-            name = "install",
+            name = "mbuild_install",
             run_as = "root",
             cwd = "@{build}",
             argv = ["@{script}", "install"],
@@ -496,21 +496,21 @@ let lower_meson_node = fun node =>
         @ pre_configure_steps
         @ [
           {
-            name = "configure",
+            name = "mbuild_configure",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "configure"],
             env = meson_step_env,
           },
           {
-            name = "build",
+            name = "mbuild_build",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "build"],
             env = meson_step_env,
           },
           {
-            name = "install",
+            name = "mbuild_install",
             run_as = "root",
             cwd = "@{build}",
             argv = ["@{script}", "install"],
@@ -568,21 +568,21 @@ let lower_perl_module_node = fun node =>
         @ pre_configure_steps
         @ [
           {
-            name = "configure",
+            name = "mbuild_configure",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "configure"],
             env = perl_module_step_env,
           },
           {
-            name = "build",
+            name = "mbuild_build",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "build"],
             env = perl_module_step_env,
           },
           {
-            name = "install",
+            name = "mbuild_install",
             run_as = "root",
             cwd = "@{build}",
             argv = ["@{script}", "install"],
