@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "e86ea25598752f10e3e24ee9480f4043bf5a207e900a2c49a952450f620b7d51",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz",
         "https://mirrors.kernel.org/gnu/gmp/gmp-6.3.0.tar.xz",

@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = import "test-rootfs.sh.fsobj-hash" as 'Text,
     origin = {
-      type = "path",
+      tag = "RecipePath",
       path = "tests/test-rootfs.sh",
     },
   }

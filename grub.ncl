@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "d665fdc6e3c5432995783be9f16ce22b1f6363422ee2f85b902d7bc06ebf4119",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/grub/grub-2.12.tar.xz",
         "https://mirrors.kernel.org/gnu/grub/grub-2.12.tar.xz",

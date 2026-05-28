@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "f382e89751370f5f2989ca9c0ad93a8cdf2309512b6d5387df7e57d81a6c7e13",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://www.sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
     },
   }
@@ -17,7 +17,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "82d81e77925fc97f8b0c0ea887ce5c3d9cc42525ae926db16140c34d8a2bbfee",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/bzip2-1.0.8-install_docs-1.patch",
     },
   }

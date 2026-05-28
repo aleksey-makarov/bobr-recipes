@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "0b860de93a69527dd8b72156779c94e324b66831b89853a0b4ea672c21a8a431",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://github.com/Mic92/iana-etc/releases/download/20250807/iana-etc-20250807.tar.gz",
     },
   }

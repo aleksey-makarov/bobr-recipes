@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "a112092958ba47aea0270c071517c9665aa64fa64bf05e8321fdc9f7a8c3f308",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz",
         "https://mirrors.kernel.org/gnu/readline/readline-8.3.tar.gz",

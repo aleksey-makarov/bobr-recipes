@@ -12,7 +12,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "bcae04626b686b7a136ae09eb081c517a56c301c1a47a3545dce8ae5d731e42f",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://sourceware.org/pub/binutils/releases/binutils-2.45.tar.xz",
         "https://mirrors.kernel.org/gnu/binutils/binutils-2.45.tar.xz",

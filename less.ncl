@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "c2b5899447db3b01823c6306d9147022865137832d46dbfb6129864e876ba9ca",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://www.greenwoodsoftware.com/less/less-679.tar.gz",
     },
   }

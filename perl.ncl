@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = import "perl-configure.sh.fsobj-hash" as 'Text,
     origin = {
-      type = "path",
+      tag = "RecipePath",
       path = "perl-configure.sh",
     },
   }
@@ -17,7 +17,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "ce0aace744ab7aeb6f42594af5afb7044b14377a6e16bb2be20dd50492926e90",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://www.cpan.org/src/5.0/perl-5.42.0.tar.xz",
     },
   }

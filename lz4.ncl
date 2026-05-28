@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "20ec3984ab02967635ef89fbf957f4d9c463a4093ccc0ab5973aecb3cdc3d709",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz",
     },
   }

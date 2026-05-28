@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "08aec5f9691e5835c19df328d7962b2fc98b770addbf816b2a6804190f2b6818",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz",
     },
   }

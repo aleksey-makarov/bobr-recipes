@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "e435621a29891fe2f93f2eee01e5912b5a35a38a1c321878f4d4c3dd2b598b85",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://download.savannah.gnu.org/releases/man-db/man-db-2.13.1.tar.xz",
     },
   }

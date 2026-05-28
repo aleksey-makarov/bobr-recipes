@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "26169f05b9b8fba0aa69ae18d342fcffbe9a8512db287d1cb975112e9879e952",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://github.com/vim/vim/archive/v9.1.1629/vim-9.1.1629.tar.gz",
       ],

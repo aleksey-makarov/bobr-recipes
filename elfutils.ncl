@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "4a388608efa2361f96d243752cbb19eda5f376ca5be827c4dd2012d08a3b53a9",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://sourceware.org/ftp/elfutils/0.193/elfutils-0.193.tar.bz2",
     },
   }

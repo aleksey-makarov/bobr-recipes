@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "5e5c0580ad04e2eeabb5605f230d12dc9980742d3111cfa7df4cac72ffb98224",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://downloads.sourceforge.net/project/psmisc/psmisc/psmisc-23.7.tar.xz",
         "https://sourceforge.net/projects/psmisc/files/psmisc/psmisc-23.7.tar.xz/download",

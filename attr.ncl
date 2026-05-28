@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "62530c618f7f6b7594e0b0e886f509775efd10b11ecf348d6768e24fedabde7c",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://download.savannah.gnu.org/releases/attr/attr-2.5.2.tar.gz",
     },
   }

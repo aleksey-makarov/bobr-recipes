@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "5f574f0c0c90971c342eecf5751cd7cdb61494bef06aea53fd8ebc8f459bef18",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-6.16.0.tar.xz",
     },
   }

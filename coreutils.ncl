@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "8c2767ed9bc9711613a3b0026564e87cbeed79480ccb4f158fc2d239a7da92d2",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz",
         "https://mirrors.kernel.org/gnu/coreutils/coreutils-9.7.tar.xz",

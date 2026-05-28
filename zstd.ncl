@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "257a6a752fbf3cd7158d29e3babb73d7a9b0ea2e568932b7bf3d6fc7ee273287",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz",
     },
   }

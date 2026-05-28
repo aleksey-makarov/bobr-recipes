@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "2cd7031b5aec0a25df16cb66eeaf3a8c36693cbc086f9088cdfadbcb3822817f",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/inetutils/inetutils-2.6.tar.xz",
         "https://mirrors.kernel.org/gnu/inetutils/inetutils-2.6.tar.xz",

@@ -37,13 +37,13 @@ EOF_INNER
 }
 
 rootfs_tree='{"name":"rootfs-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"bin"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
-source_node='{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"type":"http","url":"https://example.invalid/src.tar.xz"}}'
-patch_node='{"name":"patch","tag":"Source","object_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","origin":{"type":"http","url":"https://example.invalid/src.patch","unpack":false}}'
+source_node='{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"tag":"Http","url":"https://example.invalid/src.tar.xz"}}'
+patch_node='{"name":"patch","tag":"Source","object_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","origin":{"tag":"Http","url":"https://example.invalid/src.patch","unpack":false}}'
 script_node='{"name":"script","tag":"Text","config":{"source":"#!/bin/sh\n","executable":true},"inputs":{}}'
 
 run_case "text" pass '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{}}'
 run_case "group" pass '{"name":"all","tag":"Group","config":{},"inputs":{"first":'"${script_node}"',"second":'"${rootfs_tree}"'}}'
-run_case "source" pass '{"name":"script","tag":"Source","object_hash":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","origin":{"type":"path","path":"tests/script.sh"}}'
+run_case "source" pass '{"name":"script","tag":"Source","object_hash":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","origin":{"tag":"RecipePath","path":"tests/script.sh"}}'
 run_case "source-cutoff" pass '{"name":"script","tag":"Source","object_hash":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}'
 run_case "tree-file" pass '{"name":"hello-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"hello.txt","text":"hi\n","executable":false}]}},"inputs":{}}'
 run_case "tree-dir" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"dev"},{"type":"file","path":"etc/hostname","text":"mbuild\n","executable":false}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
@@ -53,7 +53,7 @@ run_case "tree-subset" pass '{"name":"runtime-subset","tag":"TreeSubset","config
 run_case "rootfs-closure" pass '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{},"inputs":{"root":'"${rootfs_tree}"'}}'
 run_case "initramfs" pass '{"name":"initrd","tag":"Initramfs","config":{},"inputs":{"tree0":'"${rootfs_tree}"'}}'
 run_case "source-http" pass "${source_node}"
-run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"type":"oci-registry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}'
+run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}'
 run_case "autotools-rootfs" pass '{"name":"pkg-rootfs","tag":"AutotoolsRootfs","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "autotools-package" pass '{"name":"pkg-package","tag":"Autotools","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"configure_args":["--disable-nls"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "makefile-rootfs" pass '{"name":"pkg-rootfs","tag":"MakefileRootfs","config":{"make_args":["PREFIX=/usr"],"pre_build":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}],"skip_install":true},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
@@ -65,7 +65,7 @@ run_case "perl-module-package" pass '{"name":"pkg-package","tag":"PerlModule","d
 run_case "sandbox-build-rootfs" pass '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "sandbox-build-package" pass '{"name":"sandbox-build-package","tag":"SandboxBuild","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "erofs-rootfs" pass '{"name":"rootfs-erofs","tag":"ErofsRootfs","config":{"compression":null,"label":null},"inputs":{"tree0":'"${rootfs_tree}"'}}'
-run_case "oci-extract" pass '{"name":"img-rootfs","tag":"OciExtract","config":{},"inputs":{"image":{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"type":"oci-registry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}}}'
+run_case "oci-extract" pass '{"name":"img-rootfs","tag":"OciExtract","config":{},"inputs":{"image":{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}}}'
 
 run_case "unknown-tag" fail '{"name":"bad","tag":"Demo","config":{},"inputs":{}}'
 run_case "unsupported-image-tag" fail '{"name":"img2","tag":"Image","config":{"mode":"bootstrap"},"inputs":{}}'
@@ -98,7 +98,7 @@ run_case "meson-rootfs-build-dir-rejected" fail '{"name":"pkg-rootfs","tag":"Mes
 run_case "extra-top-level-field" fail '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{},"extra":true}'
 run_case "bad-group-config" fail '{"name":"all","tag":"Group","config":{"manifest":true},"inputs":{"first":'"${script_node}"'}}'
 run_case "empty-group-inputs" fail '{"name":"all","tag":"Group","config":{},"inputs":{}}'
-run_case "bad-source-http-archive-format" fail '{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"type":"http","url":"https://example.invalid/src.tar.xz","archive_format":"tar-zst"}}'
+run_case "bad-source-http-archive-format" fail '{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"tag":"Http","url":"https://example.invalid/src.tar.xz","archive_format":"tar-zst"}}'
 run_case "bad-tree-merge-config" fail '{"name":"merged-tree","tag":"TreeMerge","config":{"base":true},"inputs":{}}'
 run_case "bad-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":"usr/lib64/libfoo.so*"},"inputs":{"tree":'"${rootfs_tree}"'}}'
 run_case "empty-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":[]},"inputs":{"tree":'"${rootfs_tree}"'}}'
@@ -113,7 +113,7 @@ let source_src = {
   tag = "Source",
   object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   origin = {
-    type = "http",
+    tag = "Http",
     url = "https://example.invalid/src.tar.xz",
   },
 } in
@@ -132,7 +132,7 @@ let patch_src = {
   tag = "Source",
   object_hash = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
   origin = {
-    type = "http",
+    tag = "Http",
     url = "https://example.invalid/a.patch",
     unpack = false,
   },
@@ -142,7 +142,7 @@ let patch_extra_src = {
   tag = "Source",
   object_hash = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
   origin = {
-    type = "http",
+    tag = "Http",
     url = "https://example.invalid/b.patch",
     unpack = false,
   },
@@ -152,12 +152,12 @@ let aux_src = {
   tag = "Source",
   object_hash = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
   origin = {
-    type = "http",
+    tag = "Http",
     url = "https://example.invalid/aux.txt",
     unpack = false,
   },
 } in
-recipe.to_request {} {
+recipe.to_request { recipes_path = "/recipes" } {} {
   name = "pkg",
   tag = "AutotoolsRootfs",
   config = {
@@ -194,6 +194,7 @@ jq -e '
   and (.root.inputs | has("rootfs"))
   and (.root.inputs | has("script"))
   and (.root.inputs | has("synthetic_common"))
+  and ([.[] | select(.name == "buildscript-autotools" and .origin.tag == "Path" and .origin.path == "/recipes/synthetic/autotools.sh")] | length == 1)
 ' <<<"${synthetic_lowering_json}" >/dev/null
 
 cat > "${tmpdir}/check-autotools-package-lowering.ncl" <<EOF_INNER
@@ -203,7 +204,7 @@ let source_src = {
   tag = "Source",
   object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   origin = {
-    type = "http",
+    tag = "Http",
     url = "https://example.invalid/src.tar.xz",
   },
 } in
@@ -282,7 +283,7 @@ let fake_pkgs = {
   m4 = default_tool_tree,
   perl = default_tool_tree,
 } in
-recipe.to_request fake_pkgs {
+recipe.to_request { recipes_path = "/recipes" } fake_pkgs {
   name = "pkg",
   tag = "Autotools",
   deps = {
@@ -321,7 +322,7 @@ let source_src = {
   tag = "Source",
   object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   origin = {
-    type = "http",
+    tag = "Http",
     url = "https://example.invalid/src.tar.xz",
   },
 } in
@@ -400,7 +401,7 @@ let fake_pkgs = {
   m4 = default_tool_tree,
   perl = default_tool_tree,
 } in
-recipe.to_request fake_pkgs {
+recipe.to_request { recipes_path = "/recipes" } fake_pkgs {
   name = "pkg",
   tag = "Autotools",
   deps = {
@@ -433,7 +434,7 @@ let source_src = {
   tag = "Source",
   object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   origin = {
-    type = "http",
+    tag = "Http",
     url = "https://example.invalid/src.tar.xz",
   },
 } in
@@ -539,7 +540,7 @@ let fake_pkgs = {
   pkgconf = pkgconf_tool_tree,
   python = python_tool_tree,
 } in
-recipe.to_request fake_pkgs {
+recipe.to_request { recipes_path = "/recipes" } fake_pkgs {
   name = "pkg",
   tag = "Meson",
   deps = {
@@ -578,7 +579,7 @@ let source_src = {
   tag = "Source",
   object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   origin = {
-    type = "http",
+    tag = "Http",
     url = "https://example.invalid/src.tar.xz",
   },
 } in
@@ -659,7 +660,7 @@ let fake_pkgs = {
   m4 = default_tool_tree,
   perl = default_tool_tree,
 } in
-recipe.to_request fake_pkgs {
+recipe.to_request { recipes_path = "/recipes" } fake_pkgs {
   name = "pkg",
   tag = "Autotools",
   deps = {
@@ -705,7 +706,7 @@ let input_tree = {
   },
   inputs = {},
 } in
-recipe.to_request { system_rootfs_0 = rootfs_tree } {
+recipe.to_request { recipes_path = "/recipes" } { system_rootfs_0 = rootfs_tree } {
   name = "pkg-subset",
   tag = "TreeSubset",
   config = {
@@ -818,7 +819,7 @@ let no_deps_runtime = {
   },
   inputs = {},
 } in
-recipe.to_request { base_filesystem = base_tree } {
+recipe.to_request { recipes_path = "/recipes" } { base_filesystem = base_tree } {
   name = "pkg-rootfs",
   tag = "RootfsClosure",
   config = {},
@@ -887,7 +888,7 @@ let rec cycle = {
     inputs = {},
   },
 } in
-recipe.to_request { base_filesystem = base_tree } {
+recipe.to_request { recipes_path = "/recipes" } { base_filesystem = base_tree } {
   name = "pkg-rootfs",
   tag = "RootfsClosure",
   config = {},
@@ -919,7 +920,7 @@ let base_tree = {
   },
   inputs = {},
 } in
-recipe.to_request { base_filesystem = base_tree } {
+recipe.to_request { recipes_path = "/recipes" } { base_filesystem = base_tree } {
   name = "empty-rootfs",
   tag = "RootfsClosure",
   config = {},
@@ -944,7 +945,7 @@ let source_src = {
   tag = "Source",
   object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   origin = {
-    type = "http",
+    tag = "Http",
     url = "https://example.invalid/src.tar.xz",
   },
 } in
@@ -958,7 +959,7 @@ let rootfs_tree = {
   },
   inputs = {},
 } in
-recipe.to_request {} {
+recipe.to_request { recipes_path = "/recipes" } {} {
   name = "pkg",
   tag = "MesonRootfs",
   config = {

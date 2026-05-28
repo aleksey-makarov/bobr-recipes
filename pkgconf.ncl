@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "cff856e6799a70d5a236c4b5761fd37be48acf1ad5f39a3c2d1aa93a5081abfc",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://distfiles.ariadne.space/pkgconf/pkgconf-2.5.1.tar.xz",
     },
   }

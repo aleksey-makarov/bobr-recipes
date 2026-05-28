@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "f4f22c6a73db50f41e0254ce32e15fb112dfbe99616eb63364196f958a6f9e3e",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/diffutils/diffutils-3.12.tar.xz",
         "https://mirrors.kernel.org/gnu/diffutils/diffutils-3.12.tar.xz",

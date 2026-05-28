@@ -64,6 +64,23 @@ let old_style_input_error = fun node_name =>
         )
         {}
 in
+let lower_source_origin = fun ctx =>
+  fun origin =>
+    if origin.tag == "RecipePath" then
+      let origin_without_tag =
+        std.record.remove "tag" origin
+      in
+      let origin_without_path =
+        std.record.remove "path" origin_without_tag
+      in
+      origin_without_path
+      & {
+        tag = "Path",
+        path = ctx.recipes_path ++ "/" ++ origin.path,
+      }
+    else
+      origin
+in
 {
   install = {
     root_default_attrs = {
@@ -144,9 +161,11 @@ in
     ],
   },
 
-  to_request = fun pkgs =>
+  to_request = fun ctx =>
+    fun pkgs =>
     fun root_node =>
     let lower = lower_node pkgs in
+    let lower_origin = lower_source_origin ctx in
     let rec collect = fun seen =>
       fun node =>
         let lowered_node = lower node in
@@ -224,7 +243,7 @@ in
               source_base
               & (
                 if std.record.has_field "origin" node then
-                  { origin = node.origin }
+                  { origin = lower_origin node.origin }
                 else
                   {}
               )

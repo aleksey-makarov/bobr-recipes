@@ -17,7 +17,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = hashes."%{version}".source,
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://github.com/systemd/systemd/archive/v%{version}/systemd-%{version}.tar.gz",
     },
   }
@@ -28,7 +28,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = hashes."%{version}".man_pages,
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-%{version}.tar.xz",
     },
   }

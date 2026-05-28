@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "336ff971f77aa5347e1ec98348ab4baabe07ff23d36c4dd5065b584137c276e4",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/automake/automake-1.18.1.tar.xz",
         "https://mirrors.kernel.org/gnu/automake/automake-1.18.1.tar.xz",

@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "06a05b0ff7c6a9a249f9c5cf1783a122d6f5a4b1b0a7f7c00eea73240fb5cce1",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://github.com/shadow-maint/shadow/releases/download/4.18.0/shadow-4.18.0.tar.xz",
     },
   }

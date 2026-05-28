@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "8fe22ea52de2f8b5a65902fc322dc947f1b472f73cd7c7198c2a639e79c6d4a6",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz",
         "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",

@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "f81bc7e91955f916841db24ca2fb355c800ba92d5f891404241a31bf861936aa",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-6.15.tar.xz",
     },
   }

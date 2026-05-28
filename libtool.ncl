@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "86809ac951117f8fca83a874ba87a61a348447a2788c27a84df0041fc315a670",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/libtool/libtool-2.5.4.tar.xz",
         "https://mirrors.kernel.org/gnu/libtool/libtool-2.5.4.tar.xz",

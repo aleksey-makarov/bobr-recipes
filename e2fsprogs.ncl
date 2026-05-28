@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "23ada8c7f6b8b50ab0ba770bc662ab0c99243972aaccf34114ce1db02692583a",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.3/e2fsprogs-1.47.3.tar.gz",
     },
   }

@@ -11,7 +11,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = hashes."%{version}",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz",
         "https://mirrors.kernel.org/gnu/autoconf/autoconf-%{version}.tar.xz",

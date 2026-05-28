@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "68437bdee29f8ff21172329eddfc21165cf931c41261faaaba78761dec10cda9",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz",
         "https://mirrors.kernel.org/gnu/patch/patch-2.8.tar.xz",

@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "e684950a928af4b5e9d00ccded2e57d7838124af00810b89a0e51b503f254921",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz",
         "https://mirrors.kernel.org/gnu/findutils/findutils-4.10.0.tar.xz",

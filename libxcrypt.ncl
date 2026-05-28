@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "3e8fe066132eb4300604bb5769f9d80fdfe1d443025978ea867ecef693afacd0",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://github.com/besser82/libxcrypt/releases/download/v4.4.38/libxcrypt-4.4.38.tar.xz",
     },
   }

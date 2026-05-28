@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "c602835611656dd7e6eaa74419f7f8856e73033c4b0ca0149c79124496e0c25a",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz",
         "https://mirrors.kernel.org/gnu/gawk/gawk-5.3.2.tar.xz",

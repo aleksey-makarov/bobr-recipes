@@ -41,9 +41,8 @@ let pkgs = (import "${repo_root}/pkgs.ncl") [] in
 {
   paths = {
     store = "${store_root}",
-    local = "${local_root}",
   },
-  nodes = recipe.to_request pkgs {
+  nodes = recipe.to_request { recipes_path = "${recipes_root}" } pkgs {
     name = "${closure_name}",
     tag = "RootfsClosure",
     config = {},

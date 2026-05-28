@@ -2,7 +2,7 @@
 
 # Build a single recipe attribute through `request.ncl({ ... })`.
 # Regenerates tree modules, exports the full JSON request envelope, and pipes
-# it directly into `mbuild`. Store and local source configuration come from
+# it directly into `mbuild`. Store and recipe source configuration come from
 # `mbuild-recipes/env.sh`.
 
 set -euo pipefail
@@ -64,7 +64,7 @@ if [ -n "${jobs}" ]; then
 let request = import "${request_file}" in
 let base = request {
   store_path = "${store_root}",
-  local_path = "${local_root}",
+  recipes_path = "${recipes_root}",
   target_name = "${attr}",
 } in
 base & {
@@ -79,7 +79,7 @@ else
 let request = import "${request_file}" in
 request {
   store_path = "${store_root}",
-  local_path = "${local_root}",
+  recipes_path = "${recipes_root}",
   target_name = "${attr}",
 }
 EOF_INNER

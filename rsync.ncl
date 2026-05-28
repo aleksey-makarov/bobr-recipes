@@ -4,7 +4,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "932bbcf4f188a42176ed09b34537f5879ad79a8756e6e3b13301a839c5fbae9c",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://download.samba.org/pub/rsync/src/rsync-3.4.2.tar.gz",
     },
   }

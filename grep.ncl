@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "1bca0554f8ff216fab035954dfac3218ae1edaa533a29680ceb675404ede5b93",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz",
         "https://mirrors.kernel.org/gnu/grep/grep-3.12.tar.xz",

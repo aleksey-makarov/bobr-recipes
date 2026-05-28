@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "a4085e565a62f920d72da4fddb21366a05ca499bb504c37712895352bf48259a",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/gdbm/gdbm-1.26.tar.gz",
         "https://mirrors.kernel.org/gnu/gdbm/gdbm-1.26.tar.gz",

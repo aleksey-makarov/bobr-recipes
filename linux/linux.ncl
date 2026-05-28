@@ -18,7 +18,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = hashes."%{version}",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://www.kernel.org/pub/linux/kernel/v%{major_version}.x/linux-%{version}.tar.xz",
     },
   }
@@ -29,7 +29,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = import ".config.fsobj-hash" as 'Text,
     origin = {
-      type = "path",
+      tag = "RecipePath",
       path = "linux/.config",
     },
   }
@@ -40,7 +40,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = import "linux.sh.fsobj-hash" as 'Text,
     origin = {
-      type = "path",
+      tag = "RecipePath",
       path = "linux/linux.sh",
     },
   }

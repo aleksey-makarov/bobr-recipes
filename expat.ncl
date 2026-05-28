@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "abdbb1ff22e063a4fafeebf73a0f250ea166a52cd264d557ef25a13cc93cd9bf",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://github.com/libexpat/libexpat/releases/download/R_2_7_1/expat-2.7.1.tar.xz",
     },
   }

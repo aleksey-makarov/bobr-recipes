@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "b84d3ef28f8f0dd62db8b3d70cc65b5f7f4c9aa9affc7dcfa0d093df80d5f710",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch",
     },
   }
@@ -17,7 +17,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "1fd37aa7476218a0f497a3d81e5434243d7aa0abe4f6f014a64190448431f205",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz",
         "https://mirrors.kernel.org/gnu/glibc/glibc-2.42.tar.xz",

@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "55aaa592f5879374928227b3c2de5e0b40b359db9f3959189aadc6bedd3698ed",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz",
     },
   }

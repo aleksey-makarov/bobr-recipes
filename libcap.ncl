@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "0b4ab42297fcc500b2f6bf7e84541f5efbe5bb2160343733bd153cb8ecbca4c5",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.76.tar.xz",
     },
   }

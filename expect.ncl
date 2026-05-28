@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "f2927159478023e45bdf4d1a4974610d2029d99d1a876a39739edde46b331d1d",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://downloads.sourceforge.net/project/expect/Expect/5.45.4/expect5.45.4.tar.gz",
         "https://sourceforge.net/projects/expect/files/Expect/5.45.4/expect5.45.4.tar.gz/download",
@@ -20,7 +20,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "52526d260124716c3d0d922ab3b5bfc43cc1ac82d473151e837ec852ab8b0e9f",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://www.linuxfromscratch.org/patches/lfs/12.4/expect-5.45.4-gcc15-1.patch",
     },
   }

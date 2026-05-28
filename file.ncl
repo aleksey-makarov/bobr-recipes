@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "cd04b661bb96d5ad89124e96e3faecda267fcfab56929da15e72c6bacdbe8312",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://astron.com/pub/file/file-5.46.tar.gz",
     },
   }

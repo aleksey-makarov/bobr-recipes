@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "9c0675229f11d6c28c8e57c26de8b57a42f24d5b886a33f1ebb8bbda4fda2e53",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://cpan.metacpan.org/authors/id/T/TO/TODDR/XML-Parser-2.47.tar.gz",
     },
   }

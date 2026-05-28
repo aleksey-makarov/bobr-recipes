@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "1b62d2456d5314709f83c6e6cca7832eb723956369e51b6e1dd31bfa330d20ac",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/texinfo/texinfo-7.2.tar.xz",
         "https://mirrors.kernel.org/gnu/texinfo/texinfo-7.2.tar.xz",

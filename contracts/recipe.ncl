@@ -74,19 +74,38 @@ let ShallowBaseRecipe = {
     | doc "Optional Nickel-level direct build/runtime dependencies for dependency-aware synthetic recipes.",
 }
 in
-let RelativeSourcePath =
-  std.contract.from_predicate (fun value =>
+let is_relative_source_path = fun value =>
     std.is_string value
     && value != ""
     && !std.string.is_match "^/" value
     && !std.string.is_match "(^|/)\\.\\.($|/)" value
-  )
+in
+let RelativeSourcePath =
+  std.contract.from_predicate is_relative_source_path
+in
+let is_absolute_source_path = fun value =>
+    std.is_string value
+    && std.string.is_match "^/" value
+in
+let AbsoluteSourcePath =
+  std.contract.from_predicate is_absolute_source_path
 in
 let SourcePathOrigin = {
-  type | std.contract.Equal "path",
+  tag | std.contract.Equal "Path",
+  path
+    | AbsoluteSourcePath
+    | doc "Absolute host source path.",
+  unpack
+    | Bool
+    | optional
+    | doc "Whether the local source archive should be unpacked into a directory object; defaults to false.",
+}
+in
+let SourceRecipePathOrigin = {
+  tag | std.contract.Equal "RecipePath",
   path
     | RelativeSourcePath
-    | doc "Relative local source path without `..`, resolved from request `paths.local`.",
+    | doc "Relative source path inside the mbuild-recipes checkout, lowered to `Path` during request export.",
   unpack
     | Bool
     | optional
@@ -94,7 +113,7 @@ let SourcePathOrigin = {
 }
 in
 let SourceHttpOrigin = {
-  type | std.contract.Equal "http",
+  tag | std.contract.Equal "Http",
   url
     | UrlField
     | doc "HTTP(S) source URL or list of fallback URLs.",
@@ -109,7 +128,7 @@ let SourceHttpOrigin = {
 }
 in
 let SourceOciRegistryOrigin = {
-  type | std.contract.Equal "oci-registry",
+  tag | std.contract.Equal "OciRegistry",
   image
     | String
     | doc "Pinned external image reference resolved through the OCI/Docker registry API.",
@@ -118,12 +137,65 @@ let SourceOciRegistryOrigin = {
     | doc "Pinned manifest or index digest to request from the registry.",
 }
 in
+let has_field = fun field => fun record => std.record.has_field field record in
+let get_field = fun field => fun record => std.record.get field record in
+let all_fields_allowed = fun allowed =>
+  fun record =>
+    std.array.fold_left
+      (fun acc => fun field => acc && std.array.elem field allowed)
+      true
+      (std.record.fields record)
+in
+let optional_bool_field = fun field =>
+  fun record =>
+    !has_field field record || std.is_bool (get_field field record)
+in
+let optional_archive_format_field = fun field =>
+  fun record =>
+    !has_field field record || std.array.elem (get_field field record) ["tar-gz", "tar-xz", "tar-bz2", "zip"]
+in
+let array_all_strings = fun value =>
+  std.array.fold_left
+    (fun acc => fun item => acc && std.is_string item)
+    true
+    value
+in
+let valid_url_field = fun value =>
+  std.is_string value
+  || (std.is_array value && std.array.length value > 0 && array_all_strings value)
+in
 let SourceOrigin =
-  std.contract.any_of [
-    SourcePathOrigin,
-    SourceHttpOrigin,
-    SourceOciRegistryOrigin,
-  ]
+  std.contract.from_predicate (fun value =>
+    std.is_record value
+    && has_field "tag" value
+    && std.is_string value.tag
+    && (
+      if value.tag == "Path" then
+        all_fields_allowed ["tag", "path", "unpack"] value
+        && has_field "path" value
+        && is_absolute_source_path value.path
+        && optional_bool_field "unpack" value
+      else if value.tag == "RecipePath" then
+        all_fields_allowed ["tag", "path", "unpack"] value
+        && has_field "path" value
+        && is_relative_source_path value.path
+        && optional_bool_field "unpack" value
+      else if value.tag == "Http" then
+        all_fields_allowed ["tag", "url", "unpack", "archive_format"] value
+        && has_field "url" value
+        && valid_url_field value.url
+        && optional_bool_field "unpack" value
+        && optional_archive_format_field "archive_format" value
+      else if value.tag == "OciRegistry" then
+        all_fields_allowed ["tag", "image", "digest"] value
+        && has_field "image" value
+        && std.is_string value.image
+        && has_field "digest" value
+        && std.is_string value.digest
+      else
+        false
+    )
+  )
 in
 let SourceRecipe = {
   name

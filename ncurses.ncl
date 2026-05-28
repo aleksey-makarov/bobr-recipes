@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "33c7002ae4e50d400f893ce1cfe3d0867503f0b057a00c8c76181519d596351a",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://invisible-mirror.net/archives/ncurses/ncurses-6.6.tar.gz",
       ],

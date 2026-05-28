@@ -8,14 +8,14 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: $(basename "$0") [--store PATH] [--local PATH] <pkgs-attr>" >&2
+  echo "usage: $(basename "$0") [--store PATH] [--recipes PATH] <pkgs-attr>" >&2
 }
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 repo_root="$(cd "${script_dir}/.." && pwd)"
 request_file="${repo_root}/request.ncl"
 store_path="/tmp/mbuild-store"
-local_path=""
+recipes_path="${repo_root}"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -27,12 +27,12 @@ while [ "$#" -gt 0 ]; do
       store_path="$2"
       shift 2
       ;;
-    --local)
+    --recipes)
       if [ "$#" -lt 2 ]; then
         usage
         exit 2
       fi
-      local_path="$2"
+      recipes_path="$2"
       shift 2
       ;;
     --help|-h)
@@ -61,30 +61,19 @@ if [[ "${store_path}" != /* ]]; then
   exit 2
 fi
 
-if [ -n "${local_path}" ] && [[ "${local_path}" != /* ]]; then
-  echo "export-request.sh: --local must be an absolute path" >&2
+if [[ "${recipes_path}" != /* ]]; then
+  echo "export-request.sh: --recipes must be an absolute path" >&2
   exit 2
 fi
 
-if [ -n "${local_path}" ]; then
-  expr=$(cat <<EOF_INNER
+expr=$(cat <<EOF_INNER
 let request = import "${request_file}" in
 request {
   store_path = "${store_path}",
-  local_path = "${local_path}",
+  recipes_path = "${recipes_path}",
   target_name = "${attr}",
 }
 EOF_INNER
 )
-else
-  expr=$(cat <<EOF_INNER
-let request = import "${request_file}" in
-request {
-  store_path = "${store_path}",
-  target_name = "${attr}",
-}
-EOF_INNER
-)
-fi
 
 printf '%s\n' "${expr}" | nickel export --format json

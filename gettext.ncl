@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "fd515db9aa1ffe75113a0345fdcd3baf95f885988b94de37aec41b9b8a22d263",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.xz",
         "https://mirrors.kernel.org/gnu/gettext/gettext-0.26.tar.xz",

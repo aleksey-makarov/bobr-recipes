@@ -4,7 +4,7 @@ let buildscript_autotools = {
   tag = "Source",
   object_hash = import "autotools.sh.fsobj-hash" as 'Text,
   origin = {
-    type = "path",
+    tag = "RecipePath",
     path = "synthetic/autotools.sh",
   },
 }
@@ -14,7 +14,7 @@ let buildscript_common = {
   tag = "Source",
   object_hash = import "common.sh.fsobj-hash" as 'Text,
   origin = {
-    type = "path",
+    tag = "RecipePath",
     path = "synthetic/common.sh",
   },
 }
@@ -24,7 +24,7 @@ let buildscript_gnu_make = {
   tag = "Source",
   object_hash = import "gnu-make.sh.fsobj-hash" as 'Text,
   origin = {
-    type = "path",
+    tag = "RecipePath",
     path = "synthetic/gnu-make.sh",
   },
 }
@@ -34,7 +34,7 @@ let buildscript_meson = {
   tag = "Source",
   object_hash = import "meson.sh.fsobj-hash" as 'Text,
   origin = {
-    type = "path",
+    tag = "RecipePath",
     path = "synthetic/meson.sh",
   },
 }
@@ -44,7 +44,7 @@ let buildscript_perl_module = {
   tag = "Source",
   object_hash = import "perl-module.sh.fsobj-hash" as 'Text,
   origin = {
-    type = "path",
+    tag = "RecipePath",
     path = "synthetic/perl-module.sh",
   },
 }

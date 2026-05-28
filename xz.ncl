@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "74e8e63e33f82cd950ec6ab7a6e1d477cb0bc359772fa96b6e75d37c9364dd59",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://github.com/tukaani-project/xz/releases/download/v5.8.1/xz-5.8.1.tar.xz",
     },
   }

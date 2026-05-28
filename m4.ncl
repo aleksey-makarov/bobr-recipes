@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "548c7869cf48b65967f41c44132f1c5c0d8b4eb484dccac7e18a62959f4d322a",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/m4/m4-1.4.20.tar.xz",
         "https://mirrors.kernel.org/gnu/m4/m4-1.4.20.tar.xz",

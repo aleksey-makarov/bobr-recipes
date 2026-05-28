@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "3cba3886442fef568c647ca135acd74fcd6c469b1e49f61bca38b1eaa60bfe9d",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz",
     },
   }

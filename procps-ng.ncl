@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "c41fd9e5e30b6aed75c309f53461634c8a76879e50a18891dbec413836f4e0c8",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://downloads.sourceforge.net/project/procps-ng/Production/procps-ng-4.0.5.tar.xz",
         "https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-4.0.5.tar.xz/download",

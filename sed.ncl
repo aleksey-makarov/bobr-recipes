@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "9194a87abb3243d375c349b457c16fb763275af0db65512b45b4f573a947bf32",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz",
         "https://mirrors.kernel.org/gnu/sed/sed-4.9.tar.xz",

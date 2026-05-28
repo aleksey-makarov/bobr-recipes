@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "fed8dc21c764926311375101d5d1c008c3cad651302f8d7d93470c33c3ddf9ae",
     origin = {
-      type = "http",
+      tag = "Http",
       url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.xz",
     },
   }

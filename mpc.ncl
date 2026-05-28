@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "0dbb9db1b4bf66eda95139d5a0358f6db38718481507ab3a32a34efcd870f2e8",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz",
         "https://mirrors.kernel.org/gnu/mpc/mpc-1.3.1.tar.gz",

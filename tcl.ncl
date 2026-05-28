@@ -6,7 +6,7 @@ fun pkgs =>
     tag = "Source",
     object_hash = "29af15338ae522c3da77be6961ad094dcb3c8436543b5327a58c2d0f6f3c70cc",
     origin = {
-      type = "http",
+      tag = "Http",
       url = [
         "https://downloads.sourceforge.net/project/tcl/Tcl/8.6.16/tcl8.6.16-src.tar.gz",
         "https://sourceforge.net/projects/tcl/files/Tcl/8.6.16/tcl8.6.16-src.tar.gz/download",
