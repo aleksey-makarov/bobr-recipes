@@ -14,22 +14,12 @@ fun pkgs =>
 
   let buildscript_man_pages = {
     name = "buildscript-man-pages",
-    tag = "Text",
-    config = {
-      executable = true,
-      source = m%"
-        #!/usr/bin/env bash
-        set -euo pipefail
-
-        cd "${MBUILD_SOURCE_DIR}"
-        mkdir -p "${MBUILD_INSTALL_DIR}"
-        rm -fv man3/crypt*
-        rm -fv man3/getspnam.3 man3/getspent.3 man3/lckpwdf.3
-        rm -fv man5/passwd.5
-        make -R GIT=false prefix=/usr DESTDIR="${MBUILD_INSTALL_DIR}" install
-      "%,
+    tag = "Source",
+    object_hash = import "man-pages-build.sh.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "man-pages-build.sh",
     },
-    inputs = {},
   }
   in
 
