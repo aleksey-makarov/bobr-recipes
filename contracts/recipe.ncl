@@ -1,6 +1,5 @@
 let KnownTags = [
   "Source",
-  "Text",
   "Group",
   "Tree",
   "TreeMerge",
@@ -213,16 +212,6 @@ let SourceRecipe = {
     | doc "Optional source origin. If omitted, the canonical result must already exist in store.",
 }
 in
-let TextConfig = {
-  source
-    | String
-    | doc "Literal text payload to stage into the output object.",
-  executable
-    | Bool
-    | optional
-    | doc "Whether the resulting staged file should be executable.",
-}
-in
 let InstallAttrs = {
   uid | Number | optional,
   gid | Number | optional,
@@ -402,8 +391,6 @@ in
 let OciExtractConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
-let TextInputs = {}
-in
 let GroupInputsShape = NonEmptyRecord
 in
 let TreeInputs = {}
@@ -473,12 +460,7 @@ let ValidateRecipeShallow = fun recipe =>
           },
       }
     in
-    if checked.tag == "Text" then
-      checked
-      & {
-        config = checked.config | TextConfig,
-      }
-    else if checked.tag == "Group" then
+    if checked.tag == "Group" then
       checked
       & {
         config = checked.config | GroupConfig,
@@ -594,9 +576,6 @@ let rec ValidateRecipe = fun recipe =>
       else
         checked | TreeDirEntry
     in
-    let validate_text_inputs = fun inputs =>
-      inputs | TextInputs
-    in
     let validate_tree_inputs = fun inputs =>
       inputs | TreeInputs
     in
@@ -677,13 +656,7 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
-    if checked.tag == "Text" then
-      checked
-      & {
-        config = checked.config | TextConfig,
-        inputs = validate_text_inputs checked.inputs,
-      }
-    else if checked.tag == "Group" then
+    if checked.tag == "Group" then
       checked
       & {
         config = checked.config | GroupConfig,
@@ -807,9 +780,6 @@ in
   base_recipe
     | doc "Base structural contract shared by all recipe nodes."
     = BaseRecipe,
-  text_config
-    | doc "Config contract for `Text` recipe nodes."
-    = TextConfig,
   group_config
     | doc "Config contract for `Group` recipe nodes."
     = GroupConfig,

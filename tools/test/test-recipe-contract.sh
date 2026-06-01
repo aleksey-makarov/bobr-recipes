@@ -39,9 +39,8 @@ EOF_INNER
 rootfs_tree='{"name":"rootfs-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"bin"}]},"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{}}'
 source_node='{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"tag":"Http","url":"https://example.invalid/src.tar.xz"}}'
 patch_node='{"name":"patch","tag":"Source","object_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","origin":{"tag":"Http","url":"https://example.invalid/src.patch","unpack":false}}'
-script_node='{"name":"script","tag":"Text","config":{"source":"#!/bin/sh\n","executable":true},"inputs":{}}'
+script_node='{"name":"script","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"script.sh","text":"#!/bin/sh\n","executable":true}]}},"inputs":{}}'
 
-run_case "text" pass '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{}}'
 run_case "group" pass '{"name":"all","tag":"Group","config":{},"inputs":{"first":'"${script_node}"',"second":'"${rootfs_tree}"'}}'
 run_case "source" pass '{"name":"script","tag":"Source","object_hash":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","origin":{"tag":"RecipePath","path":"tests/script.sh"}}'
 run_case "source-cutoff" pass '{"name":"script","tag":"Source","object_hash":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}'
@@ -68,6 +67,7 @@ run_case "erofs-rootfs" pass '{"name":"rootfs-erofs","tag":"ErofsRootfs","config
 run_case "oci-extract" pass '{"name":"img-rootfs","tag":"OciExtract","config":{},"inputs":{"image":{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}}}'
 
 run_case "unknown-tag" fail '{"name":"bad","tag":"Demo","config":{},"inputs":{}}'
+run_case "removed-text-tag" fail '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{}}'
 run_case "unsupported-image-tag" fail '{"name":"img2","tag":"Image","config":{"mode":"bootstrap"},"inputs":{}}'
 run_case "legacy-autotools-sandbox-tag" fail '{"name":"pkg","tag":"AutotoolsSandbox","config":{},"inputs":{}}'
 run_case "legacy-autotools-container-tag" fail '{"name":"pkg","tag":"AutotoolsContainer","config":{},"inputs":{}}'
@@ -95,7 +95,7 @@ run_case "missing-meson-package-deps" fail '{"name":"pkg-package","tag":"Meson",
 run_case "sandbox-build-rootfs-install-rejected" fail '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"'}}'
 run_case "autotools-rootfs-install-rejected" fail '{"name":"pkg-rootfs","tag":"AutotoolsRootfs","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "meson-rootfs-build-dir-rejected" fail '{"name":"pkg-rootfs","tag":"MesonRootfs","config":{"build_dir":"build"},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
-run_case "extra-top-level-field" fail '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{},"extra":true}'
+run_case "extra-top-level-field" fail '{"name":"hello","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"hello.txt","text":"hi","executable":false}]}},"inputs":{},"extra":true}'
 run_case "bad-group-config" fail '{"name":"all","tag":"Group","config":{"manifest":true},"inputs":{"first":'"${script_node}"'}}'
 run_case "empty-group-inputs" fail '{"name":"all","tag":"Group","config":{},"inputs":{}}'
 run_case "bad-source-http-archive-format" fail '{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"tag":"Http","url":"https://example.invalid/src.tar.xz","archive_format":"tar-zst"}}'
