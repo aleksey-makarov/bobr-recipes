@@ -11,7 +11,7 @@
 # - `target_name`: package attribute name from `pkgs.ncl`
 #
 # The returned value has this outer shape:
-# - `paths.store = store_path`
+# - `options.store = store_path`
 # - `nodes = recipe.to_request { recipes_path } raw (...)`
 let mkPkgs = import "pkgs.ncl" in
 let recipe = import "recipe-lib.ncl" in
@@ -32,7 +32,7 @@ let request | RequestArgs -> Dyn = fun args =>
   else
     let raw = mkPkgs [] in
     {
-      paths = { store = store_path },
+      options = { store = store_path },
       nodes = recipe.to_request { include recipes_path } raw (std.record.get target_name raw),
     }
 in

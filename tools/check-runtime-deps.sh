@@ -39,7 +39,7 @@ cat > "${request_expr}" <<EOF_INNER
 let recipe = import "${repo_root}/recipe-lib.ncl" in
 let pkgs = (import "${repo_root}/pkgs.ncl") [] in
 {
-  paths = {
+  options = {
     store = "${store_root}",
   },
   nodes = recipe.to_request { recipes_path = "${recipes_root}" } pkgs {
