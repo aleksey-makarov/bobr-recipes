@@ -143,6 +143,8 @@ step_install() {
 }
 
 load_env_files
+export ARFLAGS="${ARFLAGS:-crD}"
+export RANLIB="${RANLIB:-ranlib -D}"
 mbuild_prepare_source
 
 case "$step" in
