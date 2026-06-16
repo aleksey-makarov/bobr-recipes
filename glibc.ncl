@@ -6,8 +6,8 @@ fun pkgs =>
     tag = "Source",
     object_hash = "b84d3ef28f8f0dd62db8b3d70cc65b5f7f4c9aa9affc7dcfa0d093df80d5f710",
     origin = {
-      tag = "Http",
-      url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch",
+      tag = "RecipePath",
+      path = "glibc-2.42-fhs-1.patch",
     },
   }
   in
