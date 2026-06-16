@@ -20,8 +20,8 @@ fun pkgs =>
     tag = "Source",
     object_hash = "52526d260124716c3d0d922ab3b5bfc43cc1ac82d473151e837ec852ab8b0e9f",
     origin = {
-      tag = "Http",
-      url = "https://www.linuxfromscratch.org/patches/lfs/12.4/expect-5.45.4-gcc15-1.patch",
+      tag = "RecipePath",
+      path = "expect-5.45.4-gcc15-1.patch",
     },
   }
   in
