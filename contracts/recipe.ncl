@@ -8,6 +8,7 @@ let KnownTags = [
   "TreeSubset",
   "RootfsClosure",
   "ErofsRootfs",
+  "ErofsRootfsNew",
   "Initramfs",
   "Autotools",
   "Makefile",
@@ -462,6 +463,12 @@ let RootfsClosureInputsShape = { .. }
 in
 let ErofsRootfsInputsShape = { .. }
 in
+let ErofsRootfsNewInputsShape = {
+  tree
+    | Dyn
+    | doc "Single fs-tree v2 manifest input used to build an EROFS image.",
+}
+in
 let InitramfsInputsShape = { .. }
 in
 let SyntheticRootfsInputsShape = {
@@ -603,7 +610,7 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | TreeMergeConfig,
       }
-    else if checked.tag == "ErofsRootfs" then
+    else if checked.tag == "ErofsRootfs" || checked.tag == "ErofsRootfsNew" then
       checked
       & {
         config = checked.config | ErofsRootfsConfig,
@@ -730,6 +737,12 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_erofs_rootfs_new_inputs = fun inputs =>
+      let checked = inputs | ErofsRootfsNewInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_initramfs_inputs = fun inputs =>
       let checked = inputs | InitramfsInputsShape in
       std.record.map
@@ -849,6 +862,12 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | ErofsRootfsConfig,
         inputs = validate_erofs_rootfs_inputs checked.inputs,
       }
+    else if checked.tag == "ErofsRootfsNew" then
+      checked
+      & {
+        config = checked.config | ErofsRootfsConfig,
+        inputs = validate_erofs_rootfs_new_inputs checked.inputs,
+      }
     else if checked.tag == "Initramfs" then
       checked
       & {
@@ -906,7 +925,7 @@ in
     | doc "Config contract for `TreeMerge` recipe nodes."
     = TreeMergeConfig,
   erofs_rootfs_config
-    | doc "Config contract for `ErofsRootfs` recipe nodes."
+    | doc "Config contract for `ErofsRootfs` and `ErofsRootfsNew` recipe nodes."
     = ErofsRootfsConfig,
   initramfs_config
     | doc "Config contract for `Initramfs` recipe nodes."
