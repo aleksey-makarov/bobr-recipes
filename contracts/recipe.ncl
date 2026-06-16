@@ -2,6 +2,8 @@ let KnownTags = [
   "Source",
   "Group",
   "Tree",
+  "TreeNew",
+  "FsTreeImport",
   "TreeMerge",
   "TreeSubset",
   "RootfsClosure",
@@ -234,6 +236,27 @@ let InstallMeta = {
     | doc "Install rules applied when the result is used as an installable object.",
 }
 in
+let FsTreeInstallAttrs = {
+  uid | Number | optional,
+  gid | Number | optional,
+  directory_mode | Number | optional,
+  regular_file_mode | Number | optional,
+  executable_file_mode | Number | optional,
+}
+in
+let FsTreeInstallRule = {
+  path | String,
+  attrs
+    | FsTreeInstallAttrs
+    | doc "Install attributes applied while importing into fs-tree v2.",
+}
+in
+let FsTreeInstallMeta = {
+  rules
+    | Array FsTreeInstallRule
+    | doc "Install rules used by `FsTreeImport`.",
+}
+in
 let TreeFileEntry = {
   type
     | std.contract.Equal "file"
@@ -287,6 +310,18 @@ let TreeConfig = {
     | InstallMeta
     | optional
     | doc "Manual install metadata for directory output only.",
+}
+in
+let TreeNewConfig = {
+  tree
+    | TreePayload
+    | doc "Generated tree description staged directly as a plain file or directory.",
+}
+in
+let FsTreeImportConfig = {
+  install
+    | FsTreeInstallMeta
+    | doc "Install rules applied while importing the input tree into fs-tree v2.",
 }
 in
 let SandboxConfig = {
@@ -395,6 +430,12 @@ let GroupInputsShape = NonEmptyRecord
 in
 let TreeInputs = {}
 in
+let FsTreeImportInputsShape = {
+  input
+    | Dyn
+    | doc "Single directory tree input imported into fs-tree v2.",
+}
+in
 let SandboxBuildRootfsInputsShape = {
   rootfs
     | Dyn
@@ -460,6 +501,17 @@ let ValidateRecipeShallow = fun recipe =>
           },
       }
     in
+    let validate_tree_new_config = fun config =>
+      let checked = config | TreeNewConfig in
+      checked
+      & {
+        tree =
+          checked.tree
+          & {
+            entries = std.array.map validate_tree_entry checked.tree.entries,
+          },
+      }
+    in
     if checked.tag == "Group" then
       checked
       & {
@@ -469,6 +521,16 @@ let ValidateRecipeShallow = fun recipe =>
       checked
       & {
         config = validate_tree_config checked.config,
+      }
+    else if checked.tag == "TreeNew" then
+      checked
+      & {
+        config = validate_tree_new_config checked.config,
+      }
+    else if checked.tag == "FsTreeImport" then
+      checked
+      & {
+        config = checked.config | FsTreeImportConfig,
       }
     else if checked.tag == "AutotoolsRootfs" then
       checked
@@ -585,6 +647,12 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_fs_tree_import_inputs = fun inputs =>
+      let checked = inputs | FsTreeImportInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_synthetic_rootfs_inputs = fun inputs =>
       let checked = inputs | SyntheticRootfsInputsShape in
       std.record.map
@@ -599,6 +667,17 @@ let rec ValidateRecipe = fun recipe =>
     in
     let validate_tree_config = fun config =>
       let checked = config | TreeConfig in
+      checked
+      & {
+        tree =
+          checked.tree
+          & {
+            entries = std.array.map validate_tree_entry checked.tree.entries,
+          },
+      }
+    in
+    let validate_tree_new_config = fun config =>
+      let checked = config | TreeNewConfig in
       checked
       & {
         tree =
@@ -667,6 +746,18 @@ let rec ValidateRecipe = fun recipe =>
       & {
         config = validate_tree_config checked.config,
         inputs = validate_tree_inputs checked.inputs,
+      }
+    else if checked.tag == "TreeNew" then
+      checked
+      & {
+        config = validate_tree_new_config checked.config,
+        inputs = validate_tree_inputs checked.inputs,
+      }
+    else if checked.tag == "FsTreeImport" then
+      checked
+      & {
+        config = checked.config | FsTreeImportConfig,
+        inputs = validate_fs_tree_import_inputs checked.inputs,
       }
     else if checked.tag == "AutotoolsRootfs" then
       checked
@@ -786,6 +877,12 @@ in
   tree_config
     | doc "Config contract for `Tree` recipe nodes."
     = TreeConfig,
+  tree_new_config
+    | doc "Config contract for `TreeNew` recipe nodes."
+    = TreeNewConfig,
+  fs_tree_import_config
+    | doc "Config contract for `FsTreeImport` recipe nodes."
+    = FsTreeImportConfig,
   source_recipe
     | doc "Structural contract for `Source` recipe nodes."
     = SourceRecipe,

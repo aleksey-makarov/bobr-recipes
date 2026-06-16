@@ -62,6 +62,19 @@ fun pkgs =>
   }
   in
 
+  let all_new = {
+    name = "all-new",
+    tag = "Group",
+    config = {},
+    inputs =
+      recipe.numbered_inputs [
+        pkgs.base_filesystem_new,
+        pkgs.system_runtime_files_new,
+        pkgs.initrd_files_new,
+      ],
+  }
+  in
+
   let all_artifacts = {
     name = "all-artifacts",
     tag = "Group",
@@ -79,6 +92,7 @@ fun pkgs =>
       all_sources,
       all_image_rootfs,
       all_test_artifacts,
+      all_new,
       all_artifacts,
     ],
   }

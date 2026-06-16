@@ -172,6 +172,32 @@ fun pkgs =>
   }
   in
 
+  let initrd_files_files = {
+    name = "initrd-files-files",
+    tag = "TreeNew",
+    config = {
+      tree = initrd_files.config.tree,
+    },
+    inputs = {},
+  }
+  in
+
+  let initrd_files_new = {
+    name = "initrd-files-new",
+    tag = "FsTreeImport",
+    config = {
+      install = {
+        rules = [
+          recipe.install.fs_tree_root_default_rule,
+        ],
+      },
+    },
+    inputs = {
+      input = initrd_files_files,
+    },
+  }
+  in
+
   let initrd_systemd = {
     name = "initrd-systemd",
     tag = "TreeSubset",
@@ -420,6 +446,7 @@ fun pkgs =>
   {
     include [
       initrd_files,
+      initrd_files_new,
       initrd_systemd,
       initrd_kmod,
       initrd_util_linux,

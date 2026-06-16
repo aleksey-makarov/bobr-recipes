@@ -17,8 +17,35 @@ fun _pkgs =>
   }
   in
 
+  let base_filesystem_files = {
+    name = "base-filesystem-files",
+    tag = "TreeNew",
+    config = {
+      tree = tree_data,
+    },
+    inputs = {},
+  }
+  in
+
+  let base_filesystem_new = {
+    name = "base-filesystem-new",
+    tag = "FsTreeImport",
+    config = {
+      install = {
+        rules = [
+          recipe.install.fs_tree_root_default_rule,
+        ],
+      },
+    },
+    inputs = {
+      input = base_filesystem_files,
+    },
+  }
+  in
+
   {
     include [
       base_filesystem,
+      base_filesystem_new,
     ],
   }
