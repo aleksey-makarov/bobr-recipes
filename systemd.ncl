@@ -30,8 +30,8 @@ fun pkgs =>
     origin = {
       tag = "Http",
       url = [
-        "https://ftp2.osuosl.org/pub/blfs/conglomeration/systemd/systemd-man-pages-%{version}.tar.xz",
         "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-%{version}.tar.xz",
+        "https://ftp2.osuosl.org/pub/blfs/conglomeration/systemd/systemd-man-pages-%{version}.tar.xz",
       ],
     },
   }
