@@ -62,6 +62,32 @@ fun pkgs =>
   }
   in
 
+  let ubuntu_rootfs_erofs_new = {
+    name = "ubuntu-rootfs-erofs-new",
+    tag = "ErofsRootfsNew",
+    config = {
+      compression = null,
+      label = null,
+    },
+    inputs = {
+      tree = pkgs.ubuntu_rootfs_new,
+    },
+  }
+  in
+
+  let busybox_rootfs_erofs_new = {
+    name = "busybox-rootfs-erofs-new",
+    tag = "ErofsRootfsNew",
+    config = {
+      compression = null,
+      label = null,
+    },
+    inputs = {
+      tree = pkgs.busybox_rootfs_new,
+    },
+  }
+  in
+
   let all_new = {
     name = "all-new",
     tag = "Group",
@@ -77,6 +103,8 @@ fun pkgs =>
         pkgs.busybox_rootfs_new,
         pkgs.golang_rootfs_new,
         pkgs.python_slim_rootfs_new,
+        ubuntu_rootfs_erofs_new,
+        busybox_rootfs_erofs_new,
       ],
   }
   in
