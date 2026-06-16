@@ -32,6 +32,7 @@ fun pkgs =>
         "--disable-werror",
         "--enable-new-dtags",
         "--enable-default-hash-style=gnu",
+        "--enable-deterministic-archives",
       ],
     },
     inputs = {
@@ -51,6 +52,7 @@ fun pkgs =>
         "--enable-64-bit-bfd",
         "--enable-new-dtags",
         "--enable-default-hash-style=gnu",
+        "--enable-deterministic-archives",
         "--disable-nls",
         "--disable-werror",
         "--disable-gprofng",
