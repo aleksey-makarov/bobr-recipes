@@ -80,6 +80,9 @@ step_install() {
   append_dir_files_to_array "${cfg}/make_args" make_args
   mkdir -p "$out_dir"
   make DESTDIR="$out_dir" "${make_args[@]}" install
+  # perllocal.pod records a wall-clock install date (ExtUtils::Install ignores
+  # SOURCE_DATE_EPOCH); drop the install log to keep the tree reproducible.
+  find "$out_dir" -name perllocal.pod -type f -delete
 }
 
 load_env_files
