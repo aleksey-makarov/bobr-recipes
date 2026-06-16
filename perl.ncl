@@ -13,12 +13,12 @@ fun pkgs =>
   in
 
   let perl_src = {
-    name = "perl-src-5.42.0",
+    name = "perl-src-5.42.2",
     tag = "Source",
-    object_hash = "ce0aace744ab7aeb6f42594af5afb7044b14377a6e16bb2be20dd50492926e90",
+    object_hash = "0abca016a676f0186f5f4d6d4cba32fd501905e8d07821b47a930d74e87496ca",
     origin = {
       tag = "Http",
-      url = "https://www.cpan.org/src/5.0/perl-5.42.0.tar.xz",
+      url = "https://www.cpan.org/src/5.0/perl-5.42.2.tar.xz",
     },
   }
   in
@@ -37,7 +37,7 @@ fun pkgs =>
   in
 
   let perl = {
-    name = "perl-5.42.0",
+    name = "perl-5.42.2",
     tag = "SandboxBuildRootfs",
     deps = {
       build = [],
