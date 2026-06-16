@@ -38,6 +38,12 @@ step_configure() {
   project_source_dir="$(resolve_source_dir)"
   cd "$project_source_dir"
   perl_env
+  # perl's Configure recomputes cf_time from `date` unconditionally and ignores
+  # SOURCE_DATE_EPOCH, leaking the wall-clock build time into config.h,
+  # Config_heavy.pl, perlbug and perlthanks. Override it via config.over, which
+  # Configure sources late (after cf_time is set, before config.sh is written).
+  printf "cf_time='%s'\n" "$(LC_ALL=C date -u -d "@${SOURCE_DATE_EPOCH:-0}")" \
+    > config.over
   sh Configure -des \
     -D prefix=/usr \
     -D vendorprefix=/usr \
