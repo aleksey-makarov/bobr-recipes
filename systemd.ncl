@@ -29,7 +29,10 @@ fun pkgs =>
     object_hash = hashes."%{version}".man_pages,
     origin = {
       tag = "Http",
-      url = "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-%{version}.tar.xz",
+      url = [
+        "https://ftp2.osuosl.org/pub/blfs/conglomeration/systemd/systemd-man-pages-%{version}.tar.xz",
+        "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-%{version}.tar.xz",
+      ],
     },
   }
   in
