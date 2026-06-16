@@ -71,6 +71,12 @@ fun pkgs =>
         pkgs.base_filesystem_new,
         pkgs.system_runtime_files_new,
         pkgs.initrd_files_new,
+        pkgs.buildpack_deps_rootfs_new,
+        pkgs.alpine_rootfs_new,
+        pkgs.ubuntu_rootfs_new,
+        pkgs.busybox_rootfs_new,
+        pkgs.golang_rootfs_new,
+        pkgs.python_slim_rootfs_new,
       ],
   }
   in

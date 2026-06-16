@@ -65,6 +65,7 @@ run_case "sandbox-build-rootfs" pass '{"name":"sandbox-build-rootfs","tag":"Sand
 run_case "sandbox-build-package" pass '{"name":"sandbox-build-package","tag":"SandboxBuild","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "erofs-rootfs" pass '{"name":"rootfs-erofs","tag":"ErofsRootfs","config":{"compression":null,"label":null},"inputs":{"tree0":'"${rootfs_tree}"'}}'
 run_case "oci-extract" pass '{"name":"img-rootfs","tag":"OciExtract","config":{},"inputs":{"image":{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}}}'
+run_case "oci-extract-new" pass '{"name":"img-rootfs-new","tag":"OciExtractNew","config":{},"inputs":{"image":{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}}}'
 
 run_case "unknown-tag" fail '{"name":"bad","tag":"Demo","config":{},"inputs":{}}'
 run_case "removed-text-tag" fail '{"name":"hello","tag":"Text","config":{"source":"hi","executable":false},"inputs":{}}'

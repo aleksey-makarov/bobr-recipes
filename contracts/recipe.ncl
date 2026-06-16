@@ -20,6 +20,7 @@ let KnownTags = [
   "PerlModuleRootfs",
   "SandboxBuildRootfs",
   "OciExtract",
+  "OciExtractNew",
 ]
 in
 let KnownTag =
@@ -612,7 +613,7 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | InitramfsConfig,
       }
-    else if checked.tag == "OciExtract" then
+    else if checked.tag == "OciExtract" || checked.tag == "OciExtractNew" then
       checked
       & {
         config = checked.config | OciExtractConfig,
@@ -854,7 +855,7 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | InitramfsConfig,
         inputs = validate_initramfs_inputs checked.inputs,
       }
-    else if checked.tag == "OciExtract" then
+    else if checked.tag == "OciExtract" || checked.tag == "OciExtractNew" then
       checked
       & {
         config = checked.config | OciExtractConfig,
@@ -911,7 +912,7 @@ in
     | doc "Config contract for `Initramfs` recipe nodes."
     = InitramfsConfig,
   oci_extract_config
-    | doc "Config contract for `OciExtract` recipe nodes."
+    | doc "Config contract for `OciExtract` and `OciExtractNew` recipe nodes."
     = OciExtractConfig,
   shallow_recipe
     | doc "Validate one recipe node shallowly: full top-level shape and tag-specific config, but leave `inputs` as `Dyn`."
