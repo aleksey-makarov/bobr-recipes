@@ -212,9 +212,16 @@ fun pkgs =>
       configure_args = [
         "--enable-shared",
         "--with-system-expat",
-        "--enable-optimizations",
+        # PGO (--enable-optimizations) is not reproducible: its profile is
+        # gathered from a non-deterministic training run. Use LTO instead
+        # (reproducible) plus -fno-semantic-interposition to recover most of
+        # the speed lost to the shared build. See nixpkgs cpython.
+        "--with-lto",
         "--without-static-libpython",
       ],
+      env = {
+        CFLAGS_NODIST = "-fno-semantic-interposition",
+      },
       python_modules = [
         "flit_core",
         "packaging",
