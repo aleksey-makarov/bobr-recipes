@@ -38,12 +38,24 @@ step_configure() {
   project_source_dir="$(resolve_source_dir)"
   cd "$project_source_dir"
   perl_env
-  # perl's Configure recomputes cf_time from `date` unconditionally and ignores
-  # SOURCE_DATE_EPOCH, leaking the wall-clock build time into config.h,
-  # Config_heavy.pl, perlbug and perlthanks. Override it via config.over, which
-  # Configure sources late (after cf_time is set, before config.sh is written).
-  printf "cf_time='%s'\n" "$(LC_ALL=C date -u -d "@${SOURCE_DATE_EPOCH:-0}")" \
-    > config.over
+  # perl's Configure probes the build host for values that are not
+  # deterministic across machines/days and ignore SOURCE_DATE_EPOCH:
+  #   - cf_time: wall-clock time of the Configure run
+  #   - osvers / myuname: host kernel release and `uname -a`. The sandbox
+  #     shares the host kernel, so `uname -r` is not isolated and leaks the
+  #     builder's kernel version.
+  # These flow into config.h, Config_heavy.pl, Config.pm, Errno.pm, perlbug
+  # and perlthanks. config.over is sourced late (after detection, before
+  # config.sh is written), so overriding here only rewrites the recorded
+  # values, not any build decision. Use neutral, kernel-independent values
+  # (like nixpkgs, which sets osvers=gnulinux / myuname=nixpkgs) rather than a
+  # fake version. osvers stays self-consistent: Errno.pm's runtime check
+  # compares against the same Config{osvers}.
+  {
+    printf "cf_time='%s'\n" "$(LC_ALL=C date -u -d "@${SOURCE_DATE_EPOCH:-0}")"
+    printf "osvers='gnulinux'\n"
+    printf "myuname='mbuild'\n"
+  } > config.over
   sh Configure -des \
     -D prefix=/usr \
     -D vendorprefix=/usr \
