@@ -199,7 +199,6 @@ fi
 {
   echo "test-rootfs report"
   echo "name: ${name}"
-  echo "kernel: $(uname -srmo)"
   echo "ldd: $(command -v ldd || echo missing)"
 
   if [ "$have_ldd" = "no" ]; then
