@@ -24,7 +24,10 @@ fun pkgs =>
     config = {
       configure_args = [
         "--disable-static",
-        "--with-gcc-arch=native",
+        # --with-gcc-arch=native passes -march=native, tuning to the build
+        # host CPU: non-reproducible across machines and non-portable (older
+        # target CPUs would SIGILL). Build a generic baseline library instead.
+        "--without-gcc-arch",
       ],
     },
     inputs = {
