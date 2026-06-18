@@ -38,6 +38,14 @@ fun pkgs =>
       configure_args = [
         "--enable-cxx",
         "--disable-static",
+        # gmp's bundled config.guess runtime-detects the build CPU via
+        # /proc/cpuinfo and bakes -march/-mtune into gmp.h (__GMP_CFLAGS),
+        # so the build differs across machines. Pass a generic --build triple
+        # to stop the autodetect, and --enable-fat so asm routines for all x86
+        # sub-archs are compiled in and dispatched at runtime (reproducible
+        # code + good performance). Follows nixpkgs.
+        "--build=x86_64-pc-linux-gnu",
+        "--enable-fat",
         "--docdir=/usr/share/doc/gmp-6.3.0",
       ],
     },
