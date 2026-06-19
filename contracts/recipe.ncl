@@ -2,13 +2,11 @@ let KnownTags = [
   "Source",
   "Group",
   "Tree",
-  "TreeNew",
   "FsTreeImport",
   "TreeMerge",
   "TreeSubset",
   "RootfsClosure",
   "ErofsRootfs",
-  "ErofsRootfsNew",
   "Initramfs",
   "Autotools",
   "Makefile",
@@ -21,7 +19,6 @@ let KnownTags = [
   "PerlModuleRootfs",
   "SandboxBuildRootfs",
   "OciExtract",
-  "OciExtractNew",
 ]
 in
 let KnownTag =
@@ -307,16 +304,6 @@ in
 let TreeConfig = {
   tree
     | TreePayload
-    | doc "Generated tree description imported from a committed `*-tree.ncl` module.",
-  install
-    | InstallMeta
-    | optional
-    | doc "Manual install metadata for directory output only.",
-}
-in
-let TreeNewConfig = {
-  tree
-    | TreePayload
     | doc "Generated tree description staged directly as a plain file or directory.",
 }
 in
@@ -461,9 +448,7 @@ let TreeSubsetInputsShape = {
 in
 let RootfsClosureInputsShape = { .. }
 in
-let ErofsRootfsInputsShape = { .. }
-in
-let ErofsRootfsNewInputsShape = {
+let ErofsRootfsInputsShape = {
   tree
     | Dyn
     | doc "Single fs-tree v2 manifest input used to build an EROFS image.",
@@ -509,17 +494,6 @@ let ValidateRecipeShallow = fun recipe =>
           },
       }
     in
-    let validate_tree_new_config = fun config =>
-      let checked = config | TreeNewConfig in
-      checked
-      & {
-        tree =
-          checked.tree
-          & {
-            entries = std.array.map validate_tree_entry checked.tree.entries,
-          },
-      }
-    in
     if checked.tag == "Group" then
       checked
       & {
@@ -529,11 +503,6 @@ let ValidateRecipeShallow = fun recipe =>
       checked
       & {
         config = validate_tree_config checked.config,
-      }
-    else if checked.tag == "TreeNew" then
-      checked
-      & {
-        config = validate_tree_new_config checked.config,
       }
     else if checked.tag == "FsTreeImport" then
       checked
@@ -610,7 +579,7 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | TreeMergeConfig,
       }
-    else if checked.tag == "ErofsRootfs" || checked.tag == "ErofsRootfsNew" then
+    else if checked.tag == "ErofsRootfs" then
       checked
       & {
         config = checked.config | ErofsRootfsConfig,
@@ -620,7 +589,7 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | InitramfsConfig,
       }
-    else if checked.tag == "OciExtract" || checked.tag == "OciExtractNew" then
+    else if checked.tag == "OciExtract" then
       checked
       & {
         config = checked.config | OciExtractConfig,
@@ -684,17 +653,6 @@ let rec ValidateRecipe = fun recipe =>
           },
       }
     in
-    let validate_tree_new_config = fun config =>
-      let checked = config | TreeNewConfig in
-      checked
-      & {
-        tree =
-          checked.tree
-          & {
-            entries = std.array.map validate_tree_entry checked.tree.entries,
-          },
-      }
-    in
     let validate_sandbox_inputs = fun inputs =>
       let checked = inputs | SandboxBuildRootfsInputsShape in
       std.record.map
@@ -737,12 +695,6 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
-    let validate_erofs_rootfs_new_inputs = fun inputs =>
-      let checked = inputs | ErofsRootfsNewInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
     let validate_initramfs_inputs = fun inputs =>
       let checked = inputs | InitramfsInputsShape in
       std.record.map
@@ -759,12 +711,6 @@ let rec ValidateRecipe = fun recipe =>
       checked
       & {
         config = validate_tree_config checked.config,
-        inputs = validate_tree_inputs checked.inputs,
-      }
-    else if checked.tag == "TreeNew" then
-      checked
-      & {
-        config = validate_tree_new_config checked.config,
         inputs = validate_tree_inputs checked.inputs,
       }
     else if checked.tag == "FsTreeImport" then
@@ -862,19 +808,13 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | ErofsRootfsConfig,
         inputs = validate_erofs_rootfs_inputs checked.inputs,
       }
-    else if checked.tag == "ErofsRootfsNew" then
-      checked
-      & {
-        config = checked.config | ErofsRootfsConfig,
-        inputs = validate_erofs_rootfs_new_inputs checked.inputs,
-      }
     else if checked.tag == "Initramfs" then
       checked
       & {
         config = checked.config | InitramfsConfig,
         inputs = validate_initramfs_inputs checked.inputs,
       }
-    else if checked.tag == "OciExtract" || checked.tag == "OciExtractNew" then
+    else if checked.tag == "OciExtract" then
       checked
       & {
         config = checked.config | OciExtractConfig,
@@ -897,9 +837,6 @@ in
   tree_config
     | doc "Config contract for `Tree` recipe nodes."
     = TreeConfig,
-  tree_new_config
-    | doc "Config contract for `TreeNew` recipe nodes."
-    = TreeNewConfig,
   fs_tree_import_config
     | doc "Config contract for `FsTreeImport` recipe nodes."
     = FsTreeImportConfig,
@@ -925,13 +862,13 @@ in
     | doc "Config contract for `TreeMerge` recipe nodes."
     = TreeMergeConfig,
   erofs_rootfs_config
-    | doc "Config contract for `ErofsRootfs` and `ErofsRootfsNew` recipe nodes."
+    | doc "Config contract for `ErofsRootfs` recipe nodes."
     = ErofsRootfsConfig,
   initramfs_config
     | doc "Config contract for `Initramfs` recipe nodes."
     = InitramfsConfig,
   oci_extract_config
-    | doc "Config contract for `OciExtract` and `OciExtractNew` recipe nodes."
+    | doc "Config contract for `OciExtract` recipe nodes."
     = OciExtractConfig,
   shallow_recipe
     | doc "Validate one recipe node shallowly: full top-level shape and tag-specific config, but leave `inputs` as `Dyn`."

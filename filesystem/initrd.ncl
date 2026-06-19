@@ -1,8 +1,8 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let initrd_files = {
-    name = "initrd-files",
+  let initrd_files_files = {
+    name = "initrd-files-files",
     tag = "Tree",
     config = {
       tree = {
@@ -162,28 +162,13 @@ fun pkgs =>
           },
         ],
       },
-      install = {
-        rules = [
-          recipe.install.root_default_rule,
-        ],
-      },
     },
     inputs = {},
   }
   in
 
-  let initrd_files_files = {
-    name = "initrd-files-files",
-    tag = "TreeNew",
-    config = {
-      tree = initrd_files.config.tree,
-    },
-    inputs = {},
-  }
-  in
-
-  let initrd_files_new = {
-    name = "initrd-files-new",
+  let initrd_files = {
+    name = "initrd-files",
     tag = "FsTreeImport",
     config = {
       install = {
@@ -446,7 +431,6 @@ fun pkgs =>
   {
     include [
       initrd_files,
-      initrd_files_new,
       initrd_systemd,
       initrd_kmod,
       initrd_util_linux,

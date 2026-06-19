@@ -92,7 +92,9 @@ fun pkgs =>
       compression = null,
       label = null,
     },
-    inputs = recipe.numbered_inputs rootfs_deps,
+    inputs = {
+      tree = rootfs,
+    },
   }
   in
 

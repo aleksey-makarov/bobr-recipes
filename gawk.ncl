@@ -53,8 +53,8 @@ fun pkgs =>
   }
   in
 
-  let awk_symlink = {
-    name = "awk-symlink",
+  let awk_symlink_files = {
+    name = "awk-symlink-files",
     tag = "Tree",
     config = {
       tree = {
@@ -66,13 +66,24 @@ fun pkgs =>
           },
         ],
       },
+    },
+    inputs = {},
+  }
+  in
+
+  let awk_symlink = {
+    name = "awk-symlink",
+    tag = "FsTreeImport",
+    config = {
       install = {
         rules = [
-          recipe.install.root_default_rule,
+          recipe.install.fs_tree_root_default_rule,
         ],
       },
     },
-    inputs = {},
+    inputs = {
+      input = awk_symlink_files,
+    },
   }
   in
 
