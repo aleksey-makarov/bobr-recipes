@@ -15,7 +15,7 @@ APPEND = (
     "root=/dev/vda ro rootfstype=erofs systemd.volatile=overlay "
     "console=ttyS0 net.ifnames=0"
 )
-FS_TREE_SCHEMA = "bobr-fs-tree-manifest-v2"
+FS_TREE_SCHEMA = "bobr-fs-tree-manifest"
 HEX_64_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -110,7 +110,7 @@ def fs_tree_file_path(
                 die(f"empty fs-tree manifest: {manifest_path}")
             header = json.loads(header_line)
             if header.get("schema") != FS_TREE_SCHEMA:
-                die(f"not an fs-tree v2 manifest: {manifest_path}")
+                die(f"not an fs-tree manifest: {manifest_path}")
 
             for line_number, line in enumerate(manifest, start=2):
                 if not line.strip():

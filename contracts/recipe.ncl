@@ -247,7 +247,7 @@ let FsTreeInstallRule = {
   path | String,
   attrs
     | FsTreeInstallAttrs
-    | doc "Install attributes applied while importing into fs-tree v2.",
+    | doc "Install attributes applied while importing into fs-tree.",
 }
 in
 let FsTreeInstallMeta = {
@@ -310,7 +310,7 @@ in
 let FsTreeImportConfig = {
   install
     | FsTreeInstallMeta
-    | doc "Install rules applied while importing the input tree into fs-tree v2.",
+    | doc "Install rules applied while importing the input tree into fs-tree.",
 }
 in
 let SandboxConfig = {
@@ -422,7 +422,7 @@ in
 let FsTreeImportInputsShape = {
   input
     | Dyn
-    | doc "Single directory tree input imported into fs-tree v2.",
+    | doc "Single directory tree input imported into fs-tree.",
 }
 in
 let SandboxBuildRootfsInputsShape = {
@@ -451,7 +451,7 @@ in
 let ErofsRootfsInputsShape = {
   tree
     | Dyn
-    | doc "Single fs-tree v2 manifest input used to build an EROFS image.",
+    | doc "Single fs-tree manifest input used to build an EROFS image.",
 }
 in
 let InitramfsInputsShape = { .. }
