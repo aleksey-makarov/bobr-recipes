@@ -44,6 +44,11 @@ step_configure() {
   #   - osvers / myuname: host kernel release and `uname -a`. The sandbox
   #     shares the host kernel, so `uname -r` is not isolated and leaks the
   #     builder's kernel version.
+  #   - cf_by / cf_email / perladmin: the build user. Configure resolves it via
+  #     logname/whoami (getpwuid of the build uid), not $USER, so it is not
+  #     covered by the sandbox's USER=mbuild. getpwuid(0) resolves differently
+  #     between the namespace runtime (-> root) and the host runtime under real
+  #     root (-> unknown), so the recorded user leaks the runtime mode.
   # These flow into config.h, Config_heavy.pl, Config.pm, Errno.pm, perlbug
   # and perlthanks. config.over is sourced late (after detection, before
   # config.sh is written), so overriding here only rewrites the recorded
@@ -55,6 +60,9 @@ step_configure() {
     printf "cf_time='%s'\n" "$(LC_ALL=C date -u -d "@${SOURCE_DATE_EPOCH:-0}")"
     printf "osvers='gnulinux'\n"
     printf "myuname='mbuild'\n"
+    printf "cf_by='mbuild'\n"
+    printf "cf_email='mbuild@bobr.nonet'\n"
+    printf "perladmin='mbuild@bobr.nonet'\n"
   } > config.over
   sh Configure -des \
     -D prefix=/usr \
