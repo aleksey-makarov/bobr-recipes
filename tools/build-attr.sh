@@ -68,9 +68,7 @@ let base = request {
   target_name = "${attr}",
 } in
 base & {
-  options = base.options & {
-    jobs = ${jobs},
-  },
+  jobs = ${jobs},
 }
 EOF_INNER
   )
