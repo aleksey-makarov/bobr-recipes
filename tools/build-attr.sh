@@ -53,6 +53,12 @@ source "${repo_root}/env.sh"
 request_file="${repo_root}/request.ncl"
 mbuild_bin="${workspace_root}/mbuild/target/debug/mbuild"
 tree_generator="${repo_root}/tools/generate-tree-modules.py"
+overlays_file="$(pwd)/bobr-overlays.ncl"
+overlays_expr="[]"
+
+if [ -f "${overlays_file}" ]; then
+  overlays_expr="import \"${overlays_file}\""
+fi
 
 mkdir -p "${store_root}"
 
@@ -66,6 +72,7 @@ let base = request {
   store_path = "${store_root}",
   recipes_path = "${recipes_root}",
   target_name = "${attr}",
+  overlays = ${overlays_expr},
 } in
 base & {
   jobs = ${jobs},
@@ -79,6 +86,7 @@ request {
   store_path = "${store_root}",
   recipes_path = "${recipes_root}",
   target_name = "${attr}",
+  overlays = ${overlays_expr},
 }
 EOF_INNER
   )
