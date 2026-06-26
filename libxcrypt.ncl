@@ -1,13 +1,17 @@
 let recipe = import "recipe-lib.ncl" in
+let hashes = {
+  "4.4.38" = "3e8fe066132eb4300604bb5769f9d80fdfe1d443025978ea867ecef693afacd0",
+  "4.5.2" = "61672cb1ce67e78a1c27e83b4b5d636e89dd0a2b71d5295fbf4e80beaf8fb5b1",
+} in
 
 fun pkgs =>
-  let libxcrypt_src = {
-    name = "libxcrypt-src-4.4.38",
+  let libxcrypt_src = fun version => {
+    name = "libxcrypt-src-%{version}",
     tag = "Source",
-    object_hash = "3e8fe066132eb4300604bb5769f9d80fdfe1d443025978ea867ecef693afacd0",
+    object_hash = hashes."%{version}",
     origin = {
       tag = "Http",
-      url = "https://github.com/besser82/libxcrypt/releases/download/v4.4.38/libxcrypt-4.4.38.tar.xz",
+      url = "https://github.com/besser82/libxcrypt/releases/download/v%{version}/libxcrypt-%{version}.tar.xz",
     },
   }
   in
@@ -25,7 +29,8 @@ fun pkgs =>
   in
 
   let libxcrypt = {
-    name = "libxcrypt-4.4.38",
+    version | default = "4.5.2",
+    name = "libxcrypt-%{version}",
     tag = "AutotoolsRootfs",
     config = {
       configure_args = [
@@ -37,7 +42,7 @@ fun pkgs =>
     },
     inputs = {
       rootfs = libxcrypt_build_rootfs,
-      source = libxcrypt_src,
+      source = libxcrypt_src version,
     },
   }
   in

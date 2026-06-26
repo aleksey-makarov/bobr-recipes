@@ -1,19 +1,30 @@
 let recipe = import "recipe-lib.ncl" in
+let hashes = {
+  "2.41.1" = "783f3d20a602e8115a9a9977b4d4d6f7f8e099451e287358a7d3991b1c5c1136",
+  "2.41.5" = "356ee5ef126461644fb10855b0d87bb6bc1861354938d6546746a57b605461e4",
+} in
+let series = {
+  "2.41.1" = "2.41",
+  "2.41.5" = "2.41",
+} in
 
 fun pkgs =>
-  let util_linux_src = {
-    name = "util-linux-src-2.41.1",
-    tag = "Source",
-    object_hash = "783f3d20a602e8115a9a9977b4d4d6f7f8e099451e287358a7d3991b1c5c1136",
-    origin = {
-      tag = "Http",
-      url = "https://www.kernel.org/pub/linux/utils/util-linux/v2.41/util-linux-2.41.1.tar.xz",
-    },
-  }
+  let util_linux_src = fun version =>
+    let version_series = series."%{version}" in
+    {
+      name = "util-linux-src-%{version}",
+      tag = "Source",
+      object_hash = hashes."%{version}",
+      origin = {
+        tag = "Http",
+        url = "https://www.kernel.org/pub/linux/utils/util-linux/v%{version_series}/util-linux-%{version}.tar.xz",
+      },
+    }
   in
 
   let util_linux = {
-    name = "util-linux-2.41.1",
+    version | default = "2.41.5",
+    name = "util-linux-%{version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -54,14 +65,14 @@ fun pkgs =>
         "--disable-static",
         "--without-python",
         "ADJTIME_PATH=/var/lib/hwclock/adjtime",
-        "--docdir=/usr/share/doc/util-linux-2.41.1",
+        "--docdir=/usr/share/doc/util-linux-%{version}",
       ],
       make_args = [
         "usrsbin_execdir=/usr/bin",
       ],
     },
     inputs = {
-      source = util_linux_src,
+      source = util_linux_src version,
     },
   }
   in
