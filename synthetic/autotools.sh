@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cfg="${MBUILD_CONFIG_DIR:?MBUILD_CONFIG_DIR is required}"
-step="${1:-${MBUILD_STEP_NAME:-}}"
+cfg="${BOBR_CONFIG_DIR:?BOBR_CONFIG_DIR is required}"
+step="${1:-${BOBR_STEP_NAME:-}}"
 step="${step:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
-out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
-build_workspace_dir="${MBUILD_BUILD_DIR:?MBUILD_BUILD_DIR is required}"
+out_dir="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
+build_workspace_dir="${BOBR_BUILD_DIR:?BOBR_BUILD_DIR is required}"
 synthetic_common="${MBUILD_SYNTHETIC_COMMON:?MBUILD_SYNTHETIC_COMMON is required}"
 
 . "$synthetic_common"

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cfg="${MBUILD_CONFIG_DIR:?MBUILD_CONFIG_DIR is required}"
+cfg="${BOBR_CONFIG_DIR:?BOBR_CONFIG_DIR is required}"
 name="$(cat "${cfg}/name")"
-dest="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
+dest="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
 
 if [ -z "$name" ]; then
   echo "test-rootfs: config name must not be empty" >&2

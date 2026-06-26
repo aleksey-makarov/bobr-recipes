@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-phase="${MBUILD_STEP_NAME:?MBUILD_STEP_NAME is required}"
+phase="${BOBR_STEP_NAME:?BOBR_STEP_NAME is required}"
 build_kind="${MBUILD_LINUX_BUILD_KIND:-full}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
 install_dir="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
-kernel_config="/__mbuild/inputs/kernel_config"
+kernel_config="$BOBR_INPUTS_DIR/kernel_config"
 
 export ARCH=x86_64
 export KBUILD_BUILD_USER=mbuild

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-dest="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
+dest="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
 
 mkdir -p "$dest"
 
@@ -18,7 +18,7 @@ copy_reports_from_dir() {
   done < <(find "$report_dir" -maxdepth 1 -type f -name 'report-*.txt' -print0 | sort -z)
 }
 
-for input_dir in /__mbuild/inputs/report*; do
+for input_dir in "$BOBR_INPUTS_DIR"/report*; do
   [ -d "$input_dir" ] || continue
 
   copy_reports_from_dir "$input_dir"

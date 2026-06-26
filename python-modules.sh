@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cfg="${MBUILD_CONFIG_DIR:?MBUILD_CONFIG_DIR is required}"
-out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
-work_dir="${MBUILD_BUILD_DIR:-$PWD}"
+cfg="${BOBR_CONFIG_DIR:?BOBR_CONFIG_DIR is required}"
+out_dir="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
+work_dir="${BOBR_BUILD_DIR:-$PWD}"
 
 live_python="${out_dir}/usr/bin/python3"
 if [ ! -x "${live_python}" ]; then
@@ -16,7 +16,7 @@ sources_root="${work_dir}/python-module-sources"
 
 prepare_python_module_source() {
   local package_name="$1"
-  local input_path="/__mbuild/inputs/${package_name}"
+  local input_path="$BOBR_INPUTS_DIR/${package_name}"
   local source_dir="${sources_root}/${package_name}"
 
   if [ -d "${input_path}" ]; then

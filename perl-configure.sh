@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-step="${1:-${MBUILD_STEP_NAME:-}}"
+step="${1:-${BOBR_STEP_NAME:-}}"
 step="${step:?step name is required}"
 source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
-out_dir="${MBUILD_OUT_DIR:?MBUILD_OUT_DIR is required}"
+out_dir="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
 
 resolve_source_dir() {
   if [ -f "$source_dir/Configure" ]; then
