@@ -95,7 +95,7 @@ run_case "missing-meson-package-deps" fail '{"name":"pkg-package","tag":"Meson",
 run_case "sandbox-build-rootfs-install-rejected" fail '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"'}}'
 run_case "autotools-rootfs-install-rejected" fail '{"name":"pkg-rootfs","tag":"AutotoolsRootfs","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493,"symlink_mode":511}}]}},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "meson-rootfs-build-dir-rejected" fail '{"name":"pkg-rootfs","tag":"MesonRootfs","config":{"build_dir":"build"},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
-run_case "extra-top-level-field" fail '{"name":"hello","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"hello.txt","text":"hi","executable":false}]}},"inputs":{},"extra":true}'
+run_case "extra-top-level-field" pass '{"name":"hello","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"hello.txt","text":"hi","executable":false}]}},"inputs":{},"extra":true}'
 run_case "bad-group-config" fail '{"name":"all","tag":"Group","config":{"manifest":true},"inputs":{"first":'"${script_node}"'}}'
 run_case "empty-group-inputs" fail '{"name":"all","tag":"Group","config":{},"inputs":{}}'
 run_case "bad-source-http-archive-format" fail '{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"tag":"Http","url":"https://example.invalid/src.tar.xz","archive_format":"tar-zst"}}'
@@ -106,6 +106,40 @@ run_case "empty-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSu
 run_case "missing-tree-subset-input" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib64/libfoo.so*"]},"inputs":{}}'
 run_case "bad-rootfs-closure-config" fail '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{"base":true},"inputs":{"root":'"${rootfs_tree}"'}}'
 run_case "bad-erofs-rootfs-config" fail '{"name":"rootfs-erofs","tag":"ErofsRootfs","config":{"compression":"","label":null},"inputs":{}}'
+
+cat > "${tmpdir}/check-private-top-level-fields.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let tree = {
+  version | default = "1",
+  name = "tree-%{version}",
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [
+        {
+          type = "file",
+          path = "version.txt",
+          text = version,
+          executable = false,
+        },
+      ],
+    },
+  },
+  inputs = {},
+} & { version = "2" } in
+recipe.to_request { recipes_path = "/recipes" } {} tree
+EOF_INNER
+
+private_top_level_fields_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-private-top-level-fields.ncl --format json
+)"
+
+jq -e '
+  .root.name == "tree-2"
+  and (.root | has("version") | not)
+  and .root.config.tree.entries[0].text == "2"
+' <<<"${private_top_level_fields_json}" >/dev/null
 
 cat > "${tmpdir}/check-synthetic-lowering.ncl" <<EOF_INNER
 let recipe = import "${repo_root}/recipe-lib.ncl" in

@@ -34,6 +34,9 @@ let RecipeDeps = {
 }
 in
 let UrlField = std.contract.any_of [ String, Array String ] in
+# Raw Nickel recipe records are open on purpose: package modules may carry
+# local parameters such as `version`. `recipe.to_request` is the boundary that
+# serializes only runtime-facing recipe fields.
 let BaseRecipe = {
   name
     | String
@@ -52,6 +55,7 @@ let BaseRecipe = {
     | RecipeDeps
     | optional
     | doc "Optional Nickel-level direct build/runtime dependencies for dependency-aware synthetic recipes.",
+  ..
 }
 in
 let ShallowBaseRecipe = {
@@ -72,6 +76,7 @@ let ShallowBaseRecipe = {
     | RecipeDeps
     | optional
     | doc "Optional Nickel-level direct build/runtime dependencies for dependency-aware synthetic recipes.",
+  ..
 }
 in
 let is_relative_source_path = fun value =>
@@ -235,6 +240,7 @@ let SourceRecipe = {
     | SourceOrigin
     | optional
     | doc "Optional source origin. If omitted, the canonical result must already exist in store.",
+  ..
 }
 in
 let InstallAttrs = {
