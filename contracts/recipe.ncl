@@ -127,6 +127,15 @@ let SourceHttpOrigin = {
     | doc "Optional explicit archive format override.",
 }
 in
+let SourceOciPlatform = {
+  os
+    | String
+    | doc "OCI platform operating system, for example `linux`.",
+  architecture
+    | String
+    | doc "OCI platform architecture, for example `amd64`.",
+}
+in
 let SourceOciRegistryOrigin = {
   tag | std.contract.Equal "OciRegistry",
   image
@@ -135,6 +144,9 @@ let SourceOciRegistryOrigin = {
   digest
     | String
     | doc "Pinned manifest or index digest to request from the registry.",
+  platform
+    | SourceOciPlatform
+    | doc "OCI platform selected when the pinned digest is an image index or manifest list.",
 }
 in
 let has_field = fun field => fun record => std.record.has_field field record in
@@ -164,6 +176,16 @@ let valid_url_field = fun value =>
   std.is_string value
   || (std.is_array value && std.array.length value > 0 && array_all_strings value)
 in
+let valid_oci_platform = fun value =>
+  std.is_record value
+  && all_fields_allowed ["os", "architecture"] value
+  && has_field "os" value
+  && std.is_string value.os
+  && value.os != ""
+  && has_field "architecture" value
+  && std.is_string value.architecture
+  && value.architecture != ""
+in
 let SourceOrigin =
   std.contract.from_predicate (fun value =>
     std.is_record value
@@ -187,11 +209,13 @@ let SourceOrigin =
         && optional_bool_field "unpack" value
         && optional_archive_format_field "archive_format" value
       else if value.tag == "OciRegistry" then
-        all_fields_allowed ["tag", "image", "digest"] value
+        all_fields_allowed ["tag", "image", "digest", "platform"] value
         && has_field "image" value
         && std.is_string value.image
         && has_field "digest" value
         && std.is_string value.digest
+        && has_field "platform" value
+        && valid_oci_platform value.platform
       else
         false
     )

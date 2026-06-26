@@ -9,6 +9,7 @@ fun _pkgs =>
       tag = "OciRegistry",
       image = "docker.io/library/buildpack-deps:bookworm",
       digest = "sha256:58c016c3359fc99b33db9dbf1d16bb55b911d0a83248577606cea280f978e6e4",
+      platform = { os = "linux", architecture = "amd64" },
     },
   }
   in
@@ -21,6 +22,7 @@ fun _pkgs =>
       tag = "OciRegistry",
       image = "docker.io/library/alpine:3.23",
       digest = "sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11",
+      platform = { os = "linux", architecture = "amd64" },
     },
   }
   in
@@ -33,6 +35,7 @@ fun _pkgs =>
       tag = "OciRegistry",
       image = "docker.io/library/ubuntu:24.04",
       digest = "sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b",
+      platform = { os = "linux", architecture = "amd64" },
     },
   }
   in
@@ -45,6 +48,7 @@ fun _pkgs =>
       tag = "OciRegistry",
       image = "docker.io/library/busybox:1.37",
       digest = "sha256:1487d0af5f52b4ba31c7e465126ee2123fe3f2305d638e7827681e7cf6c83d5e",
+      platform = { os = "linux", architecture = "amd64" },
     },
   }
   in
@@ -57,6 +61,7 @@ fun _pkgs =>
       tag = "OciRegistry",
       image = "docker.io/library/golang:1-bookworm",
       digest = "sha256:47ce5636e9936b2c5cbf708925578ef386b4f8872aec74a67bd13a627d242b19",
+      platform = { os = "linux", architecture = "amd64" },
     },
   }
   in
@@ -69,6 +74,7 @@ fun _pkgs =>
       tag = "OciRegistry",
       image = "docker.io/library/python:3-slim-bookworm",
       digest = "sha256:2e256d0381371566ed96980584957ed31297f437569b79b0e5f7e17f2720e53a",
+      platform = { os = "linux", architecture = "amd64" },
     },
   }
   in
