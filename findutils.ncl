@@ -51,7 +51,6 @@ fun pkgs =>
 
   {
     include [
-      findutils_src,
       findutils_gen1,
       findutils,
     ],

@@ -48,7 +48,6 @@ fun pkgs =>
 
   {
     include [
-      elfutils_src,
       elfutils_rootfs,
       elfutils,
     ],

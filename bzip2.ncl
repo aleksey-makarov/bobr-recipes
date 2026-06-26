@@ -100,7 +100,6 @@ fun pkgs =>
 
   {
     include [
-      bzip2_src,
       bzip2_gen1,
       bzip2,
     ],

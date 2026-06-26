@@ -50,7 +50,6 @@ fun pkgs =>
 
   {
     include [
-      procps_ng_src,
       procps_ng,
     ],
   }

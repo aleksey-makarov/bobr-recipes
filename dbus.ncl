@@ -90,7 +90,6 @@ fun pkgs =>
 
   {
     include [
-      dbus_src,
       dbus,
     ],
   }

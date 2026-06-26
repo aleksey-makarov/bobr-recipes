@@ -38,7 +38,6 @@ fun pkgs =>
 
   {
     include [
-      libffi_src,
       libffi,
     ],
   }

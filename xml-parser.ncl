@@ -33,7 +33,6 @@ fun pkgs =>
 
   {
     include [
-      xml_parser_src,
       xml_parser,
     ],
   }

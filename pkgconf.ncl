@@ -66,7 +66,6 @@ fun pkgs =>
 
   {
     include [
-      pkgconf_src,
       pkgconf_gen1,
       pkgconf,
     ],

@@ -36,7 +36,6 @@ fun pkgs =>
 
   {
     include [
-      flex_src,
       flex,
     ],
   }

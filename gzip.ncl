@@ -43,7 +43,6 @@ fun pkgs =>
 
   {
     include [
-      gzip_src,
       gzip_gen1,
       gzip,
     ],

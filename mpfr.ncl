@@ -42,7 +42,6 @@ fun pkgs =>
 
   {
     include [
-      mpfr_src,
       mpfr,
     ],
   }

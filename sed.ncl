@@ -43,7 +43,6 @@ fun pkgs =>
 
   {
     include [
-      sed_src,
       sed_gen1,
       sed,
     ],

@@ -52,7 +52,6 @@ fun pkgs =>
 
   {
     include [
-      libcap_src,
       libcap,
       libcap_libs,
     ],

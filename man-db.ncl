@@ -51,7 +51,6 @@ fun pkgs =>
 
   {
     include [
-      man_db_src,
       man_db,
     ],
   }

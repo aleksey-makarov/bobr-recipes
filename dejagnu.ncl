@@ -77,7 +77,6 @@ fun pkgs =>
 
   {
     include [
-      dejagnu_src,
       buildscript_dejagnu,
       dejagnu,
     ],

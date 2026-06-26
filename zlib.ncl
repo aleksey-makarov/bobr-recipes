@@ -35,7 +35,6 @@ fun pkgs =>
 
   {
     include [
-      zlib_src,
       zlib,
     ],
   }

@@ -102,7 +102,6 @@ fun pkgs =>
 
   {
     include [
-      ncurses_src,
       ncurses,
       ncurses_libs,
     ],

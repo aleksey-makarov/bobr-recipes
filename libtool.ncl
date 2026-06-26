@@ -49,7 +49,6 @@ fun pkgs =>
 
   {
     include [
-      libtool_src,
       libtool,
     ],
   }

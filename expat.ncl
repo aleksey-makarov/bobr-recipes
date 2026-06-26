@@ -36,7 +36,6 @@ fun pkgs =>
 
   {
     include [
-      expat_src,
       expat,
     ],
   }

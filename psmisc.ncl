@@ -36,7 +36,6 @@ fun pkgs =>
 
   {
     include [
-      psmisc_src,
       psmisc,
     ],
   }

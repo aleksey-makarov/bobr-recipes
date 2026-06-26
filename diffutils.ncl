@@ -45,7 +45,6 @@ fun pkgs =>
 
   {
     include [
-      diffutils_src,
       diffutils_gen1,
       diffutils,
     ],

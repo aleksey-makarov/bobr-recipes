@@ -39,7 +39,6 @@ fun pkgs =>
 
   {
     include [
-      automake_src,
       automake,
     ],
   }

@@ -111,7 +111,6 @@ fun pkgs =>
 
   {
     include [
-      gawk_src,
       gawk_gen1,
       awk_symlink,
       gawk,

@@ -73,7 +73,6 @@ fun pkgs =>
 
   {
     include [
-      grub_src,
       grub,
     ],
   }

@@ -78,7 +78,6 @@ fun pkgs =>
 
   {
     include [
-      expect_src,
       expect_gcc15_patch,
       expect,
     ],

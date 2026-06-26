@@ -43,7 +43,6 @@ fun pkgs =>
 
   {
     include [
-      make_src,
       make_gen1,
       make,
     ],

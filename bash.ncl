@@ -74,7 +74,6 @@ fun pkgs =>
 
   {
     include [
-      bash_src,
       bash_gen1,
       bash,
     ],

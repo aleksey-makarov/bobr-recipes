@@ -43,7 +43,6 @@ fun pkgs =>
 
   {
     include [
-      grep_src,
       grep_gen1,
       grep,
     ],

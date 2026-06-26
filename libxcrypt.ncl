@@ -56,7 +56,6 @@ fun pkgs =>
 
   {
     include [
-      libxcrypt_src,
       libxcrypt,
       libxcrypt_libs,
     ],

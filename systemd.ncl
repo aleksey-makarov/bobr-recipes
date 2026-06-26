@@ -142,8 +142,6 @@ fun pkgs =>
 
   {
     include [
-      systemd_src,
-      systemd_man_pages_src,
       systemd,
       systemd_libs,
     ],

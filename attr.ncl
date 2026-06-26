@@ -43,7 +43,6 @@ fun pkgs =>
 
   {
     include [
-      attr_src,
       attr,
       attr_libs,
     ],

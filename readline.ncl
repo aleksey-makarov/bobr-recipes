@@ -67,7 +67,6 @@ fun pkgs =>
 
   {
     include [
-      readline_src,
       readline,
     ],
   }

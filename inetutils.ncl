@@ -68,7 +68,6 @@ fun pkgs =>
 
   {
     include [
-      inetutils_src,
       inetutils,
     ],
   }

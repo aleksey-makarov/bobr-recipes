@@ -57,7 +57,6 @@ fun pkgs =>
 
   {
     include [
-      texinfo_src,
       texinfo,
     ],
   }

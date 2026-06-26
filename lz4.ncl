@@ -30,7 +30,6 @@ fun pkgs =>
 
   {
     include [
-      lz4_src,
       lz4,
     ],
   }

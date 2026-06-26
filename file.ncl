@@ -39,7 +39,6 @@ fun pkgs =>
 
   {
     include [
-      file_src,
       file,
     ],
   }

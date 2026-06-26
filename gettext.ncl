@@ -49,7 +49,6 @@ fun pkgs =>
 
   {
     include [
-      gettext_src,
       gettext,
     ],
   }

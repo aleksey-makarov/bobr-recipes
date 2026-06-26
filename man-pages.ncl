@@ -59,7 +59,6 @@ fun pkgs =>
 
   {
     include [
-      man_pages_src,
       buildscript_man_pages,
       man_pages,
     ],

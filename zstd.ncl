@@ -38,7 +38,6 @@ fun pkgs =>
 
   {
     include [
-      zstd_src,
       zstd,
     ],
   }

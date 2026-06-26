@@ -134,7 +134,6 @@ fun pkgs =>
 
   {
     include [
-      glibc_src,
       glibc_bootstrap_rootfs,
       glibc_gen1,
       glibc,

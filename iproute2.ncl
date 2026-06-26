@@ -61,7 +61,6 @@ fun pkgs =>
 
   {
     include [
-      iproute2_src,
       iproute2,
     ],
   }

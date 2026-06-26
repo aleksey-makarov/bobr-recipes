@@ -83,7 +83,6 @@ fun pkgs =>
 
   {
     include [
-      perl_src,
       perl,
     ],
   }

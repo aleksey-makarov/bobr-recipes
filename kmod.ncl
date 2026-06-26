@@ -50,7 +50,6 @@ fun pkgs =>
 
   {
     include [
-      kmod_src,
       kmod,
     ],
   }

@@ -271,7 +271,6 @@ fun pkgs =>
 
   {
     include [
-      python_src,
       python_gen1,
       python,
     ],

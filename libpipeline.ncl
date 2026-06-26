@@ -30,7 +30,6 @@ fun pkgs =>
 
   {
     include [
-      libpipeline_src,
       libpipeline,
     ],
   }

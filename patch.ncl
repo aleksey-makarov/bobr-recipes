@@ -43,7 +43,6 @@ fun pkgs =>
 
   {
     include [
-      patch_src,
       patch_gen1,
       patch,
     ],

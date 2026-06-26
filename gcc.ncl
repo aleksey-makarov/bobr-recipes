@@ -62,9 +62,9 @@ fun pkgs =>
     inputs = {
       rootfs = pkgs.buildpack_deps_rootfs,
       source = gcc_src,
-      gmp = pkgs.gmp_src,
-      mpfr = pkgs.mpfr_src,
-      mpc = pkgs.mpc_src,
+      gmp = pkgs.gmp.inputs.source,
+      mpfr = pkgs.mpfr.inputs.source,
+      mpc = pkgs.mpc.inputs.source,
     },
   }
   in
@@ -98,9 +98,9 @@ fun pkgs =>
     inputs = {
       rootfs = pkgs.system_rootfs_0,
       source = gcc_src,
-      gmp = pkgs.gmp_src,
-      mpfr = pkgs.mpfr_src,
-      mpc = pkgs.mpc_src,
+      gmp = pkgs.gmp.inputs.source,
+      mpfr = pkgs.mpfr.inputs.source,
+      mpc = pkgs.mpc.inputs.source,
     },
   }
   in
@@ -125,7 +125,6 @@ fun pkgs =>
 
   {
     include [
-      gcc_src,
       gcc_gen1,
       gcc,
       gcc_libs,

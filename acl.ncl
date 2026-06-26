@@ -55,7 +55,6 @@ fun pkgs =>
 
   {
     include [
-      acl_src,
       acl,
       acl_libs,
     ],

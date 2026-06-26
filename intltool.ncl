@@ -56,7 +56,6 @@ fun pkgs =>
 
   {
     include [
-      intltool_src,
       intltool,
     ],
   }

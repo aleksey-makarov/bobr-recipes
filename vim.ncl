@@ -87,7 +87,6 @@ fun pkgs =>
 
   {
     include [
-      vim_src,
       vim,
     ],
   }

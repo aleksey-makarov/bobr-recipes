@@ -39,7 +39,6 @@ fun pkgs =>
 
   {
     include [
-      groff_src,
       groff,
     ],
   }

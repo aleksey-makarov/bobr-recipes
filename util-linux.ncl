@@ -80,7 +80,6 @@ fun pkgs =>
 
   {
     include [
-      util_linux_src,
       util_linux,
       util_linux_libs,
     ],

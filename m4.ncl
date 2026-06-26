@@ -45,7 +45,6 @@ fun pkgs =>
 
   {
     include [
-      m4_src,
       m4_gen1,
       m4,
     ],

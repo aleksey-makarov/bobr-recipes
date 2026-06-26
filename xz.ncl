@@ -64,7 +64,6 @@ fun pkgs =>
 
   {
     include [
-      xz_src,
       xz_gen1,
       xz,
       xz_libs,

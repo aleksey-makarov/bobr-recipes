@@ -49,7 +49,6 @@ fun pkgs =>
 
   {
     include [
-      tar_src,
       tar_gen1,
       tar,
     ],

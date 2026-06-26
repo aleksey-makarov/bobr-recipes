@@ -38,7 +38,6 @@ fun pkgs =>
 
   {
     include [
-      gdbm_src,
       gdbm,
     ],
   }

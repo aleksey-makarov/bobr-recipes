@@ -46,7 +46,6 @@ fun pkgs =>
 
   {
     include [
-      bison_src,
       bison_gen1,
       bison,
     ],

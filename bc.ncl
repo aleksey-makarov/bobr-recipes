@@ -35,7 +35,6 @@ fun pkgs =>
 
   {
     include [
-      bc_src,
       bc,
     ],
   }

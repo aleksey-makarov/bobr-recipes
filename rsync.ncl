@@ -38,7 +38,6 @@ fun pkgs =>
 
   {
     include [
-      rsync_src,
       rsync,
     ],
   }

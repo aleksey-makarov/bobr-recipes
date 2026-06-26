@@ -30,7 +30,6 @@ fun pkgs =>
 
   {
     include [
-      gperf_src,
       gperf,
     ],
   }

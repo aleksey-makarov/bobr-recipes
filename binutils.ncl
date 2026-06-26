@@ -68,7 +68,6 @@ fun pkgs =>
 
   {
     include [
-      binutils_src,
       binutils_gen1,
       binutils,
     ],

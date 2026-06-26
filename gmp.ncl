@@ -57,7 +57,6 @@ fun pkgs =>
 
   {
     include [
-      gmp_src,
       gmp,
     ],
   }

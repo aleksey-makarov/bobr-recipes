@@ -48,7 +48,6 @@ fun pkgs =>
 
   {
     include [
-      less_src,
       less,
     ],
   }

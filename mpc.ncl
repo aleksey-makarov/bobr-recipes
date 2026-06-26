@@ -43,7 +43,6 @@ fun pkgs =>
 
   {
     include [
-      mpc_src,
       mpc,
     ],
   }

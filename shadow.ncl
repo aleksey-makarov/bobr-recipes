@@ -81,7 +81,6 @@ fun pkgs =>
 
   {
     include [
-      shadow_src,
       shadow,
     ],
   }

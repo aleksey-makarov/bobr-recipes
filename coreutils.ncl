@@ -85,7 +85,6 @@ fun pkgs =>
 
   {
     include [
-      coreutils_src,
       coreutils_gen1,
       coreutils,
     ],
