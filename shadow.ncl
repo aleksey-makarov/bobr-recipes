@@ -25,6 +25,7 @@ fun pkgs =>
       & recipe.numbered_inputs [
         pkgs.libxcrypt,
         pkgs.pkgconf,
+        pkgs.systemd_dev,
       ],
   }
   in
@@ -60,7 +61,6 @@ fun pkgs =>
         "--disable-static",
         "--with-bcrypt",
         "--with-yescrypt",
-        "--disable-logind",
         "--without-libbsd",
         "--with-group-name-max-length=32",
       ],

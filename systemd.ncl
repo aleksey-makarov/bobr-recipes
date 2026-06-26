@@ -128,6 +128,8 @@ fun pkgs =>
     recipe.split.libs systemd [
       "usr/lib/libsystemd.so*",
       "usr/lib/libudev.so*",
+      "usr/lib/libsystemd-shared-*.so",
+      "usr/lib/systemd/libsystemd-shared-*.so",
     ]
     & {
       deps = {
@@ -140,9 +142,37 @@ fun pkgs =>
     }
   in
 
+  let systemd_dev = {
+    name = "systemd-dev-%{version}",
+    tag = "TreeSubset",
+    config = {
+      include = [
+        "usr/include/libudev.h",
+        "usr/include/systemd/*.h",
+        "usr/lib/libsystemd.so*",
+        "usr/lib/libudev.so*",
+        "usr/lib/libsystemd-shared-*.so",
+        "usr/lib/pkgconfig/libsystemd.pc",
+        "usr/lib/pkgconfig/libudev.pc",
+        "usr/lib/systemd/libsystemd-shared-*.so",
+      ],
+    },
+    inputs = {
+      tree = systemd,
+    },
+    deps = {
+      build = [],
+      runtime = [
+        systemd_libs,
+      ],
+    },
+  }
+  in
+
   {
     include [
       systemd,
       systemd_libs,
+      systemd_dev,
     ],
   }
