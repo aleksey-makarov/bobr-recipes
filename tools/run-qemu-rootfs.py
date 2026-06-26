@@ -23,7 +23,7 @@ def usage(program: str) -> str:
     return (
         f"usage: {program} [STORE] [-- QEMU_ARG ...]\n\n"
         "Boot pkgs.erofs_rootfs with pkgs.linux and pkgs.initrd.\n"
-        "STORE defaults to ./mbuild-store relative to the current directory."
+        "STORE defaults to ./bobr-store relative to the current directory."
     )
 
 
@@ -32,7 +32,7 @@ def parse_args(argv: list[str]) -> tuple[pathlib.Path, list[str]]:
         print(usage(pathlib.Path(sys.argv[0]).name))
         raise SystemExit(0)
 
-    store = pathlib.Path.cwd() / "mbuild-store"
+    store = pathlib.Path.cwd() / "bobr-store"
     qemu_args: list[str] = []
 
     if argv:

@@ -14,7 +14,7 @@ usage() {
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 repo_root="$(cd "${script_dir}/.." && pwd)"
 request_file="${repo_root}/request.ncl"
-store_path="/tmp/mbuild-store"
+store_path="/tmp/bobr-store"
 recipes_path="${repo_root}"
 
 while [ "$#" -gt 0 ]; do

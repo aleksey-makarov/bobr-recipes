@@ -18,12 +18,12 @@ fi
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${repo_root}/env.sh"
-mbuild_bin="${workspace_root}/mbuild/target/debug/mbuild"
+bobr_bin="${workspace_root}/mbuild/target/debug/bobr"
 checker="${repo_root}/tools/check-runtime-rootfs.py"
 closure_name="${attr}-rootfs-closure"
 
-if [ ! -x "${mbuild_bin}" ]; then
-  echo "missing mbuild binary: ${mbuild_bin}" >&2
+if [ ! -x "${bobr_bin}" ]; then
+  echo "missing bobr binary: ${bobr_bin}" >&2
   exit 2
 fi
 
@@ -56,7 +56,7 @@ echo "==> export runtime rootfs request for ${attr}" >&2
 echo "==> build ${closure_name}" >&2
 (
   cd "${workspace_root}"
-  nickel export "${request_expr}" --format json | "${mbuild_bin}"
+  nickel export "${request_expr}" --format json | "${bobr_bin}"
 )
 
 rootfs_root="${store_root}/object-refs/${closure_name}/root"

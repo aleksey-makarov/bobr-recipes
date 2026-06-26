@@ -2,7 +2,7 @@
 
 # Build a single recipe attribute through `request.ncl({ ... })`.
 # Regenerates tree modules, exports the full JSON request envelope, and pipes
-# it directly into `mbuild`. Store and recipe source configuration come from
+# it directly into `bobr`. Store and recipe source configuration come from
 # `mbuild-recipes/env.sh`.
 
 set -euo pipefail
@@ -51,7 +51,7 @@ attr="${1:-all_test_artifacts}"
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${repo_root}/env.sh"
 request_file="${repo_root}/request.ncl"
-mbuild_bin="${workspace_root}/mbuild/target/debug/mbuild"
+bobr_bin="${workspace_root}/mbuild/target/debug/bobr"
 tree_generator="${repo_root}/tools/generate-tree-modules.py"
 overlays_file="$(pwd)/bobr-overlays.ncl"
 overlays_expr="[]"
@@ -100,5 +100,5 @@ echo "==> build ${attr}" >&2
 (
   cd "${workspace_root}"
   TIMEFORMAT="==> pipeline time: real %R s, user %U s, sys %S s"
-  time (printf '%s\n' "${expr}" | nickel export --format json | "${mbuild_bin}")
+  time (printf '%s\n' "${expr}" | nickel export --format json | "${bobr_bin}")
 )

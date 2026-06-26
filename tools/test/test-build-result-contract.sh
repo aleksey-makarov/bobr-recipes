@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Validate every JSON build result under mbuild-store/result-refs against the
+# Validate every JSON build result under bobr-store/result-refs against the
 # build-result contract.
 # Run this after local builds when you want to check stored result records
 # rather than recipe definitions.

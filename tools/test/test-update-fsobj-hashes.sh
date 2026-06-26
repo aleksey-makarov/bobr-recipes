@@ -25,11 +25,11 @@ chmod +x "${fixture_repo}/tools/update-fsobj-hashes.sh"
 
 cat > "${fixture_repo}/env.sh" <<EOF_INNER
 #!/usr/bin/env bash
-store_rel_from_recipes="../mbuild-store"
+store_rel_from_recipes="../bobr-store"
 env_sh_dir="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
 recipes_root="\${env_sh_dir}"
 workspace_root="${workspace_root}"
-store_root="\${workspace_root}/mbuild-store"
+store_root="\${workspace_root}/bobr-store"
 EOF_INNER
 
 assert_file_equals() {
