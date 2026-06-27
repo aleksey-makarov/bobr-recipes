@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # List attribute names exported by the default package set in `pkgs.ncl`.
-# By default this uses `mbuild-recipes/pkgs.ncl`, but you may pass an explicit
+# By default this uses `bobr-recipes/pkgs.ncl`, but you may pass an explicit
 # path to another `pkgs.ncl`-compatible file:
 #
 #   tools/list-pkgs-attrs.sh

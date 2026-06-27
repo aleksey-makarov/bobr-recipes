@@ -8,7 +8,7 @@
 #
 # Arguments:
 # - `store_path`: absolute path to the bobr store root
-# - `recipes_path`: absolute path to the mbuild-recipes checkout root
+# - `recipes_path`: absolute path to the bobr-recipes checkout root
 # - `target_name`: package attribute name from `pkgs.ncl`
 # - `overlays`: optional array of `pkgs.ncl` overlays
 #

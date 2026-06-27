@@ -18,7 +18,7 @@ fi
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${repo_root}/env.sh"
-bobr_bin="${workspace_root}/mbuild/target/debug/bobr"
+bobr_bin="${workspace_root}/bobr/target/debug/bobr"
 checker="${repo_root}/tools/check-runtime-rootfs.py"
 closure_name="${attr}-rootfs-closure"
 

@@ -110,7 +110,7 @@ let SourceRecipePathOrigin = {
   tag | std.contract.Equal "RecipePath",
   path
     | RelativeSourcePath
-    | doc "Relative source path inside the mbuild-recipes checkout, lowered to `Path` during request export.",
+    | doc "Relative source path inside the bobr-recipes checkout, lowered to `Path` during request export.",
   unpack
     | Bool
     | optional

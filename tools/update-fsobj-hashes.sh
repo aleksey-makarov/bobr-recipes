@@ -4,7 +4,7 @@
 #
 # Usage:
 # - `tools/update-fsobj-hashes.sh`
-#   recursively updates every `*.fsobj-hash` file under `mbuild-recipes`
+#   recursively updates every `*.fsobj-hash` file under `bobr-recipes`
 #   whose sibling path without the suffix exists as a file or directory
 # - `tools/update-fsobj-hashes.sh <path>`
 #   writes or updates the sibling `<path>.fsobj-hash` for one file or directory
@@ -41,7 +41,7 @@ done
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${repo_root}/env.sh"
-fsobj_hash_bin="${workspace_root}/mbuild/target/debug/fsobj-hash"
+fsobj_hash_bin="${workspace_root}/bobr/target/debug/fsobj-hash"
 
 if [ ! -x "${fsobj_hash_bin}" ]; then
   echo "missing fsobj-hash binary: ${fsobj_hash_bin}" >&2

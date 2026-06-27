@@ -7,14 +7,14 @@
 set -euo pipefail
 
 workspace_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-recipes_root="${workspace_root}/mbuild-recipes"
+recipes_root="${workspace_root}/bobr-recipes"
 source_tool="${recipes_root}/tools/update-fsobj-hashes.sh"
-fsobj_hash_bin="${workspace_root}/mbuild/target/debug/fsobj-hash"
+fsobj_hash_bin="${workspace_root}/bobr/target/debug/fsobj-hash"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
 (
-  cd "${workspace_root}/mbuild"
+  cd "${workspace_root}/bobr"
   cargo build -p fsobj-hash >/dev/null
 )
 

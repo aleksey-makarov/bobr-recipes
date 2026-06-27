@@ -2,7 +2,7 @@
 
 # Shared environment for recipe-side tools.
 # Edit `store_rel_from_recipes` if you want to move the local bobr store.
-# Store paths are interpreted relative to the `mbuild-recipes` checkout root.
+# Store paths are interpreted relative to the `bobr-recipes` checkout root.
 
 store_rel_from_recipes="../bobr-store"
 
