@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "${MBUILD_SOURCE_DIR}"
+cd "${BOBR_SOURCE_DIR}"
 mkdir -pv build
 cd build
-mkdir -p .tmp doc "${MBUILD_INSTALL_DIR}/usr/share/doc/dejagnu-1.6.3"
+mkdir -p .tmp doc "${BOBR_INSTALL_DIR}/usr/share/doc/dejagnu-1.6.3"
 export TMPDIR="${TMPDIR:-$PWD/.tmp}"
 
 ../configure --prefix=/usr
@@ -13,6 +13,6 @@ makeinfo --plaintext -o doc/dejagnu.txt ../doc/dejagnu.texi
 
 jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
 make -j"$jobs"
-make DESTDIR="${MBUILD_INSTALL_DIR}" install
-rm -f "${MBUILD_INSTALL_DIR}/usr/share/info/dir"
-install -v -m644 doc/dejagnu.html doc/dejagnu.txt "${MBUILD_INSTALL_DIR}/usr/share/doc/dejagnu-1.6.3"
+make DESTDIR="${BOBR_INSTALL_DIR}" install
+rm -f "${BOBR_INSTALL_DIR}/usr/share/info/dir"
+install -v -m644 doc/dejagnu.html doc/dejagnu.txt "${BOBR_INSTALL_DIR}/usr/share/doc/dejagnu-1.6.3"

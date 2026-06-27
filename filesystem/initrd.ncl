@@ -49,7 +49,7 @@ fun pkgs =>
           {
             type = "file",
             path = "etc/initrd-release",
-            text = "NAME=\"mbuild initrd\"\nID=mbuild-initrd\nVERSION_ID=1\n",
+            text = "NAME=\"bobr initrd\"\nID=bobr-initrd\nVERSION_ID=1\n",
             executable = false,
           },
           {

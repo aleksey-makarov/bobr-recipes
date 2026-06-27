@@ -3,7 +3,7 @@ set -euo pipefail
 
 step="${1:-${BOBR_STEP_NAME:-}}"
 step="${step:?step name is required}"
-source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
+source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
 out_dir="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
 
 resolve_source_dir() {
@@ -46,7 +46,7 @@ step_configure() {
   #     builder's kernel version.
   #   - cf_by / cf_email / perladmin: the build user. Configure resolves it via
   #     logname/whoami (getpwuid of the build uid), not $USER, so it is not
-  #     covered by the sandbox's USER=mbuild. getpwuid(0) resolves differently
+  #     covered by the sandbox's USER=bobr. getpwuid(0) resolves differently
   #     between the namespace runtime (-> root) and the host runtime under real
   #     root (-> unknown), so the recorded user leaks the runtime mode.
   # These flow into config.h, Config_heavy.pl, Config.pm, Errno.pm, perlbug
@@ -59,10 +59,10 @@ step_configure() {
   {
     printf "cf_time='%s'\n" "$(LC_ALL=C date -u -d "@${SOURCE_DATE_EPOCH:-0}")"
     printf "osvers='gnulinux'\n"
-    printf "myuname='mbuild'\n"
-    printf "cf_by='mbuild'\n"
-    printf "cf_email='mbuild@bobr.nonet'\n"
-    printf "perladmin='mbuild@bobr.nonet'\n"
+    printf "myuname='bobr'\n"
+    printf "cf_by='bobr'\n"
+    printf "cf_email='bobr@bobr.nonet'\n"
+    printf "perladmin='bobr@bobr.nonet'\n"
   } > config.over
   sh Configure -des \
     -D prefix=/usr \

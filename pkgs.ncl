@@ -12,7 +12,7 @@
 #
 # Typical entry points built on top of this:
 # - `request.ncl` selects one attribute from `(mkPkgs [])` and lowers it to an
-#   `mbuild` JSON request
+#   `bobr` JSON request
 # - helper scripts such as `list-pkgs-attrs.sh` inspect the fields of
 #   `(mkPkgs [])` directly
 #

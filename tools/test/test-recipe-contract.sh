@@ -45,7 +45,7 @@ run_case "group" pass '{"name":"all","tag":"Group","config":{},"inputs":{"first"
 run_case "source" pass '{"name":"script","tag":"Source","object_hash":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","origin":{"tag":"RecipePath","path":"tests/script.sh"}}'
 run_case "source-cutoff" pass '{"name":"script","tag":"Source","object_hash":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}'
 run_case "tree-file" pass '{"name":"hello-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"hello.txt","text":"hi\n","executable":false}]}},"inputs":{}}'
-run_case "tree-dir" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"dev"},{"type":"file","path":"etc/hostname","text":"mbuild\n","executable":false}]}},"inputs":{}}'
+run_case "tree-dir" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"dev"},{"type":"file","path":"etc/hostname","text":"bobr\n","executable":false}]}},"inputs":{}}'
 run_case "tree-symlink" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"usr/bin"},{"type":"symlink","path":"bin","target":"usr/bin"}]}},"inputs":{}}'
 run_case "tree-merge" pass '{"name":"merged-tree","tag":"TreeMerge","config":{},"inputs":{"left":{"name":"left-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"bin"}]}},"inputs":{}},"right":{"name":"right-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"etc"}]}},"inputs":{}}}}'
 run_case "tree-subset" pass '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib64/libfoo.so*"]},"inputs":{"tree":'"${rootfs_tree}"'}}'
@@ -220,12 +220,12 @@ synthetic_lowering_json="$(
 
 jq -e '
   .root.tag == "Sandbox"
-  and .root.config.steps[0].name == "mbuild_prepare_source"
-  and .root.config.steps[0].env.MBUILD_SOURCE_INPUT == "@{source}"
-  and .root.config.steps[0].env.MBUILD_SOURCE_DIR == "@{build}/source"
-  and .root.config.steps[0].env.MBUILD_SYNTHETIC_COMMON == "@{synthetic_common}"
-  and .root.config.steps[0].env.MBUILD_PATCH_INPUTS == "@{patch} @{patch_extra}"
-  and [.root.config.steps[].name] == ["mbuild_prepare_source", "pre", "mbuild_configure", "mbuild_build", "mbuild_install"]
+  and .root.config.steps[0].name == "bobr_prepare_source"
+  and .root.config.steps[0].env.BOBR_SOURCE_INPUT == "@{source}"
+  and .root.config.steps[0].env.BOBR_SOURCE_DIR == "@{build}/source"
+  and .root.config.steps[0].env.BOBR_SYNTHETIC_COMMON == "@{synthetic_common}"
+  and .root.config.steps[0].env.BOBR_PATCH_INPUTS == "@{patch} @{patch_extra}"
+  and [.root.config.steps[].name] == ["bobr_prepare_source", "pre", "bobr_configure", "bobr_build", "bobr_install"]
   and .root.config.steps[1].cwd == "@{build}/source/subdir"
   and (.root.inputs | has("rootfs"))
   and (.root.inputs | has("script"))
@@ -1021,9 +1021,9 @@ meson_synthetic_lowering_json="$(
 
 jq -e '
   .root.tag == "Sandbox"
-  and .root.config.steps[0].name == "mbuild_prepare_source"
-  and .root.config.steps[0].env.MBUILD_SOURCE_DIR == "@{build}/source"
-  and [.root.config.steps[].name] == ["mbuild_prepare_source", "pre", "mbuild_configure", "mbuild_build", "mbuild_install"]
+  and .root.config.steps[0].name == "bobr_prepare_source"
+  and .root.config.steps[0].env.BOBR_SOURCE_DIR == "@{build}/source"
+  and [.root.config.steps[].name] == ["bobr_prepare_source", "pre", "bobr_configure", "bobr_build", "bobr_install"]
   and .root.config.steps[1].cwd == "@{build}/source/subdir"
   and (.root.config.script_config | has("build_dir") | not)
 ' <<<"${meson_synthetic_lowering_json}" >/dev/null

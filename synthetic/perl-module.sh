@@ -4,9 +4,9 @@ set -euo pipefail
 cfg="${BOBR_CONFIG_DIR:?BOBR_CONFIG_DIR is required}"
 step="${1:-${BOBR_STEP_NAME:-}}"
 step="${step:?step name is required}"
-source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
+source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
 out_dir="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
-synthetic_common="${MBUILD_SYNTHETIC_COMMON:?MBUILD_SYNTHETIC_COMMON is required}"
+synthetic_common="${BOBR_SYNTHETIC_COMMON:?BOBR_SYNTHETIC_COMMON is required}"
 
 . "$synthetic_common"
 
@@ -86,7 +86,7 @@ step_install() {
 }
 
 load_env_files
-mbuild_prepare_source
+bobr_prepare_source
 
 case "$step" in
   prepare) : ;;

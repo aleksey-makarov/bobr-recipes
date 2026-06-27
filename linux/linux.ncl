@@ -58,9 +58,9 @@ fun pkgs =>
           cwd = "@{build}",
           argv = ["@{script}"],
           env = {
-            MBUILD_LINUX_BUILD_KIND = "headers",
-            MBUILD_SOURCE_DIR = "@{build}/source",
-            MBUILD_INSTALL_DIR = "@{out}",
+            BOBR_LINUX_BUILD_KIND = "headers",
+            BOBR_SOURCE_DIR = "@{build}/source",
+            BOBR_INSTALL_DIR = "@{out}",
           },
         },
         {
@@ -69,9 +69,9 @@ fun pkgs =>
           cwd = "@{build}",
           argv = ["@{script}"],
           env = {
-            MBUILD_LINUX_BUILD_KIND = "headers",
-            MBUILD_SOURCE_DIR = "@{build}/source",
-            MBUILD_INSTALL_DIR = "@{out}",
+            BOBR_LINUX_BUILD_KIND = "headers",
+            BOBR_SOURCE_DIR = "@{build}/source",
+            BOBR_INSTALL_DIR = "@{out}",
           },
         },
         {
@@ -80,9 +80,9 @@ fun pkgs =>
           cwd = "@{build}",
           argv = ["@{script}"],
           env = {
-            MBUILD_LINUX_BUILD_KIND = "headers",
-            MBUILD_SOURCE_DIR = "@{build}/source",
-            MBUILD_INSTALL_DIR = "@{out}",
+            BOBR_LINUX_BUILD_KIND = "headers",
+            BOBR_SOURCE_DIR = "@{build}/source",
+            BOBR_INSTALL_DIR = "@{out}",
           },
         },
       ],
@@ -132,9 +132,9 @@ fun pkgs =>
           cwd = "@{build}",
           argv = ["@{script}"],
           env = {
-            MBUILD_LINUX_BUILD_KIND = "full",
-            MBUILD_SOURCE_DIR = "@{build}/source",
-            MBUILD_INSTALL_DIR = "@{out}",
+            BOBR_LINUX_BUILD_KIND = "full",
+            BOBR_SOURCE_DIR = "@{build}/source",
+            BOBR_INSTALL_DIR = "@{out}",
           },
         },
         {
@@ -143,9 +143,9 @@ fun pkgs =>
           cwd = "@{build}",
           argv = ["@{script}"],
           env = {
-            MBUILD_LINUX_BUILD_KIND = "full",
-            MBUILD_SOURCE_DIR = "@{build}/source",
-            MBUILD_INSTALL_DIR = "@{out}",
+            BOBR_LINUX_BUILD_KIND = "full",
+            BOBR_SOURCE_DIR = "@{build}/source",
+            BOBR_INSTALL_DIR = "@{out}",
           },
         },
         {
@@ -154,9 +154,9 @@ fun pkgs =>
           cwd = "@{build}",
           argv = ["@{script}"],
           env = {
-            MBUILD_LINUX_BUILD_KIND = "full",
-            MBUILD_SOURCE_DIR = "@{build}/source",
-            MBUILD_INSTALL_DIR = "@{out}",
+            BOBR_LINUX_BUILD_KIND = "full",
+            BOBR_SOURCE_DIR = "@{build}/source",
+            BOBR_INSTALL_DIR = "@{out}",
           },
         },
       ],

@@ -61,8 +61,8 @@ fun pkgs =>
           cwd = "@{build}",
           argv = ["@{script}"],
           env = {
-            MBUILD_SOURCE_DIR = "@{build}/source",
-            MBUILD_INSTALL_DIR = "@{out}",
+            BOBR_SOURCE_DIR = "@{build}/source",
+            BOBR_INSTALL_DIR = "@{out}",
           },
         },
       ],

@@ -150,7 +150,7 @@ in
       m%"
         source_input="@{source}"
         source_dir="@{build}/source"
-        marker="@{build}/.mbuild-source-prepared"
+        marker="@{build}/.bobr-source-prepared"
 
         if [ -f "$marker" ]; then
           exit 0

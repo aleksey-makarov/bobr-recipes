@@ -61,19 +61,19 @@ EOF_PATCH
 +changed
 EOF_PATCH
 
-  MBUILD_SOURCE_INPUT="$input_dir"
-  MBUILD_SOURCE_DIR="${build_dir}/source"
-  MBUILD_PATCH_INPUTS="${patch_file} ${patch_dir}"
-  export MBUILD_SOURCE_INPUT MBUILD_SOURCE_DIR MBUILD_PATCH_INPUTS
+  BOBR_SOURCE_INPUT="$input_dir"
+  BOBR_SOURCE_DIR="${build_dir}/source"
+  BOBR_PATCH_INPUTS="${patch_file} ${patch_dir}"
+  export BOBR_SOURCE_INPUT BOBR_SOURCE_DIR BOBR_PATCH_INPUTS
 
   # shellcheck source=/dev/null
   . "$common"
-  mbuild_prepare_source
-  mbuild_prepare_source
+  bobr_prepare_source
+  bobr_prepare_source
 
-  assert_file "${MBUILD_SOURCE_DIR}/hello.txt" "new"
-  assert_file "${MBUILD_SOURCE_DIR}/dir.txt" "after"
-  assert_file "${MBUILD_SOURCE_DIR}/ignored.txt" "ignored"
+  assert_file "${BOBR_SOURCE_DIR}/hello.txt" "new"
+  assert_file "${BOBR_SOURCE_DIR}/dir.txt" "after"
+  assert_file "${BOBR_SOURCE_DIR}/ignored.txt" "ignored"
 }
 
 run_archive_source_case() {
@@ -85,16 +85,16 @@ run_archive_source_case() {
   printf 'from archive\n' > "${archive_root}/pkg/file.txt"
   tar -C "$archive_root" -cf "$archive" pkg
 
-  MBUILD_SOURCE_INPUT="$archive"
-  MBUILD_SOURCE_DIR="${build_dir}/source"
-  MBUILD_PATCH_INPUTS=""
-  export MBUILD_SOURCE_INPUT MBUILD_SOURCE_DIR MBUILD_PATCH_INPUTS
+  BOBR_SOURCE_INPUT="$archive"
+  BOBR_SOURCE_DIR="${build_dir}/source"
+  BOBR_PATCH_INPUTS=""
+  export BOBR_SOURCE_INPUT BOBR_SOURCE_DIR BOBR_PATCH_INPUTS
 
   # shellcheck source=/dev/null
   . "$common"
-  mbuild_prepare_source
+  bobr_prepare_source
 
-  assert_file "${MBUILD_SOURCE_DIR}/file.txt" "from archive"
+  assert_file "${BOBR_SOURCE_DIR}/file.txt" "from archive"
 }
 
 run_directory_source_case

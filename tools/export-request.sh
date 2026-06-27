@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Export one `mbuild` JSON request for a single package attribute.
+# Export one `bobr` JSON request for a single package attribute.
 #
 # This is the safe inspection path for `pkgs.ncl`: it selects one target through
 # `request.ncl` and never serializes the complete fixed-point package set.

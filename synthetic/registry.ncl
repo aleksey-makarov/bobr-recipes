@@ -248,14 +248,14 @@ let synthetic_patch_input_paths = fun inputs =>
     )
 in
 let synthetic_step_env = fun node => {
-  MBUILD_SOURCE_INPUT = "@{source}",
-  MBUILD_SOURCE_DIR = "@{build}/source",
-  MBUILD_SYNTHETIC_COMMON = "@{synthetic_common}",
-  MBUILD_PATCH_INPUTS = synthetic_patch_input_paths node.inputs,
+  BOBR_SOURCE_INPUT = "@{source}",
+  BOBR_SOURCE_DIR = "@{build}/source",
+  BOBR_SYNTHETIC_COMMON = "@{synthetic_common}",
+  BOBR_PATCH_INPUTS = synthetic_patch_input_paths node.inputs,
 }
 in
 let synthetic_prepare_step = fun step_env => {
-  name = "mbuild_prepare_source",
+  name = "bobr_prepare_source",
   run_as = "build-user",
   cwd = "@{build}",
   argv = ["@{script}", "prepare"],
@@ -347,21 +347,21 @@ let lower_autotools_node = fun node =>
         @ pre_configure_steps
         @ [
           {
-            name = "mbuild_configure",
+            name = "bobr_configure",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "configure"],
             env = autotools_step_env,
           },
           {
-            name = "mbuild_build",
+            name = "bobr_build",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "build"],
             env = autotools_step_env,
           },
           {
-            name = "mbuild_install",
+            name = "bobr_install",
             run_as = "root",
             cwd = "@{build}",
             argv = ["@{script}", "install"],
@@ -434,14 +434,14 @@ let lower_makefile_node = fun node =>
         @ pre_build_steps
         @ [
           {
-            name = "mbuild_build",
+            name = "bobr_build",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "build"],
             env = makefile_step_env,
           },
           {
-            name = "mbuild_install",
+            name = "bobr_install",
             run_as = "root",
             cwd = "@{build}",
             argv = ["@{script}", "install"],
@@ -496,21 +496,21 @@ let lower_meson_node = fun node =>
         @ pre_configure_steps
         @ [
           {
-            name = "mbuild_configure",
+            name = "bobr_configure",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "configure"],
             env = meson_step_env,
           },
           {
-            name = "mbuild_build",
+            name = "bobr_build",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "build"],
             env = meson_step_env,
           },
           {
-            name = "mbuild_install",
+            name = "bobr_install",
             run_as = "root",
             cwd = "@{build}",
             argv = ["@{script}", "install"],
@@ -568,21 +568,21 @@ let lower_perl_module_node = fun node =>
         @ pre_configure_steps
         @ [
           {
-            name = "mbuild_configure",
+            name = "bobr_configure",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "configure"],
             env = perl_module_step_env,
           },
           {
-            name = "mbuild_build",
+            name = "bobr_build",
             run_as = "build-user",
             cwd = "@{build}",
             argv = ["@{script}", "build"],
             env = perl_module_step_env,
           },
           {
-            name = "mbuild_install",
+            name = "bobr_install",
             run_as = "root",
             cwd = "@{build}",
             argv = ["@{script}", "install"],

@@ -2,14 +2,14 @@
 set -euo pipefail
 
 phase="${BOBR_STEP_NAME:?BOBR_STEP_NAME is required}"
-build_kind="${MBUILD_LINUX_BUILD_KIND:-full}"
-source_dir="${MBUILD_SOURCE_DIR:?MBUILD_SOURCE_DIR is required}"
-install_dir="${MBUILD_INSTALL_DIR:?MBUILD_INSTALL_DIR is required}"
+build_kind="${BOBR_LINUX_BUILD_KIND:-full}"
+source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
+install_dir="${BOBR_INSTALL_DIR:?BOBR_INSTALL_DIR is required}"
 kernel_config="$BOBR_INPUTS_DIR/kernel_config"
 
 export ARCH=x86_64
-export KBUILD_BUILD_USER=mbuild
-export KBUILD_BUILD_HOST=mbuild
+export KBUILD_BUILD_USER=bobr
+export KBUILD_BUILD_HOST=bobr
 export KBUILD_BUILD_TIMESTAMP='1970-01-01'
 export KBUILD_BUILD_VERSION=1
 export SOURCE_DATE_EPOCH=0

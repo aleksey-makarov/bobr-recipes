@@ -3,11 +3,11 @@
 #
 # Usage:
 # - `request { store_path = "/abs/store", recipes_path = "/abs/recipes", target_name = "foo" }`
-#   returns a full `mbuild` JSON request envelope for the selected package
+#   returns a full `bobr` JSON request envelope for the selected package
 #   attribute.
 #
 # Arguments:
-# - `store_path`: absolute path to the mbuild store root
+# - `store_path`: absolute path to the bobr store root
 # - `recipes_path`: absolute path to the mbuild-recipes checkout root
 # - `target_name`: package attribute name from `pkgs.ncl`
 # - `overlays`: optional array of `pkgs.ncl` overlays

@@ -232,10 +232,10 @@ fi
     log_fail "/etc/os-release is not the expected relative symlink"
   fi
 
-  if grep -qx 'ID=mbuild' /usr/lib/os-release 2>/dev/null; then
-    log_ok "os-release contains ID=mbuild"
+  if grep -qx 'ID=bobr' /usr/lib/os-release 2>/dev/null; then
+    log_ok "os-release contains ID=bobr"
   else
-    log_fail "os-release does not contain ID=mbuild"
+    log_fail "os-release does not contain ID=bobr"
   fi
 
   while IFS= read -r -d '' path; do

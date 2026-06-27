@@ -12,7 +12,7 @@ let ResultInputIdentity = {
 in
 let ResultRecord = {
   schema
-    | std.contract.Equal "mbuild-result-v4"
+    | std.contract.Equal "bobr-result-v4"
     | doc "Current result record schema identifier.",
   result_id
     | String
@@ -36,7 +36,7 @@ in
     | doc "Contract for one direct input identity in a result record."
     = ResultInputIdentity,
   result_record
-    | doc "Shape contract for one current `mbuild-result-v4` record."
+    | doc "Shape contract for one current `bobr-result-v4` record."
     = ResultRecord,
   validate_result
     | doc "Validate one result record."
