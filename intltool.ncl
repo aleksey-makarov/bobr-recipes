@@ -7,7 +7,11 @@ fun pkgs =>
     object_hash = "1e2ff2a47dd7c74c37371c1f7beb5fdfe410d6632385f2885abd5ed2054be305",
     origin = {
       tag = "Http",
-      url = "https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz",
+      url = [
+        "https://gstreamer.freedesktop.org/src/mirror/intltool-0.51.0.tar.gz",
+        "https://ftp.osuosl.org/pub/blfs/conglomeration/intltool/intltool-0.51.0.tar.gz",
+        "https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz",
+      ],
     },
   }
   in
