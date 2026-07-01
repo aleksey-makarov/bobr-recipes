@@ -2,9 +2,9 @@
 
 # Build one bobr-recipes package attribute and run it through `bobr`.
 #
-# The driver refreshes local `*.fsobj-hash` locks and generated tree modules,
-# builds the JSON request for one `pkgs.ncl` attribute through `request.ncl`
-# (with optional overlays and quiet/jobs), and pipes it into `bobr`.
+# The driver refreshes local `*.fsobj-hash` locks, builds the JSON request for
+# one `pkgs.ncl` attribute through `request.ncl` (with optional overlays and
+# quiet/jobs), and pipes it into `bobr`.
 #
 # Usage:
 #   bobr-build.sh [OPTIONS] <pkgs-attr>
@@ -182,10 +182,8 @@ build it with: (cd ${workspace_root}/bobr && cargo build-sandbox-launcher)"
   fi
 fi
 
-# Refresh local *.fsobj-hash locks and regenerate tree modules in the recipes
-# checkout being built.
+# Refresh local *.fsobj-hash locks in the recipes checkout being built.
 "${recipes_path}/tools/bobr-update-fsobj-hashes.sh" --fsobj-hash="${fsobj_hash_bin}"
-( cd "${recipes_path}" && python3 tools/generate-tree-modules.py )
 
 # request.ncl returns { schema, store, nodes }; quiet/jobs are merged on top.
 merge_fields=()
