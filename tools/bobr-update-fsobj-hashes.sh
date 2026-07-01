@@ -3,27 +3,35 @@
 # Refresh adjacent `*.fsobj-hash` lock files for local Source inputs.
 #
 # Usage:
-# - `tools/update-fsobj-hashes.sh`
+# - `tools/bobr-update-fsobj-hashes.sh`
 #   recursively updates every `*.fsobj-hash` file under `bobr-recipes`
 #   whose sibling path without the suffix exists as a file or directory
-# - `tools/update-fsobj-hashes.sh <path>`
+# - `tools/bobr-update-fsobj-hashes.sh <path>`
 #   writes or updates the sibling `<path>.fsobj-hash` for one file or directory
-# - `tools/update-fsobj-hashes.sh --check [<path>]`
+# - `tools/bobr-update-fsobj-hashes.sh --check [<path>]`
 #   verifies existing lock files without rewriting them
+#
+# The fsobj-hash binary defaults to the local debug build; override it with
+# `--fsobj-hash=PATH` or the `BOBR_FSOBJ_HASH` environment variable (bobr-build.sh
+# passes the binary it resolved next to `bobr`).
 
 set -euo pipefail
 
-if [ "$#" -gt 2 ]; then
-  echo "usage: $0 [--check] [path]" >&2
+if [ "$#" -gt 3 ]; then
+  echo "usage: $0 [--check] [--fsobj-hash=PATH] [path]" >&2
   exit 2
 fi
 
 check_only=0
 target_path=""
+fsobj_hash_override=""
 for arg in "$@"; do
   case "$arg" in
     --check)
       check_only=1
+      ;;
+    --fsobj-hash=*)
+      fsobj_hash_override="${arg#--fsobj-hash=}"
       ;;
     -*)
       echo "unknown option: $arg" >&2
@@ -31,7 +39,7 @@ for arg in "$@"; do
       ;;
     *)
       if [ -n "${target_path}" ]; then
-        echo "usage: $0 [--check] [path]" >&2
+        echo "usage: $0 [--check] [--fsobj-hash=PATH] [path]" >&2
         exit 2
       fi
       target_path="$arg"
@@ -40,8 +48,8 @@ for arg in "$@"; do
 done
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-source "${repo_root}/env.sh"
-fsobj_hash_bin="${workspace_root}/bobr/target/debug/fsobj-hash"
+workspace_root="$(cd "${repo_root}/.." && pwd)"
+fsobj_hash_bin="${fsobj_hash_override:-${BOBR_FSOBJ_HASH:-${workspace_root}/bobr/target/debug/fsobj-hash}}"
 
 if [ ! -x "${fsobj_hash_bin}" ]; then
   echo "missing fsobj-hash binary: ${fsobj_hash_bin}" >&2
@@ -108,6 +116,6 @@ while IFS= read -r -d '' lock_path; do
   if ! write_or_check_lock "${peer_path}" "${lock_path}"; then
     status=1
   fi
-done < <(find "${recipes_root}" -type f -name '*.fsobj-hash' -print0 | sort -z)
+done < <(find "${repo_root}" -type f -name '*.fsobj-hash' -print0 | sort -z)
 
 exit "${status}"

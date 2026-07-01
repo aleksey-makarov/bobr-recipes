@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Smoke-test update-fsobj-hashes.sh on file, directory, bulk, and check flows.
+# Smoke-test bobr-update-fsobj-hashes.sh on file, directory, bulk, and check flows.
 # Run this when editing fsobj-hash lock-file tooling or local Source authoring
 # behavior.
 
@@ -8,7 +8,7 @@ set -euo pipefail
 
 workspace_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 recipes_root="${workspace_root}/bobr-recipes"
-source_tool="${recipes_root}/tools/update-fsobj-hashes.sh"
+source_tool="${recipes_root}/tools/bobr-update-fsobj-hashes.sh"
 fsobj_hash_bin="${workspace_root}/bobr/target/debug/fsobj-hash"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
@@ -20,17 +20,13 @@ trap 'rm -rf "${tmpdir}"' EXIT
 
 fixture_repo="${tmpdir}/fixture-recipes"
 mkdir -p "${fixture_repo}/tools"
-cp "${source_tool}" "${fixture_repo}/tools/update-fsobj-hashes.sh"
-chmod +x "${fixture_repo}/tools/update-fsobj-hashes.sh"
+tool="${fixture_repo}/tools/bobr-update-fsobj-hashes.sh"
+cp "${source_tool}" "${tool}"
+chmod +x "${tool}"
 
-cat > "${fixture_repo}/env.sh" <<EOF_INNER
-#!/usr/bin/env bash
-store_rel_from_recipes="../bobr-store"
-env_sh_dir="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
-recipes_root="\${env_sh_dir}"
-workspace_root="${workspace_root}"
-store_root="\${workspace_root}/bobr-store"
-EOF_INNER
+# The tool's default fsobj-hash path is derived from its own location, which
+# would point inside the fixture; pass the real binary explicitly.
+run_tool() { "${tool}" --fsobj-hash="${fsobj_hash_bin}" "$@"; }
 
 assert_file_equals() {
   local path="$1"
@@ -54,26 +50,26 @@ expect_failure() {
 
 printf 'hello world\n' > "${fixture_repo}/hello.txt"
 file_hash="$("${fsobj_hash_bin}" "${fixture_repo}/hello.txt" | tr -d '\r\n')"
-"${fixture_repo}/tools/update-fsobj-hashes.sh" "${fixture_repo}/hello.txt"
+run_tool "${fixture_repo}/hello.txt"
 assert_file_equals "${fixture_repo}/hello.txt.fsobj-hash" "${file_hash}"
-"${fixture_repo}/tools/update-fsobj-hashes.sh" --check "${fixture_repo}/hello.txt"
+run_tool --check "${fixture_repo}/hello.txt"
 
 mkdir -p "${fixture_repo}/tree/subdir"
 printf 'payload\n' > "${fixture_repo}/tree/subdir/file.txt"
 dir_hash="$("${fsobj_hash_bin}" "${fixture_repo}/tree" | tr -d '\r\n')"
-"${fixture_repo}/tools/update-fsobj-hashes.sh" "${fixture_repo}/tree"
+run_tool "${fixture_repo}/tree"
 assert_file_equals "${fixture_repo}/tree.fsobj-hash" "${dir_hash}"
 
 printf '%s\n' '0000000000000000000000000000000000000000000000000000000000000000' > "${fixture_repo}/hello.txt.fsobj-hash"
-expect_failure "${fixture_repo}/tools/update-fsobj-hashes.sh" --check "${fixture_repo}/hello.txt"
+expect_failure run_tool --check "${fixture_repo}/hello.txt"
 
 printf '%s\n' 'stale' > "${fixture_repo}/tree.fsobj-hash"
 printf '%s\n' 'stale' > "${fixture_repo}/hello.txt.fsobj-hash"
-"${fixture_repo}/tools/update-fsobj-hashes.sh"
+run_tool
 assert_file_equals "${fixture_repo}/hello.txt.fsobj-hash" "${file_hash}"
 assert_file_equals "${fixture_repo}/tree.fsobj-hash" "${dir_hash}"
 
 printf '%s\n' 'orphan' > "${fixture_repo}/missing.fsobj-hash"
-expect_failure "${fixture_repo}/tools/update-fsobj-hashes.sh" --check
+expect_failure run_tool --check
 
 echo "update-fsobj-hashes smoke tests passed"

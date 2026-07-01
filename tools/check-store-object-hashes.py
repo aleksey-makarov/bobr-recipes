@@ -117,7 +117,7 @@ def resolve_fsobj_hash(explicit: Path | None) -> Path:
         return Path(path)
 
     # This tool lives in the bobr-recipes checkout; the bobr build tree is a
-    # sibling under the workspace root (see env.sh / build-attr.sh, which use
+    # sibling under the workspace root (see bobr-build.sh, which uses
     # `${workspace_root}/bobr`). tools/ -> bobr-recipes -> workspace root.
     workspace_root = Path(__file__).resolve().parents[2]
     repo_binary = workspace_root / "bobr" / "target" / "debug" / "fsobj-hash"

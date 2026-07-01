@@ -8,7 +8,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source "${repo_root}/env.sh"
+store_root="$(realpath -ms -- "${repo_root}/../bobr-store")"
 contract_file="${repo_root}/contracts/build-result.ncl"
 result_refs_dir="${store_root}/result-refs"
 tmpdir="$(mktemp -d)"

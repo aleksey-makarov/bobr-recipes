@@ -19,7 +19,7 @@
 # Do not run `nickel export` on `(import "pkgs.ncl") []` directly. Exporting
 # the complete package set serializes the entire fixed-point recipe graph and
 # can exhaust system memory. Use `std.record.fields`, `tools/list-pkgs-attrs.sh`,
-# `request.ncl`, or `tools/export-request.sh` for targeted inspection.
+# `request.ncl`, or `tools/bobr-build.sh --dry-run` for targeted inspection.
 let base_modules = [
   import "images.ncl",
   import "image-rootfs.ncl",

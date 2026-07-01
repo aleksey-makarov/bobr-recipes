@@ -17,7 +17,9 @@ if [[ ! "${attr}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
 fi
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-source "${repo_root}/env.sh"
+workspace_root="$(cd "${repo_root}/.." && pwd)"
+recipes_root="${repo_root}"
+store_root="$(realpath -ms -- "${repo_root}/../bobr-store")"
 bobr_bin="${workspace_root}/bobr/target/debug/bobr"
 checker="${repo_root}/tools/check-runtime-rootfs.py"
 closure_name="${attr}-rootfs-closure"
