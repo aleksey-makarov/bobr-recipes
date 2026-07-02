@@ -30,6 +30,7 @@ let base_modules = [
   import "xz.ncl",
   import "rsync.ncl",
   import "lz4.ncl",
+  import "erofs-utils.ncl",
   import "zstd.ncl",
   import "file.ncl",
   import "readline.ncl",
