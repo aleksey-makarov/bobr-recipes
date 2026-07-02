@@ -192,7 +192,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = pkgs.buildpack_deps_rootfs,
+      _rootfs = pkgs.buildpack_deps_rootfs,
       source = python_src,
     },
   }
@@ -254,7 +254,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = python_build_rootfs,
+      _rootfs = python_build_rootfs,
       source = python_src,
       modules_helper = python_modules_helper,
       flit_core = flit_core_src,

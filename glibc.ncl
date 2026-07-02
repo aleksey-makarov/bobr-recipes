@@ -72,7 +72,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = glibc_bootstrap_rootfs,
+      _rootfs = glibc_bootstrap_rootfs,
       source = glibc_src,
       fhs_patch = glibc_fhs_patch_2_42,
     },
@@ -115,7 +115,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_0,
+      _rootfs = pkgs.system_rootfs_0,
       source = glibc_src,
       fhs_patch = glibc_fhs_patch_2_42,
     },

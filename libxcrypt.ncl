@@ -41,7 +41,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = libxcrypt_build_rootfs,
+      _rootfs = libxcrypt_build_rootfs,
       source = libxcrypt_src version,
     },
   }

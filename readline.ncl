@@ -59,7 +59,7 @@ fun pkgs =>
       env = { SHLIB_LIBS = "-lncursesw" },
     },
     inputs = {
-      rootfs = readline_build_rootfs,
+      _rootfs = readline_build_rootfs,
       source = readline_src,
     },
   }

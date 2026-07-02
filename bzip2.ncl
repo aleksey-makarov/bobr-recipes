@@ -73,7 +73,7 @@ fun pkgs =>
     tag = "MakefileRootfs",
     config = bzip2_config,
     inputs = {
-      rootfs = pkgs.system_rootfs_1,
+      _rootfs = pkgs.system_rootfs_1,
       source = bzip2_src,
       install_docs_patch = bzip2_install_docs_patch,
     },
@@ -91,7 +91,7 @@ fun pkgs =>
     },
     config = bzip2_config,
     inputs = {
-      rootfs = pkgs.system_rootfs_2,
+      _rootfs = pkgs.system_rootfs_2,
       source = bzip2_src,
       install_docs_patch = bzip2_install_docs_patch,
     },

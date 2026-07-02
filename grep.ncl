@@ -22,7 +22,7 @@ fun pkgs =>
       configure_args = ["--disable-nls", "--disable-perl-regexp"],
     },
     inputs = {
-      rootfs = pkgs.buildpack_deps_rootfs,
+      _rootfs = pkgs.buildpack_deps_rootfs,
       source = grep_src,
     },
   }
@@ -35,7 +35,7 @@ fun pkgs =>
       configure_args = ["--disable-nls", "--disable-perl-regexp"],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_1,
+      _rootfs = pkgs.system_rootfs_1,
       source = grep_src,
     },
   }

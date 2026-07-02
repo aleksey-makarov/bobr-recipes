@@ -29,7 +29,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_0,
+      _rootfs = pkgs.system_rootfs_0,
       script = test_rootfs_script_source,
     },
   }
@@ -52,7 +52,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_1,
+      _rootfs = pkgs.system_rootfs_1,
       script = test_rootfs_script_source,
     },
   }
@@ -75,7 +75,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_2,
+      _rootfs = pkgs.system_rootfs_2,
       script = test_rootfs_script_source,
     },
   }
@@ -99,7 +99,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.rootfs,
+      _rootfs = pkgs.rootfs,
       script = test_rootfs_script_source,
     },
   }

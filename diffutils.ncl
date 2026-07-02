@@ -23,7 +23,7 @@ fun pkgs =>
       env = { gl_cv_func_strcasecmp_works = "y" },
     },
     inputs = {
-      rootfs = pkgs.buildpack_deps_rootfs,
+      _rootfs = pkgs.buildpack_deps_rootfs,
       source = diffutils_src,
     },
   }
@@ -37,7 +37,7 @@ fun pkgs =>
       env = { gl_cv_func_strcasecmp_works = "y" },
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_1,
+      _rootfs = pkgs.system_rootfs_1,
       source = diffutils_src,
     },
   }

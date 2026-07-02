@@ -31,7 +31,7 @@ fun pkgs =>
       configure_args = [],
     },
     inputs = {
-      rootfs = file_build_rootfs,
+      _rootfs = file_build_rootfs,
       source = file_src,
     },
   }

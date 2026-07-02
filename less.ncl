@@ -40,7 +40,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = less_build_rootfs,
+      _rootfs = less_build_rootfs,
       source = less_src,
     },
   }

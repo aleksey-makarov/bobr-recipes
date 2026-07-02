@@ -60,7 +60,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = inetutils_build_rootfs,
+      _rootfs = inetutils_build_rootfs,
       source = inetutils_src,
     },
   }

@@ -423,7 +423,7 @@ fun pkgs =>
     },
     config = {},
     inputs = {
-      tree = initrd_rootfs,
+      _tree = initrd_rootfs,
     },
   }
   in

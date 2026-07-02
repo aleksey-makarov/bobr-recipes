@@ -20,7 +20,7 @@ fun pkgs =>
     tag = "AutotoolsRootfs",
     config = {},
     inputs = {
-      rootfs = pkgs.buildpack_deps_rootfs,
+      _rootfs = pkgs.buildpack_deps_rootfs,
       source = m4_src,
     },
   }
@@ -37,7 +37,7 @@ fun pkgs =>
     },
     config = {},
     inputs = {
-      rootfs = pkgs.system_rootfs_1,
+      _rootfs = pkgs.system_rootfs_1,
       source = m4_src,
     },
   }

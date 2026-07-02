@@ -47,7 +47,7 @@ fun pkgs =>
     tag = "AutotoolsRootfs",
     config = pkgconf_config,
     inputs = {
-      rootfs = pkgs.system_rootfs_1,
+      _rootfs = pkgs.system_rootfs_1,
       source = pkgconf_src,
     },
   }
@@ -58,7 +58,7 @@ fun pkgs =>
     tag = "AutotoolsRootfs",
     config = pkgconf_config,
     inputs = {
-      rootfs = pkgs.system_rootfs_2,
+      _rootfs = pkgs.system_rootfs_2,
       source = pkgconf_src,
     },
   }

@@ -22,7 +22,7 @@ fun pkgs =>
       configure_args = ["--docdir=/usr/share/doc/gperf-3.3"],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_2,
+      _rootfs = pkgs.system_rootfs_2,
       source = gperf_src,
     },
   }

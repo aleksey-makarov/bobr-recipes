@@ -22,7 +22,7 @@ fun pkgs =>
       configure_args = ["--disable-nls"],
     },
     inputs = {
-      rootfs = pkgs.buildpack_deps_rootfs,
+      _rootfs = pkgs.buildpack_deps_rootfs,
       source = gzip_src,
     },
   }
@@ -35,7 +35,7 @@ fun pkgs =>
       configure_args = ["--disable-nls"],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_1,
+      _rootfs = pkgs.system_rootfs_1,
       source = gzip_src,
     },
   }

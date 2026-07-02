@@ -37,7 +37,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_2,
+      _rootfs = pkgs.system_rootfs_2,
       source = libcap_src version,
     },
   }

@@ -89,7 +89,7 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      rootfs = pkgs.buildpack_deps_rootfs,
+      _rootfs = pkgs.buildpack_deps_rootfs,
       script = buildscript_linux,
       source = linux_source,
     },

@@ -36,7 +36,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.buildpack_deps_rootfs,
+      _rootfs = pkgs.buildpack_deps_rootfs,
       source = binutils_src,
     },
   }
@@ -60,7 +60,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_0,
+      _rootfs = pkgs.system_rootfs_0,
       source = binutils_src,
     },
   }

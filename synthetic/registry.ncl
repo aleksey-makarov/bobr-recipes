@@ -379,7 +379,7 @@ let lower_autotools_package_node = fun node =>
   let build_rootfs = build_rootfs_for autotools_package_default_build_deps node in
   let package_inputs =
     record_replace
-      "rootfs"
+      "_rootfs"
       build_rootfs
       node.inputs
   in
@@ -600,7 +600,7 @@ let lower_makefile_package_node = fun node =>
   let build_rootfs = build_rootfs_for makefile_package_default_build_deps node in
   let package_inputs =
     record_replace
-      "rootfs"
+      "_rootfs"
       build_rootfs
       node.inputs
   in
@@ -615,7 +615,7 @@ let lower_meson_package_node = fun node =>
   let build_rootfs = build_rootfs_for meson_package_default_build_deps node in
   let package_inputs =
     record_replace
-      "rootfs"
+      "_rootfs"
       build_rootfs
       node.inputs
   in
@@ -630,7 +630,7 @@ let lower_perl_module_package_node = fun node =>
   let build_rootfs = build_rootfs_for perl_module_package_default_build_deps node in
   let package_inputs =
     record_replace
-      "rootfs"
+      "_rootfs"
       build_rootfs
       node.inputs
   in
@@ -645,7 +645,7 @@ let lower_sandbox_build_node = fun node =>
   let build_rootfs = build_rootfs_for sandbox_build_default_build_deps node in
   let package_inputs =
     record_replace
-      "rootfs"
+      "_rootfs"
       build_rootfs
       node.inputs
   in

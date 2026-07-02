@@ -74,7 +74,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = perl_build_rootfs,
+      _rootfs = perl_build_rootfs,
       script = buildscript_perl_configure,
       source = perl_src,
     },

@@ -38,7 +38,7 @@ fun pkgs =>
     tag = "AutotoolsRootfs",
     config = {},
     inputs = {
-      rootfs = autoconf_build_rootfs,
+      _rootfs = autoconf_build_rootfs,
       source = autoconf_src version,
     },
   }

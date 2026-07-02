@@ -80,7 +80,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      rootfs = shadow_build_rootfs,
+      _rootfs = shadow_build_rootfs,
       source = shadow_src version,
     },
   }

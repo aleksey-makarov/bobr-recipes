@@ -28,7 +28,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = pkgs.system_rootfs_1,
+      _rootfs = pkgs.system_rootfs_1,
       source = flex_src,
     },
   }

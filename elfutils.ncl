@@ -40,7 +40,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = elfutils_rootfs,
+      _rootfs = elfutils_rootfs,
       source = elfutils_src,
     },
   }

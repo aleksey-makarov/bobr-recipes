@@ -93,7 +93,7 @@ fun pkgs =>
       label = null,
     },
     inputs = {
-      tree = rootfs,
+      _tree = rootfs,
     },
   }
   in

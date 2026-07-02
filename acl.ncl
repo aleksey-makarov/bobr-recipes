@@ -34,7 +34,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      rootfs = acl_build_rootfs,
+      _rootfs = acl_build_rootfs,
       source = acl_src,
     },
   }
