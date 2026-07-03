@@ -53,17 +53,16 @@ run_case "rootfs-closure" pass '{"name":"pkg-rootfs","tag":"RootfsClosure","conf
 run_case "initramfs" pass '{"name":"initrd","tag":"Initramfs","config":{},"inputs":{"tree0":'"${rootfs_tree}"'}}'
 run_case "source-http" pass "${source_node}"
 run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","platform":{"os":"linux","architecture":"amd64"}}}'
-run_case "autotools-rootfs" pass '{"name":"pkg-rootfs","tag":"AutotoolsRootfs","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "autotools-rootfs" pass '{"name":"pkg-rootfs","tag":"AutotoolsRootfs","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "autotools-package" pass '{"name":"pkg-package","tag":"Autotools","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"configure_args":["--disable-nls"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "makefile-rootfs" pass '{"name":"pkg-rootfs","tag":"MakefileRootfs","config":{"make_args":["PREFIX=/usr"],"pre_build":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}],"skip_install":true},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "makefile-rootfs" pass '{"name":"pkg-rootfs","tag":"MakefileRootfs","config":{"make_args":["PREFIX=/usr"],"pre_build":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}],"skip_install":true},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "makefile-package" pass '{"name":"pkg-package","tag":"Makefile","deps":{"build":[],"runtime":[]},"config":{"make_args":["PREFIX=/usr"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "meson-rootfs" pass '{"name":"pkg-rootfs","tag":"MesonRootfs","config":{"setup_args":["--buildtype=release"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "meson-rootfs" pass '{"name":"pkg-rootfs","tag":"MesonRootfs","config":{"setup_args":["--buildtype=release"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "meson-package" pass '{"name":"pkg-package","tag":"Meson","deps":{"build":[],"runtime":[]},"config":{"setup_args":["--buildtype=release"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
-run_case "perl-module-rootfs" pass '{"name":"pkg-rootfs","tag":"PerlModuleRootfs","config":{"perl_args":["INSTALLDIRS=vendor"],"make_args":["DESTDIR=/tmp/out"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "perl-module-rootfs" pass '{"name":"pkg-rootfs","tag":"PerlModuleRootfs","config":{"perl_args":["INSTALLDIRS=vendor"],"make_args":["DESTDIR=/tmp/out"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "perl-module-package" pass '{"name":"pkg-package","tag":"PerlModule","deps":{"build":[],"runtime":[]},"config":{"perl_args":["INSTALLDIRS=vendor"]},"inputs":{"source":'"${source_node}"'}}'
-run_case "sandbox-build-rootfs" pass '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
+run_case "sandbox-build-rootfs" pass '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "sandbox-build-package" pass '{"name":"sandbox-build-package","tag":"SandboxBuild","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
-run_case "erofs-rootfs" pass '{"name":"rootfs-erofs","tag":"ErofsRootfs","config":{"compression":null,"label":null},"inputs":{"tree":'"${rootfs_tree}"'}}'
 run_case "oci-extract" pass '{"name":"img-rootfs","tag":"OciExtract","config":{},"inputs":{"image":{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","platform":{"os":"linux","architecture":"amd64"}}}}}'
 
 run_case "unknown-tag" fail '{"name":"bad","tag":"Demo","config":{},"inputs":{}}'
@@ -92,9 +91,9 @@ run_case "missing-sandbox-build-rootfs" fail '{"name":"sandbox-build-rootfs","ta
 run_case "missing-autotools-package-source" fail '{"name":"pkg-package","tag":"Autotools","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"patch":'"${patch_node}"'}}'
 run_case "missing-makefile-package-source" fail '{"name":"pkg-package","tag":"Makefile","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"patch":'"${patch_node}"'}}'
 run_case "missing-meson-package-deps" fail '{"name":"pkg-package","tag":"Meson","config":{},"inputs":{"source":'"${source_node}"'}}'
-run_case "sandbox-build-rootfs-install-rejected" fail '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493}}]}},"inputs":{"rootfs":'"${rootfs_tree}"'}}'
-run_case "autotools-rootfs-install-rejected" fail '{"name":"pkg-rootfs","tag":"AutotoolsRootfs","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493}}]}},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
-run_case "meson-rootfs-build-dir-rejected" fail '{"name":"pkg-rootfs","tag":"MesonRootfs","config":{"build_dir":"build"},"inputs":{"rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
+run_case "sandbox-build-rootfs-install-rejected" fail '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493}}]}},"inputs":{"_rootfs":'"${rootfs_tree}"'}}'
+run_case "autotools-rootfs-install-rejected" fail '{"name":"pkg-rootfs","tag":"AutotoolsRootfs","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493}}]}},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
+run_case "meson-rootfs-build-dir-rejected" fail '{"name":"pkg-rootfs","tag":"MesonRootfs","config":{"build_dir":"build"},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "extra-top-level-field" pass '{"name":"hello","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"hello.txt","text":"hi","executable":false}]}},"inputs":{},"extra":true}'
 run_case "bad-group-config" fail '{"name":"all","tag":"Group","config":{"manifest":true},"inputs":{"first":'"${script_node}"'}}'
 run_case "empty-group-inputs" fail '{"name":"all","tag":"Group","config":{},"inputs":{}}'
@@ -105,7 +104,6 @@ run_case "bad-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubs
 run_case "empty-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":[]},"inputs":{"tree":'"${rootfs_tree}"'}}'
 run_case "missing-tree-subset-input" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib64/libfoo.so*"]},"inputs":{}}'
 run_case "bad-rootfs-closure-config" fail '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{"base":true},"inputs":{"root":'"${rootfs_tree}"'}}'
-run_case "bad-erofs-rootfs-config" fail '{"name":"rootfs-erofs","tag":"ErofsRootfs","config":{"compression":"","label":null},"inputs":{}}'
 
 cat > "${tmpdir}/check-private-top-level-fields.ncl" <<EOF_INNER
 let recipe = import "${repo_root}/recipe-lib.ncl" in
@@ -204,7 +202,7 @@ recipe.to_request { recipes_path = "/recipes" } {} {
     },
   },
   inputs = {
-    rootfs = rootfs_tree,
+    _rootfs = rootfs_tree,
     source = source_src,
     patch_extra = patch_extra_src,
     patch = patch_src,
@@ -227,7 +225,7 @@ jq -e '
   and .root.config.steps[0].env.BOBR_PATCH_INPUTS == "@{patch} @{patch_extra}"
   and [.root.config.steps[].name] == ["bobr_prepare_source", "pre", "bobr_configure", "bobr_build", "bobr_install"]
   and .root.config.steps[1].cwd == "@{build}/source/subdir"
-  and (.root.inputs | has("rootfs"))
+  and (.root.inputs | has("_rootfs"))
   and (.root.inputs | has("script"))
   and (.root.inputs | has("synthetic_common"))
   and ([.[] | select(.name == "buildscript-autotools" and .origin.tag == "Path" and .origin.path == "/recipes/synthetic/autotools.sh")] | length == 1)
@@ -342,7 +340,7 @@ autotools_package_lowering_json="$(
 
 jq -e '
   .root.tag == "Sandbox"
-  and (.root.inputs | has("rootfs"))
+  and (.root.inputs | has("_rootfs"))
   and ([.[] | select(.name == "pkg-build-rootfs" and .tag == "TreeMerge")] | length == 1)
   and ([.[] | select(.name == "pkg-build-rootfs")][0].inputs | length == 4)
   and ([.[] | select(.name == "base-filesystem")] | length == 1)
@@ -599,7 +597,7 @@ meson_package_lowering_json="$(
 
 jq -e '
   .root.tag == "Sandbox"
-  and (.root.inputs | has("rootfs"))
+  and (.root.inputs | has("_rootfs"))
   and ([.[] | select(.name == "pkg-build-rootfs" and .tag == "TreeMerge")] | length == 1)
   and ([.[] | select(.name == "common-native-tool")] | length == 1)
   and ([.[] | select(.name == "pkgconf-tool")] | length == 1)
@@ -764,7 +762,7 @@ jq -e '
   and .root.name == "pkg-subset"
   and .root.config.include[0] == "usr/lib64/libfoo.so*"
   and (.root.inputs | has("tree"))
-  and (.root.inputs | has("rootfs") | not)
+  and (.root.inputs | has("_rootfs") | not)
   and (.root.inputs | has("script") | not)
   and ([.[] | select(.name == "buildscript-tree-subset")] | length == 0)
   and ([.[] | select(.name == "input-tree")] | length == 1)
@@ -1008,7 +1006,7 @@ recipe.to_request { recipes_path = "/recipes" } {} {
     },
   },
   inputs = {
-    rootfs = rootfs_tree,
+    _rootfs = rootfs_tree,
     source = source_src,
   },
 }

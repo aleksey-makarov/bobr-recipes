@@ -85,14 +85,11 @@ fun pkgs =>
     inputs = recipe.numbered_inputs rootfs_deps,
   }
   in
-  let erofs_rootfs = {
-    name = "erofs-rootfs",
-    tag = "ErofsRootfs",
-    config = {},
-    inputs = {
-      _tree = rootfs,
-    },
-  }
+  let erofs_rootfs =
+    recipe.erofs_image pkgs {
+      name = "erofs-rootfs",
+      tree = rootfs,
+    }
   in
 
   {

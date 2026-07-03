@@ -138,6 +138,58 @@ in
       },
   },
 
+  # Pack a filesystem tree into a reproducible EROFS image. There is no native
+  # `ErofsRootfs` builder: this lowers to a `Sandbox` that runs `mkfs.erofs`
+  # (from `pkgs.erofs_utils`) over the materialized tree. The build rootfs is the
+  # runtime closure of erofs-utils plus a shell; `mk-erofs.sh` supplies the
+  # reproducibility flags. The result is captured as a plain-object directory
+  # holding a single `erofs-rootfs.erofs` file (`preserve_ownership = false`,
+  # since the image blob has no meaningful ownership of its own).
+  #
+  # `args`: { name : String, tree : <fs-tree node to pack> }.
+  erofs_image = fun pkgs =>
+    fun args =>
+      let mkfs_script = {
+        name = "%{args.name}-mkfs-script",
+        tag = "Source",
+        object_hash = import "filesystem/mk-erofs.sh.fsobj-hash" as 'Text,
+        origin = {
+          tag = "RecipePath",
+          path = "filesystem/mk-erofs.sh",
+        },
+      }
+      in
+      let build_rootfs = {
+        name = "%{args.name}-build-rootfs",
+        tag = "RootfsClosure",
+        config = {},
+        inputs = {
+          erofs_utils = pkgs.erofs_utils,
+          bash = pkgs.bash,
+        },
+      }
+      in
+      {
+        name = args.name,
+        tag = "SandboxBuildRootfs",
+        config = {
+          preserve_ownership = false,
+          steps = [
+            {
+              name = "mkfs_erofs",
+              run_as = "root",
+              cwd = "@{out}",
+              argv = ["@{script}"],
+            },
+          ],
+        },
+        inputs = {
+          _rootfs = build_rootfs,
+          _tree = args.tree,
+          script = mkfs_script,
+        },
+      },
+
   prepare_source_step = {
     name = "prepare_source",
     run_as = "build-user",

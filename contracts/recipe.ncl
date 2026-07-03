@@ -6,7 +6,6 @@ let KnownTags = [
   "TreeMerge",
   "TreeSubset",
   "RootfsClosure",
-  "ErofsRootfs",
   "Initramfs",
   "Autotools",
   "Makefile",
@@ -433,17 +432,6 @@ let TreeSubsetConfig = {
   include | Array String | NonEmptyArray,
 }
 in
-let ErofsRootfsConfig = {
-  compression
-    | String
-    | optional
-    | doc "EROFS compression algorithm; `\"\"` (or omitted) means plain EROFS.",
-  label
-    | String
-    | optional
-    | doc "EROFS filesystem label; `\"\"` (or omitted) means no label.",
-}
-in
 let InitramfsConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
@@ -461,9 +449,9 @@ let FsTreeImportInputsShape = {
 }
 in
 let SandboxBuildRootfsInputsShape = {
-  rootfs
+  _rootfs
     | Dyn
-    | doc "Single recipe node for the rootfs directory input.",
+    | doc "Single materialized fs-tree node for the rootfs directory input.",
   ..
 }
 in
@@ -483,16 +471,10 @@ let TreeSubsetInputsShape = {
 in
 let RootfsClosureInputsShape = { .. }
 in
-let ErofsRootfsInputsShape = {
-  tree
-    | Dyn
-    | doc "Single fs-tree manifest input used to build an EROFS image.",
-}
-in
 let InitramfsInputsShape = { .. }
 in
 let SyntheticRootfsInputsShape = {
-  rootfs | Dyn,
+  _rootfs | Dyn,
   source | Dyn,
   ..
 }
@@ -614,11 +596,6 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | TreeMergeConfig,
       }
-    else if checked.tag == "ErofsRootfs" then
-      checked
-      & {
-        config = checked.config | ErofsRootfsConfig,
-      }
     else if checked.tag == "Initramfs" then
       checked
       & {
@@ -720,12 +697,6 @@ let rec ValidateRecipe = fun recipe =>
     in
     let validate_rootfs_closure_inputs = fun inputs =>
       let checked = inputs | RootfsClosureInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_erofs_rootfs_inputs = fun inputs =>
-      let checked = inputs | ErofsRootfsInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -837,12 +808,6 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | TreeMergeConfig,
         inputs = validate_rootfs_closure_inputs checked.inputs,
       }
-    else if checked.tag == "ErofsRootfs" then
-      checked
-      & {
-        config = checked.config | ErofsRootfsConfig,
-        inputs = validate_erofs_rootfs_inputs checked.inputs,
-      }
     else if checked.tag == "Initramfs" then
       checked
       & {
@@ -896,9 +861,6 @@ in
   tree_merge_config
     | doc "Config contract for `TreeMerge` recipe nodes."
     = TreeMergeConfig,
-  erofs_rootfs_config
-    | doc "Config contract for `ErofsRootfs` recipe nodes."
-    = ErofsRootfsConfig,
   initramfs_config
     | doc "Config contract for `Initramfs` recipe nodes."
     = InitramfsConfig,
