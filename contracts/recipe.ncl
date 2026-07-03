@@ -249,7 +249,6 @@ let InstallAttrs = {
   directory_mode | Number | optional,
   regular_file_mode | Number | optional,
   executable_file_mode | Number | optional,
-  symlink_mode | Number | optional,
 }
 in
 let InstallRule = {
@@ -357,6 +356,15 @@ let SandboxConfig = {
     | Dyn
     | optional
     | doc "Optional script configuration payload passed through to the build script.",
+  preserve_ownership
+    | Bool
+    | optional
+    | doc m%"
+      Capture the output as an ownership-aware fs-tree (default `true`). When
+      `false`, the output tree is chowned to a single owner and captured as a
+      plain object — for self-contained artifacts where per-file ownership is
+      irrelevant.
+    "%,
 }
 in
 let HookStep = {
@@ -425,18 +433,15 @@ let TreeSubsetConfig = {
   include | Array String | NonEmptyArray,
 }
 in
-let ErofsNullableString =
-  std.contract.from_predicate (fun value => value == null || std.is_string value && value != "")
-in
 let ErofsRootfsConfig = {
   compression
-    | ErofsNullableString
+    | String
     | optional
-    | doc "Optional EROFS compression setting. `null` means plain EROFS.",
+    | doc "EROFS compression algorithm; `\"\"` (or omitted) means plain EROFS.",
   label
-    | ErofsNullableString
+    | String
     | optional
-    | doc "Optional EROFS filesystem label. `null` means no label.",
+    | doc "EROFS filesystem label; `\"\"` (or omitted) means no label.",
 }
 in
 let InitramfsConfig =

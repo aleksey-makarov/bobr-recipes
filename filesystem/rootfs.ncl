@@ -88,10 +88,7 @@ fun pkgs =>
   let erofs_rootfs = {
     name = "erofs-rootfs",
     tag = "ErofsRootfs",
-    config = {
-      compression = null,
-      label = null,
-    },
+    config = {},
     inputs = {
       _tree = rootfs,
     },

@@ -89,7 +89,6 @@ in
       directory_mode = 0o755,
       regular_file_mode = 0o644,
       executable_file_mode = 0o755,
-      symlink_mode = 0o777,
     },
     fs_tree_root_default_attrs = {
       uid = 0,
@@ -108,7 +107,6 @@ in
         directory_mode = 0o755,
         regular_file_mode = 0o644,
         executable_file_mode = 0o755,
-        symlink_mode = 0o777,
       }
       in
       { path = "**", attrs = default_attrs },

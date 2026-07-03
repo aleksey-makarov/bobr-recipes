@@ -16,6 +16,10 @@ fun pkgs =>
     name = "test-system-rootfs-0",
     tag = "SandboxBuildRootfs",
     config = {
+      # Test reports are plain files; capture the output as a plain-object
+      # directory (chowned) rather than an ownership-aware fs-tree, so the
+      # report collector can read them directly via a non-`_` input.
+      preserve_ownership = false,
       script_config = {
         name = "system-rootfs-0",
       },
@@ -39,6 +43,10 @@ fun pkgs =>
     name = "test-system-rootfs-1",
     tag = "SandboxBuildRootfs",
     config = {
+      # Test reports are plain files; capture the output as a plain-object
+      # directory (chowned) rather than an ownership-aware fs-tree, so the
+      # report collector can read them directly via a non-`_` input.
+      preserve_ownership = false,
       script_config = {
         name = "system-rootfs-1",
       },
@@ -62,6 +70,10 @@ fun pkgs =>
     name = "test-system-rootfs-2",
     tag = "SandboxBuildRootfs",
     config = {
+      # Test reports are plain files; capture the output as a plain-object
+      # directory (chowned) rather than an ownership-aware fs-tree, so the
+      # report collector can read them directly via a non-`_` input.
+      preserve_ownership = false,
       script_config = {
         name = "system-rootfs-2",
       },
@@ -85,6 +97,10 @@ fun pkgs =>
     name = "test-rootfs",
     tag = "SandboxBuildRootfs",
     config = {
+      # Test reports are plain files; capture the output as a plain-object
+      # directory (chowned) rather than an ownership-aware fs-tree, so the
+      # report collector can read them directly via a non-`_` input.
+      preserve_ownership = false,
       script_config = {
         name = "rootfs",
         check_python = "true",

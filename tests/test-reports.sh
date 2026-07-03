@@ -22,7 +22,6 @@ for input_dir in "$BOBR_INPUTS_DIR"/report*; do
   [ -d "$input_dir" ] || continue
 
   copy_reports_from_dir "$input_dir"
-  copy_reports_from_dir "$input_dir/root"
 done
 
 printf '%s\n' "$copied" > "$dest/copied-count.txt"

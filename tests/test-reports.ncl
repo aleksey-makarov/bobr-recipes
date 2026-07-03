@@ -16,6 +16,9 @@ fun pkgs =>
     name = "test-reports",
     tag = "SandboxBuildRootfs",
     config = {
+      # The collected reports are plain files; capture as a plain-object
+      # directory rather than an ownership-aware fs-tree.
+      preserve_ownership = false,
       steps = [
         {
           name = "collect_reports",
