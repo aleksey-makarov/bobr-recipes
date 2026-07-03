@@ -17,6 +17,9 @@ APPEND = (
 )
 FS_TREE_SCHEMA = "bobr-fs-tree-manifest"
 HEX_64_RE = re.compile(r"^[0-9a-f]{64}$")
+# pkgs.erofs_rootfs is a plain-object directory holding this single image file
+# (built by filesystem/mk-erofs.sh), not a bare file object.
+EROFS_IMAGE_NAME = "erofs-rootfs.erofs"
 
 
 def usage(program: str) -> str:
@@ -146,9 +149,12 @@ def main(argv: list[str]) -> int:
     store, qemu_args = parse_args(argv)
     names = load_recipe_names(repo_root())
 
+    rootfs_dir = object_ref(store, names["rootfs"])
+    if not rootfs_dir.is_dir():
+        die(f"expected EROFS rootfs object directory for {names['rootfs']}: {rootfs_dir}")
     rootfs_path = ensure_file(
-        object_ref(store, names["rootfs"]),
-        f"EROFS rootfs artifact for {names['rootfs']}",
+        rootfs_dir / EROFS_IMAGE_NAME,
+        f"EROFS image inside {names['rootfs']}",
     )
     initrd_path = ensure_file(
         object_ref(store, names["initrd"]), f"initrd artifact for {names['initrd']}"
