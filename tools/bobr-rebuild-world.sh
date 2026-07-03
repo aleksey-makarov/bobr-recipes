@@ -2,10 +2,11 @@
 
 # Rebuild the whole world into a fresh, timestamped store.
 #
-# Creates <workspace>/bobr-store.<YYMMDDhhmmss>, repoints the bobr-store
-# symlink at it, records the bobr/bobr-recipes commits, seeds source objects
-# from the previous store (hardlinks, so tarballs are not re-fetched), and runs
-# the build. The build itself runs strictly through bobr-build.sh.
+# Creates <workspace>/bobr-store.<YYMMDDhhmmss>, records the bobr/bobr-recipes
+# commits, seeds source objects from the previous store (hardlinks, so tarballs
+# are not re-fetched), and runs the build. Only after the build succeeds does it
+# repoint the bobr-store symlink at the new store. The build itself runs
+# strictly through bobr-build.sh.
 #
 # It does NOT pull git repos or build the bobr binaries: it builds the current
 # checkout, and bobr-build.sh hard-checks that the binaries exist.
@@ -175,16 +176,6 @@ host_stats_log="${store_root}/host-stats.log"
 
 echo "==> create store ${store_root}" >&2
 mkdir "${store_root}"
-if [ -L "${store_link}" ]; then
-  ln -sfnT "$(basename "${store_root}")" "${store_link}"
-elif [ -d "${store_link}" ]; then
-  echo "==> keep existing store directory ${store_link}" >&2
-elif [ -e "${store_link}" ]; then
-  echo "bobr-rebuild-world.sh: ${store_link} exists and is not a directory or symlink" >&2
-  exit 2
-else
-  ln -sT "$(basename "${store_root}")" "${store_link}"
-fi
 touch "${script_log}" "${host_stats_log}"
 
 log "store=${store_root}"
@@ -251,6 +242,13 @@ rm -f "${time_report}"
 log "build_seconds=$(( $(date '+%s') - build_started_at ))"
 [ "${build_status}" -eq 0 ] || exit "${build_status}"
 log_host_snapshot "after-build"
+
+# The build succeeded: repoint the convenience symlink at the new store.
+# Overwrite an existing symlink; leave any non-symlink of that name untouched.
+if [ -L "${store_link}" ] || [ ! -e "${store_link}" ]; then
+  ln -sfnT "$(basename "${store_root}")" "${store_link}"
+  echo "==> link: ${store_link} -> $(basename "${store_root}")" >&2
+fi
 
 echo "==> store: ${store_root}" >&2
 echo "==> hashes: ${hashes_file}" >&2
