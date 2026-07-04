@@ -186,10 +186,28 @@ fun pkgs =>
   }
   in
 
+  # Extract the kernel image out of the linux fs-tree into a plain object
+  # (a directory holding a single `bzImage`), so tools can use it directly
+  # without poking into fs-files by hash.
+  let linux_bzimage = {
+    name = "linux-bzimage-%{version}",
+    tag = "FsTreeExport",
+    config = {
+      copies = [
+        { from = "boot/bzImage", to = "bzImage" },
+      ],
+    },
+    inputs = {
+      input = linux,
+    },
+  }
+  in
+
   {
     include [
       linux_headers_gen1,
       linux,
       linux_headers,
+      linux_bzimage,
     ],
   }

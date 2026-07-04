@@ -49,6 +49,7 @@ run_case "tree-dir" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{
 run_case "tree-symlink" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"usr/bin"},{"type":"symlink","path":"bin","target":"usr/bin"}]}},"inputs":{}}'
 run_case "tree-merge" pass '{"name":"merged-tree","tag":"TreeMerge","config":{},"inputs":{"left":{"name":"left-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"bin"}]}},"inputs":{}},"right":{"name":"right-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"etc"}]}},"inputs":{}}}}'
 run_case "tree-subset" pass '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib64/libfoo.so*"]},"inputs":{"tree":'"${rootfs_tree}"'}}'
+run_case "fs-tree-export" pass '{"name":"exported","tag":"FsTreeExport","config":{"copies":[{"from":"boot/bzImage","to":"bzImage"}]},"inputs":{"input":'"${rootfs_tree}"'}}'
 run_case "rootfs-closure" pass '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{},"inputs":{"root":'"${rootfs_tree}"'}}'
 run_case "initramfs" pass '{"name":"initrd","tag":"Initramfs","config":{},"inputs":{"tree0":'"${rootfs_tree}"'}}'
 run_case "source-http" pass "${source_node}"
@@ -102,6 +103,7 @@ run_case "bad-source-oci-registry-missing-platform" fail '{"name":"img","tag":"S
 run_case "bad-tree-merge-config" fail '{"name":"merged-tree","tag":"TreeMerge","config":{"base":true},"inputs":{}}'
 run_case "bad-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":"usr/lib64/libfoo.so*"},"inputs":{"tree":'"${rootfs_tree}"'}}'
 run_case "empty-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":[]},"inputs":{"tree":'"${rootfs_tree}"'}}'
+run_case "empty-fs-tree-export-copies" fail '{"name":"exported","tag":"FsTreeExport","config":{"copies":[]},"inputs":{"input":'"${rootfs_tree}"'}}'
 run_case "missing-tree-subset-input" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib64/libfoo.so*"]},"inputs":{}}'
 run_case "bad-rootfs-closure-config" fail '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{"base":true},"inputs":{"root":'"${rootfs_tree}"'}}'
 

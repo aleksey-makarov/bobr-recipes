@@ -3,6 +3,7 @@ let KnownTags = [
   "Group",
   "Tree",
   "FsTreeImport",
+  "FsTreeExport",
   "TreeMerge",
   "TreeSubset",
   "RootfsClosure",
@@ -432,6 +433,16 @@ let TreeSubsetConfig = {
   include | Array String | NonEmptyArray,
 }
 in
+let FsTreeExportConfig = {
+  copies
+    | Array {
+      from | String,
+      to | String,
+    }
+    | NonEmptyArray
+    | doc "Copy commands exporting fs-tree entries into a plain object.",
+}
+in
 let InitramfsConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
@@ -446,6 +457,12 @@ let FsTreeImportInputsShape = {
   input
     | Dyn
     | doc "Single directory tree input imported into fs-tree.",
+}
+in
+let FsTreeExportInputsShape = {
+  input
+    | Dyn
+    | doc "Single fs-tree node whose entries are exported to a plain object.",
 }
 in
 let SandboxBuildRootfsInputsShape = {
@@ -525,6 +542,11 @@ let ValidateRecipeShallow = fun recipe =>
       checked
       & {
         config = checked.config | FsTreeImportConfig,
+      }
+    else if checked.tag == "FsTreeExport" then
+      checked
+      & {
+        config = checked.config | FsTreeExportConfig,
       }
     else if checked.tag == "AutotoolsRootfs" then
       checked
@@ -642,6 +664,12 @@ let rec ValidateRecipe = fun recipe =>
         (fun _ input => ValidateRecipe input)
         checked
     in
+    let validate_fs_tree_export_inputs = fun inputs =>
+      let checked = inputs | FsTreeExportInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
     let validate_synthetic_rootfs_inputs = fun inputs =>
       let checked = inputs | SyntheticRootfsInputsShape in
       std.record.map
@@ -724,6 +752,12 @@ let rec ValidateRecipe = fun recipe =>
       & {
         config = checked.config | FsTreeImportConfig,
         inputs = validate_fs_tree_import_inputs checked.inputs,
+      }
+    else if checked.tag == "FsTreeExport" then
+      checked
+      & {
+        config = checked.config | FsTreeExportConfig,
+        inputs = validate_fs_tree_export_inputs checked.inputs,
       }
     else if checked.tag == "AutotoolsRootfs" then
       checked
@@ -840,6 +874,9 @@ in
   fs_tree_import_config
     | doc "Config contract for `FsTreeImport` recipe nodes."
     = FsTreeImportConfig,
+  fs_tree_export_config
+    | doc "Config contract for `FsTreeExport` recipe nodes."
+    = FsTreeExportConfig,
   source_recipe
     | doc "Structural contract for `Source` recipe nodes."
     = SourceRecipe,
