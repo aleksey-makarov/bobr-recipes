@@ -13,12 +13,12 @@
 # Typical entry points built on top of this:
 # - `request.ncl` selects one attribute from `(mkPkgs [])` and lowers it to an
 #   `bobr` JSON request
-# - helper scripts such as `list-pkgs-attrs.sh` inspect the fields of
+# - helper scripts such as `bobr-list-pkgs.sh` inspect the fields of
 #   `(mkPkgs [])` directly
 #
 # Do not run `nickel export` on `(import "pkgs.ncl") []` directly. Exporting
 # the complete package set serializes the entire fixed-point recipe graph and
-# can exhaust system memory. Use `std.record.fields`, `tools/list-pkgs-attrs.sh`,
+# can exhaust system memory. Use `std.record.fields`, `tools/bobr-list-pkgs.sh`,
 # `request.ncl`, or `tools/bobr-build.sh --dry-run` for targeted inspection.
 let base_modules = [
   import "images.ncl",

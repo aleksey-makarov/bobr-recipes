@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
-# List attribute names exported by the default package set in `pkgs.ncl`.
-# By default this uses `bobr-recipes/pkgs.ncl`, but you may pass an explicit
-# path to another `pkgs.ncl`-compatible file:
+# List attribute names (and package names) exported by the default package set
+# in `pkgs.ncl` — use it to pick a build target for `bobr-build.sh`. By default
+# it reads `bobr-recipes/pkgs.ncl`, but you may pass an explicit path to another
+# `pkgs.ncl`-compatible file:
 #
-#   tools/list-pkgs-attrs.sh
-#   tools/list-pkgs-attrs.sh ./pkgs.ncl
+#   tools/bobr-list-pkgs.sh
+#   tools/bobr-list-pkgs.sh ./pkgs.ncl
 
 set -euo pipefail
 
-script_dir="$(cd "$(dirname "$0")" && pwd)"
-recipes_root="$(cd "${script_dir}/.." && pwd)"
+script_path="$(readlink -f "${BASH_SOURCE[0]}")"
+recipes_root="$(cd "$(dirname "${script_path}")/.." && pwd)"
 default_pkgs="${recipes_root}/pkgs.ncl"
 
 if [ "$#" -gt 1 ]; then
