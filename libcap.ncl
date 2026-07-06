@@ -2,18 +2,20 @@ let recipe = import "recipe-lib.ncl" in
 let hashes = {
   "2.76" = "0b4ab42297fcc500b2f6bf7e84541f5efbe5bb2160343733bd153cb8ecbca4c5",
   "2.78" = "6db52bfba9d8b05756c369b7befa2b94d857e295d083b3423ec74bbfb8266e04",
-} in
+}
+in
 
 fun pkgs =>
-  let libcap_src = fun version => {
-    name = "libcap-src-%{version}",
-    tag = "Source",
-    object_hash = hashes."%{version}",
-    origin = {
-      tag = "Http",
-      url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-%{version}.tar.xz",
-    },
-  }
+  let libcap_src = fun version =>
+    {
+      name = "libcap-src-%{version}",
+      tag = "Source",
+      object_hash = hashes."%{version}",
+      origin = {
+        tag = "Http",
+        url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-%{version}.tar.xz",
+      },
+    }
   in
 
   let libcap = {

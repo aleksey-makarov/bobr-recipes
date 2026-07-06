@@ -2,18 +2,20 @@ let recipe = import "recipe-lib.ncl" in
 let hashes = {
   "2.8.0" = "f2c22be2fabadc5fd2465e1e2ae20dd9af7027c410cdbd12e0d9b491c302f4c3",
   "2.10.0" = "9b7925f9078134fbe9092e741bf00824822e5f2bf26871b6b2f07fccb691b522",
-} in
+}
+in
 
 fun pkgs =>
-  let kbd_src = fun version => {
-    name = "kbd-src-%{version}",
-    tag = "Source",
-    object_hash = hashes."%{version}",
-    origin = {
-      tag = "Http",
-      url = "https://www.kernel.org/pub/linux/utils/kbd/kbd-%{version}.tar.xz",
-    },
-  }
+  let kbd_src = fun version =>
+    {
+      name = "kbd-src-%{version}",
+      tag = "Source",
+      object_hash = hashes."%{version}",
+      origin = {
+        tag = "Http",
+        url = "https://www.kernel.org/pub/linux/utils/kbd/kbd-%{version}.tar.xz",
+      },
+    }
   in
 
   let kbd_backspace_patch = {

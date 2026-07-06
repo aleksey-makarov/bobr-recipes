@@ -2,18 +2,20 @@ let recipe = import "recipe-lib.ncl" in
 let hashes = {
   "3.5.2" = "3cba3886442fef568c647ca135acd74fcd6c469b1e49f61bca38b1eaa60bfe9d",
   "3.5.7" = "33845dfc342f1a135108c246dee86cbe77d09bde3b58e5e1e272c37da80392b4",
-} in
+}
+in
 
 fun pkgs =>
-  let openssl_src = fun version => {
-    name = "openssl-src-%{version}",
-    tag = "Source",
-    object_hash = hashes."%{version}",
-    origin = {
-      tag = "Http",
-      url = "https://github.com/openssl/openssl/releases/download/openssl-%{version}/openssl-%{version}.tar.gz",
-    },
-  }
+  let openssl_src = fun version =>
+    {
+      name = "openssl-src-%{version}",
+      tag = "Source",
+      object_hash = hashes."%{version}",
+      origin = {
+        tag = "Http",
+        url = "https://github.com/openssl/openssl/releases/download/openssl-%{version}/openssl-%{version}.tar.gz",
+      },
+    }
   in
 
   let buildscript_openssl = {

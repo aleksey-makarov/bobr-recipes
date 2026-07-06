@@ -2,18 +2,20 @@ let recipe = import "recipe-lib.ncl" in
 let hashes = {
   "3.5.2" = "afcddd52785db63850239f2d8c39472af103df9a251b35fd03475197eddaeed0",
   "3.6.0" = "85fb6048358a84f27b394991a14aec0f1cb8c686c75440f44bd973490ef08600",
-} in
+}
+in
 
 fun pkgs =>
-  let libffi_src = fun version => {
-    name = "libffi-src-%{version}",
-    tag = "Source",
-    object_hash = hashes."%{version}",
-    origin = {
-      tag = "Http",
-      url = "https://github.com/libffi/libffi/releases/download/v%{version}/libffi-%{version}.tar.gz",
-    },
-  }
+  let libffi_src = fun version =>
+    {
+      name = "libffi-src-%{version}",
+      tag = "Source",
+      object_hash = hashes."%{version}",
+      origin = {
+        tag = "Http",
+        url = "https://github.com/libffi/libffi/releases/download/v%{version}/libffi-%{version}.tar.gz",
+      },
+    }
   in
 
   let libffi = {

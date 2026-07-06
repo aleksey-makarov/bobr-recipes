@@ -1,18 +1,20 @@
 let recipe = import "recipe-lib.ncl" in
 let hashes = {
   "1.8.6" = "e9dba06bef8d9ac66966d9461d36f7aad24e27f1607017e57625abbf958bb37e",
-} in
+}
+in
 
 fun pkgs =>
-  let erofs_utils_src = fun version => {
-    name = "erofs-utils-src-%{version}",
-    tag = "Source",
-    object_hash = hashes."%{version}",
-    origin = {
-      tag = "Http",
-      url = "https://git.kernel.org/pub/scm/linux/kernel/git/xiang/erofs-utils.git/snapshot/erofs-utils-%{version}.tar.gz",
-    },
-  }
+  let erofs_utils_src = fun version =>
+    {
+      name = "erofs-utils-src-%{version}",
+      tag = "Source",
+      object_hash = hashes."%{version}",
+      origin = {
+        tag = "Http",
+        url = "https://git.kernel.org/pub/scm/linux/kernel/git/xiang/erofs-utils.git/snapshot/erofs-utils-%{version}.tar.gz",
+      },
+    }
   in
 
   let erofs_utils = {

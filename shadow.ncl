@@ -2,18 +2,20 @@ let recipe = import "recipe-lib.ncl" in
 let hashes = {
   "4.18.0" = "06a05b0ff7c6a9a249f9c5cf1783a122d6f5a4b1b0a7f7c00eea73240fb5cce1",
   "4.19.4" = "9569b68a1283e8f5a2187aef9e7ea4dd3e6fbc60991f115cf217b6a22f85c0ad",
-} in
+}
+in
 
 fun pkgs =>
-  let shadow_src = fun version => {
-    name = "shadow-src-%{version}",
-    tag = "Source",
-    object_hash = hashes."%{version}",
-    origin = {
-      tag = "Http",
-      url = "https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz",
-    },
-  }
+  let shadow_src = fun version =>
+    {
+      name = "shadow-src-%{version}",
+      tag = "Source",
+      object_hash = hashes."%{version}",
+      origin = {
+        tag = "Http",
+        url = "https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz",
+      },
+    }
   in
 
   let shadow_build_rootfs = {

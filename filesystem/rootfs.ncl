@@ -86,10 +86,12 @@ fun pkgs =>
   }
   in
   let erofs_rootfs =
-    recipe.erofs_image pkgs {
-      name = "erofs-rootfs",
-      tree = rootfs,
-    }
+    recipe.erofs_image
+      pkgs
+      {
+        name = "erofs-rootfs",
+        tree = rootfs,
+      }
   in
 
   {

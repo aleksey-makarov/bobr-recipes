@@ -2,24 +2,27 @@ let recipe = import "recipe-lib.ncl" in
 let hashes = {
   "9.1.1629" = "26169f05b9b8fba0aa69ae18d342fcffbe9a8512db287d1cb975112e9879e952",
   "9.2.0680" = "51947928a257debaf2f969a469b9005a5a3eb438a0d737d767d2ce3f9fd66acc",
-} in
+}
+in
 let runtime_dirs = {
   "9.1.1629" = "vim91",
   "9.2.0680" = "vim92",
-} in
+}
+in
 
 fun pkgs =>
-  let vim_src = fun version => {
-    name = "vim-src-%{version}",
-    tag = "Source",
-    object_hash = hashes."%{version}",
-    origin = {
-      tag = "Http",
-      url = [
-        "https://github.com/vim/vim/archive/v%{version}/vim-%{version}.tar.gz",
-      ],
-    },
-  }
+  let vim_src = fun version =>
+    {
+      name = "vim-src-%{version}",
+      tag = "Source",
+      object_hash = hashes."%{version}",
+      origin = {
+        tag = "Http",
+        url = [
+          "https://github.com/vim/vim/archive/v%{version}/vim-%{version}.tar.gz",
+        ],
+      },
+    }
   in
 
   let vim = {

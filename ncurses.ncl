@@ -84,11 +84,13 @@ fun pkgs =>
   in
 
   let ncurses_libs =
-    recipe.split.libs ncurses [
-      "usr/lib/*.so*",
-      "usr/share/terminfo/**",
-      "usr/share/tabset/**",
-    ]
+    recipe.split.libs
+      ncurses
+      [
+        "usr/lib/*.so*",
+        "usr/share/terminfo/**",
+        "usr/share/tabset/**",
+      ]
     & {
       deps = {
         build = [],
