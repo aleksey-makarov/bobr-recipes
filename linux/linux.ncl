@@ -46,55 +46,62 @@ fun pkgs =>
   }
   in
 
-  let linux_headers_gen1 = {
-    name = "linux-headers-gen1-%{version}",
-    tag = "SandboxBuildRootfs",
-    config = {
-      steps = [
-        recipe.prepare_source_step,
-        {
-          name = "configure",
-          run_as = "build-user",
-          cwd = "@{build}",
-          argv = ["@{script}"],
-          env = {
-            BOBR_LINUX_BUILD_KIND = "headers",
-            BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
-          },
+  # Kernel UAPI headers are config-independent: `make headers` extracts them
+  # from the source tree and generates the rest (`linux/version.h`, the
+  # asm-generic wrapper headers) without ever consuming `.config`. The two
+  # variants are the *same* recipe and differ only in the rootfs they build in:
+  #   - gen1: the OCI-derived buildpack rootfs, used to bootstrap system-rootfs
+  #     before a self-hosted toolchain exists;
+  #   - plain: our self-hosted `system_rootfs_2`, so regular packages compile
+  #     against the same headers the toolchain itself was built against.
+  let mk_linux_headers = fun variant =>
+    fun rootfs =>
+      let headers_env = {
+        BOBR_LINUX_BUILD_KIND = "headers",
+        BOBR_SOURCE_DIR = "@{build}/source",
+        BOBR_INSTALL_DIR = "@{out}",
+      }
+      in
+      {
+        name = "linux-headers%{variant}-%{version}",
+        tag = "SandboxBuildRootfs",
+        config = {
+          steps = [
+            recipe.prepare_source_step,
+            {
+              name = "configure",
+              run_as = "build-user",
+              cwd = "@{build}",
+              argv = ["@{script}"],
+              env = headers_env,
+            },
+            {
+              name = "build",
+              run_as = "build-user",
+              cwd = "@{build}",
+              argv = ["@{script}"],
+              env = headers_env,
+            },
+            {
+              name = "install",
+              run_as = "root",
+              cwd = "@{build}",
+              argv = ["@{script}"],
+              env = headers_env,
+            },
+          ],
+          script_config = {},
         },
-        {
-          name = "build",
-          run_as = "build-user",
-          cwd = "@{build}",
-          argv = ["@{script}"],
-          env = {
-            BOBR_LINUX_BUILD_KIND = "headers",
-            BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
-          },
+        inputs = {
+          _rootfs = rootfs,
+          script = buildscript_linux,
+          source = linux_source,
         },
-        {
-          name = "install",
-          run_as = "root",
-          cwd = "@{build}",
-          argv = ["@{script}"],
-          env = {
-            BOBR_LINUX_BUILD_KIND = "headers",
-            BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
-          },
-        },
-      ],
-      script_config = {},
-    },
-    inputs = {
-      _rootfs = pkgs.buildpack_deps_rootfs,
-      script = buildscript_linux,
-      source = linux_source,
-    },
-  }
+      }
   in
+
+  let linux_headers_gen1 = mk_linux_headers "-gen1" pkgs.buildpack_deps_rootfs in
+  let linux_headers = mk_linux_headers "" pkgs.system_rootfs_2 in
 
   let linux = {
     name = "linux-%{version}",
@@ -166,22 +173,6 @@ fun pkgs =>
       script = buildscript_linux,
       source = linux_source,
       kernel_config = linux_config,
-    },
-  }
-  in
-
-  let linux_headers = {
-    name = "linux-headers-%{version}",
-    tag = "TreeSubset",
-    deps = {
-      build = [],
-      runtime = [],
-    },
-    config = {
-      include = ["usr/include/**"],
-    },
-    inputs = {
-      tree = linux,
     },
   }
   in
