@@ -129,6 +129,19 @@ fun pkgs =>
             type = "dir",
             path = "var/log",
           },
+          # /var/run and /var/lock must be symlinks into /run, or systemd taints
+          # the manager with 'var-run-bad'. (The real rootfs has these via
+          # base_filesystem; the initrd builds its own minimal /var.)
+          {
+            type = "symlink",
+            path = "var/run",
+            target = "../run",
+          },
+          {
+            type = "symlink",
+            path = "var/lock",
+            target = "../run/lock",
+          },
           {
             type = "file",
             path = "usr/lib/udev/rules.d/99-systemd-minimal.rules",
