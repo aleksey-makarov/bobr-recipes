@@ -74,6 +74,11 @@ phase_install() {
     # where /lib is a symlink to usr/lib (installing to lib/modules would
     # collide with that symlink on TreeMerge).
     make INSTALL_MOD_PATH="$install_dir/usr" INSTALL_MOD_STRIP=1 modules_install
+    # modules_install leaves build/ (and source/) symlinks pointing at the
+    # ephemeral kernel build tree; they dangle in the final rootfs (we ship no
+    # build tree). Remove them -- they are only needed to build out-of-tree
+    # modules, and a broken symlink otherwise fails the rootfs check.
+    rm -f "$install_dir"/usr/lib/modules/*/build "$install_dir"/usr/lib/modules/*/source
   else
     install_bootstrap_headers
   fi
