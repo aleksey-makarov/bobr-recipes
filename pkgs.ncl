@@ -104,6 +104,10 @@ let base_modules = [
   import "tests/test-rootfs.ncl",
   import "tests/test-reports.ncl",
   import "vim.ncl",
+  import "libdrm.ncl",
+  import "mesa.ncl",
+  import "kmscube.ncl",
+  import "gnome.ncl",
   import "aggregate.ncl",
 ]
 in

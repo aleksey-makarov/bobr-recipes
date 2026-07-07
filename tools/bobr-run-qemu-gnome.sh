@@ -5,7 +5,7 @@
 # /dev/dri/card0 and can eventually run a graphical session. The serial console
 # is kept on the terminal (console=ttyS0) for debugging alongside the window.
 #
-# Boots pkgs.erofs_rootfs with pkgs.linux_bzimage and pkgs.initrd.
+# Boots pkgs.gnome_erofs_rootfs with pkgs.linux_bzimage and pkgs.initrd.
 #
 # Usage: bobr-run-qemu-gnome.sh [--store PATH] [-- QEMU_ARG ...]
 #   --store defaults to <recipes>/../bobr-store, matching bobr-build.sh.
@@ -72,7 +72,7 @@ build_object() {
 }
 
 kernel_path="${store_path}/objects/$(build_object linux_bzimage)/bzImage"
-image_path="${store_path}/objects/$(build_object erofs_rootfs)/erofs-rootfs.erofs"
+image_path="${store_path}/objects/$(build_object gnome_erofs_rootfs)/erofs-rootfs.erofs"
 initrd_path="${store_path}/objects/$(build_object initrd)"
 
 [ -f "${kernel_path}" ] || die "kernel image not found: ${kernel_path}"
