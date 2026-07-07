@@ -176,6 +176,9 @@ fun pkgs =>
         # certs/extract-cert (built for defconfig's signed-regdb / keyring
         # chain) needs OpenSSL headers + libcrypto at build time.
         pkgs.openssl,
+        # depmod (from kmod) is invoked by `make modules_install` to generate
+        # modules.dep/.alias so udev can autoload modules by modalias.
+        pkgs.kmod,
       ],
       runtime = [],
     },
@@ -247,11 +250,30 @@ fun pkgs =>
   }
   in
 
+  # All loadable modules + depmod metadata, split out of the linux fs-tree so
+  # the running system's rootfs can ship a full `/lib/modules/<release>`
+  # without also pulling in `boot/`. The initrd takes only the boot-critical
+  # subset (see filesystem/initrd.ncl); this is everything.
+  let linux_modules = {
+    name = "linux-modules-%{pkgs.linux.version}",
+    tag = "TreeSubset",
+    config = {
+      include = [
+        "usr/lib/modules/**",
+      ],
+    },
+    inputs = {
+      tree = pkgs.linux,
+    },
+  }
+  in
+
   {
     include [
       linux_headers_gen1,
       linux,
       linux_headers,
       linux_bzimage,
+      linux_modules,
     ],
   }

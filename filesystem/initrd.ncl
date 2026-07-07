@@ -396,6 +396,27 @@ fun pkgs =>
   }
   in
 
+  # Boot-critical kernel modules + depmod metadata, taken from the linux
+  # fs-tree. The rootfs is EROFS on virtio-blk (/dev/vda); with VIRTIO_BLK=m
+  # the driver must be present here so udev can autoload it by modalias and the
+  # device appears. EROFS/overlayfs are built-in, so only the block driver is
+  # needed. `modules.*` are depmod's alias/dep tables kmod reads to resolve and
+  # load the module; the full module set lives in the rootfs (linux_modules).
+  let initrd_modules = {
+    name = "initrd-modules",
+    tag = "TreeSubset",
+    config = {
+      include = [
+        "usr/lib/modules/*/kernel/drivers/block/virtio_blk.ko*",
+        "usr/lib/modules/*/modules.*",
+      ],
+    },
+    inputs = {
+      tree = pkgs.linux,
+    },
+  }
+  in
+
   let initrd_rootfs = {
     name = "initrd-rootfs",
     tag = "TreeMerge",
@@ -410,6 +431,7 @@ fun pkgs =>
       initrd_xz,
       initrd_zstd,
       initrd_zlib,
+      initrd_modules,
     ],
   }
   in
@@ -439,6 +461,7 @@ fun pkgs =>
       initrd_xz,
       initrd_zstd,
       initrd_zlib,
+      initrd_modules,
       initrd_rootfs,
       initrd,
     ],

@@ -49,7 +49,7 @@ phase_build() {
   fi
 
   jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-  make -j"${jobs}" bzImage
+  make -j"${jobs}" bzImage modules
 }
 
 install_bootstrap_headers() {
@@ -66,6 +66,14 @@ phase_install() {
     install -m0644 arch/x86/boot/bzImage "$install_dir/boot/bzImage"
     install -m0644 System.map "$install_dir/boot/System.map"
     install -m0644 .config "$install_dir/boot/kernel.config"
+    # Install loadable modules and let depmod (from kmod) generate
+    # modules.dep/.alias/... so udev can autoload by modalias.
+    # INSTALL_MOD_STRIP=1 drops debug info to keep the tree small. The kernel
+    # hardcodes lib/modules under INSTALL_MOD_PATH; we point it at usr so
+    # modules land in usr/lib/modules -- a real directory in the merged rootfs,
+    # where /lib is a symlink to usr/lib (installing to lib/modules would
+    # collide with that symlink on TreeMerge).
+    make INSTALL_MOD_PATH="$install_dir/usr" INSTALL_MOD_STRIP=1 modules_install
   else
     install_bootstrap_headers
   fi

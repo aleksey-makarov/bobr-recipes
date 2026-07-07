@@ -6,6 +6,7 @@ fun pkgs =>
     pkgs.man_pages,
     pkgs.iana_etc,
     pkgs.linux_headers,
+    pkgs.linux_modules,
     pkgs.glibc,
     pkgs.zlib,
     pkgs.bzip2,
