@@ -81,6 +81,19 @@
   EFI = 'y,
   EFI_STUB = 'y,
 
+  # Graphics: DRM/KMS + virtio-gpu, so a QEMU guest gets /dev/dri/card0 (see
+  # tools/bobr-run-qemu-gnome.sh). Pinned explicitly rather than inherited from
+  # `make defconfig`, so the graphics foundation is reproducible and does not
+  # drift when the kernel version or base config changes. DRM_FBDEV_EMULATION +
+  # FRAMEBUFFER_CONSOLE put the console on the DRM framebuffer; INPUT_EVDEV
+  # exposes /dev/input/event* for userspace input (libinput).
+  DRM = 'y,
+  DRM_VIRTIO_GPU = 'y,
+  DRM_FBDEV_EMULATION = 'y,
+  FB = 'y,
+  FRAMEBUFFER_CONSOLE = 'y,
+  INPUT_EVDEV = 'm,
+
   # Local build tag.
   LOCALVERSION = "-bobr",
 }
