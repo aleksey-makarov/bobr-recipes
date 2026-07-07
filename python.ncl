@@ -79,6 +79,32 @@ fun pkgs =>
   }
   in
 
+  let mako_src = {
+    name = "mako-src-1.3.12",
+    tag = "Source",
+    object_hash = "29abf9d272e5e78306ae3a4cf3b5a4680699e538dd4f7d139d425955fb6ab6f2",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://pypi.org/packages/source/M/Mako/mako-1.3.12.tar.gz",
+      ],
+    },
+  }
+  in
+
+  let pyyaml_src = {
+    name = "pyyaml-src-6.0.3",
+    tag = "Source",
+    object_hash = "7e903ce8cce47dc3ca5a86ca0affaa0e1f7c51cb4e807c6083df75b89e25b0f7",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://pypi.org/packages/source/P/PyYAML/pyyaml-6.0.3.tar.gz",
+      ],
+    },
+  }
+  in
+
   let jinja2_src = {
     name = "jinja2-src-3.1.6",
     tag = "Source",
@@ -228,6 +254,8 @@ fun pkgs =>
         "wheel",
         "setuptools",
         "MarkupSafe",
+        "Mako",
+        "PyYAML",
         "Jinja2",
         "meson",
       ],
@@ -240,6 +268,11 @@ fun pkgs =>
             "/bin/bash",
             "@{modules_helper}",
           ],
+          # Build PyYAML as pure Python: the build rootfs has neither Cython nor
+          # libyaml, and this skips the optional C extension instead of failing.
+          env = {
+            PYYAML_FORCE_LIBYAML = "0",
+          },
         },
         {
           name = "link_python",
@@ -262,6 +295,8 @@ fun pkgs =>
       wheel = wheel_src,
       setuptools = setuptools_src,
       MarkupSafe = markupsafe_src,
+      Mako = mako_src,
+      PyYAML = pyyaml_src,
       Jinja2 = jinja2_src,
       meson = meson_src,
       ninja = ninja_src,
