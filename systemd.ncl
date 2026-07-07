@@ -58,6 +58,8 @@ fun pkgs =>
         pkgs.libxcrypt_libs,
         pkgs.openssl_libs,
         pkgs.util_linux_libs,
+        # udevd's kmod builtin (module autoloading by modalias) links libkmod.
+        pkgs.kmod_libs,
       ],
     },
     config = {
@@ -77,6 +79,11 @@ fun pkgs =>
       setup_args = [
         "--buildtype=release",
         "--libdir=/usr/lib",
+        # Enable the kmod integration (udev module autoloading by modalias via
+        # the kmod builtin + 80-drivers.rules). Required, not auto: fail loudly
+        # if libkmod is ever not found rather than silently shipping a udev
+        # that cannot load modules.
+        "-Dkmod=enabled",
         "-Ddefault-dnssec=no",
         "-Dfirstboot=false",
         "-Dinstall-tests=false",

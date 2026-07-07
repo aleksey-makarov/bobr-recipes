@@ -205,6 +205,9 @@ fun pkgs =>
         "usr/lib/systemd/systemd-udevd",
         "usr/lib/systemd/systemd-volatile-root",
         "usr/lib/systemd/system-generators/systemd-fstab-generator",
+        # Autoload kernel modules by modalias during udev coldplug (kmod
+        # builtin), so virtio_blk gets loaded and /dev/vda appears.
+        "usr/lib/udev/rules.d/80-drivers.rules",
         "usr/lib/systemd/system/basic.target",
         "usr/lib/systemd/system/initrd-cleanup.service",
         "usr/lib/systemd/system/initrd-fs.target",
@@ -258,7 +261,7 @@ fun pkgs =>
     config = {
       include = [
         "usr/bin/kmod",
-        "usr/lib64/libkmod.so*",
+        "usr/lib/libkmod.so*",
         "usr/bin/depmod",
         "usr/bin/insmod",
         "usr/bin/lsmod",

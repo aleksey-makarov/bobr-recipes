@@ -39,6 +39,10 @@ fun pkgs =>
       setup_args = [
         "--buildtype=release",
         "--sbindir=/usr/bin",
+        # Install libs (and libkmod.pc) to /usr/lib, not the meson default
+        # /usr/lib64: that is where pkg-config looks, so systemd's `-Dkmod`
+        # can find libkmod and enable udev module autoloading.
+        "--libdir=/usr/lib",
         "-Dmanpages=false",
       ],
     },
@@ -48,8 +52,30 @@ fun pkgs =>
   }
   in
 
+  # Shared libkmod for runtime linkers (systemd-udevd's kmod builtin, the kmod
+  # tools themselves). depends on the compression/crypto libs libkmod is built
+  # against (see libkmod_deps in kmod's meson.build).
+  let kmod_libs =
+    recipe.split.libs kmod [
+      "usr/lib/libkmod.so*",
+    ]
+    & {
+      deps = {
+        build = [],
+        runtime = [
+          pkgs.glibc_libs,
+          pkgs.openssl_libs,
+          pkgs.xz_libs,
+          pkgs.zstd,
+          pkgs.zlib,
+        ],
+      },
+    }
+  in
+
   {
     include [
       kmod,
+      kmod_libs,
     ],
   }
