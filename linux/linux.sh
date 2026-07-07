@@ -50,11 +50,6 @@ phase_build() {
   make -j"${jobs}" bzImage
 }
 
-install_headers_with_rsync() {
-  mkdir -p "$install_dir/usr"
-  make headers_install INSTALL_HDR_PATH="$install_dir/usr"
-}
-
 install_bootstrap_headers() {
   mkdir -p "$install_dir/usr"
   cp -rv usr/include "$install_dir/usr"
@@ -69,7 +64,6 @@ phase_install() {
     install -m0644 arch/x86/boot/bzImage "$install_dir/boot/bzImage"
     install -m0644 System.map "$install_dir/boot/System.map"
     install -m0644 .config "$install_dir/boot/kernel.config"
-    install_headers_with_rsync
   else
     install_bootstrap_headers
   fi

@@ -126,7 +126,6 @@ fun pkgs =>
         pkgs.zlib,
         pkgs.elfutils,
         pkgs.perl,
-        pkgs.rsync,
       ],
       runtime = [],
     },
