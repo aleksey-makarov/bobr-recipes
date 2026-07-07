@@ -173,6 +173,9 @@ fun pkgs =>
         pkgs.zlib,
         pkgs.elfutils,
         pkgs.perl,
+        # certs/extract-cert (built for defconfig's signed-regdb / keyring
+        # chain) needs OpenSSL headers + libcrypto at build time.
+        pkgs.openssl,
       ],
       runtime = [],
     },
