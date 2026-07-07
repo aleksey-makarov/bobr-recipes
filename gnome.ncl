@@ -91,6 +91,8 @@ fun pkgs =>
         pkgs.rootfs,
         pkgs.libdrm,
         pkgs.mesa,
+        pkgs.vulkan_loader,
+        pkgs.vulkan_tools,
         pkgs.kmscube,
         # Wayland session stack (step 3: Weston via seatd).
         pkgs.libpng,

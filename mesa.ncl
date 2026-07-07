@@ -12,12 +12,17 @@ fun pkgs =>
   }
   in
 
-  # Accel-only graphics stack for a QEMU virtio-gpu guest: the virgl Gallium
-  # driver forwards GL to the host via virglrenderer (qemu -device
-  # virtio-vga-gl, gl=on). No LLVM (so no llvmpipe software fallback -- we
-  # assume a working host GL), no Vulkan yet (see TODO_vulkan_guest.md), and no
-  # window-system platforms (kmscube drives KMS/GBM directly, EGL uses the GBM
-  # platform).
+  # Graphics stack for a QEMU virtio-gpu guest. GL/GLES goes through the virgl
+  # Gallium driver, whose scanout presents to the qemu window; the venus/blob
+  # scanout does not display on the current qemu 10.1 / virglrenderer 1.2 (the
+  # guest renders and issues set_scanout_blob + flush without error, but nothing
+  # appears -- only classic transfer-based scanouts show). The venus Vulkan
+  # driver (`virtio`) forwards Vulkan to the host for Vulkan apps; zink
+  # (GL-on-Vulkan) is built too but is not the default for virtio-gpu. No LLVM,
+  # The Wayland platform (-Dplatforms=wayland) makes Mesa's WSI advertise
+  # VK_KHR_wayland_surface (venus) and provide the Wayland EGL platform, so
+  # Wayland GL/Vulkan clients (incl. the GNOME session) can create surfaces.
+  # Zink/venus need the Vulkan headers at build and the loader at runtime.
   let mesa = {
     name = "mesa-%{version}",
     tag = "Meson",
@@ -29,6 +34,9 @@ fun pkgs =>
         pkgs.expat,
         pkgs.bison,
         pkgs.flex,
+        pkgs.vulkan_headers,
+        pkgs.wayland,
+        pkgs.wayland_protocols,
       ],
       runtime = [
         pkgs.glibc_libs,
@@ -37,15 +45,17 @@ fun pkgs =>
         pkgs.zlib,
         pkgs.zstd,
         pkgs.expat,
+        pkgs.vulkan_loader,
+        pkgs.wayland,
       ],
     },
     config = {
       setup_args = [
         "--buildtype=release",
         "--libdir=/usr/lib",
-        "-Dplatforms=",
-        "-Dgallium-drivers=virgl",
-        "-Dvulkan-drivers=",
+        "-Dplatforms=wayland",
+        "-Dgallium-drivers=virgl,zink",
+        "-Dvulkan-drivers=virtio",
         "-Dllvm=disabled",
         "-Dgbm=enabled",
         "-Degl=enabled",
