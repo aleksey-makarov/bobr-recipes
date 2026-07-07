@@ -17,4 +17,12 @@ else
   done
 fi
 
+# Source drop-in scripts (env vars, shell integration, etc.).
+if [ -d /etc/profile.d ]; then
+  for script in /etc/profile.d/*.sh; do
+    [ -r "$script" ] && . "$script"
+  done
+  unset script
+fi
+
 # End /etc/profile
