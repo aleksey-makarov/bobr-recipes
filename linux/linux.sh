@@ -5,7 +5,6 @@ phase="${BOBR_STEP_NAME:?BOBR_STEP_NAME is required}"
 build_kind="${BOBR_LINUX_BUILD_KIND:-full}"
 source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
 install_dir="${BOBR_INSTALL_DIR:?BOBR_INSTALL_DIR is required}"
-kernel_config="$BOBR_INPUTS_DIR/kernel_config"
 
 export ARCH=x86_64
 export KBUILD_BUILD_USER=bobr
@@ -29,7 +28,10 @@ phase_configure() {
   make mrproper
 
   if [ "$build_kind" = "full" ]; then
-    cp "$kernel_config" .config
+    # Base config from the kernel's own defconfig/tinyconfig, then merge our
+    # data-driven fragment (materialized via script_config) on top.
+    make "${BOBR_LINUX_CONFIG_BASE:?BOBR_LINUX_CONFIG_BASE is required}"
+    ./scripts/kconfig/merge_config.sh -m .config "${BOBR_CONFIG_DIR:?BOBR_CONFIG_DIR is required}/config.fragment"
     make olddefconfig
   fi
 }
