@@ -79,22 +79,26 @@ initrd_path="${store_path}/objects/$(build_object initrd)"
 [ -f "${image_path}" ] || die "EROFS rootfs not found: ${image_path}"
 [ -f "${initrd_path}" ] || die "initrd not found: ${initrd_path}"
 
-# virtio-vga-gl provides the virtio-gpu (DRM card0) plus VGA compatibility and
-# virgl acceleration; -vga none disables the default emulated VGA so it is the
-# only display adapter. virtio input devices give the guest a keyboard and a
-# tablet (absolute pointer). The serial console stays multiplexed on stdio via
-# -serial mon:stdio (replacing the base script's -nographic).
+# virtio-gpu-gl with venus=true exposes a Vulkan (venus) GPU to the guest; blob
+# resources + hostmem need a shared memory backend (memfd, share=on) wired via
+# -machine memory-backend=mem (machine type stays the qemu default -- venus does
+# not require q35). -vga none leaves virtio-gpu-gl as the only display adapter.
+# virtio input devices give a keyboard and a tablet (absolute pointer); the
+# serial console stays multiplexed on stdio via -serial mon:stdio.
+mem_mb="${QEMU_MEM_MB:-4096}"
 exec qemu-system-x86_64 \
   -enable-kvm \
   -cpu host \
-  -m "${QEMU_MEM_MB:-4096}" \
+  -m "${mem_mb}" \
+  -object "memory-backend-memfd,id=mem,size=${mem_mb}M,share=on" \
+  -machine memory-backend=mem \
   -smp "${QEMU_SMP:-2}" \
   -kernel "${kernel_path}" \
   -initrd "${initrd_path}" \
   -drive "file=${image_path},format=raw,if=virtio,readonly=on" \
   -nic user,model=virtio-net-pci \
   -vga none \
-  -device virtio-vga-gl \
+  -device virtio-gpu-gl,blob=true,hostmem=4G,venus=true \
   -display "${QEMU_DISPLAY:-sdl,gl=on}" \
   -device virtio-keyboard-pci \
   -device virtio-tablet-pci \
