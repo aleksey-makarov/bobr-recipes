@@ -191,6 +191,37 @@ EOF_INNER
   fi
 }
 
+assert_present() {
+  local label="$1"
+  shift
+  local candidate
+  for candidate in "$@"; do
+    if [ -e "$candidate" ]; then
+      log_ok "present: ${label} (${candidate})"
+      return 0
+    fi
+  done
+  log_fail "missing: ${label}"
+  return 0
+}
+
+run_graphics_check() {
+  # Static presence check for the accel-only graphics stack (libdrm + Mesa/virgl
+  # + kmscube). The main ELF/ldd scan already verifies these resolve their
+  # shared libraries; this asserts the key artifacts exist at all, so a broken
+  # Mesa configuration (e.g. gbm/egl/virgl not built) is caught. Unmatched globs
+  # stay literal and fail the -e check.
+  log_check "graphics stack files are present"
+  assert_present "kmscube" /usr/bin/kmscube
+  assert_present "libdrm" /usr/lib/libdrm.so*
+  assert_present "libgbm" /usr/lib/libgbm.so*
+  assert_present "libEGL" /usr/lib/libEGL.so*
+  assert_present "libGLESv2" /usr/lib/libGLESv2.so*
+  # The gallium driver: modern Mesa (24+) ships a single libgallium-<ver>.so in
+  # libdir; older Mesa installed per-driver dri/*_dri.so. Accept either.
+  assert_present "gallium driver" /usr/lib/libgallium-*.so /usr/lib/dri/*_dri.so
+}
+
 if ! command -v ldd >/dev/null 2>&1; then
   status="error"
   have_ldd="no"
@@ -278,6 +309,13 @@ fi
     run_python_check
   else
     echo "INFO  python check disabled"
+  fi
+
+  echo
+  if config_flag check_graphics; then
+    run_graphics_check
+  else
+    echo "INFO  graphics check disabled"
   fi
 
   if [ "$failures" -ne 0 ]; then

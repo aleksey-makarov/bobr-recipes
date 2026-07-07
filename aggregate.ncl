@@ -27,6 +27,7 @@ fun pkgs =>
         pkgs.linux,
         pkgs.erofs_rootfs,
         pkgs.initrd,
+        pkgs.gnome_erofs_rootfs,
       ],
   }
   in
