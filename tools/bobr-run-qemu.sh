@@ -11,6 +11,8 @@
 # Usage: bobr-run-qemu.sh [--store PATH] [-- QEMU_ARG ...]
 #   --store defaults to <recipes>/../bobr-store, matching bobr-build.sh.
 #   QEMU_MEM_MB (default 1024) and QEMU_SMP (default 2) tune the VM.
+#   QEMU_HOME_IMG (default <recipes>/../home.img) is a persistent ext4 disk
+#   mounted at /home in the guest; auto-created sparse (1 GiB) if missing.
 
 set -euo pipefail
 
@@ -34,7 +36,7 @@ while [ "$#" -gt 0 ]; do
       shift 2
       ;;
     -h | --help)
-      sed -n '3,14p' "${script_path}" | sed 's/^# \{0,1\}//'
+      sed -n '3,16p' "${script_path}" | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     --)
@@ -77,6 +79,21 @@ initrd_path="${store_path}/objects/$(build_object initrd)"
 [ -f "${image_path}" ] || die "EROFS rootfs not found: ${image_path}"
 [ -f "${initrd_path}" ] || die "initrd not found: ${initrd_path}"
 
+# Persistent /home on a second virtio-blk disk (guest /dev/vdb, mounted at /home
+# via fstab -- the same fstab is shared with the gnome rootfs). This is mutable
+# user state, not a build artifact, so it lives outside the store. Create it
+# sparse and format ext4 on first use; reuse it on later runs. Defaults to a
+# separate file from the gnome runner; set QEMU_HOME_IMG to the same path in
+# both to share one /home.
+home_img="${QEMU_HOME_IMG:-$(realpath -ms -- "${recipes_path}/../home.img")}"
+if [ ! -e "${home_img}" ]; then
+  command -v mkfs.ext4 >/dev/null 2>&1 || die "mkfs.ext4 not found (needed to create ${home_img})"
+  echo "creating persistent home disk: ${home_img} (sparse 1 GiB ext4)" >&2
+  truncate -s 1G "${home_img}" || die "failed to allocate ${home_img}"
+  mkfs.ext4 -q -F -E lazy_itable_init=1,lazy_journal_init=1 "${home_img}" \
+    || die "mkfs.ext4 failed on ${home_img}"
+fi
+
 exec qemu-system-x86_64 \
   -enable-kvm \
   -cpu host \
@@ -85,6 +102,7 @@ exec qemu-system-x86_64 \
   -kernel "${kernel_path}" \
   -initrd "${initrd_path}" \
   -drive "file=${image_path},format=raw,if=virtio,readonly=on" \
+  -drive "file=${home_img},format=raw,if=virtio" \
   -nic user,model=virtio-net-pci \
   -append "${APPEND}" \
   -nographic \
