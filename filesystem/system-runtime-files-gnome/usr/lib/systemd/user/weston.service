@@ -17,6 +17,11 @@ After=graphical-session-pre.target
 Type=simple
 Environment=XDG_SESSION_TYPE=wayland
 Environment=LIBSEAT_BACKEND=logind
+# Cursor theme/size for Wayland clients (weston-terminal, GTK apps, ...) that
+# inherit this env. Without XCURSOR_SIZE clients pick an oversized default.
+# Interim until GNOME/gsettings (org.gnome.desktop.interface cursor-*) lands.
+Environment=XCURSOR_THEME=Bibata-Modern-Classic
+Environment=XCURSOR_SIZE=16
 ExecStart=/usr/bin/weston --backend=drm
 Restart=always
 RestartSec=1

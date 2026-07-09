@@ -1,0 +1,7 @@
+# Default cursor theme/size for GNOME (org.gnome.desktop.interface, from
+# gsettings-desktop-schemas). Applied by glib-compile-schemas in the gnome_rootfs
+# finalize step. This is the proper knob for the client cursor size (XCURSOR_SIZE
+# is ignored by GTK4 on Wayland).
+[org.gnome.desktop.interface]
+cursor-theme='Bibata-Modern-Classic'
+cursor-size=16
