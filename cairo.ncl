@@ -24,7 +24,7 @@ fun pkgs =>
         pkgs.fontconfig,
         pkgs.libpng,
         pkgs.zlib,
-        pkgs.expat,
+        pkgs.glib,
       ],
       runtime = [
         pkgs.glibc_libs,
@@ -33,6 +33,7 @@ fun pkgs =>
         pkgs.fontconfig,
         pkgs.libpng,
         pkgs.zlib,
+        pkgs.glib,
       ],
     },
     config = {
@@ -51,6 +52,8 @@ fun pkgs =>
         "-Dfontconfig=enabled",
         "-Dpng=enabled",
         "-Dzlib=enabled",
+        # cairo-gobject: needed by pango/GTK4. Was off for the Weston bring-up.
+        "-Dglib=enabled",
       ],
     },
     inputs = {

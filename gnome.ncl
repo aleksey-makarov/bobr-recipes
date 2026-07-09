@@ -82,8 +82,8 @@ fun pkgs =>
   }
   in
 
-  let gnome_rootfs = {
-    name = "gnome-rootfs",
+  let gnome_rootfs_contents = {
+    name = "gnome-rootfs-contents",
     tag = "TreeMerge",
     config = {},
     inputs =
@@ -115,7 +115,103 @@ fun pkgs =>
         pkgs.bibata_cursors,
         pkgs.weston,
         weston_config,
+        # GNOME/GTK4 library stack (step 6a). Runtime artifacts only: glib_gen1
+        # is a build-only intermediate (its libs are identical to glib's).
+        pkgs.pcre2,
+        pkgs.libxml2,
+        pkgs.libjpeg_turbo,
+        pkgs.libtiff,
+        pkgs.glib,
+        pkgs.gobject_introspection,
+        pkgs.graphene,
+        pkgs.fribidi,
+        pkgs.harfbuzz,
+        pkgs.pango,
+        pkgs.libepoxy,
+        pkgs.shared_mime_info,
+        pkgs.gdk_pixbuf,
+        pkgs.gtk4,
+        pkgs.hicolor_icon_theme,
+        pkgs.adwaita_icon_theme,
+        # 6b (mutter deps so far)
+        pkgs.json_glib,
+        pkgs.gsettings_desktop_schemas,
       ],
+  }
+  in
+
+  # Build env holding the aggregate-cache generators (glib-compile-schemas and
+  # gio-querymodules from glib, gdk-pixbuf-query-loaders from gdk-pixbuf,
+  # gtk4-update-icon-cache from gtk4) plus a shell/coreutils.
+  let gnome_rootfs_cache_env = {
+    name = "gnome-rootfs-cache-env",
+    tag = "RootfsClosure",
+    config = {},
+    inputs = {
+      gtk4 = pkgs.gtk4,
+      glib = pkgs.glib,
+      gdk_pixbuf = pkgs.gdk_pixbuf,
+      bash = pkgs.bash,
+      coreutils = pkgs.coreutils,
+      sed = pkgs.sed,
+    },
+  }
+  in
+
+  # Finalize the merged tree with the aggregate GNOME caches. These index files
+  # contributed by many packages and cannot be regenerated on the read-only /usr
+  # at runtime, so they are baked here at build time (as rpm-ostree/mkosi do).
+  let gnome_rootfs = {
+    name = "gnome-rootfs",
+    tag = "SandboxBuildRootfs",
+    config = {
+      steps = [
+        {
+          name = "finalize_caches",
+          run_as = "root",
+          cwd = "@{out}",
+          argv = [
+            "/bin/bash",
+            "-ec",
+            m%"
+              out="$BOBR_OUT_DIR"
+              cp -a "$BOBR_INPUTS_DIR/_tree/." "$out/"
+
+              # GSettings schemas -> gschemas.compiled
+              if [ -d "$out/usr/share/glib-2.0/schemas" ]; then
+                glib-compile-schemas "$out/usr/share/glib-2.0/schemas"
+              fi
+
+              # gdk-pixbuf loaders.cache. The tool writes absolute loader paths;
+              # strip the build-time $out prefix so they are the runtime /usr
+              # paths.
+              gdkdir="$out/usr/lib/gdk-pixbuf-2.0/2.10.0"
+              if [ -d "$gdkdir/loaders" ]; then
+                GDK_PIXBUF_MODULEDIR="$gdkdir/loaders" \
+                  gdk-pixbuf-query-loaders > "$gdkdir/loaders.cache"
+                sed -i "s|$out||g" "$gdkdir/loaders.cache"
+              fi
+
+              # GIO modules cache (stores basenames, no prefix to strip)
+              if [ -d "$out/usr/lib/gio/modules" ]; then
+                gio-querymodules "$out/usr/lib/gio/modules"
+              fi
+
+              # Icon theme caches
+              for theme in Adwaita hicolor; do
+                if [ -d "$out/usr/share/icons/$theme" ]; then
+                  gtk4-update-icon-cache -qtf "$out/usr/share/icons/$theme"
+                fi
+              done
+            "%,
+          ],
+        },
+      ],
+    },
+    inputs = {
+      _rootfs = gnome_rootfs_cache_env,
+      _tree = gnome_rootfs_contents,
+    },
   }
   in
 

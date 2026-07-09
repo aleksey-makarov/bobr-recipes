@@ -1,0 +1,59 @@
+# libepoxy -- GL/EGL function-pointer dispatch, used by GTK4. It dlopens the GL
+# stack (Mesa) at runtime; X11/GLX off (pure Wayland/EGL). `version`/`hashes`
+# are node fields (overridable), as in linux.ncl.
+let default_version = "1.5.10" in
+let default_hashes = {
+  "1.5.10" = "52b4e77df6dd0f76f2799478f1c4654a58cf8a581bc1c3776832b8d1126d8d5f",
+}
+in
+
+fun pkgs =>
+  let mk_src = fun version =>
+    fun hash =>
+      {
+        name = "libepoxy-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/anholt/libepoxy/archive/refs/tags/%{version}.tar.gz",
+        },
+      }
+  in
+
+  let libepoxy = {
+    version | default = default_version,
+    hashes | default = default_hashes,
+    name = "libepoxy-%{version}",
+    tag = "Meson",
+    deps = {
+      build = [
+        pkgs.mesa,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.mesa,
+      ],
+    },
+    config = {
+      setup_args = [
+        "--buildtype=release",
+        "--libdir=/usr/lib",
+        "-Dglx=no",
+        "-Degl=yes",
+        "-Dx11=false",
+        "-Dtests=false",
+        "-Ddocs=false",
+      ],
+    },
+    inputs = {
+      source = mk_src version (hashes."%{version}"),
+    },
+  }
+  in
+
+  {
+    include [
+      libepoxy,
+    ],
+  }

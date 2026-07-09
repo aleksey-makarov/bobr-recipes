@@ -1,0 +1,80 @@
+# pango -- text layout, used by GTK4. Uses harfbuzz (shaping), fribidi (bidi),
+# cairo (rendering), fontconfig/freetype (fonts). Xft off (no X).
+# `version`/`hashes` are node fields (overridable), as in linux.ncl.
+let default_version = "1.56.4" in
+let default_hashes = {
+  "1.56.4" = "070fa7bad21997dd688e4a70819f98f167207426206dafd18a5b9c8178de209d",
+}
+in
+
+let branch = fun version =>
+  let m = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
+  if m.index == 0 && std.array.length m.groups == 1 then std.array.at 0 m.groups
+  else std.fail_with "pango.ncl: version must be MAJOR.MINOR.PATCH"
+in
+
+fun pkgs =>
+  let mk_src = fun version =>
+    fun hash =>
+      {
+        name = "pango-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://download.gnome.org/sources/pango/%{branch version}/pango-%{version}.tar.xz",
+        },
+      }
+  in
+
+  let pango = {
+    version | default = default_version,
+    hashes | default = default_hashes,
+    name = "pango-%{version}",
+    tag = "Meson",
+    deps = {
+      build = [
+        pkgs.glib,
+        pkgs.harfbuzz,
+        pkgs.fribidi,
+        pkgs.cairo,
+        pkgs.fontconfig,
+        pkgs.freetype,
+        pkgs.gobject_introspection,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.glib,
+        pkgs.harfbuzz,
+        pkgs.fribidi,
+        pkgs.cairo,
+        pkgs.fontconfig,
+        pkgs.freetype,
+      ],
+    },
+    config = {
+      setup_args = [
+        "--buildtype=release",
+        "--libdir=/usr/lib",
+        "-Dintrospection=enabled",
+        "-Dxft=disabled",
+        "-Dsysprof=disabled",
+        "-Dlibthai=disabled",
+        "-Dbuild-testsuite=false",
+        "-Dbuild-examples=false",
+        "-Ddocumentation=false",
+        "-Dgtk_doc=false",
+        "-Dman-pages=false",
+      ],
+    },
+    inputs = {
+      source = mk_src version (hashes."%{version}"),
+    },
+  }
+  in
+
+  {
+    include [
+      pango,
+    ],
+  }
