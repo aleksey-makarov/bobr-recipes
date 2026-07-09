@@ -89,6 +89,9 @@ fun pkgs =>
     inputs =
       recipe.numbered_inputs [
         pkgs.rootfs,
+        # Graphics-only runtime files (tty1 autologin, weston user service +
+        # graphical-session wiring); kept out of the plain rootfs.
+        pkgs.system_runtime_files_gnome,
         pkgs.libdrm,
         pkgs.mesa,
         pkgs.vulkan_loader,

@@ -1,0 +1,22 @@
+# Weston compositor as the graphical session, run as a systemd --user service.
+# Stand-in for gnome-session until the GNOME stack lands; the launch path (user
+# service + devices via logind) is what gnome-session/mutter will reuse. Started
+# for the tty1/seat0 login by the /etc/profile.d guard, which also imports the
+# login session's XDG_SESSION_ID into the user manager so libseat's logind
+# backend can take control of seat0.
+[Unit]
+Description=Weston Wayland compositor (graphical session)
+# graphical-session.target refuses manual start; the compositor brings it up by
+# pulling it in as a dependency. Auxiliary graphical services (later) bind with
+# PartOf=graphical-session.target so they stop when the session ends.
+Wants=graphical-session.target
+Before=graphical-session.target
+After=graphical-session-pre.target
+
+[Service]
+Type=simple
+Environment=XDG_SESSION_TYPE=wayland
+Environment=LIBSEAT_BACKEND=logind
+ExecStart=/usr/bin/weston --backend=drm
+Restart=always
+RestartSec=1

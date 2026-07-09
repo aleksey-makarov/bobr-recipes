@@ -93,6 +93,7 @@ let base_modules = [
   import "glibc.ncl",
   import "filesystem/base-filesystem.ncl",
   import "filesystem/system-runtime-files.ncl",
+  import "filesystem/system-runtime-files-gnome.ncl",
   import "filesystem/rootfs.ncl",
   import "filesystem/initrd.ncl",
   import "system-rootfs.ncl",
