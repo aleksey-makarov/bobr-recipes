@@ -1,0 +1,6 @@
+# PAM config for the console login program (shadow's `login`, invoked by
+# `agetty --autologin user`). Just defer to the shared system-auth stack.
+auth      include  system-auth
+account   include  system-auth
+password  include  system-auth
+session   include  system-auth

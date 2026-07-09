@@ -3,3 +3,7 @@ tmpfs /var/tmp tmpfs mode=1777,nosuid,nodev 0 0
 tmpfs /var/log tmpfs mode=0755,nosuid,nodev 0 0
 tmpfs /var/lib/systemd tmpfs mode=0755,nosuid,nodev 0 0
 tmpfs /root tmpfs mode=0700,nosuid,nodev 0 0
+# Persistent home on a second virtio-blk disk (see tools/bobr-run-qemu-gnome.sh,
+# QEMU_HOME_IMG). nofail: the ephemeral overlay /home is used if the disk is
+# absent; passno 0 skips the boot fsck.
+/dev/vdb /home ext4 defaults,nofail 0 0

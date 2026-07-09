@@ -1,0 +1,12 @@
+# Shared PAM stack, included by the login service. Modules live in
+# /usr/lib/security. pam_systemd registers the logind session (seat,
+# XDG_RUNTIME_DIR=/run/user/UID, device ACLs) -- the whole point of enabling
+# PAM. pam_loginuid stamps the audit login uid. With passwordless autologin
+# (login -f) the auth line is skipped, but account+session still run, so
+# pam_systemd fires.
+auth      required  pam_unix.so
+account   required  pam_unix.so
+password  required  pam_unix.so
+session   required  pam_loginuid.so
+session   required  pam_unix.so
+session   optional  pam_systemd.so

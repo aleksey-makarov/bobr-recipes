@@ -26,6 +26,7 @@ fun pkgs =>
       { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.libxcrypt,
+        pkgs.linux_pam,
         pkgs.pkgconf,
         pkgs.systemd_dev,
       ],
@@ -61,6 +62,13 @@ fun pkgs =>
         "--sysconfdir=/etc",
         "--sbindir=/usr/bin",
         "--disable-static",
+        # Build login/su/passwd against PAM so they consult /etc/pam.d/*. This is
+        # required for logind: login's PAM session stack runs pam_systemd, which
+        # registers the session (without PAM, login authenticates on its own and
+        # never opens a PAM session). PAM-enabled tools other than `login` need
+        # their own /etc/pam.d/<tool> file or they fall through to `other`
+        # (deny); only `login` is provided for now.
+        "--with-libpam",
         "--with-bcrypt",
         "--with-yescrypt",
         "--without-libbsd",
@@ -77,7 +85,14 @@ fun pkgs =>
         argv = [
           "/bin/sh",
           "-ec",
-          "make DESTDIR=\"@{out}\" -C man install-man",
+          # Drop shadow's own /etc/pam.d/login: we ship our own (with
+          # pam_systemd) in system-runtime-files, and shadow's references the
+          # removed pam_securetty.so. The other shadow pam.d files (su, passwd,
+          # ...) are unique and defer to our /etc/pam.d/system-auth, so keep them.
+          m%"
+            make DESTDIR="@{out}" -C man install-man
+            rm -f "@{out}/etc/pam.d/login"
+          "%,
         ],
       },
     },

@@ -38,6 +38,7 @@ let base_modules = [
   import "acl.ncl",
   import "libxcrypt.ncl",
   import "shadow.ncl",
+  import "linux-pam.ncl",
   import "ncurses.ncl",
   import "less.ncl",
   import "zlib.ncl",

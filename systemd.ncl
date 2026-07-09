@@ -48,6 +48,7 @@ fun pkgs =>
         pkgs.kmod,
         pkgs.libcap,
         pkgs.libxcrypt,
+        pkgs.linux_pam,
         pkgs.openssl,
         pkgs.util_linux,
       ],
@@ -56,6 +57,8 @@ fun pkgs =>
         pkgs.acl_libs,
         pkgs.libcap_libs,
         pkgs.libxcrypt_libs,
+        # pam_systemd.so links libpam.so.0 (built once -Dpam=enabled).
+        pkgs.linux_pam_libs,
         pkgs.openssl_libs,
         pkgs.util_linux_libs,
         # udevd's kmod builtin (module autoloading by modalias) links libkmod.
@@ -93,7 +96,12 @@ fun pkgs =>
         "-Duserdb=false",
         "-Dman=disabled",
         "-Dmode=release",
-        "-Dpamconfdir=no",
+        # Build pam_systemd.so so logind registers a session at login (requires
+        # linux-pam). Let systemd install its own /etc/pam.d/systemd-user (used
+        # by user@.service); the login/system-auth stacks come from
+        # system-runtime-files.
+        "-Dpam=enabled",
+        "-Dpamconfdir=/etc/pam.d",
         "-Ddev-kvm-mode=0660",
         "-Dnobody-group=nogroup",
         "-Dsysupdate=disabled",
@@ -112,7 +120,13 @@ fun pkgs =>
                 --no-same-owner --strip-components=1 \
                 -C "@{out}/usr/share/man"
             install -vdm755 "@{out}/etc"
-            : > "@{out}/etc/machine-id"
+            # Ship the special "uninitialized" marker rather than an empty file:
+            # an empty /etc/machine-id is NOT treated as first boot, but the
+            # string "uninitialized" is (machine-id(5)). With a volatile /etc the
+            # marker reappears every boot, so systemd re-runs first-boot init --
+            # notably presetting units -- on each boot, which is how getty@tty1
+            # etc. get enabled per policy (no build-time preset, no hand enable).
+            printf 'uninitialized\n' > "@{out}/etc/machine-id"
 
             for shared_lib in "@{out}"/usr/lib/systemd/libsystemd-shared-*.so; do
                 [ -e "$shared_lib" ]

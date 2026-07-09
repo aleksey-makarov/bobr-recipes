@@ -68,6 +68,10 @@ fun pkgs =>
     pkgs.xml_parser,
     pkgs.sed,
     pkgs.shadow,
+    # libpam + PAM modules (pam_unix/pam_systemd/...) and helpers. systemd ships
+    # pam_systemd.so which links libpam.so.0, so the rootfs must carry PAM or
+    # that module is unresolved; also the basis for login sessions.
+    pkgs.linux_pam,
     pkgs.procps_ng,
     pkgs.findutils,
     pkgs.gzip,
@@ -79,6 +83,12 @@ fun pkgs =>
     pkgs.vim,
   ]
   in
+  # Unit enablement is NOT done here. systemd applies preset policy at first
+  # boot ("systemd will enable/disable all units according to preset policy",
+  # systemd.preset(5)); with an empty /etc/machine-id on a volatile-overlay /etc
+  # every boot is a first boot, so presets are (re)applied on every boot. Units
+  # we want on by default that the vendor preset does not cover go in a
+  # /usr/lib/systemd/system-preset/*.preset file, not enabled by hand or at build.
   let rootfs = {
     name = "rootfs",
     tag = "TreeMerge",

@@ -1,0 +1,6 @@
+# Fallback for any PAM service without its own config: deny everything. Secure
+# default -- a service must opt in with an explicit /etc/pam.d/<service> file.
+auth      required  pam_deny.so
+account   required  pam_deny.so
+password  required  pam_deny.so
+session   required  pam_deny.so
