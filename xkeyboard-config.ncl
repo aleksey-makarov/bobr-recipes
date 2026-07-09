@@ -20,9 +20,6 @@ fun pkgs =>
     deps = {
       build = [
         pkgs.gettext,
-        # xkeyboard-config's generators run Python xml.etree; pyexpat needs
-        # libexpat.so at runtime, so expat must be in the build rootfs.
-        pkgs.expat,
         # The rules/*.part files are generated with m4 (perl for a few helpers).
         pkgs.m4,
         pkgs.perl,

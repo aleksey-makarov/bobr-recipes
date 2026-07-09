@@ -232,6 +232,13 @@ fun pkgs =>
       runtime = [
         pkgs.glibc_libs,
         pkgs.zlib,
+        # Built --with-system-expat, so pyexpat (xml.parsers.expat, used by
+        # gdbus-codegen and others) links libexpat.so.1. _ctypes links libffi.
+        # Without these in python's runtime closure, any build rootfs that pulls
+        # python (Meson/Autotools default build deps) lacks them and pyexpat/
+        # ctypes fail at import.
+        pkgs.expat,
+        pkgs.libffi,
       ],
     },
     config = {
