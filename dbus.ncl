@@ -76,6 +76,27 @@ fun pkgs =>
             ln -sfv ../dbus.socket \
                 "@{out}/usr/lib/systemd/system/sockets.target.wants/dbus.socket"
 
+            # Per-user session bus for the systemd --user session (the graphical
+            # session's D-Bus). The upstream user templates carry no [Install],
+            # so enable the socket by hand in the user sockets.target.wants. This
+            # gives DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus.
+            install -vdm755 \
+                "@{out}/usr/lib/systemd/user" \
+                "@{out}/usr/lib/systemd/user/sockets.target.wants"
+
+            sed \
+                -e 's#@SYSTEMCTL@#/usr/bin/systemctl#g' \
+                "$dbus_src_root"/bus/systemd-user/dbus.socket.in \
+                > "@{out}/usr/lib/systemd/user/dbus.socket"
+
+            sed \
+                -e 's#@EXPANDED_BINDIR@#/usr/bin#g' \
+                "$dbus_src_root"/bus/systemd-user/dbus.service.in \
+                > "@{out}/usr/lib/systemd/user/dbus.service"
+
+            ln -sfv ../dbus.socket \
+                "@{out}/usr/lib/systemd/user/sockets.target.wants/dbus.socket"
+
             install -vdm755 "@{out}/var/lib/dbus"
             ln -sfv /etc/machine-id "@{out}/var/lib/dbus/machine-id"
           "%,

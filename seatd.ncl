@@ -12,16 +12,20 @@ fun pkgs =>
   }
   in
 
-  # libseat + the seatd daemon. For step 3 we use the seatd backend (no logind
-  # yet); the logind backend is disabled and will be enabled once PAM/logind
-  # land. builtin backend kept as a fallback.
+  # libseat + the seatd daemon. The logind backend (libseat over systemd-logind)
+  # is enabled now that a logind session exists, so a compositor can take
+  # devices via logind (LIBSEAT_BACKEND=logind). The seatd and builtin backends
+  # are kept as fallbacks (LIBSEAT_BACKEND=seatd for the weston-start path).
   let seatd = {
     name = "seatd-%{version}",
     tag = "Meson",
     deps = {
-      build = [],
+      build = [
+        pkgs.systemd_dev,
+      ],
       runtime = [
         pkgs.glibc_libs,
+        pkgs.systemd_libs,
       ],
     },
     config = {
@@ -31,7 +35,7 @@ fun pkgs =>
         "-Dserver=enabled",
         "-Dlibseat-seatd=enabled",
         "-Dlibseat-builtin=enabled",
-        "-Dlibseat-logind=disabled",
+        "-Dlibseat-logind=systemd",
         "-Dman-pages=disabled",
         "-Dexamples=disabled",
       ],
