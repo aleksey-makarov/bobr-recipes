@@ -1,7 +1,7 @@
 let recipe = import "recipe-lib.ncl" in
 let hashes = {
-  "2.7.1" = "abdbb1ff22e063a4fafeebf73a0f250ea166a52cd264d557ef25a13cc93cd9bf",
-  "2.8.2" = "a5cc72bb064f8ac583ddc3f2e3dc6043b801b9d2162504c656fe8d92ffa85e46",
+  "2.7.1" = "354552544b8f99012e5062f7d570ec77f14b412a3ff5c7d8d0dae62c0d217c30",
+  "2.8.2" = "3ad89b8588e6644bd4e49981480d48b21289eebbcd4f0a1a4afb1c29f99b6ab4",
 }
 in
 let release_tags = {

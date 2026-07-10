@@ -3,7 +3,7 @@
 # overlay can override the version (and add its hash), as in linux.ncl.
 let default_version = "10.45" in
 let default_hashes = {
-  "10.45" = "472ac4a8be2c9f77d172b3c226a8a5aff9f17bae0b03a26b60b138ad36cf4ece",
+  "10.45" = "21547f3516120c75597e5b30a992e27a592a31950b5140e7b8bfde3f192033c4",
 }
 in
 

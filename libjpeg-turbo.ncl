@@ -4,7 +4,7 @@
 # `version`/`hashes` are node fields (overridable), as in linux.ncl.
 let default_version = "3.1.0" in
 let default_hashes = {
-  "3.1.0" = "3d8f4816c7231d7a57219d81ca78fb36aaffd358b27614a430fd127024db216a",
+  "3.1.0" = "9564c72b1dfd1d6fe6274c5f95a8d989b59854575d4bbee44ade7bc17aa9bc93",
 }
 in
 

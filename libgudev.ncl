@@ -3,7 +3,7 @@
 # fields (overridable), as in linux.ncl.
 let default_version = "238" in
 let default_hashes = {
-  "238" = "cfe1959dc46907afcd49f70cb999d17bf4bca92d7d89f3a86a2777f31ed30d33",
+  "238" = "61266ab1afc9d73dbc60a8b2af73e99d2fdff47d99544d085760e4fa667b5dd1",
 }
 in
 

@@ -4,7 +4,7 @@ fun pkgs =>
   let libpng_src = {
     name = "libpng-src-%{version}",
     tag = "Source",
-    object_hash = "82043e583b2bca3038fd18826a48191e25ef9958905047273a69d4f5a8f66c60",
+    object_hash = "4df396518620a7aa3651443e87d1b2862e4e88cad135a8b93423e01706232307",
     origin = {
       tag = "Http",
       # Canonical SourceForge project path (+ /download fallback), matching the

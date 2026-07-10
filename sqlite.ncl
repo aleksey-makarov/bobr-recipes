@@ -5,7 +5,7 @@
 # number X YY ZZ 00 (e.g. 3.53.3 -> 3530300), derived here.
 let default_version = "3.53.3" in
 let default_hashes = {
-  "3.53.3" = "fbbc28e95d9ceb14507bb3524e4758da6a6cfed6cdb5614d7e889fdeae388479",
+  "3.53.3" = "c917d7db16648ec95f714974ace5e5dcf46b7dc70e26600a0a102a3141125db0",
 }
 in
 let default_year = "2026" in

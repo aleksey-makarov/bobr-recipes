@@ -3,7 +3,7 @@
 # linux.ncl.
 let default_version = "1.10.8" in
 let default_hashes = {
-  "1.10.8" = "8589044e29d9c3862e1cc1bb7eec724b6a3b152c38de90bd9858e5902bcf1948",
+  "1.10.8" = "55c5c141a564245b8f8fbe7698663c87a45a7333c2a2c56f06f811ab73b212dd",
 }
 in
 

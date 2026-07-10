@@ -5,7 +5,7 @@
 # are node fields (overridable), as in linux.ncl.
 let default_version = "2.88.2" in
 let default_hashes = {
-  "2.88.2" = "6d689e49d6620198d7d254713a3d57fcf09ca28d8c7ac0e41abc103782384811",
+  "2.88.2" = "cf3f215a640c8a4257f14317586b8f1fdd25a10a93cb4bdda147c0f9ad88e74f",
 }
 in
 

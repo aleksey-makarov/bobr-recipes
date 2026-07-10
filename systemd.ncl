@@ -2,12 +2,12 @@ let recipe = import "recipe-lib.ncl" in
 let version = "260.1" in
 let hashes = {
   "257.8" = {
-    source = "205fac8b8602a9b692c9bac232f9cac70a52050d9af9a44fc7e24144d7b67e50",
-    man_pages = "b0c85b585ffc3cfa57c3ee9da936d2f1e0de9ef2fa1db4bff94005eee5bddc04",
+    source = "f280278161446fe3838bedb970c7b3998043ad107f7627735a81483218c6f6f9",
+    man_pages = "89d32984d7f3cc410101806f7a2bb01ba20cad04b30c190c98387b1dd8fef7f5",
   },
   "260.1" = {
-    source = "9828f807cb88b337f4794f19858c5d0a6314ecfd31a83f0f795f8fa377201cc0",
-    man_pages = "8e0e15ec0bb84e9a23a3813494fad7a5d2358e564a5efc98abba8997e168dc01",
+    source = "11b9821892b75d19af7b21f0f7f4e53636638147faf3e6a4ded78b40cb38993f",
+    man_pages = "b0c143b3388afac9e1154facf0821809b396ab86f3f61ddc8028679a7d65d83c",
   },
 } in
 

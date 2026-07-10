@@ -9,7 +9,7 @@ let recipe = import "recipe-lib.ncl" in
 # (overridable), as in linux.ncl.
 let default_version = "1.97.0" in
 let default_hashes = {
-  "1.97.0" = "cf0d0a02a1b3cb5d2a9059ec0dac2d9e213359178503ba098ffa1ef114d3bd5c",
+  "1.97.0" = "1cf17e4905b841d4c8e3f76467ac148d55fb3f54bf213c86f0d287a36471d904",
 }
 in
 

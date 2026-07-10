@@ -1,7 +1,7 @@
 let recipe = import "recipe-lib.ncl" in
 let hashes = {
-  "4.4.38" = "3e8fe066132eb4300604bb5769f9d80fdfe1d443025978ea867ecef693afacd0",
-  "4.5.2" = "61672cb1ce67e78a1c27e83b4b5d636e89dd0a2b71d5295fbf4e80beaf8fb5b1",
+  "4.4.38" = "80304b9c306ea799327f01d9a7549bdb28317789182631f1b54f4511b4206dd6",
+  "4.5.2" = "71513a31c01a428bccd5367a32fd95f115d6dac50fb5b60c779d5c7942aec071",
 }
 in
 

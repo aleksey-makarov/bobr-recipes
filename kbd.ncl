@@ -1,7 +1,7 @@
 let recipe = import "recipe-lib.ncl" in
 let hashes = {
-  "2.8.0" = "f2c22be2fabadc5fd2465e1e2ae20dd9af7027c410cdbd12e0d9b491c302f4c3",
-  "2.10.0" = "9b7925f9078134fbe9092e741bf00824822e5f2bf26871b6b2f07fccb691b522",
+  "2.8.0" = "01f5806da7d1d34f594b7b2a6ae1ab23215344cf1064e8edcd3a90fef9776a11",
+  "2.10.0" = "6e5ca4f8d76ee9e3a8db700b667f13e12aac9933828a64e1aaad93d26be9b479",
 }
 in
 
@@ -21,7 +21,7 @@ fun pkgs =>
   let kbd_backspace_patch = {
     name = "kbd-backspace-patch",
     tag = "Source",
-    object_hash = "e9f468ea0ed2089b0743133e41e13d3cd9891afe258534d82bc596cda98c8f0d",
+    object_hash = "8be28dcb11420624a500f2ea4fe975f771174bffee50e54ec8cd295a2dec104e",
     origin = {
       tag = "RecipePath",
       path = "kbd-2.8.0-backspace-1.patch",

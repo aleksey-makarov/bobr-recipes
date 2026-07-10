@@ -4,7 +4,7 @@
 # fields (overridable), as in linux.ncl.
 let default_version = "0.4.9" in
 let default_hashes = {
-  "0.4.9" = "da582569c4dded90fb970b3e65eb5873b54a377bca2e5c2ffe9fd5d49aabdd53",
+  "0.4.9" = "9df5ef301d6a4b361002aa52cce1165a87a89744055879bdbab31e7e86f1e846",
 }
 in
 

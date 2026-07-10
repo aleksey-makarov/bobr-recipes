@@ -5,7 +5,7 @@
 # as in linux.ncl.
 let default_version = "50.1" in
 let default_hashes = {
-  "50.1" = "e3964ebbc3e4105cec36f63bcb950feffe37d2bd42e7fa81a0cc7d421fe08c27",
+  "50.1" = "0a2aa25082672585d16fcdab61c7b0e33f035fb87476505c794f29565afa485b",
 }
 in
 

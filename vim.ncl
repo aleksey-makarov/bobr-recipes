@@ -1,7 +1,7 @@
 let recipe = import "recipe-lib.ncl" in
 let hashes = {
-  "9.1.1629" = "26169f05b9b8fba0aa69ae18d342fcffbe9a8512db287d1cb975112e9879e952",
-  "9.2.0680" = "51947928a257debaf2f969a469b9005a5a3eb438a0d737d767d2ce3f9fd66acc",
+  "9.1.1629" = "d92c6550e8eca741085fce94e5b0d3d13d2c62fcb5b69bf5a6010d3114de4828",
+  "9.2.0680" = "9f306d8a25fc688ad2b814c1c420833ed20ff86deca907a81db0af08dde51a6f",
 }
 in
 let runtime_dirs = {

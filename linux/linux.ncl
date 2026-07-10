@@ -11,7 +11,7 @@ let recipe = import "../recipe-lib.ncl" in
 #       }
 let default_version = "6.18.38" in
 let default_hashes = {
-  "6.18.38" = "98124abcf3e24e6abe7fa17af14fc7c0e478e6732f2fde4e9310abb3bb2afde0",
+  "6.18.38" = "ac26e508abd56e9f8b89872b6e10c49fc823bcc70d8068a5d8504c1a7c4ff045",
 }
 in
 
