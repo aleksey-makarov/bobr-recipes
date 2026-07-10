@@ -206,17 +206,26 @@ else
 base"
 fi
 
-# Print the wall time of one `nickel recipes -> JSON request` pass to stderr.
-report_nickel_time() {
-  awk -v s="$1" -v e="$2" \
-    'BEGIN { printf "==> nickel recipes -> json request: %.2fs\n", e - s }' >&2
+# Print the wall time of one build phase ("nickel recipes -> json request" or
+# "bobr build") to stderr. When BOBR_BUILD_TIMING_LOG names a file, append the
+# same line there too -- that lets callers such as bobr-rebuild-world.sh record
+# the split without teeing bobr's live progress UI off stderr.
+report_phase_time() {
+  local label="$1" start="$2" end="$3" line
+  line="$(awk -v l="${label}" -v s="${start}" -v e="${end}" \
+    'BEGIN { printf "==> %s: %.2fs", l, e - s }')"
+  printf '%s\n' "${line}" >&2
+  if [ -n "${BOBR_BUILD_TIMING_LOG:-}" ]; then
+    printf '%s\n' "${line}" >> "${BOBR_BUILD_TIMING_LOG}"
+  fi
 }
 
 if [ "${dry_run}" -eq 1 ]; then
   nickel_started_at="$(date +%s.%N)"
   printf '%s\n' "${request_expr}" | nickel export --format json
   nickel_finished_at="$(date +%s.%N)"
-  report_nickel_time "${nickel_started_at}" "${nickel_finished_at}"
+  report_phase_time "nickel recipes -> json request" \
+    "${nickel_started_at}" "${nickel_finished_at}"
   exit 0
 fi
 
@@ -228,12 +237,20 @@ if [ "${podman_unshare}" -eq 1 ]; then
 fi
 
 # Export the request to a file first -- timed on its own -- rather than piping
-# nickel straight into bobr, so the recipes -> JSON pass is measured separately
-# from the build that follows.
+# nickel straight into bobr, so the recipes -> JSON pass and the build itself
+# are measured and reported separately.
 request_json="$(mktemp)"
 trap 'rm -f "${request_json}"' EXIT
 nickel_started_at="$(date +%s.%N)"
 printf '%s\n' "${request_expr}" | nickel export --format json > "${request_json}"
 nickel_finished_at="$(date +%s.%N)"
-report_nickel_time "${nickel_started_at}" "${nickel_finished_at}"
-"${bobr_cmd[@]}" < "${request_json}"
+report_phase_time "nickel recipes -> json request" \
+  "${nickel_started_at}" "${nickel_finished_at}"
+
+# Time the bobr build separately, preserving its exit status.
+bobr_started_at="$(date +%s.%N)"
+bobr_status=0
+"${bobr_cmd[@]}" < "${request_json}" || bobr_status="$?"
+bobr_finished_at="$(date +%s.%N)"
+report_phase_time "bobr build" "${bobr_started_at}" "${bobr_finished_at}"
+exit "${bobr_status}"

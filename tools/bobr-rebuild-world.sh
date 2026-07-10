@@ -178,6 +178,11 @@ echo "==> create store ${store_root}" >&2
 mkdir "${store_root}"
 touch "${script_log}" "${host_stats_log}"
 
+# bobr-build.sh prints its per-phase timings ("nickel recipes -> json request"
+# and "bobr build") to stderr; pointing it at the run log records the same lines
+# there too, for both the export and the build passes below.
+export BOBR_BUILD_TIMING_LOG="${script_log}"
+
 log "store=${store_root}"
 log "target=${attr}"
 log "cli_jobs=${jobs:-default}"
@@ -200,11 +205,7 @@ fi
 # Export the request once (through bobr-build.sh) to learn the source objects to
 # seed; this also refreshes the fsobj-hash locks, exactly like the real build.
 echo "==> export request for ${attr}" >&2
-# bobr-build.sh prints the `nickel recipes -> JSON request` time on stderr;
-# capture its stderr into the log too. The export step has no live progress UI,
-# so teeing stderr is safe here (unlike the build pass below).
-"${bobr_build}" --dry-run --store "${store_root}" "${attr}" \
-  > "${request_json}" 2> >(tee -a "${script_log}" >&2)
+"${bobr_build}" --dry-run --store "${store_root}" "${attr}" > "${request_json}"
 
 if command -v jq >/dev/null 2>&1; then
   log "request_source_objects=$(
