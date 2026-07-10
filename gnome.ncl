@@ -136,6 +136,12 @@ fun pkgs =>
         # 6b (mutter deps so far)
         pkgs.json_glib,
         pkgs.gsettings_desktop_schemas,
+        pkgs.lcms2,
+        pkgs.sqlite,
+        pkgs.colord,
+        pkgs.libusb,
+        pkgs.libgusb,
+        pkgs.libgudev,
       ],
   }
   in
