@@ -5,6 +5,7 @@
 if [ "$(tty)" = "/dev/tty1" ] && [ -z "${WAYLAND_DISPLAY:-}" ]; then
   systemctl --user import-environment XDG_SESSION_ID XDG_SEAT XDG_VTNR
   # Start the compositor; it pulls in graphical-session.target itself (that
-  # target refuses manual start, so we must not start it directly).
-  systemctl --user start weston.service
+  # target refuses manual start, so we must not start it directly). mutter.service
+  # also pulls in the gtk4-demo test client via Wants.
+  systemctl --user start mutter.service
 fi
