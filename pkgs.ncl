@@ -108,6 +108,8 @@ let base_modules = [
   import "libgusb.ncl",
   import "libusb.ncl",
   import "colord.ncl",
+  import "libseccomp.ncl",
+  import "glycin/glycin.ncl",
   import "pkgconf.ncl",
   import "gmp.ncl",
   import "man-pages.ncl",

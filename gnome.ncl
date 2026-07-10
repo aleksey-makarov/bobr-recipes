@@ -142,6 +142,8 @@ fun pkgs =>
         pkgs.libusb,
         pkgs.libgusb,
         pkgs.libgudev,
+        pkgs.libseccomp,
+        pkgs.glycin,
       ],
   }
   in
