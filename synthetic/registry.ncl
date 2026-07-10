@@ -140,9 +140,11 @@ fun pkgs =>
       roots
   in
   let sorted_closure_nodes = fun closure_set =>
+    # `std.record.fields` already returns names sorted; avoid Nickel's quadratic
+    # `std.array.sort` (a few hundred names take tens of seconds).
     std.array.map
       (fun name => std.record.get name closure_set)
-      (std.array.sort std.string.compare (std.record.fields closure_set))
+      (std.record.fields closure_set)
   in
   let common_native_package_default_build_deps = [
     pkgs.linux_headers,
@@ -212,7 +214,7 @@ fun pkgs =>
         }
   in
   let rootfs_closure_for = fun node =>
-    let root_fields = std.array.sort std.string.compare (std.record.fields node.inputs) in
+    let root_fields = std.record.fields node.inputs in # already sorted
     let roots = std.array.map (fun field => std.record.get field node.inputs) root_fields in
     if std.array.length roots == 0 then
       fail ("RootfsClosure '" ++ node.name ++ "' must have at least one input")
@@ -237,13 +239,10 @@ fun pkgs =>
         std.array.map
           (fun name => "@{" ++ name ++ "}")
           (
-            std.array.sort
-              std.string.compare
-              (
-                std.array.filter
-                  (fun name => std.string.is_match "^patch" name)
-                  (std.record.fields inputs)
-              )
+            # `std.record.fields` is already sorted and `filter` preserves order.
+            std.array.filter
+              (fun name => std.string.is_match "^patch" name)
+              (std.record.fields inputs)
           )
       )
   in

@@ -262,13 +262,14 @@ in
     let unique_nodes = collect {} root_node in
     let root_name = root_node.name in
     let other_names =
-      std.array.sort
-        std.string.compare
-        (
-          std.array.filter
-            (fun name => name != root_name)
-            (std.record.fields unique_nodes)
-        )
+      # `std.record.fields` already returns names in sorted order, so no explicit
+      # sort is needed here (`filter` preserves order). Nickel's `std.array.sort`
+      # is quadratic with a huge constant -- a few hundred names take tens of
+      # seconds -- so sorting the already-sorted field list dominated request
+      # generation.
+      std.array.filter
+        (fun name => name != root_name)
+        (std.record.fields unique_nodes)
     in
     let ordered_names = [root_name] @ other_names in
     let name_to_id =
