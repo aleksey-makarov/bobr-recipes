@@ -1,0 +1,3 @@
+# Python bytecode from tools (e.g. tools/bobr-mcp.py)
+__pycache__/
+*.pyc
