@@ -175,6 +175,9 @@ fun pkgs =>
         "usr/lib/libsystemd-shared-*.so",
         "usr/lib/pkgconfig/libsystemd.pc",
         "usr/lib/pkgconfig/libudev.pc",
+        # udev.pc lives in share/pkgconfig (pkgconfigdatadir) and exposes the
+        # `udevdir` variable that consumers like mutter read at configure time.
+        "usr/share/pkgconfig/udev.pc",
         "usr/lib/systemd/libsystemd-shared-*.so",
       ],
     },

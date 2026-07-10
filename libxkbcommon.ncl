@@ -12,9 +12,9 @@ fun pkgs =>
   }
   in
 
-  # Keymap compiler used by the compositor. x11/wayland integrations and the
-  # xkbregistry (libxml2) are off; keymap data comes from xkeyboard-config at
-  # the default config root.
+  # Keymap compiler used by the compositor. x11/wayland integrations are off;
+  # keymap data comes from xkeyboard-config at the default config root. The
+  # xkbregistry library (libxml2-backed) is on -- mutter links it unconditionally.
   let libxkbcommon = {
     name = "libxkbcommon-%{version}",
     tag = "Meson",
@@ -22,10 +22,12 @@ fun pkgs =>
       build = [
         pkgs.bison,
         pkgs.flex,
+        pkgs.libxml2,
       ],
       runtime = [
         pkgs.glibc_libs,
         pkgs.xkeyboard_config,
+        pkgs.libxml2,
       ],
     },
     config = {
@@ -38,7 +40,7 @@ fun pkgs =>
         "-Denable-tools=false",
         "-Denable-x11=false",
         "-Denable-wayland=false",
-        "-Denable-xkbregistry=false",
+        "-Denable-xkbregistry=true",
         "-Denable-bash-completion=false",
         "-Dxkb-config-root=/usr/share/X11/xkb",
       ],

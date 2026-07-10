@@ -144,6 +144,10 @@ fun pkgs =>
         pkgs.libgudev,
         pkgs.libseccomp,
         pkgs.glycin,
+        # 6b: mutter (Wayland compositor) and its remaining new runtime deps.
+        pkgs.at_spi2_core,
+        pkgs.libei,
+        pkgs.mutter,
       ],
   }
   in

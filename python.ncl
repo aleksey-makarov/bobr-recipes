@@ -118,6 +118,19 @@ fun pkgs =>
   }
   in
 
+  let docutils_src = {
+    name = "docutils-src-0.21.2",
+    tag = "Source",
+    object_hash = "3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://pypi.org/packages/source/d/docutils/docutils-0.21.2.tar.gz",
+      ],
+    },
+  }
+  in
+
   let meson_src = {
     name = "meson-src-1.8.3",
     tag = "Source",
@@ -264,6 +277,7 @@ fun pkgs =>
         "Mako",
         "PyYAML",
         "Jinja2",
+        "docutils",
         "meson",
       ],
       post_install = [
@@ -305,6 +319,7 @@ fun pkgs =>
       Mako = mako_src,
       PyYAML = pyyaml_src,
       Jinja2 = jinja2_src,
+      docutils = docutils_src,
       meson = meson_src,
       ninja = ninja_src,
     },
