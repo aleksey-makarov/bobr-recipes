@@ -200,7 +200,11 @@ fi
 # Export the request once (through bobr-build.sh) to learn the source objects to
 # seed; this also refreshes the fsobj-hash locks, exactly like the real build.
 echo "==> export request for ${attr}" >&2
-"${bobr_build}" --dry-run --store "${store_root}" "${attr}" > "${request_json}"
+# bobr-build.sh prints the `nickel recipes -> JSON request` time on stderr;
+# capture its stderr into the log too. The export step has no live progress UI,
+# so teeing stderr is safe here (unlike the build pass below).
+"${bobr_build}" --dry-run --store "${store_root}" "${attr}" \
+  > "${request_json}" 2> >(tee -a "${script_log}" >&2)
 
 if command -v jq >/dev/null 2>&1; then
   log "request_source_objects=$(

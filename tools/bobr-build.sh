@@ -206,8 +206,17 @@ else
 base"
 fi
 
+# Print the wall time of one `nickel recipes -> JSON request` pass to stderr.
+report_nickel_time() {
+  awk -v s="$1" -v e="$2" \
+    'BEGIN { printf "==> nickel recipes -> json request: %.2fs\n", e - s }' >&2
+}
+
 if [ "${dry_run}" -eq 1 ]; then
+  nickel_started_at="$(date +%s.%N)"
   printf '%s\n' "${request_expr}" | nickel export --format json
+  nickel_finished_at="$(date +%s.%N)"
+  report_nickel_time "${nickel_started_at}" "${nickel_finished_at}"
   exit 0
 fi
 
@@ -218,4 +227,13 @@ if [ "${podman_unshare}" -eq 1 ]; then
   bobr_cmd=(podman unshare "${bobr_bin}")
 fi
 
-printf '%s\n' "${request_expr}" | nickel export --format json | "${bobr_cmd[@]}"
+# Export the request to a file first -- timed on its own -- rather than piping
+# nickel straight into bobr, so the recipes -> JSON pass is measured separately
+# from the build that follows.
+request_json="$(mktemp)"
+trap 'rm -f "${request_json}"' EXIT
+nickel_started_at="$(date +%s.%N)"
+printf '%s\n' "${request_expr}" | nickel export --format json > "${request_json}"
+nickel_finished_at="$(date +%s.%N)"
+report_nickel_time "${nickel_started_at}" "${nickel_finished_at}"
+"${bobr_cmd[@]}" < "${request_json}"
