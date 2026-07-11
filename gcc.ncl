@@ -1,15 +1,15 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let gcc_src = {
-    name = "gcc-src-15.2.0",
+  let gcc_src = fun version => fun hash => {
+    name = "gcc-src-%{version}",
     tag = "Source",
-    object_hash = "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz",
-        "https://mirrors.kernel.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz",
+        "https://ftp.gnu.org/gnu/gcc/gcc-%{version}/gcc-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/gcc/gcc-%{version}/gcc-%{version}.tar.xz",
       ],
     },
   }
@@ -46,7 +46,9 @@ fun pkgs =>
   in
 
   let gcc_gen1 = {
-    name = "gcc-gen1-15.2.0",
+    version | default = "15.2.0",
+    source_object_hash | default = "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e",
+    name = "gcc-gen1-%{version}",
     tag = "AutotoolsRootfs",
     config = {
       pre_configure = gcc_prereqs_pre_configure,
@@ -61,7 +63,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.buildpack_deps_rootfs,
-      source = gcc_src,
+      source = gcc_src version source_object_hash,
       gmp = pkgs.gmp.inputs.source,
       mpfr = pkgs.mpfr.inputs.source,
       mpc = pkgs.mpc.inputs.source,
@@ -70,7 +72,9 @@ fun pkgs =>
   in
 
   let gcc = {
-    name = "gcc-15.2.0",
+    version | default = "15.2.0",
+    source_object_hash | default = "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e",
+    name = "gcc-%{version}",
     tag = "AutotoolsRootfs",
     config = {
       pre_configure = gcc_prereqs_pre_configure,
@@ -97,7 +101,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.system_rootfs_0,
-      source = gcc_src,
+      source = gcc_src version source_object_hash,
       gmp = pkgs.gmp.inputs.source,
       mpfr = pkgs.mpfr.inputs.source,
       mpc = pkgs.mpc.inputs.source,

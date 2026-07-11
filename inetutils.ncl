@@ -1,15 +1,15 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let inetutils_src = {
-    name = "inetutils-src-2.6",
+  let inetutils_src = fun version => fun hash => {
+    name = "inetutils-src-%{version}",
     tag = "Source",
-    object_hash = "68bedbfeaf73f7d86be2a7d99bcfbd4093d829f52770893919ae174c0b2357ca",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/inetutils/inetutils-2.6.tar.xz",
-        "https://mirrors.kernel.org/gnu/inetutils/inetutils-2.6.tar.xz",
+        "https://ftp.gnu.org/gnu/inetutils/inetutils-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/inetutils/inetutils-%{version}.tar.xz",
       ],
     },
   }
@@ -28,7 +28,9 @@ fun pkgs =>
   in
 
   let inetutils = {
-    name = "inetutils-2.6",
+    version | default = "2.6",
+    source_object_hash | default = "68bedbfeaf73f7d86be2a7d99bcfbd4093d829f52770893919ae174c0b2357ca",
+    name = "inetutils-%{version}",
     tag = "AutotoolsRootfs",
     deps = {
       build = [],
@@ -61,7 +63,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = inetutils_build_rootfs,
-      source = inetutils_src,
+      source = inetutils_src version source_object_hash,
     },
   }
   in

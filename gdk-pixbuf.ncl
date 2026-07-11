@@ -1,11 +1,6 @@
 # gdk-pixbuf -- image loading for GTK4. PNG/JPEG loaders (libpng/libjpeg-turbo);
 # tiff off (no libtiff); glycin off (a Rust loader -- avoid Rust in this tier).
-# `version`/`hashes` are node fields (overridable), as in linux.ncl.
-let default_version = "2.44.7" in
-let default_hashes = {
-  "2.44.7" = "172f80e3626ec31520a970400f1a3694e04718f6c2cd2885f75250fb5a6995a4",
-}
-in
+# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 
 let branch = fun version =>
   let m = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
@@ -28,8 +23,8 @@ fun pkgs =>
   in
 
   let gdk_pixbuf = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "2.44.7",
+    source_object_hash | default = "172f80e3626ec31520a970400f1a3694e04718f6c2cd2885f75250fb5a6995a4",
     name = "gdk-pixbuf-%{version}",
     tag = "Meson",
     deps = {
@@ -65,7 +60,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

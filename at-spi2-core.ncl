@@ -2,14 +2,8 @@
 # package provides along with atspi and the at-spi bus. Introspection is on --
 # mutter's GObject introspection pulls in Atk-1.0.gir. X11 support, the GTK2
 # adaptor and docs are off; the D-Bus backend is the plain dbus-daemon.
-# `version`/`hashes`/`series` are node fields (overridable), as in linux.ncl;
+# `version`/`source_object_hash`/`series` are node fields (overridable), as in linux.ncl;
 # `series` is the download.gnome.org major.minor directory.
-let default_version = "2.58.7" in
-let default_hashes = {
-  "2.58.7" = "62d2ba47f014e58522e86162eeb57f44b21077112139cfd61ab4c34b027f3f6f",
-}
-in
-let default_series = "2.58" in
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -27,9 +21,9 @@ fun pkgs =>
   in
 
   let at_spi2_core = {
-    version | default = default_version,
-    hashes | default = default_hashes,
-    series | default = default_series,
+    version | default = "2.58.7",
+    source_object_hash | default = "62d2ba47f014e58522e86162eeb57f44b21077112139cfd61ab4c34b027f3f6f",
+    series | default = "2.58",
     name = "at-spi2-core-%{version}",
     tag = "Meson",
     deps = {
@@ -62,7 +56,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version series (hashes."%{version}"),
+      source = mk_src version series source_object_hash,
     },
   }
   in

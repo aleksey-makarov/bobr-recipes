@@ -1,19 +1,21 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let flex_src = {
-    name = "flex-src-2.6.4",
+  let flex_src = fun version => fun hash => {
+    name = "flex-src-%{version}",
     tag = "Source",
-    object_hash = "e87aae032bf07c26f85ac0ed3250998c37621d95f8bd748b31f15b33c45ee995",
+    object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz",
+      url = "https://github.com/westes/flex/releases/download/v%{version}/flex-%{version}.tar.gz",
     },
   }
   in
 
   let flex = {
-    name = "flex-2.6.4",
+    version | default = "2.6.4",
+    source_object_hash | default = "e87aae032bf07c26f85ac0ed3250998c37621d95f8bd748b31f15b33c45ee995",
+    name = "flex-%{version}",
     tag = "AutotoolsRootfs",
     deps = {
       build = [],
@@ -29,7 +31,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.system_rootfs_1,
-      source = flex_src,
+      source = flex_src version source_object_hash,
     },
   }
   in

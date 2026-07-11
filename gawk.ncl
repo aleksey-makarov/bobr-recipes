@@ -1,22 +1,24 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let gawk_src = {
-    name = "gawk-src-5.3.2",
+  let gawk_src = fun version => fun hash => {
+    name = "gawk-src-%{version}",
     tag = "Source",
-    object_hash = "f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz",
-        "https://mirrors.kernel.org/gnu/gawk/gawk-5.3.2.tar.xz",
+        "https://ftp.gnu.org/gnu/gawk/gawk-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/gawk/gawk-%{version}.tar.xz",
       ],
     },
   }
   in
 
   let gawk_gen1 = {
-    name = "gawk-gen1-5.3.2",
+    version | default = "5.3.2",
+    source_object_hash | default = "f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc",
+    name = "gawk-gen1-%{version}",
     tag = "AutotoolsRootfs",
     config = {
       configure_args = ["--without-readline"],
@@ -48,7 +50,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.buildpack_deps_rootfs,
-      source = gawk_src,
+      source = gawk_src version source_object_hash,
     },
   }
   in
@@ -88,7 +90,9 @@ fun pkgs =>
   in
 
   let gawk = {
-    name = "gawk-5.3.2",
+    version | default = "5.3.2",
+    source_object_hash | default = "f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc",
+    name = "gawk-%{version}",
     tag = "AutotoolsRootfs",
     config = {
       configure_args = ["--without-readline"],
@@ -104,7 +108,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.system_rootfs_1,
-      source = gawk_src,
+      source = gawk_src version source_object_hash,
     },
   }
   in

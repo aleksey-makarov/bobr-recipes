@@ -1,10 +1,9 @@
-let version = "2.14.3" in
 
 fun pkgs =>
-  let freetype_src = {
+  let freetype_src = fun version => fun hash => {
     name = "freetype-src-%{version}",
     tag = "Source",
-    object_hash = "36bc4f1cc413335368ee656c42afca65c5a3987e8768cc28cf11ba775e785a5f",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://download.savannah.gnu.org/releases/freetype/freetype-%{version}.tar.xz",
@@ -15,6 +14,8 @@ fun pkgs =>
   # harfbuzz is disabled to break the freetype<->harfbuzz cycle (we don't build
   # harfbuzz for the Weston bring-up); brotli off. png/zlib/bzip2 enabled.
   let freetype = {
+    version | default = "2.14.3",
+    source_object_hash | default = "36bc4f1cc413335368ee656c42afca65c5a3987e8768cc28cf11ba775e785a5f",
     name = "freetype-%{version}",
     tag = "Meson",
     deps = {
@@ -44,7 +45,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = freetype_src,
+      source = freetype_src version source_object_hash,
     },
   }
   in

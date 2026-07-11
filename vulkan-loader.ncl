@@ -1,10 +1,9 @@
-let version = "1.4.350.0" in
 
 fun pkgs =>
-  let vulkan_loader_src = {
+  let vulkan_loader_src = fun version => fun hash => {
     name = "vulkan-loader-src-%{version}",
     tag = "Source",
-    object_hash = "91f88fc43abb36821a568c7fbb3f815e9baf946d5fe187928df279708d45e509",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/vulkan-sdk-%{version}.tar.gz",
@@ -17,6 +16,8 @@ fun pkgs =>
   # Vulkan app. X11 WSI is off (no X11); Wayland WSI is just a compile define, no
   # extra deps. find_package(PkgConfig REQUIRED) runs unconditionally -> pkgconf.
   let vulkan_loader = {
+    version | default = "1.4.350.0",
+    source_object_hash | default = "91f88fc43abb36821a568c7fbb3f815e9baf946d5fe187928df279708d45e509",
     name = "vulkan-loader-%{version}",
     tag = "Makefile",
     deps = {
@@ -41,7 +42,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = vulkan_loader_src,
+      source = vulkan_loader_src version source_object_hash,
     },
   }
   in

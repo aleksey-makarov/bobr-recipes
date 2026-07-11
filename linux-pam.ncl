@@ -1,11 +1,10 @@
 let recipe = import "recipe-lib.ncl" in
-let version = "1.6.1" in
 
 fun pkgs =>
-  let linux_pam_src = {
+  let linux_pam_src = fun version => fun hash => {
     name = "linux-pam-src-%{version}",
     tag = "Source",
-    object_hash = "f8923c740159052d719dbfc2a2f81942d68dd34fcaf61c706a02c9b80feeef8e",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://github.com/linux-pam/linux-pam/releases/download/v%{version}/Linux-PAM-%{version}.tar.xz",
@@ -22,6 +21,8 @@ fun pkgs =>
   # off to avoid xsltproc/gettext/libselinux/libaudit/libdb/libeconf deps we do
   # not carry. flex/bison are for the legacy pam_conv1 config converter.
   let linux_pam = {
+    version | default = "1.6.1",
+    source_object_hash | default = "f8923c740159052d719dbfc2a2f81942d68dd34fcaf61c706a02c9b80feeef8e",
     name = "linux-pam-%{version}",
     tag = "Autotools",
     deps = {
@@ -72,7 +73,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = linux_pam_src,
+      source = linux_pam_src version source_object_hash,
     },
   }
   in

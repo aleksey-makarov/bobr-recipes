@@ -1,15 +1,15 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let tcl_src = {
-    name = "tcl-src-8.6.16",
+  let tcl_src = fun version => fun hash => {
+    name = "tcl-src-%{version}",
     tag = "Source",
-    object_hash = "91cb8fa61771c63c262efb553059b7c7ad6757afa5857af6265e4b0bdc2a14a5",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://downloads.sourceforge.net/project/tcl/Tcl/8.6.16/tcl8.6.16-src.tar.gz",
-        "https://sourceforge.net/projects/tcl/files/Tcl/8.6.16/tcl8.6.16-src.tar.gz/download",
+        "https://downloads.sourceforge.net/project/tcl/Tcl/%{version}/tcl%{version}-src.tar.gz",
+        "https://sourceforge.net/projects/tcl/files/Tcl/%{version}/tcl%{version}-src.tar.gz/download",
       ],
     },
   }
@@ -27,7 +27,9 @@ fun pkgs =>
   in
 
   let tcl = {
-    name = "tcl-8.6.16",
+    version | default = "8.6.16",
+    source_object_hash | default = "91cb8fa61771c63c262efb553059b7c7ad6757afa5857af6265e4b0bdc2a14a5",
+    name = "tcl-%{version}",
     tag = "SandboxBuild",
     deps = {
       build = [
@@ -65,7 +67,7 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_tcl,
-      source = tcl_src,
+      source = tcl_src version source_object_hash,
     },
   }
   in

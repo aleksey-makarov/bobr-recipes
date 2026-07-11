@@ -1,28 +1,24 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let pkg_name = "binutils" in
-  let pkg_version = "2.45" in
-
-  let source_name = "%{pkg_name}-src-%{pkg_version}" in
-  let gen1_name = "%{pkg_name}-gen1-%{pkg_version}" in
-
-  let binutils_src = {
-    name = source_name,
+  let binutils_src = fun version => fun hash => {
+    name = "binutils-src-%{version}",
     tag = "Source",
-    object_hash = "c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://sourceware.org/pub/binutils/releases/binutils-2.45.tar.xz",
-        "https://mirrors.kernel.org/gnu/binutils/binutils-2.45.tar.xz",
+        "https://sourceware.org/pub/binutils/releases/binutils-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/binutils/binutils-%{version}.tar.xz",
       ],
     },
   }
   in
 
   let binutils_gen1 = {
-    name = gen1_name,
+    version | default = "2.45",
+    source_object_hash | default = "c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2",
+    name = "binutils-gen1-%{version}",
     tag = "AutotoolsRootfs",
     config = {
       configure_args = [
@@ -37,13 +33,15 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.buildpack_deps_rootfs,
-      source = binutils_src,
+      source = binutils_src version source_object_hash,
     },
   }
   in
 
   let binutils = {
-    name = "binutils-2.45",
+    version | default = "2.45",
+    source_object_hash | default = "c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2",
+    name = "binutils-%{version}",
     tag = "AutotoolsRootfs",
     config = {
       configure_args = [
@@ -61,7 +59,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.system_rootfs_0,
-      source = binutils_src,
+      source = binutils_src version source_object_hash,
     },
   }
   in

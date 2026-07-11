@@ -1,13 +1,13 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let bzip2_src = {
-    name = "bzip2-src-1.0.8",
+  let bzip2_src = fun version => fun hash => {
+    name = "bzip2-src-%{version}",
     tag = "Source",
-    object_hash = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
+    object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://www.sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
+      url = "https://www.sourceware.org/pub/bzip2/bzip2-%{version}.tar.gz",
     },
   }
   in
@@ -23,7 +23,7 @@ fun pkgs =>
   }
   in
 
-  let bzip2_config = {
+  let bzip2_config = fun version => {
     pre_build = {
       name = "prepare_source",
       run_as = "build-user",
@@ -51,7 +51,7 @@ fun pkgs =>
           make PREFIX="@{out}/usr" install
           mkdir -p "@{out}/usr/lib" "@{out}/usr/bin" "@{out}/usr/include"
           cp -av libbz2.so.* "@{out}/usr/lib/"
-          ln -svf libbz2.so.1.0.8 "@{out}/usr/lib/libbz2.so"
+          ln -svf libbz2.so.%{version} "@{out}/usr/lib/libbz2.so"
           cp -v bzip2-shared "@{out}/usr/bin/bzip2"
           cp -v bzlib.h "@{out}/usr/include/"
           for i in "@{out}/usr/bin"/{bzcat,bunzip2,lbzip2}; do
@@ -69,19 +69,23 @@ fun pkgs =>
   in
 
   let bzip2_gen1 = {
-    name = "bzip2-gen1-1.0.8",
+    version | default = "1.0.8",
+    source_object_hash | default = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
+    name = "bzip2-gen1-%{version}",
     tag = "MakefileRootfs",
-    config = bzip2_config,
+    config = bzip2_config version,
     inputs = {
       _rootfs = pkgs.system_rootfs_1,
-      source = bzip2_src,
+      source = bzip2_src version source_object_hash,
       install_docs_patch = bzip2_install_docs_patch,
     },
   }
   in
 
   let bzip2 = {
-    name = "bzip2-1.0.8",
+    version | default = "1.0.8",
+    source_object_hash | default = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
+    name = "bzip2-%{version}",
     tag = "MakefileRootfs",
     deps = {
       build = [],
@@ -89,10 +93,10 @@ fun pkgs =>
         pkgs.glibc_libs,
       ],
     },
-    config = bzip2_config,
+    config = bzip2_config version,
     inputs = {
       _rootfs = pkgs.system_rootfs_2,
-      source = bzip2_src,
+      source = bzip2_src version source_object_hash,
       install_docs_patch = bzip2_install_docs_patch,
     },
   }

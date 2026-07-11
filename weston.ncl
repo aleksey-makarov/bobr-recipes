@@ -1,10 +1,9 @@
-let version = "15.0.1" in
 
 fun pkgs =>
-  let weston_src = {
+  let weston_src = fun version => fun hash => {
     name = "weston-src-%{version}",
     tag = "Source",
-    object_hash = "551d039bfb0c837ba5a4d027cdb8ee16bded0eedb789821f8025d8a64b791f6d",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://gitlab.freedesktop.org/wayland/weston/-/releases/%{version}/downloads/weston-%{version}.tar.xz",
@@ -17,6 +16,8 @@ fun pkgs =>
   # clients (weston-terminal). Seat management via libseat/seatd (not
   # systemd/logind yet). No X/Xwayland, no RDP/VNC/pipewire/remoting.
   let weston = {
+    version | default = "15.0.1",
+    source_object_hash | default = "551d039bfb0c837ba5a4d027cdb8ee16bded0eedb789821f8025d8a64b791f6d",
     name = "weston-%{version}",
     tag = "Meson",
     deps = {
@@ -98,7 +99,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = weston_src,
+      source = weston_src version source_object_hash,
     },
   }
   in

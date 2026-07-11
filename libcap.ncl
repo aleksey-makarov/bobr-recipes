@@ -1,16 +1,12 @@
 let recipe = import "recipe-lib.ncl" in
-let hashes = {
-  "2.76" = "629da4ab29900d0f7fcc36227073743119925fd711c99a1689bbf5c9b40c8e6f",
-  "2.78" = "0d621e562fd932ccf67b9660fb018e468a683d7b827541df27813228c996bb11",
-}
-in
 
 fun pkgs =>
   let libcap_src = fun version =>
+    fun hash =>
     {
       name = "libcap-src-%{version}",
       tag = "Source",
-      object_hash = hashes."%{version}",
+      object_hash = hash,
       origin = {
         tag = "Http",
         url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-%{version}.tar.xz",
@@ -20,6 +16,7 @@ fun pkgs =>
 
   let libcap = {
     version | default = "2.78",
+    source_object_hash | default = "0d621e562fd932ccf67b9660fb018e468a683d7b827541df27813228c996bb11",
     name = "libcap-%{version}",
     tag = "MakefileRootfs",
     config = {
@@ -40,7 +37,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.system_rootfs_2,
-      source = libcap_src version,
+      source = libcap_src version source_object_hash,
     },
   }
   in

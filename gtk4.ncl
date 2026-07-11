@@ -1,13 +1,8 @@
 # GTK4 -- the toolkit. Wayland backend only (no X11/broadway). GL renderer via
 # libepoxy/Mesa (virgl); Vulkan renderer off for now. Accessibility (accesskit,
 # a Rust lib) off. Demos built for the 6a validation (gtk4-demo). Print/media/
-# cloud/colord/sysprof/tracker off. `version`/`hashes` are node fields
+# cloud/colord/sysprof/tracker off. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
-let default_version = "4.22.4" in
-let default_hashes = {
-  "4.22.4" = "51bd9f60c7d23a665a556c7364c21fb2e4e282566b3e7e092455e8f910330893",
-}
-in
 
 let branch = fun version =>
   let m = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
@@ -30,8 +25,8 @@ fun pkgs =>
   in
 
   let gtk4 = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "4.22.4",
+    source_object_hash | default = "51bd9f60c7d23a665a556c7364c21fb2e4e282566b3e7e092455e8f910330893",
     name = "gtk4-%{version}",
     tag = "Meson",
     deps = {
@@ -101,7 +96,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

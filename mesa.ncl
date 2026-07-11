@@ -1,10 +1,9 @@
-let version = "26.1.4" in
 
 fun pkgs =>
-  let mesa_src = {
+  let mesa_src = fun version => fun hash => {
     name = "mesa-src-%{version}",
     tag = "Source",
-    object_hash = "072705caa9adf4740f1489194b13e278ad959166863b5271fe423a86353c9ab6",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://archive.mesa3d.org/mesa-%{version}.tar.xz",
@@ -24,6 +23,8 @@ fun pkgs =>
   # Wayland GL/Vulkan clients (incl. the GNOME session) can create surfaces.
   # Zink/venus need the Vulkan headers at build and the loader at runtime.
   let mesa = {
+    version | default = "26.1.4",
+    source_object_hash | default = "072705caa9adf4740f1489194b13e278ad959166863b5271fe423a86353c9ab6",
     name = "mesa-%{version}",
     tag = "Meson",
     deps = {
@@ -68,7 +69,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mesa_src,
+      source = mesa_src version source_object_hash,
     },
   }
   in

@@ -1,22 +1,24 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let gmp_src = {
-    name = "gmp-src-6.3.0",
+  let gmp_src = fun version => fun hash => {
+    name = "gmp-src-%{version}",
     tag = "Source",
-    object_hash = "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz",
-        "https://mirrors.kernel.org/gnu/gmp/gmp-6.3.0.tar.xz",
+        "https://ftp.gnu.org/gnu/gmp/gmp-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/gmp/gmp-%{version}.tar.xz",
       ],
     },
   }
   in
 
   let gmp = {
-    name = "gmp-6.3.0",
+    version | default = "6.3.0",
+    source_object_hash | default = "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898",
+    name = "gmp-%{version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -46,11 +48,11 @@ fun pkgs =>
         # code + good performance). Follows nixpkgs.
         "--build=x86_64-pc-linux-gnu",
         "--enable-fat",
-        "--docdir=/usr/share/doc/gmp-6.3.0",
+        "--docdir=/usr/share/doc/gmp-%{version}",
       ],
     },
     inputs = {
-      source = gmp_src,
+      source = gmp_src version source_object_hash,
     },
   }
   in

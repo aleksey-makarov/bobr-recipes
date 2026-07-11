@@ -1,15 +1,15 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let expect_src = {
-    name = "expect-src-5.45.4",
+  let expect_src = fun version => fun hash => {
+    name = "expect-src-%{version}",
     tag = "Source",
-    object_hash = "49a7da83b0bdd9f46d04a04deec19c7767bb9a323e40c4781f89caf760b92c34",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://downloads.sourceforge.net/project/expect/Expect/5.45.4/expect5.45.4.tar.gz",
-        "https://sourceforge.net/projects/expect/files/Expect/5.45.4/expect5.45.4.tar.gz/download",
+        "https://downloads.sourceforge.net/project/expect/Expect/%{version}/expect%{version}.tar.gz",
+        "https://sourceforge.net/projects/expect/files/Expect/%{version}/expect%{version}.tar.gz/download",
       ],
     },
   }
@@ -27,7 +27,9 @@ fun pkgs =>
   in
 
   let expect = {
-    name = "expect-5.45.4",
+    version | default = "5.45.4",
+    source_object_hash | default = "49a7da83b0bdd9f46d04a04deec19c7767bb9a323e40c4781f89caf760b92c34",
+    name = "expect-%{version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -64,13 +66,13 @@ fun pkgs =>
         argv = [
           "ln",
           "-sfv",
-          "expect5.45.4/libexpect5.45.4.so",
-          "@{out}/usr/lib/libexpect5.45.4.so",
+          "expect%{version}/libexpect%{version}.so",
+          "@{out}/usr/lib/libexpect%{version}.so",
         ],
       },
     },
     inputs = {
-      source = expect_src,
+      source = expect_src version source_object_hash,
       gcc15_patch = expect_gcc15_patch,
     },
   }

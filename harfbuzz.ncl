@@ -3,13 +3,8 @@
 # hb-cairo would pull cairo->freetype into the graph). The dependency on
 # freetype is one-directional (freetype is NOT rebuilt with harfbuzz -- that
 # would create a mutual runtime dep, and harfbuzz-in-freetype only tweaks
-# autohinting), so there is no cycle. `version`/`hashes` are node fields
+# autohinting), so there is no cycle. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
-let default_version = "14.2.1" in
-let default_hashes = {
-  "14.2.1" = "a54a5d8e9380a41fbb762ce367bcbf7704792dfca0d93f1bbca86c5a57902e0e",
-}
-in
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -26,8 +21,8 @@ fun pkgs =>
   in
 
   let harfbuzz = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "14.2.1",
+    source_object_hash | default = "a54a5d8e9380a41fbb762ce367bcbf7704792dfca0d93f1bbca86c5a57902e0e",
     name = "harfbuzz-%{version}",
     tag = "Meson",
     deps = {
@@ -57,7 +52,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

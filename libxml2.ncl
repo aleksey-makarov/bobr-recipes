@@ -1,11 +1,6 @@
 # libxml2 -- XML parser, needed by shared-mime-info (and later gnome-desktop
-# and other GNOME bits). `version`/`hashes` are node fields (overridable), as
+# and other GNOME bits). `version`/`source_object_hash` are node fields (overridable), as
 # in linux.ncl.
-let default_version = "2.15.3" in
-let default_hashes = {
-  "2.15.3" = "78262a6e7ac170d6528ebfe2efccdf220191a5af6a6cd61ea4a9a9a5042c7a07",
-}
-in
 
 let branch = fun version =>
   let matched = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
@@ -30,8 +25,8 @@ fun pkgs =>
   in
 
   let libxml2 = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "2.15.3",
+    source_object_hash | default = "78262a6e7ac170d6528ebfe2efccdf220191a5af6a6cd61ea4a9a9a5042c7a07",
     name = "libxml2-%{version}",
     tag = "Autotools",
     deps = {
@@ -55,7 +50,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

@@ -5,13 +5,8 @@ let recipe = import "recipe-lib.ncl" in
 # detour). The official dist targets an old glibc, so it runs on our newer glibc
 # (forward-compatible); rustc is relocatable (finds its sysroot next to the
 # binary), so installing it to /usr works. It never ships in a runtime rootfs --
-# only appears in build rootfs closures. `version`/`hashes` are node fields
+# only appears in build rootfs closures. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
-let default_version = "1.97.0" in
-let default_hashes = {
-  "1.97.0" = "1cf17e4905b841d4c8e3f76467ac148d55fb3f54bf213c86f0d287a36471d904",
-}
-in
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -28,8 +23,8 @@ fun pkgs =>
   in
 
   let rust_bin = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "1.97.0",
+    source_object_hash | default = "1cf17e4905b841d4c8e3f76467ac148d55fb3f54bf213c86f0d287a36471d904",
     name = "rust-bin-%{version}",
     tag = "SandboxBuild",
     deps = {
@@ -69,7 +64,7 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

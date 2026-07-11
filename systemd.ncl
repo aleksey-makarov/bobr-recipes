@@ -1,21 +1,10 @@
 let recipe = import "recipe-lib.ncl" in
-let version = "260.1" in
-let hashes = {
-  "257.8" = {
-    source = "f280278161446fe3838bedb970c7b3998043ad107f7627735a81483218c6f6f9",
-    man_pages = "89d32984d7f3cc410101806f7a2bb01ba20cad04b30c190c98387b1dd8fef7f5",
-  },
-  "260.1" = {
-    source = "11b9821892b75d19af7b21f0f7f4e53636638147faf3e6a4ded78b40cb38993f",
-    man_pages = "b0c143b3388afac9e1154facf0821809b396ab86f3f61ddc8028679a7d65d83c",
-  },
-} in
 
 fun pkgs =>
-  let systemd_src = {
+  let systemd_src = fun version => fun hash => {
     name = "systemd-src-%{version}",
     tag = "Source",
-    object_hash = hashes."%{version}".source,
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://github.com/systemd/systemd/archive/v%{version}/systemd-%{version}.tar.gz",
@@ -23,10 +12,10 @@ fun pkgs =>
   }
   in
 
-  let systemd_man_pages_src = {
+  let systemd_man_pages_src = fun version => fun hash => {
     name = "systemd-man-pages-src-%{version}",
     tag = "Source",
-    object_hash = hashes."%{version}".man_pages,
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
@@ -38,6 +27,9 @@ fun pkgs =>
   in
 
   let systemd = {
+    version | default = "260.1",
+    source_object_hash | default = "11b9821892b75d19af7b21f0f7f4e53636638147faf3e6a4ded78b40cb38993f",
+    man_pages_object_hash | default = "b0c143b3388afac9e1154facf0821809b396ab86f3f61ddc8028679a7d65d83c",
     name = "systemd-%{version}",
     tag = "Meson",
     deps = {
@@ -139,8 +131,8 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = systemd_src,
-      man_pages = systemd_man_pages_src,
+      source = systemd_src version source_object_hash,
+      man_pages = systemd_man_pages_src version man_pages_object_hash,
     },
   }
   in
@@ -164,7 +156,7 @@ fun pkgs =>
   in
 
   let systemd_dev = {
-    name = "systemd-dev-%{version}",
+    name = "systemd-dev-%{systemd.version}",
     tag = "TreeSubset",
     config = {
       include = [

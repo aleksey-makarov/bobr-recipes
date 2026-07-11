@@ -1,12 +1,7 @@
 # colord -- color management. mutter links only the client library (libcolord),
 # so the daemon is off (-Ddaemon=false), which drops the heavy daemon deps
 # (gusb, sqlite, polkit, libgudev). Client lib needs glib + lcms2.
-# `version`/`hashes` are node fields (overridable), as in linux.ncl.
-let default_version = "1.4.8" in
-let default_hashes = {
-  "1.4.8" = "21500bd68975312a7f0f3ce6019d9f75f42aacaa75ca7115ec720b5445406896",
-}
-in
+# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -23,8 +18,8 @@ fun pkgs =>
   in
 
   let colord = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "1.4.8",
+    source_object_hash | default = "21500bd68975312a7f0f3ce6019d9f75f42aacaa75ca7115ec720b5445406896",
     name = "colord-%{version}",
     tag = "Meson",
     deps = {
@@ -66,7 +61,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

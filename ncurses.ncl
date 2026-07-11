@@ -1,21 +1,23 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let ncurses_src = {
-    name = "ncurses-src-6.6",
+  let ncurses_src = fun version => fun hash => {
+    name = "ncurses-src-%{version}",
     tag = "Source",
-    object_hash = "355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://invisible-mirror.net/archives/ncurses/ncurses-6.6.tar.gz",
+        "https://invisible-mirror.net/archives/ncurses/ncurses-%{version}.tar.gz",
       ],
     },
   }
   in
 
   let ncurses = {
-    name = "ncurses-6.6",
+    version | default = "6.6",
+    source_object_hash | default = "355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11",
+    name = "ncurses-%{version}",
     tag = "AutotoolsRootfs",
     deps = {
       build = [],
@@ -70,7 +72,7 @@ fun pkgs =>
             "-ec",
             m%"
               mkdir -p "@{out}/usr/share/doc"
-              cp -v -R "@{build}/source/doc" -T "@{out}/usr/share/doc/ncurses-6.6"
+              cp -v -R "@{build}/source/doc" -T "@{out}/usr/share/doc/ncurses-%{version}"
             "%,
           ],
         },
@@ -78,7 +80,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.system_rootfs_2,
-      source = ncurses_src,
+      source = ncurses_src version source_object_hash,
     },
   }
   in

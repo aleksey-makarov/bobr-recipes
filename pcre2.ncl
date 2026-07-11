@@ -1,11 +1,6 @@
 # PCRE2 (Perl-compatible regular expressions, v2). GLib 2.x hard-requires it
-# (the bundled PCRE was removed). `version`/`hashes` are node fields so an
+# (the bundled PCRE was removed). `version`/`source_object_hash` are node fields so an
 # overlay can override the version (and add its hash), as in linux.ncl.
-let default_version = "10.45" in
-let default_hashes = {
-  "10.45" = "21547f3516120c75597e5b30a992e27a592a31950b5140e7b8bfde3f192033c4",
-}
-in
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -22,8 +17,8 @@ fun pkgs =>
   in
 
   let pcre2 = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "10.45",
+    source_object_hash | default = "21547f3516120c75597e5b30a992e27a592a31950b5140e7b8bfde3f192033c4",
     name = "pcre2-%{version}",
     tag = "Autotools",
     deps = {
@@ -40,7 +35,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

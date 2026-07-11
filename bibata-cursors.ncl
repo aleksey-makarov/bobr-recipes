@@ -1,11 +1,10 @@
 let recipe = import "recipe-lib.ncl" in
-let version = "2.0.7" in
 
 fun pkgs =>
-  let bibata_cursors_src = {
+  let bibata_cursors_src = fun version => fun hash => {
     name = "bibata-cursors-src-%{version}",
     tag = "Source",
-    object_hash = "7d3495864e5bbef02f5e77de760b2905903b63c71495a78ef6306d19a3b556d8",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://github.com/ful1e5/Bibata_Cursor/releases/download/v%{version}/Bibata-Modern-Classic.tar.xz",
@@ -28,6 +27,8 @@ fun pkgs =>
   # default cursor theme so Weston/desktop clients find a complete cursor set
   # (dnd-move/copy/none etc.) instead of warning about missing cursors.
   let bibata_cursors = {
+    version | default = "2.0.7",
+    source_object_hash | default = "7d3495864e5bbef02f5e77de760b2905903b63c71495a78ef6306d19a3b556d8",
     name = "bibata-cursors-%{version}",
     tag = "SandboxBuild",
     deps = {
@@ -55,7 +56,7 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_bibata_cursors,
-      source = bibata_cursors_src,
+      source = bibata_cursors_src version source_object_hash,
     },
   }
   in

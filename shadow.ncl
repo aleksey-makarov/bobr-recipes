@@ -1,16 +1,12 @@
 let recipe = import "recipe-lib.ncl" in
-let hashes = {
-  "4.18.0" = "add4604d3bc410344433122a819ee4154b79dd8316a56298c60417e637c07608",
-  "4.19.4" = "ce57a313e315a0a7cb04a8f50cc20753e994e487bbe9b78a2a824ca75cb486c0",
-}
-in
 
 fun pkgs =>
   let shadow_src = fun version =>
+    fun hash =>
     {
       name = "shadow-src-%{version}",
       tag = "Source",
-      object_hash = hashes."%{version}",
+      object_hash = hash,
       origin = {
         tag = "Http",
         url = "https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz",
@@ -35,6 +31,7 @@ fun pkgs =>
 
   let shadow = {
     version | default = "4.19.4",
+    source_object_hash | default = "ce57a313e315a0a7cb04a8f50cc20753e994e487bbe9b78a2a824ca75cb486c0",
     name = "shadow-%{version}",
     tag = "AutotoolsRootfs",
     config = {
@@ -98,7 +95,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = shadow_build_rootfs,
-      source = shadow_src version,
+      source = shadow_src version source_object_hash,
     },
   }
   in

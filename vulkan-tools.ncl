@@ -1,10 +1,9 @@
-let version = "1.4.350.0" in
 
 fun pkgs =>
-  let vulkan_tools_src = {
+  let vulkan_tools_src = fun version => fun hash => {
     name = "vulkan-tools-src-%{version}",
     tag = "Source",
-    object_hash = "3079796d51b29ce49dc7b7c7e243df93b343d54c3be9d4a8292c3231b9698deb",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://github.com/KhronosGroup/Vulkan-Tools/archive/refs/tags/vulkan-sdk-%{version}.tar.gz",
@@ -16,6 +15,8 @@ fun pkgs =>
   # the venus path. cube uses the Wayland WSI (runs under Weston); X11 WSI off.
   # Shaders ship as prebuilt SPIR-V, so no glslang. Mock ICD off.
   let vulkan_tools = {
+    version | default = "1.4.350.0",
+    source_object_hash | default = "3079796d51b29ce49dc7b7c7e243df93b343d54c3be9d4a8292c3231b9698deb",
     name = "vulkan-tools-%{version}",
     tag = "Makefile",
     deps = {
@@ -46,7 +47,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = vulkan_tools_src,
+      source = vulkan_tools_src version source_object_hash,
     },
   }
   in

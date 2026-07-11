@@ -1,21 +1,12 @@
 let recipe = import "recipe-lib.ncl" in
-let hashes = {
-  "9.1.1629" = "d92c6550e8eca741085fce94e5b0d3d13d2c62fcb5b69bf5a6010d3114de4828",
-  "9.2.0680" = "9f306d8a25fc688ad2b814c1c420833ed20ff86deca907a81db0af08dde51a6f",
-}
-in
-let runtime_dirs = {
-  "9.1.1629" = "vim91",
-  "9.2.0680" = "vim92",
-}
-in
 
 fun pkgs =>
   let vim_src = fun version =>
+    fun hash =>
     {
       name = "vim-src-%{version}",
       tag = "Source",
-      object_hash = hashes."%{version}",
+      object_hash = hash,
       origin = {
         tag = "Http",
         url = [
@@ -27,7 +18,8 @@ fun pkgs =>
 
   let vim = {
     version | default = "9.2.0680",
-    runtime_dir = runtime_dirs."%{version}",
+    source_object_hash | default = "9f306d8a25fc688ad2b814c1c420833ed20ff86deca907a81db0af08dde51a6f",
+    runtime_dir = "vim92",
     name = "vim-%{version}",
     tag = "Autotools",
     deps = {
@@ -93,7 +85,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = vim_src version,
+      source = vim_src version source_object_hash,
     },
   }
   in

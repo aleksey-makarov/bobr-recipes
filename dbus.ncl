@@ -1,19 +1,21 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let dbus_src = {
-    name = "dbus-src-1.16.2",
+  let dbus_src = fun version => fun hash => {
+    name = "dbus-src-%{version}",
     tag = "Source",
-    object_hash = "0ba2a1a4b16afe7bceb2c07e9ce99a8c2c3508e5dec290dbb643384bd6beb7e2",
+    object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz",
+      url = "https://dbus.freedesktop.org/releases/dbus/dbus-%{version}.tar.xz",
     },
   }
   in
 
   let dbus = {
-    name = "dbus-1.16.2",
+    version | default = "1.16.2",
+    source_object_hash | default = "0ba2a1a4b16afe7bceb2c07e9ce99a8c2c3508e5dec290dbb643384bd6beb7e2",
+    name = "dbus-%{version}",
     tag = "Meson",
     deps = {
       build = [
@@ -104,7 +106,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = dbus_src,
+      source = dbus_src version source_object_hash,
     },
   }
   in

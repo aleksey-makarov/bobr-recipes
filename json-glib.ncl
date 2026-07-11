@@ -1,11 +1,6 @@
 # json-glib -- JSON parsing/serialization on GObject, used by mutter and other
-# GNOME components. `version`/`hashes` are node fields (overridable), as in
+# GNOME components. `version`/`source_object_hash` are node fields (overridable), as in
 # linux.ncl.
-let default_version = "1.10.8" in
-let default_hashes = {
-  "1.10.8" = "55c5c141a564245b8f8fbe7698663c87a45a7333c2a2c56f06f811ab73b212dd",
-}
-in
 
 let branch = fun version =>
   let m = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
@@ -28,8 +23,8 @@ fun pkgs =>
   in
 
   let json_glib = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "1.10.8",
+    source_object_hash | default = "55c5c141a564245b8f8fbe7698663c87a45a7333c2a2c56f06f811ab73b212dd",
     name = "json-glib-%{version}",
     tag = "Meson",
     deps = {
@@ -55,7 +50,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

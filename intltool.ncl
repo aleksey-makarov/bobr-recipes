@@ -1,23 +1,25 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let intltool_src = {
-    name = "intltool-src-0.51.0",
+  let intltool_src = fun version => fun hash => {
+    name = "intltool-src-%{version}",
     tag = "Source",
-    object_hash = "67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://gstreamer.freedesktop.org/src/mirror/intltool-0.51.0.tar.gz",
-        "https://ftp.osuosl.org/pub/blfs/conglomeration/intltool/intltool-0.51.0.tar.gz",
-        "https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz",
+        "https://gstreamer.freedesktop.org/src/mirror/intltool-%{version}.tar.gz",
+        "https://ftp.osuosl.org/pub/blfs/conglomeration/intltool/intltool-%{version}.tar.gz",
+        "https://launchpad.net/intltool/trunk/%{version}/+download/intltool-%{version}.tar.gz",
       ],
     },
   }
   in
 
   let intltool = {
-    name = "intltool-0.51.0",
+    version | default = "0.51.0",
+    source_object_hash | default = "67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd",
+    name = "intltool-%{version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -48,12 +50,12 @@ fun pkgs =>
           "-v",
           "-Dm644",
           "@{build}/source/doc/I18N-HOWTO",
-          "@{out}/usr/share/doc/intltool-0.51.0/I18N-HOWTO",
+          "@{out}/usr/share/doc/intltool-%{version}/I18N-HOWTO",
         ],
       },
     },
     inputs = {
-      source = intltool_src,
+      source = intltool_src version source_object_hash,
     },
   }
   in

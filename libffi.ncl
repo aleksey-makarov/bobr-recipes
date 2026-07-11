@@ -1,16 +1,12 @@
 let recipe = import "recipe-lib.ncl" in
-let hashes = {
-  "3.5.2" = "f3a3082a23b37c293a4fcd1053147b371f2ff91fa7ea1b2a52e335676bac82dc",
-  "3.6.0" = "31ff1fe32deaebfbb388727f32677bb254bf2a41382c51464c0b1837c9ee9828",
-}
-in
 
 fun pkgs =>
   let libffi_src = fun version =>
+    fun hash =>
     {
       name = "libffi-src-%{version}",
       tag = "Source",
-      object_hash = hashes."%{version}",
+      object_hash = hash,
       origin = {
         tag = "Http",
         url = "https://github.com/libffi/libffi/releases/download/v%{version}/libffi-%{version}.tar.gz",
@@ -20,6 +16,7 @@ fun pkgs =>
 
   let libffi = {
     version | default = "3.6.0",
+    source_object_hash | default = "31ff1fe32deaebfbb388727f32677bb254bf2a41382c51464c0b1837c9ee9828",
     name = "libffi-%{version}",
     tag = "Autotools",
     deps = {
@@ -38,7 +35,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libffi_src version,
+      source = libffi_src version source_object_hash,
     },
   }
   in

@@ -1,16 +1,12 @@
 let recipe = import "recipe-lib.ncl" in
-let hashes = {
-  "6.16.0" = "5900ccc15f9ac3bf7b7eae81deb5937123df35e99347a7f11a22818482f0a8d0",
-  "7.1.0" = "fd9fa1b95809417157ca83dd72957e3261bdbce896353cb936f80af0b33a4b5c",
-}
-in
 
 fun pkgs =>
   let iproute2_src = fun version =>
+    fun hash =>
     {
       name = "iproute2-src-%{version}",
       tag = "Source",
-      object_hash = hashes."%{version}",
+      object_hash = hash,
       origin = {
         tag = "Http",
         url = "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-%{version}.tar.xz",
@@ -20,6 +16,7 @@ fun pkgs =>
 
   let iproute2 = {
     version | default = "7.1.0",
+    source_object_hash | default = "fd9fa1b95809417157ca83dd72957e3261bdbce896353cb936f80af0b33a4b5c",
     name = "iproute2-%{version}",
     tag = "Makefile",
     deps = {
@@ -61,7 +58,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = iproute2_src version,
+      source = iproute2_src version source_object_hash,
     },
   }
   in

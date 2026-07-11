@@ -1,11 +1,6 @@
 # Little CMS 2 -- color management engine, needed by colord and mutter. Core
 # library only (jpeg/tiff/zlib utilities off, no external deps). `version`/
-# `hashes` are node fields (overridable), as in linux.ncl.
-let default_version = "2.17" in
-let default_hashes = {
-  "2.17" = "d11af569e42a1baa1650d20ad61d12e41af4fead4aa7964a01f93b08b53ab074",
-}
-in
+# `source_object_hash` are node fields (overridable), as in linux.ncl.
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -22,8 +17,8 @@ fun pkgs =>
   in
 
   let lcms2 = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "2.17",
+    source_object_hash | default = "d11af569e42a1baa1650d20ad61d12e41af4fead4aa7964a01f93b08b53ab074",
     name = "lcms2-%{version}",
     tag = "Autotools",
     deps = {
@@ -41,7 +36,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

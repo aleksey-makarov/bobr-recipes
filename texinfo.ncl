@@ -1,22 +1,24 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let texinfo_src = {
-    name = "texinfo-src-7.2",
+  let texinfo_src = fun version => fun hash => {
+    name = "texinfo-src-%{version}",
     tag = "Source",
-    object_hash = "0329d7788fbef113fa82cb80889ca197a344ce0df7646fe000974c5d714363a6",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/texinfo/texinfo-7.2.tar.xz",
-        "https://mirrors.kernel.org/gnu/texinfo/texinfo-7.2.tar.xz",
+        "https://ftp.gnu.org/gnu/texinfo/texinfo-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/texinfo/texinfo-%{version}.tar.xz",
       ],
     },
   }
   in
 
   let texinfo = {
-    name = "texinfo-7.2",
+    version | default = "7.2",
+    source_object_hash | default = "0329d7788fbef113fa82cb80889ca197a344ce0df7646fe000974c5d714363a6",
+    name = "texinfo-%{version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -50,7 +52,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = texinfo_src,
+      source = texinfo_src version source_object_hash,
     },
   }
   in

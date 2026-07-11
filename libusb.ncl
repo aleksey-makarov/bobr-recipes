@@ -1,11 +1,6 @@
 # libusb -- USB access library, needed by libgusb (-> colord -> mutter). udev
 # hotplug off (device enumeration via sysfs) to avoid a libudev build dep here.
-# `version`/`hashes` are node fields (overridable), as in linux.ncl.
-let default_version = "1.0.30" in
-let default_hashes = {
-  "1.0.30" = "fea36f34f9156400209595e300840767ab1a385ede1dc7ee893015aea9c6dbaf",
-}
-in
+# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -22,8 +17,8 @@ fun pkgs =>
   in
 
   let libusb = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "1.0.30",
+    source_object_hash | default = "fea36f34f9156400209595e300840767ab1a385ede1dc7ee893015aea9c6dbaf",
     name = "libusb-%{version}",
     tag = "Autotools",
     deps = {
@@ -39,7 +34,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

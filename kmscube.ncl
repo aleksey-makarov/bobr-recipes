@@ -1,13 +1,12 @@
 let commit = "f60e50e887d3c49e91ac9b06d8199b36152632fa" in
 # kmscube has no releases; pin a git commit. The version carries the commit
 # date so the package attribute resolves to `kmscube`.
-let version = "20251024-f60e50e" in
 
 fun pkgs =>
-  let kmscube_src = {
+  let kmscube_src = fun version => fun hash => {
     name = "kmscube-src-%{version}",
     tag = "Source",
-    object_hash = "e676b733d351d345b9cbf919dfaf84a5ef16e71f328c542f5614027bd4ca2e05",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://gitlab.freedesktop.org/mesa/kmscube/-/archive/%{commit}/kmscube-%{commit}.tar.gz",
@@ -19,6 +18,8 @@ fun pkgs =>
   # does an atomic modeset and renders a spinning cube straight to the virtio
   # scanout -- no Wayland/X compositor. First real userspace-graphics check.
   let kmscube = {
+    version | default = "20251024-f60e50e",
+    source_object_hash | default = "e676b733d351d345b9cbf919dfaf84a5ef16e71f328c542f5614027bd4ca2e05",
     name = "kmscube-%{version}",
     tag = "Meson",
     deps = {
@@ -41,7 +42,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = kmscube_src,
+      source = kmscube_src version source_object_hash,
     },
   }
   in

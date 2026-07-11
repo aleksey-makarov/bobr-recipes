@@ -1,11 +1,6 @@
 # libgudev -- GObject bindings for libudev (device enumeration), required by
-# colord and mutter. Wraps libudev from systemd. `version`/`hashes` are node
+# colord and mutter. Wraps libudev from systemd. `version`/`source_object_hash` are node
 # fields (overridable), as in linux.ncl.
-let default_version = "238" in
-let default_hashes = {
-  "238" = "61266ab1afc9d73dbc60a8b2af73e99d2fdff47d99544d085760e4fa667b5dd1",
-}
-in
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -22,8 +17,8 @@ fun pkgs =>
   in
 
   let libgudev = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "238",
+    source_object_hash | default = "61266ab1afc9d73dbc60a8b2af73e99d2fdff47d99544d085760e4fa667b5dd1",
     name = "libgudev-%{version}",
     tag = "Meson",
     deps = {
@@ -49,7 +44,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

@@ -1,10 +1,5 @@
 # fribidi -- Unicode bidirectional algorithm, used by pango.
-# `version`/`hashes` are node fields (overridable), as in linux.ncl.
-let default_version = "1.0.16" in
-let default_hashes = {
-  "1.0.16" = "1b1cde5b235d40479e91be2f0e88a309e3214c8ab470ec8a2744d82a5a9ea05c",
-}
-in
+# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -21,8 +16,8 @@ fun pkgs =>
   in
 
   let fribidi = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "1.0.16",
+    source_object_hash | default = "1b1cde5b235d40479e91be2f0e88a309e3214c8ab470ec8a2744d82a5a9ea05c",
     name = "fribidi-%{version}",
     tag = "Meson",
     deps = {
@@ -40,7 +35,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

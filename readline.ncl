@@ -1,15 +1,15 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let readline_src = {
-    name = "readline-src-8.3",
+  let readline_src = fun version => fun hash => {
+    name = "readline-src-%{version}",
     tag = "Source",
-    object_hash = "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz",
-        "https://mirrors.kernel.org/gnu/readline/readline-8.3.tar.gz",
+        "https://ftp.gnu.org/gnu/readline/readline-%{version}.tar.gz",
+        "https://mirrors.kernel.org/gnu/readline/readline-%{version}.tar.gz",
       ],
     },
   }
@@ -28,7 +28,9 @@ fun pkgs =>
   in
 
   let readline = {
-    name = "readline-8.3",
+    version | default = "8.3",
+    source_object_hash | default = "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc",
+    name = "readline-%{version}",
     tag = "AutotoolsRootfs",
     deps = {
       build = [],
@@ -54,13 +56,13 @@ fun pkgs =>
       configure_args = [
         "--disable-static",
         "--with-curses",
-        "--docdir=/usr/share/doc/readline-8.3",
+        "--docdir=/usr/share/doc/readline-%{version}",
       ],
       env = { SHLIB_LIBS = "-lncursesw" },
     },
     inputs = {
       _rootfs = readline_build_rootfs,
-      source = readline_src,
+      source = readline_src version source_object_hash,
     },
   }
   in

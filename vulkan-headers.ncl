@@ -1,10 +1,9 @@
-let version = "1.4.350.0" in
 
 fun pkgs =>
-  let vulkan_headers_src = {
+  let vulkan_headers_src = fun version => fun hash => {
     name = "vulkan-headers-src-%{version}",
     tag = "Source",
-    object_hash = "70270d10bf2c1e074a06ee37a50b75d332993d1b80a1d9526eeed2da6d82ed22",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/vulkan-sdk-%{version}.tar.gz",
@@ -17,6 +16,8 @@ fun pkgs =>
   # pre_build step runs cmake (Unix Makefiles generator), then `make` /
   # `make DESTDIR=... install`.
   let vulkan_headers = {
+    version | default = "1.4.350.0",
+    source_object_hash | default = "70270d10bf2c1e074a06ee37a50b75d332993d1b80a1d9526eeed2da6d82ed22",
     name = "vulkan-headers-%{version}",
     tag = "Makefile",
     deps = {
@@ -37,7 +38,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = vulkan_headers_src,
+      source = vulkan_headers_src version source_object_hash,
     },
   }
   in

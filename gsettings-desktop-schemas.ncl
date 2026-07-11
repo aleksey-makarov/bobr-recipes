@@ -1,13 +1,8 @@
 # gsettings-desktop-schemas -- the org.gnome.desktop.* GSettings schemas (data)
 # used across GNOME (mutter, gnome-shell, GTK reads e.g. cursor-size). The
 # .gschema.xml install to /usr/share/glib-2.0/schemas and are compiled by the
-# gnome_rootfs finalize step. `version`/`hashes` are node fields (overridable),
+# gnome_rootfs finalize step. `version`/`source_object_hash` are node fields (overridable),
 # as in linux.ncl.
-let default_version = "50.1" in
-let default_hashes = {
-  "50.1" = "0a2aa25082672585d16fcdab61c7b0e33f035fb87476505c794f29565afa485b",
-}
-in
 
 let branch = fun version =>
   let m = std.string.find "^([0-9]+)" version in
@@ -30,8 +25,8 @@ fun pkgs =>
   in
 
   let gsettings_desktop_schemas = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "50.1",
+    source_object_hash | default = "0a2aa25082672585d16fcdab61c7b0e33f035fb87476505c794f29565afa485b",
     name = "gsettings-desktop-schemas-%{version}",
     tag = "Meson",
     deps = {
@@ -52,7 +47,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

@@ -2,12 +2,7 @@
 # sandboxes image loaders with seccomp). Plain C autotools library. The release
 # tarball ships the pre-generated gperf syscall table (`syscalls.perf.c`), but
 # `gperf` is kept as a build dep since configure probes for it.
-# `version`/`hashes` are node fields (overridable), as in linux.ncl.
-let default_version = "2.6.0" in
-let default_hashes = {
-  "2.6.0" = "83b6085232d1588c379dc9b9cae47bb37407cf262e6e74993c61ba72d2a784dc",
-}
-in
+# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -24,8 +19,8 @@ fun pkgs =>
   in
 
   let libseccomp = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "2.6.0",
+    source_object_hash | default = "83b6085232d1588c379dc9b9cae47bb37407cf262e6e74993c61ba72d2a784dc",
     name = "libseccomp-%{version}",
     tag = "Autotools",
     deps = {
@@ -42,7 +37,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

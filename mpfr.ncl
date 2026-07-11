@@ -1,22 +1,24 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let mpfr_src = {
-    name = "mpfr-src-4.2.2",
+  let mpfr_src = fun version => fun hash => {
+    name = "mpfr-src-%{version}",
     tag = "Source",
-    object_hash = "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz",
-        "https://mirrors.kernel.org/gnu/mpfr/mpfr-4.2.2.tar.xz",
+        "https://ftp.gnu.org/gnu/mpfr/mpfr-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/mpfr/mpfr-%{version}.tar.xz",
       ],
     },
   }
   in
 
   let mpfr = {
-    name = "mpfr-4.2.2",
+    version | default = "4.2.2",
+    source_object_hash | default = "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01",
+    name = "mpfr-%{version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -31,11 +33,11 @@ fun pkgs =>
       configure_args = [
         "--disable-static",
         "--enable-thread-safe",
-        "--docdir=/usr/share/doc/mpfr-4.2.2",
+        "--docdir=/usr/share/doc/mpfr-%{version}",
       ],
     },
     inputs = {
-      source = mpfr_src,
+      source = mpfr_src version source_object_hash,
     },
   }
   in

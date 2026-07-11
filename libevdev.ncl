@@ -1,10 +1,9 @@
-let version = "1.13.4" in
 
 fun pkgs =>
-  let libevdev_src = {
+  let libevdev_src = fun version => fun hash => {
     name = "libevdev-src-%{version}",
     tag = "Source",
-    object_hash = "f00ab8d42ad8b905296fab67e13b871f1a424839331516642100f82ad88127cd",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://www.freedesktop.org/software/libevdev/libevdev-%{version}.tar.xz",
@@ -13,6 +12,8 @@ fun pkgs =>
   in
 
   let libevdev = {
+    version | default = "1.13.4",
+    source_object_hash | default = "f00ab8d42ad8b905296fab67e13b871f1a424839331516642100f82ad88127cd",
     name = "libevdev-%{version}",
     tag = "Meson",
     deps = {
@@ -30,7 +31,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libevdev_src,
+      source = libevdev_src version source_object_hash,
     },
   }
   in

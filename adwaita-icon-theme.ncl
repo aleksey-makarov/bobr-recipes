@@ -2,13 +2,8 @@
 # meson build requires gtk4-update-icon-cache at configure time (required:true);
 # the actual cache run is skip_if_destdir, so under our DESTDIR install it is
 # skipped and the icon cache is produced later by the gnome_rootfs finalize
-# step. Hence gtk4 is a build-only dep. `version`/`hashes` are node fields
+# step. Hence gtk4 is a build-only dep. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
-let default_version = "50.0" in
-let default_hashes = {
-  "50.0" = "fac6e0401fca714780561a081b8f7e27c3bc1db34ebda4da175081f26b24d460",
-}
-in
 
 let branch = fun version =>
   let m = std.string.find "^([0-9]+)" version in
@@ -31,8 +26,8 @@ fun pkgs =>
   in
 
   let adwaita_icon_theme = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "50.0",
+    source_object_hash | default = "fac6e0401fca714780561a081b8f7e27c3bc1db34ebda4da175081f26b24d460",
     name = "adwaita-icon-theme-%{version}",
     tag = "Meson",
     deps = {
@@ -47,7 +42,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

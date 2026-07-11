@@ -1,13 +1,13 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let e2fsprogs_src = {
-    name = "e2fsprogs-src-1.47.3",
+  let e2fsprogs_src = fun version => fun hash => {
+    name = "e2fsprogs-src-%{version}",
     tag = "Source",
-    object_hash = "2f5164e64dd7d91eadd1e0e8a77d92c06dd7837bb19f1d9189ce1939b363d2b4",
+    object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.3/e2fsprogs-1.47.3.tar.gz",
+      url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v%{version}/e2fsprogs-%{version}.tar.gz",
     },
   }
   in
@@ -24,7 +24,9 @@ fun pkgs =>
   in
 
   let e2fsprogs = {
-    name = "e2fsprogs-1.47.3",
+    version | default = "1.47.3",
+    source_object_hash | default = "2f5164e64dd7d91eadd1e0e8a77d92c06dd7837bb19f1d9189ce1939b363d2b4",
+    name = "e2fsprogs-%{version}",
     tag = "SandboxBuild",
     deps = {
       build = [
@@ -65,7 +67,7 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_e2fsprogs,
-      source = e2fsprogs_src,
+      source = e2fsprogs_src version source_object_hash,
     },
   }
   in

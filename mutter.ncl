@@ -4,13 +4,7 @@
 # notification and the profiler are all off, which drops those dependencies.
 # The native KMS backend (via logind + udev, EGL/GLES2 from mesa) is on. gvdb is
 # a bundled meson subproject, so it needs no recipe.
-# `version`/`hashes`/`series` are node fields (overridable), as in linux.ncl.
-let default_version = "50.3" in
-let default_hashes = {
-  "50.3" = "25663fa7afc96a4c092448990c0da664b7f04dd8d9f5e3b9be2b498b1b303cb4",
-}
-in
-let default_series = "50" in
+# `version`/`source_object_hash`/`series` are node fields (overridable), as in linux.ncl.
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -28,9 +22,9 @@ fun pkgs =>
   in
 
   let mutter = {
-    version | default = default_version,
-    hashes | default = default_hashes,
-    series | default = default_series,
+    version | default = "50.3",
+    source_object_hash | default = "25663fa7afc96a4c092448990c0da664b7f04dd8d9f5e3b9be2b498b1b303cb4",
+    series | default = "50",
     name = "mutter-%{version}",
     tag = "Meson",
     deps = {
@@ -125,7 +119,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version series (hashes."%{version}"),
+      source = mk_src version series source_object_hash,
     },
   }
   in

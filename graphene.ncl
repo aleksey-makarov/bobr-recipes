@@ -1,10 +1,5 @@
 # graphene -- lightweight vector/matrix math used by GTK4 and mutter.
-# `version`/`hashes` are node fields (overridable), as in linux.ncl.
-let default_version = "1.10.8" in
-let default_hashes = {
-  "1.10.8" = "a37bb0e78a419dcbeaa9c7027bcff52f5ec2367c25ec859da31dfde2928f279a",
-}
-in
+# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 
 let branch = fun version =>
   let m = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
@@ -27,8 +22,8 @@ fun pkgs =>
   in
 
   let graphene = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "1.10.8",
+    source_object_hash | default = "a37bb0e78a419dcbeaa9c7027bcff52f5ec2367c25ec859da31dfde2928f279a",
     name = "graphene-%{version}",
     tag = "Meson",
     deps = {
@@ -51,7 +46,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

@@ -1,10 +1,9 @@
-let version = "2.16.0" in
 
 fun pkgs =>
-  let fontconfig_src = {
+  let fontconfig_src = fun version => fun hash => {
     name = "fontconfig-src-%{version}",
     tag = "Source",
-    object_hash = "6a33dc555cc9ba8b10caf7695878ef134eeb36d0af366041f639b1da9b6ed220",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://www.freedesktop.org/software/fontconfig/release/fontconfig-%{version}.tar.xz",
@@ -13,6 +12,8 @@ fun pkgs =>
   in
 
   let fontconfig = {
+    version | default = "2.16.0",
+    source_object_hash | default = "6a33dc555cc9ba8b10caf7695878ef134eeb36d0af366041f639b1da9b6ed220",
     name = "fontconfig-%{version}",
     tag = "Meson",
     deps = {
@@ -36,7 +37,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = fontconfig_src,
+      source = fontconfig_src version source_object_hash,
     },
   }
   in

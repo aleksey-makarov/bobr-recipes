@@ -1,16 +1,12 @@
 let recipe = import "recipe-lib.ncl" in
-let hashes = {
-  "2.8.0" = "01f5806da7d1d34f594b7b2a6ae1ab23215344cf1064e8edcd3a90fef9776a11",
-  "2.10.0" = "6e5ca4f8d76ee9e3a8db700b667f13e12aac9933828a64e1aaad93d26be9b479",
-}
-in
 
 fun pkgs =>
   let kbd_src = fun version =>
+    fun hash =>
     {
       name = "kbd-src-%{version}",
       tag = "Source",
-      object_hash = hashes."%{version}",
+      object_hash = hash,
       origin = {
         tag = "Http",
         url = "https://www.kernel.org/pub/linux/utils/kbd/kbd-%{version}.tar.xz",
@@ -31,6 +27,7 @@ fun pkgs =>
 
   let kbd = {
     version | default = "2.10.0",
+    source_object_hash | default = "6e5ca4f8d76ee9e3a8db700b667f13e12aac9933828a64e1aaad93d26be9b479",
     name = "kbd-%{version}",
     tag = "Autotools",
     deps = {
@@ -73,7 +70,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = kbd_src version,
+      source = kbd_src version source_object_hash,
       backspace_patch = kbd_backspace_patch,
     },
   }

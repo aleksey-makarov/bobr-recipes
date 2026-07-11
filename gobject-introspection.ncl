@@ -3,13 +3,8 @@
 # glib_gen1 (no-gir glib) to break the glib<->g-i cycle; its runtime dep is also
 # glib_gen1 (NOT the final glib) so that glib's gir pass, which build-deps on
 # g-i, does not form a build-graph cycle. In the rootfs the final glib provides
-# the identically-versioned libglib. `version`/`hashes` are node fields
+# the identically-versioned libglib. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
-let default_version = "1.86.0" in
-let default_hashes = {
-  "1.86.0" = "920d1a3fcedeadc32acff95c2e203b319039dd4b4a08dd1a2dfd283d19c0b9ae",
-}
-in
 
 let branch = fun version =>
   let matched = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
@@ -34,8 +29,8 @@ fun pkgs =>
   in
 
   let gobject_introspection = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "1.86.0",
+    source_object_hash | default = "920d1a3fcedeadc32acff95c2e203b319039dd4b4a08dd1a2dfd283d19c0b9ae",
     name = "gobject-introspection-%{version}",
     tag = "Meson",
     deps = {
@@ -62,7 +57,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

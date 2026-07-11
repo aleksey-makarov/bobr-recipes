@@ -1,16 +1,12 @@
 let recipe = import "recipe-lib.ncl" in
-let hashes = {
-  "3.5.2" = "c53a47e5e441c930c3928cf7bf6fb00e5d129b630e0aa873b08258656e7345ec",
-  "3.5.7" = "a8c0d28a529ca480f9f36cf5792e2cd21984552a3c8e4aa11a24aa31aeac98e8",
-}
-in
 
 fun pkgs =>
   let openssl_src = fun version =>
+    fun hash =>
     {
       name = "openssl-src-%{version}",
       tag = "Source",
-      object_hash = hashes."%{version}",
+      object_hash = hash,
       origin = {
         tag = "Http",
         url = "https://github.com/openssl/openssl/releases/download/openssl-%{version}/openssl-%{version}.tar.gz",
@@ -31,6 +27,7 @@ fun pkgs =>
 
   let openssl = {
     version | default = "3.5.7",
+    source_object_hash | default = "a8c0d28a529ca480f9f36cf5792e2cd21984552a3c8e4aa11a24aa31aeac98e8",
     name = "openssl-%{version}",
     tag = "SandboxBuild",
     deps = {
@@ -71,7 +68,7 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_openssl,
-      source = openssl_src version,
+      source = openssl_src version source_object_hash,
     },
   }
   in

@@ -1,19 +1,12 @@
 let recipe = import "../recipe-lib.ncl" in
 
-# The source release. `hashes` is the catalog of known/supported kernel
-# versions (its keys say which ones are officially built and tested), and
-# `version` picks one. Both are node fields, so an overlay builds:
-#   - a known version by overriding just `version`;
-#   - a new version by overriding `version` and adding its hash to `hashes`:
-#       linux = prev.linux & {
-#         version = "6.19.1",
-#         hashes = prev.linux.hashes & { "6.19.1" = "<sha256>" },
-#       }
-let default_version = "6.18.38" in
-let default_hashes = {
-  "6.18.38" = "ac26e508abd56e9f8b89872b6e10c49fc823bcc70d8068a5d8504c1a7c4ff045",
-}
-in
+# The source release. `version` picks the kernel version and
+# `source_object_hash` is its source tarball hash; both are node fields, so an
+# overlay builds a different kernel by overriding them:
+#   linux = prev.linux & {
+#     version = "6.19.1",
+#     source_object_hash = "<sha256>",
+#   }
 
 let major_version = fun version =>
   let matched = std.string.find "^([0-9]+)[.]" version in
@@ -104,8 +97,8 @@ fun pkgs =>
       }
       in
       {
-        version | default = default_version,
-        hashes | default = default_hashes,
+        version | default = "6.18.38",
+        source_object_hash | default = "ac26e508abd56e9f8b89872b6e10c49fc823bcc70d8068a5d8504c1a7c4ff045",
         name = "linux-headers%{variant}-%{version}",
         tag = "SandboxBuildRootfs",
         config = {
@@ -138,7 +131,7 @@ fun pkgs =>
         inputs = {
           _rootfs = rootfs,
           script = buildscript_linux,
-          source = linux_source version (hashes."%{version}"),
+          source = linux_source version source_object_hash,
         },
       }
   in
@@ -147,8 +140,8 @@ fun pkgs =>
   let linux_headers = mk_linux_headers "" pkgs.system_rootfs_2 in
 
   let linux = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "6.18.38",
+    source_object_hash | default = "ac26e508abd56e9f8b89872b6e10c49fc823bcc70d8068a5d8504c1a7c4ff045",
     config_options | default = {},
     use_tinyconfig | default = false,
     name = "linux%{if use_tinyconfig then "-tiny" else ""}-%{version}",
@@ -228,7 +221,7 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_linux,
-      source = linux_source version (hashes."%{version}"),
+      source = linux_source version source_object_hash,
     },
   }
   in

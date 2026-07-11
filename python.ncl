@@ -1,14 +1,14 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let python_src = {
-    name = "python-src-3.13.7",
+  let python_src = fun version => fun hash => {
+    name = "python-src-%{version}",
     tag = "Source",
-    object_hash = "5462f9099dfd30e238def83c71d91897d8caa5ff6ebc7a50f14d4802cdaaa79a",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://www.python.org/ftp/python/3.13.7/Python-3.13.7.tar.xz",
+        "https://www.python.org/ftp/python/%{version}/Python-%{version}.tar.xz",
       ],
     },
   }
@@ -182,7 +182,9 @@ fun pkgs =>
   in
 
   let python_gen1 = {
-    name = "python-gen1-3.13.7",
+    version | default = "3.13.7",
+    source_object_hash | default = "5462f9099dfd30e238def83c71d91897d8caa5ff6ebc7a50f14d4802cdaaa79a",
+    name = "python-gen1-%{version}",
     tag = "AutotoolsRootfs",
     config = {
       in-tree = true,
@@ -232,13 +234,15 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.buildpack_deps_rootfs,
-      source = python_src,
+      source = python_src version source_object_hash,
     },
   }
   in
 
   let python = {
-    name = "python-3.13.7",
+    version | default = "3.13.7",
+    source_object_hash | default = "5462f9099dfd30e238def83c71d91897d8caa5ff6ebc7a50f14d4802cdaaa79a",
+    name = "python-%{version}",
     tag = "AutotoolsRootfs",
     deps = {
       build = [],
@@ -309,7 +313,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = python_build_rootfs,
-      source = python_src,
+      source = python_src version source_object_hash,
       modules_helper = python_modules_helper,
       flit_core = flit_core_src,
       packaging = packaging_src,

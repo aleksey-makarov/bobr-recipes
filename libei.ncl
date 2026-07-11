@@ -8,12 +8,7 @@
 # Source is fetched from the freedesktop GitLab archive with `unpack = true`, so
 # the object hash is the extracted tree's fsobj-hash rather than the tarball
 # bytes -- GitLab regenerates archive tarballs non-reproducibly, but the tree is
-# stable. `version`/`hashes` are node fields (overridable), as in linux.ncl.
-let default_version = "1.4.1" in
-let default_hashes = {
-  "1.4.1" = "c3e78cdfd27ee4635e657ce7f9c4454fc67ad4dbf0a3f9ada057b130bbafe278",
-}
-in
+# stable. `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -31,8 +26,8 @@ fun pkgs =>
   in
 
   let libei = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "1.4.1",
+    source_object_hash | default = "c3e78cdfd27ee4635e657ce7f9c4454fc67ad4dbf0a3f9ada057b130bbafe278",
     name = "libei-%{version}",
     tag = "Meson",
     deps = {
@@ -57,7 +52,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

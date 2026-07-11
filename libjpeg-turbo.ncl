@@ -1,12 +1,7 @@
 # libjpeg-turbo -- JPEG codec, needed by gdk-pixbuf. CMake-only (3.x dropped
 # autotools), so built via the Makefile builder with a cmake `pre_build` step
 # (same pattern as vulkan-loader). SIMD is off to avoid a nasm build dep.
-# `version`/`hashes` are node fields (overridable), as in linux.ncl.
-let default_version = "3.1.0" in
-let default_hashes = {
-  "3.1.0" = "9564c72b1dfd1d6fe6274c5f95a8d989b59854575d4bbee44ade7bc17aa9bc93",
-}
-in
+# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -23,8 +18,8 @@ fun pkgs =>
   in
 
   let libjpeg_turbo = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "3.1.0",
+    source_object_hash | default = "9564c72b1dfd1d6fe6274c5f95a8d989b59854575d4bbee44ade7bc17aa9bc93",
     name = "libjpeg-turbo-%{version}",
     tag = "Makefile",
     deps = {
@@ -47,7 +42,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

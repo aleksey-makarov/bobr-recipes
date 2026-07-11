@@ -1,22 +1,13 @@
 let recipe = import "recipe-lib.ncl" in
-let hashes = {
-  "2.41.1" = "be9ad9a276f4305ab7dd2f5225c8be1ff54352f565ff4dede9628c1aaa7dec57",
-  "2.41.5" = "f586e35d320ff537aab3ffeca37e9ecd482ccbe013590db4429a414d8aa6a728",
-}
-in
-let series = {
-  "2.41.1" = "2.41",
-  "2.41.5" = "2.41",
-}
-in
 
 fun pkgs =>
   let util_linux_src = fun version =>
-    let version_series = series."%{version}" in
+    fun hash =>
+    let version_series = "2.41" in
     {
       name = "util-linux-src-%{version}",
       tag = "Source",
-      object_hash = hashes."%{version}",
+      object_hash = hash,
       origin = {
         tag = "Http",
         url = "https://www.kernel.org/pub/linux/utils/util-linux/v%{version_series}/util-linux-%{version}.tar.xz",
@@ -26,6 +17,7 @@ fun pkgs =>
 
   let util_linux = {
     version | default = "2.41.5",
+    source_object_hash | default = "f586e35d320ff537aab3ffeca37e9ecd482ccbe013590db4429a414d8aa6a728",
     name = "util-linux-%{version}",
     tag = "Autotools",
     deps = {
@@ -74,7 +66,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = util_linux_src version,
+      source = util_linux_src version source_object_hash,
     },
   }
   in

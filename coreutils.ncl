@@ -1,22 +1,24 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let coreutils_src = {
-    name = "coreutils-src-9.7",
+  let coreutils_src = fun version => fun hash => {
+    name = "coreutils-src-%{version}",
     tag = "Source",
-    object_hash = "e8bb26ad0293f9b5a1fc43fb42ba970e312c66ce92c1b0b16713d7500db251bf",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz",
-        "https://mirrors.kernel.org/gnu/coreutils/coreutils-9.7.tar.xz",
+        "https://ftp.gnu.org/gnu/coreutils/coreutils-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/coreutils/coreutils-%{version}.tar.xz",
       ],
     },
   }
   in
 
   let coreutils_gen1 = {
-    name = "coreutils-gen1-9.7",
+    version | default = "9.7",
+    source_object_hash | default = "e8bb26ad0293f9b5a1fc43fb42ba970e312c66ce92c1b0b16713d7500db251bf",
+    name = "coreutils-gen1-%{version}",
     tag = "AutotoolsRootfs",
     config = {
       configure_args = [
@@ -44,13 +46,15 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.buildpack_deps_rootfs,
-      source = coreutils_src,
+      source = coreutils_src version source_object_hash,
     },
   }
   in
 
   let coreutils = {
-    name = "coreutils-9.7",
+    version | default = "9.7",
+    source_object_hash | default = "e8bb26ad0293f9b5a1fc43fb42ba970e312c66ce92c1b0b16713d7500db251bf",
+    name = "coreutils-%{version}",
     tag = "AutotoolsRootfs",
     config = {
       configure_args = [
@@ -78,7 +82,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.system_rootfs_1,
-      source = coreutils_src,
+      source = coreutils_src version source_object_hash,
     },
   }
   in

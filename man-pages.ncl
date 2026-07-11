@@ -1,13 +1,13 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let man_pages_src = {
-    name = "man-pages-src-6.15",
+  let man_pages_src = fun version => fun hash => {
+    name = "man-pages-src-%{version}",
     tag = "Source",
-    object_hash = "03d8ebf618bd5df57cb4bf355efa3f4cd3a00b771efd623d4fd042b5dceb4465",
+    object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-6.15.tar.xz",
+      url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-%{version}.tar.xz",
     },
   }
   in
@@ -24,7 +24,9 @@ fun pkgs =>
   in
 
   let man_pages = {
-    name = "man-pages-6.15",
+    version | default = "6.15",
+    source_object_hash | default = "03d8ebf618bd5df57cb4bf355efa3f4cd3a00b771efd623d4fd042b5dceb4465",
+    name = "man-pages-%{version}",
     tag = "SandboxBuild",
     deps = {
       build = [
@@ -52,7 +54,7 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_man_pages,
-      source = man_pages_src,
+      source = man_pages_src version source_object_hash,
     },
   }
   in

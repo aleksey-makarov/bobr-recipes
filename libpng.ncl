@@ -1,10 +1,9 @@
-let version = "1.6.50" in
 
 fun pkgs =>
-  let libpng_src = {
+  let libpng_src = fun version => fun hash => {
     name = "libpng-src-%{version}",
     tag = "Source",
-    object_hash = "4df396518620a7aa3651443e87d1b2862e4e88cad135a8b93423e01706232307",
+    object_hash = hash,
     origin = {
       tag = "Http",
       # Canonical SourceForge project path (+ /download fallback), matching the
@@ -19,6 +18,8 @@ fun pkgs =>
   in
 
   let libpng = {
+    version | default = "1.6.50",
+    source_object_hash | default = "4df396518620a7aa3651443e87d1b2862e4e88cad135a8b93423e01706232307",
     name = "libpng-%{version}",
     tag = "Autotools",
     deps = {
@@ -48,7 +49,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = libpng_src,
+      source = libpng_src version source_object_hash,
     },
   }
   in

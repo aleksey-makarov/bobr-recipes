@@ -1,11 +1,10 @@
 let recipe = import "recipe-lib.ncl" in
-let version = "2.37" in
 
 fun pkgs =>
-  let dejavu_src = {
+  let dejavu_src = fun version => fun hash => {
     name = "dejavu-src-%{version}",
     tag = "Source",
-    object_hash = "fa9ca4d13871dd122f61258a80d01751d603b4d3ee14095d65453b4e846e17d7",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-%{version}.tar.bz2",
@@ -27,6 +26,8 @@ fun pkgs =>
   # A basic scalable font so cairo/fontconfig have something to render (Weston
   # panel/terminal), and a sensible default for the desktop later.
   let dejavu = {
+    version | default = "2.37",
+    source_object_hash | default = "fa9ca4d13871dd122f61258a80d01751d603b4d3ee14095d65453b4e846e17d7",
     name = "dejavu-%{version}",
     tag = "SandboxBuild",
     deps = {
@@ -54,7 +55,7 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_dejavu,
-      source = dejavu_src,
+      source = dejavu_src version source_object_hash,
     },
   }
   in

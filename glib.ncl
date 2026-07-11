@@ -1,13 +1,8 @@
 # GLib / GObject / GIO -- the base of the GNOME stack. Built in two passes to
 # break the glib <-> gobject-introspection cycle:
 #   glib_gen1 (introspection off) -> gobject-introspection -> glib (gir on).
-# Downstream uses `glib` (has the GLib/GObject/Gio typelibs). `version`/`hashes`
+# Downstream uses `glib` (has the GLib/GObject/Gio typelibs). `version`/`source_object_hash`
 # are node fields (overridable), as in linux.ncl.
-let default_version = "2.88.2" in
-let default_hashes = {
-  "2.88.2" = "cf3f215a640c8a4257f14317586b8f1fdd25a10a93cb4bdda147c0f9ad88e74f",
-}
-in
 
 let branch = fun version =>
   let matched = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
@@ -64,8 +59,8 @@ fun pkgs =>
     fun introspection =>
       fun extra_build =>
         {
-          version | default = default_version,
-          hashes | default = default_hashes,
+          version | default = "2.88.2",
+          source_object_hash | default = "cf3f215a640c8a4257f14317586b8f1fdd25a10a93cb4bdda147c0f9ad88e74f",
           name = "glib%{suffix}-%{version}",
           tag = "Meson",
           deps = {
@@ -76,7 +71,7 @@ fun pkgs =>
             setup_args = base_setup @ ["-Dintrospection=%{introspection}"],
           },
           inputs = {
-            source = mk_src version (hashes."%{version}"),
+            source = mk_src version source_object_hash,
           },
         }
   in

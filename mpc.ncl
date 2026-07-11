@@ -1,22 +1,24 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let mpc_src = {
-    name = "mpc-src-1.3.1",
+  let mpc_src = fun version => fun hash => {
+    name = "mpc-src-%{version}",
     tag = "Source",
-    object_hash = "ab642492f5cf882b74aa0cb730cd410a81edcdbec895183ce930e706c1c759b8",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz",
-        "https://mirrors.kernel.org/gnu/mpc/mpc-1.3.1.tar.gz",
+        "https://ftp.gnu.org/gnu/mpc/mpc-%{version}.tar.gz",
+        "https://mirrors.kernel.org/gnu/mpc/mpc-%{version}.tar.gz",
       ],
     },
   }
   in
 
   let mpc = {
-    name = "mpc-1.3.1",
+    version | default = "1.3.1",
+    source_object_hash | default = "ab642492f5cf882b74aa0cb730cd410a81edcdbec895183ce930e706c1c759b8",
+    name = "mpc-%{version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -32,11 +34,11 @@ fun pkgs =>
     config = {
       configure_args = [
         "--disable-static",
-        "--docdir=/usr/share/doc/mpc-1.3.1",
+        "--docdir=/usr/share/doc/mpc-%{version}",
       ],
     },
     inputs = {
-      source = mpc_src,
+      source = mpc_src version source_object_hash,
     },
   }
   in

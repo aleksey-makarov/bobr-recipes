@@ -1,19 +1,21 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let kmod_src = {
-    name = "kmod-src-34.2",
+  let kmod_src = fun version => fun hash => {
+    name = "kmod-src-%{version}",
     tag = "Source",
-    object_hash = "5a5d5073070cc7e0c7a7a3c6ec2a0e1780850c8b47b3e3892226b93ffcb9cb54",
+    object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.xz",
+      url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-%{version}.tar.xz",
     },
   }
   in
 
   let kmod = {
-    name = "kmod-34.2",
+    version | default = "34.2",
+    source_object_hash | default = "5a5d5073070cc7e0c7a7a3c6ec2a0e1780850c8b47b3e3892226b93ffcb9cb54",
+    name = "kmod-%{version}",
     tag = "Meson",
     deps = {
       build = [
@@ -47,7 +49,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = kmod_src,
+      source = kmod_src version source_object_hash,
     },
   }
   in

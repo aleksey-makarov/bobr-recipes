@@ -1,13 +1,8 @@
 # libxcvt -- VESA CVT timing library, split out of xorg-server so Wayland
 # compositors can generate mode timings without X. mutter's native backend
 # needs its `cvt` program at build time to generate the default-modes table;
-# the library itself is not linked. `version`/`hashes` are node fields
+# the library itself is not linked. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
-let default_version = "0.1.3" in
-let default_hashes = {
-  "0.1.3" = "a929998a8767de7dfa36d6da4751cdbeef34ed630714f2f4a767b351f2442e01",
-}
-in
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -24,8 +19,8 @@ fun pkgs =>
   in
 
   let libxcvt = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "0.1.3",
+    source_object_hash | default = "a929998a8767de7dfa36d6da4751cdbeef34ed630714f2f4a767b351f2442e01",
     name = "libxcvt-%{version}",
     tag = "Meson",
     deps = {
@@ -41,7 +36,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

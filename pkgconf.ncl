@@ -1,21 +1,21 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let pkgconf_src = {
-    name = "pkgconf-src-2.5.1",
+  let pkgconf_src = fun version => fun hash => {
+    name = "pkgconf-src-%{version}",
     tag = "Source",
-    object_hash = "cd05c9589b9f86ecf044c10a2269822bc9eb001eced2582cfffd658b0a50c243",
+    object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://distfiles.ariadne.space/pkgconf/pkgconf-2.5.1.tar.xz",
+      url = "https://distfiles.ariadne.space/pkgconf/pkgconf-%{version}.tar.xz",
     },
   }
   in
 
-  let pkgconf_config = {
+  let pkgconf_config = fun version => {
     configure_args = [
       "--disable-static",
-      "--docdir=/usr/share/doc/pkgconf-2.5.1",
+      "--docdir=/usr/share/doc/pkgconf-%{version}",
       # Search both /usr/lib and /usr/lib64 pkgconfig dirs: some packages (zlib,
       # glibc) install to /usr/lib64, and their .pc files (e.g. zlib.pc) must be
       # discoverable, or `Requires: zlib` resolution fails for dependents like
@@ -50,23 +50,27 @@ fun pkgs =>
   in
 
   let pkgconf_gen1 = {
-    name = "pkgconf-gen1-2.5.1",
+    version | default = "2.5.1",
+    source_object_hash | default = "cd05c9589b9f86ecf044c10a2269822bc9eb001eced2582cfffd658b0a50c243",
+    name = "pkgconf-gen1-%{version}",
     tag = "AutotoolsRootfs",
-    config = pkgconf_config,
+    config = pkgconf_config version,
     inputs = {
       _rootfs = pkgs.system_rootfs_1,
-      source = pkgconf_src,
+      source = pkgconf_src version source_object_hash,
     },
   }
   in
 
   let pkgconf = {
-    name = "pkgconf-2.5.1",
+    version | default = "2.5.1",
+    source_object_hash | default = "cd05c9589b9f86ecf044c10a2269822bc9eb001eced2582cfffd658b0a50c243",
+    name = "pkgconf-%{version}",
     tag = "AutotoolsRootfs",
-    config = pkgconf_config,
+    config = pkgconf_config version,
     inputs = {
       _rootfs = pkgs.system_rootfs_2,
-      source = pkgconf_src,
+      source = pkgconf_src version source_object_hash,
     },
   }
   in

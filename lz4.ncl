@@ -1,19 +1,21 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let lz4_src = {
-    name = "lz4-src-1.10.0",
+  let lz4_src = fun version => fun hash => {
+    name = "lz4-src-%{version}",
     tag = "Source",
-    object_hash = "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b",
+    object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz",
+      url = "https://github.com/lz4/lz4/releases/download/v%{version}/lz4-%{version}.tar.gz",
     },
   }
   in
 
   let lz4 = {
-    name = "lz4-1.10.0",
+    version | default = "1.10.0",
+    source_object_hash | default = "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b",
+    name = "lz4-%{version}",
     tag = "MakefileRootfs",
     config = {
       make_args = [
@@ -23,7 +25,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.system_rootfs_2,
-      source = lz4_src,
+      source = lz4_src version source_object_hash,
     },
   }
   in

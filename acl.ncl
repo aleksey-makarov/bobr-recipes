@@ -1,13 +1,13 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let acl_src = {
-    name = "acl-src-2.3.2",
+  let acl_src = fun version => fun hash => {
+    name = "acl-src-%{version}",
     tag = "Source",
-    object_hash = "97203a72cae99ab89a067fe2210c1cbf052bc492b479eca7d226d9830883b0bd",
+    object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://download.savannah.gnu.org/releases/acl/acl-2.3.2.tar.xz",
+      url = "https://download.savannah.gnu.org/releases/acl/acl-%{version}.tar.xz",
     },
   }
   in
@@ -25,17 +25,19 @@ fun pkgs =>
   in
 
   let acl = {
-    name = "acl-2.3.2",
+    version | default = "2.3.2",
+    source_object_hash | default = "97203a72cae99ab89a067fe2210c1cbf052bc492b479eca7d226d9830883b0bd",
+    name = "acl-%{version}",
     tag = "AutotoolsRootfs",
     config = {
       configure_args = [
         "--disable-static",
-        "--docdir=/usr/share/doc/acl-2.3.2",
+        "--docdir=/usr/share/doc/acl-%{version}",
       ],
     },
     inputs = {
       _rootfs = acl_build_rootfs,
-      source = acl_src,
+      source = acl_src version source_object_hash,
     },
   }
   in

@@ -1,11 +1,6 @@
 # pango -- text layout, used by GTK4. Uses harfbuzz (shaping), fribidi (bidi),
 # cairo (rendering), fontconfig/freetype (fonts). Xft off (no X).
-# `version`/`hashes` are node fields (overridable), as in linux.ncl.
-let default_version = "1.56.4" in
-let default_hashes = {
-  "1.56.4" = "17065e2fcc5f5a5bdbffc884c956bfc7c451a96e8c4fb2f8ad837c6413cb5a01",
-}
-in
+# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 
 let branch = fun version =>
   let m = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
@@ -28,8 +23,8 @@ fun pkgs =>
   in
 
   let pango = {
-    version | default = default_version,
-    hashes | default = default_hashes,
+    version | default = "1.56.4",
+    source_object_hash | default = "17065e2fcc5f5a5bdbffc884c956bfc7c451a96e8c4fb2f8ad837c6413cb5a01",
     name = "pango-%{version}",
     tag = "Meson",
     deps = {
@@ -68,7 +63,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version (hashes."%{version}"),
+      source = mk_src version source_object_hash,
     },
   }
   in

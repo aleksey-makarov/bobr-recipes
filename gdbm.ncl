@@ -1,22 +1,24 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let gdbm_src = {
-    name = "gdbm-src-1.26",
+  let gdbm_src = fun version => fun hash => {
+    name = "gdbm-src-%{version}",
     tag = "Source",
-    object_hash = "6a24504a14de4a744103dcb936be976df6fbe88ccff26065e54c1c47946f4a5e",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/gdbm/gdbm-1.26.tar.gz",
-        "https://mirrors.kernel.org/gnu/gdbm/gdbm-1.26.tar.gz",
+        "https://ftp.gnu.org/gnu/gdbm/gdbm-%{version}.tar.gz",
+        "https://mirrors.kernel.org/gnu/gdbm/gdbm-%{version}.tar.gz",
       ],
     },
   }
   in
 
   let gdbm = {
-    name = "gdbm-1.26",
+    version | default = "1.26",
+    source_object_hash | default = "6a24504a14de4a744103dcb936be976df6fbe88ccff26065e54c1c47946f4a5e",
+    name = "gdbm-%{version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -31,7 +33,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = gdbm_src,
+      source = gdbm_src version source_object_hash,
     },
   }
   in

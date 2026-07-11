@@ -12,13 +12,13 @@ fun pkgs =>
   }
   in
 
-  let perl_src = {
-    name = "perl-src-5.42.2",
+  let perl_src = fun version => fun hash => {
+    name = "perl-src-%{version}",
     tag = "Source",
-    object_hash = "0a585eeb9e363c0f80482ddb3571625250c2c86aeb408853e8ea50805cfb14bb",
+    object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://www.cpan.org/src/5.0/perl-5.42.2.tar.xz",
+      url = "https://www.cpan.org/src/5.0/perl-%{version}.tar.xz",
     },
   }
   in
@@ -37,7 +37,9 @@ fun pkgs =>
   in
 
   let perl = {
-    name = "perl-5.42.2",
+    version | default = "5.42.2",
+    source_object_hash | default = "0a585eeb9e363c0f80482ddb3571625250c2c86aeb408853e8ea50805cfb14bb",
+    name = "perl-%{version}",
     tag = "SandboxBuildRootfs",
     deps = {
       build = [],
@@ -76,7 +78,7 @@ fun pkgs =>
     inputs = {
       _rootfs = perl_build_rootfs,
       script = buildscript_perl_configure,
-      source = perl_src,
+      source = perl_src version source_object_hash,
     },
   }
   in

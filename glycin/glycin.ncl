@@ -5,8 +5,8 @@
 #
 # glycin is a Rust (Cargo workspace) project driven by Meson; its crates are
 # vendored offline via `cargo.ncl` + the `Bundle` builder. Because a Cargo.lock
-# pins one exact version, the usual `version`/`hashes` table idiom does not fit:
-# instead this exposes three overridable, mutually consistent fields --
+# pins one exact version, the version and its vendored crates must move together,
+# so this exposes three coupled, mutually consistent overridable fields --
 # `version`, `source_object_hash`, and `cargo_lock`. To move to another version,
 # an overlay must override ALL THREE together (`cargo_lock = import
 # "<their>/Cargo.lock" as 'Toml`); otherwise the version and the vendored crates

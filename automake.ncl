@@ -1,22 +1,24 @@
 let recipe = import "recipe-lib.ncl" in
 
 fun pkgs =>
-  let automake_src = {
-    name = "automake-src-1.18.1",
+  let automake_src = fun version => fun hash => {
+    name = "automake-src-%{version}",
     tag = "Source",
-    object_hash = "168aa363278351b89af56684448f525a5bce5079d0b6842bd910fdd3f1646887",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/automake/automake-1.18.1.tar.xz",
-        "https://mirrors.kernel.org/gnu/automake/automake-1.18.1.tar.xz",
+        "https://ftp.gnu.org/gnu/automake/automake-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/automake/automake-%{version}.tar.xz",
       ],
     },
   }
   in
 
   let automake = {
-    name = "automake-1.18.1",
+    version | default = "1.18.1",
+    source_object_hash | default = "168aa363278351b89af56684448f525a5bce5079d0b6842bd910fdd3f1646887",
+    name = "automake-%{version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -28,11 +30,11 @@ fun pkgs =>
     },
     config = {
       configure_args = [
-        "--docdir=/usr/share/doc/automake-1.18.1",
+        "--docdir=/usr/share/doc/automake-%{version}",
       ],
     },
     inputs = {
-      source = automake_src,
+      source = automake_src version source_object_hash,
     },
   }
   in

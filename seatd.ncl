@@ -1,10 +1,9 @@
-let version = "0.9.3" in
 
 fun pkgs =>
-  let seatd_src = {
+  let seatd_src = fun version => fun hash => {
     name = "seatd-src-%{version}",
     tag = "Source",
-    object_hash = "302564d54d8e28191fadfd734f2675ecb0c9e0615a58011b89ef15dfa4dbaa96",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://git.sr.ht/~kennylevinsen/seatd/archive/%{version}.tar.gz",
@@ -17,6 +16,8 @@ fun pkgs =>
   # devices via logind (LIBSEAT_BACKEND=logind). The seatd and builtin backends
   # are kept as fallbacks (LIBSEAT_BACKEND=seatd for the weston-start path).
   let seatd = {
+    version | default = "0.9.3",
+    source_object_hash | default = "302564d54d8e28191fadfd734f2675ecb0c9e0615a58011b89ef15dfa4dbaa96",
     name = "seatd-%{version}",
     tag = "Meson",
     deps = {
@@ -41,7 +42,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = seatd_src,
+      source = seatd_src version source_object_hash,
     },
   }
   in

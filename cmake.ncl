@@ -1,10 +1,9 @@
-let version = "3.31.6" in
 
 fun pkgs =>
-  let cmake_src = {
+  let cmake_src = fun version => fun hash => {
     name = "cmake-src-%{version}",
     tag = "Source",
-    object_hash = "653427f0f5014750aafff22727fb2aa60c6c732ca91808cfb78ce22ddd9e55f0",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://github.com/Kitware/CMake/releases/download/v%{version}/cmake-%{version}.tar.gz",
@@ -18,6 +17,8 @@ fun pkgs =>
   # used; OpenSSL is off (not in the build rootfs, and not needed here). Needed
   # to build the CMake-based vulkan-headers/loader/tools.
   let cmake = {
+    version | default = "3.31.6",
+    source_object_hash | default = "653427f0f5014750aafff22727fb2aa60c6c732ca91808cfb78ce22ddd9e55f0",
     name = "cmake-%{version}",
     tag = "Makefile",
     deps = {
@@ -39,7 +40,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = cmake_src,
+      source = cmake_src version source_object_hash,
     },
   }
   in

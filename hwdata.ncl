@@ -1,11 +1,10 @@
 let recipe = import "recipe-lib.ncl" in
-let version = "0.395" in
 
 fun pkgs =>
-  let hwdata_src = {
+  let hwdata_src = fun version => fun hash => {
     name = "hwdata-src-%{version}",
     tag = "Source",
-    object_hash = "1166f733c57afa82cfdad56e62ef044835fbc8c99ef65f033e6a5802716b5c66",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://github.com/vcrhonek/hwdata/archive/refs/tags/v%{version}.tar.gz",
@@ -30,6 +29,8 @@ fun pkgs =>
   # incomplete in the git archive (missing generated hwdata.spec) and only
   # needed for distro packaging anyway.
   let hwdata = {
+    version | default = "0.395",
+    source_object_hash | default = "1166f733c57afa82cfdad56e62ef044835fbc8c99ef65f033e6a5802716b5c66",
     name = "hwdata-%{version}",
     tag = "SandboxBuild",
     deps = {
@@ -57,7 +58,7 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_hwdata,
-      source = hwdata_src,
+      source = hwdata_src version source_object_hash,
     },
   }
   in

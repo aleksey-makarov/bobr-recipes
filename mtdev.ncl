@@ -1,10 +1,9 @@
-let version = "1.1.7" in
 
 fun pkgs =>
-  let mtdev_src = {
+  let mtdev_src = fun version => fun hash => {
     name = "mtdev-src-%{version}",
     tag = "Source",
-    object_hash = "a107adad2101fecac54ac7f9f0e0a0dd155d954193da55c2340c97f2ff1d814e",
+    object_hash = hash,
     origin = {
       tag = "Http",
       url = "https://bitmath.org/code/mtdev/mtdev-%{version}.tar.bz2",
@@ -14,6 +13,8 @@ fun pkgs =>
 
   # Multitouch protocol translation library; a required dependency of libinput.
   let mtdev = {
+    version | default = "1.1.7",
+    source_object_hash | default = "a107adad2101fecac54ac7f9f0e0a0dd155d954193da55c2340c97f2ff1d814e",
     name = "mtdev-%{version}",
     tag = "Autotools",
     deps = {
@@ -28,7 +29,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mtdev_src,
+      source = mtdev_src version source_object_hash,
     },
   }
   in
