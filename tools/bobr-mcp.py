@@ -23,7 +23,7 @@ a trusted interface. git is confined to the two clones and to branch `agent`
 Config (env):
   BOBR_MCP_AGENT     agent workspace root (required)
   BOBR_MCP_BOBR_BIN  bobr binary for recipe builds
-                     (default: $AGENT/bobr/target/debug/bobr)
+                     (default: $BOBR_MCP_AGENT/bobr/target/debug/bobr)
   BOBR_MCP_HOST      bind host (default 127.0.0.1)
   BOBR_MCP_PORT      bind port (default 8765)
 
@@ -191,14 +191,23 @@ def _assert_agent(path: Path) -> None:
 
 @mcp.tool()
 def bobr_compile(profile: str = "debug") -> dict:
-    """Rebuild the bobr binary (cargo build --bin bobr) so recipe builds use
-    the current bobr sources. profile: 'debug' or 'release'."""
-    argv = ["cargo", "build", "--bin", "bobr"]
-    if profile == "release":
-        argv.append("--release")
-    elif profile != "debug":
+    """Rebuild the whole bobr toolchain so recipe builds use the current bobr
+    sources: the host binaries (bobr, fsobj-hash -- bobr-build.sh needs both)
+    and the musl-static bobr-sandbox-launcher (the sandbox needs it, and prefers
+    the musl build). profile: 'debug' or 'release'."""
+    if profile not in ("debug", "release"):
         raise ValueError("profile must be 'debug' or 'release'")
-    return _start("bobr_compile", f"cargo build --bin bobr ({profile})", argv, BOBR_REPO)
+    rel = " --release" if profile == "release" else ""
+    # Fixed command (no external input) -- cargo build (all host bins) plus the
+    # musl launcher; run via a shell so it's a single job.
+    script = (
+        f"cargo build{rel} && "
+        f"cargo build -p bobr-sandbox-launcher --target x86_64-unknown-linux-musl{rel}"
+    )
+    return _start(
+        "bobr_compile", f"cargo build + musl launcher ({profile})",
+        ["bash", "-c", script], BOBR_REPO,
+    )
 
 
 @mcp.tool()

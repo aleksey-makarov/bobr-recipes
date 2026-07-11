@@ -39,6 +39,14 @@ git -C "$AGENT/bobr" checkout -B agent
 
 git clone <origin> "$AGENT/bobr-recipes"
 git -C "$AGENT/bobr-recipes" checkout -B agent
+
+# Commit identity for the agent's checkpoint commits (git_commit needs it).
+# A distinct "agent" identity keeps agent-branch commits obvious; use your own
+# if you prefer. Set it per clone:
+for r in bobr bobr-recipes; do
+  git -C "$AGENT/$r" config user.name  "bobr agent"
+  git -C "$AGENT/$r" config user.email "agent@bobr.local"
+done
 ```
 
 `<origin>` is your shared remote (or the master machine over ssh). Keep the
@@ -66,7 +74,7 @@ It listens on `127.0.0.1:8765` by default. Env knobs:
 | var | default | meaning |
 |-----|---------|---------|
 | `BOBR_MCP_AGENT` | (required) | agent workspace root |
-| `BOBR_MCP_BOBR_BIN` | `$AGENT/bobr/target/debug/bobr` | bobr binary recipe builds use |
+| `BOBR_MCP_BOBR_BIN` | `$BOBR_MCP_AGENT/bobr/target/debug/bobr` | bobr binary recipe builds use |
 | `BOBR_MCP_HOST` | `127.0.0.1` | bind host |
 | `BOBR_MCP_PORT` | `8765` | bind port |
 
