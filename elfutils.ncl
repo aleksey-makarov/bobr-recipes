@@ -13,7 +13,7 @@ fun pkgs =>
   in
 
   let elfutils_rootfs = {
-    name = "elfutils-rootfs-0.193",
+    name = "elfutils-rootfs",
     tag = "TreeMerge",
     config = {},
     inputs = {
