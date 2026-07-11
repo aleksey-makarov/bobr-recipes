@@ -114,6 +114,8 @@ let base_modules = [
   import "libei.ncl",
   import "libxcvt.ncl",
   import "mutter.ncl",
+  import "mc.ncl",
+  import "openssh.ncl",
   import "pkgconf.ncl",
   import "gmp.ncl",
   import "man-pages.ncl",

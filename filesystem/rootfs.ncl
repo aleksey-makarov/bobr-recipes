@@ -21,6 +21,7 @@ fun pkgs =>
     pkgs.libffi,
     pkgs.libxcrypt,
     pkgs.expat,
+    pkgs.pcre2,
     pkgs.ncurses,
     pkgs.bash,
     pkgs.bc,
@@ -81,6 +82,11 @@ fun pkgs =>
     pkgs.util_linux,
     pkgs.e2fsprogs,
     pkgs.vim,
+    # mc links libglib-2.0 (which needs libpcre2, added above); the flat rootfs
+    # list has no transitive runtime closure, so glib must be listed explicitly.
+    pkgs.glib,
+    pkgs.mc,
+    pkgs.openssh,
   ]
   in
   # Unit enablement is NOT done here. systemd applies preset policy at first
