@@ -2,7 +2,10 @@
 # PAM enabled (login sessions), privilege separation as user `sshd` in
 # /var/empty, config under /etc/ssh. `make install` generates host keys into
 # the DESTDIR; those are host identity, so post_install removes them -- they are
-# regenerated on first boot by sshd-keygen.service (stateless model).
+# regenerated every boot by sshd-keygen.service (stateless model). post_install
+# also prepends an `Include /etc/ssh/sshd_config.d/*.conf` line to the shipped
+# sshd_config so the image can drop in policy (system-runtime-files provides
+# 10-stateless.conf); prepended because sshd uses the first value per keyword.
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 
 fun pkgs =>
@@ -49,13 +52,20 @@ fun pkgs =>
         "--with-privsep-user=sshd",
       ],
       post_install = {
-        name = "drop_baked_host_keys",
+        name = "prepare_ssh_config",
         run_as = "root",
         cwd = "@{out}",
         argv = [
           "/bin/sh",
           "-ec",
-          "rm -f \"@{out}\"/etc/ssh/ssh_host_*",
+          m%"
+            rm -f "@{out}"/etc/ssh/ssh_host_*
+            cfg="@{out}/etc/ssh/sshd_config"
+            if [ -f "$cfg" ]; then
+              printf 'Include /etc/ssh/sshd_config.d/*.conf\n' \
+                | cat - "$cfg" > "$cfg.new" && mv "$cfg.new" "$cfg"
+            fi
+          "%,
         ],
       },
     },

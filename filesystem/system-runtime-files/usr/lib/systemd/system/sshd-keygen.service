@@ -1,0 +1,13 @@
+[Unit]
+Description=Generate sshd host keys
+Documentation=man:ssh-keygen(1)
+Before=sshd.service
+# /etc/ssh is on the volatile overlay, so host keys are gone every boot and
+# `ssh-keygen -A` regenerates the missing ones. The host identity therefore
+# changes each boot (by design for this image); clients use
+# StrictHostKeyChecking=no for this VM.
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/ssh-keygen -A

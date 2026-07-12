@@ -5,5 +5,11 @@ tmpfs /var/lib/systemd tmpfs mode=0755,nosuid,nodev 0 0
 tmpfs /root tmpfs mode=0700,nosuid,nodev 0 0
 # Persistent home on a second virtio-blk disk (see tools/bobr-run-qemu-gnome.sh,
 # QEMU_HOME_IMG). nofail: the ephemeral overlay /home is used if the disk is
-# absent; passno 0 skips the boot fsck.
-/dev/vdb /home ext4 defaults,nofail 0 0
+# absent; passno 0 skips the boot fsck. nofail also drops the mount's default
+# ordering before local-fs.target, which would let systemd-tmpfiles-setup run
+# before /home is mounted and provision /home/user on the hidden underlying dir
+# (tmpfiles.d/home.conf) -- so x-systemd.before pins tmpfiles after this mount.
+# (No custom device-timeout: /dev/vdb takes a few seconds to appear, so a short
+# timeout would fail the mount even when the disk is present; the absent-disk
+# fallback just waits out the default device timeout instead.)
+/dev/vdb /home ext4 defaults,nofail,x-systemd.before=systemd-tmpfiles-setup.service 0 0

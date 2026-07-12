@@ -1,0 +1,6 @@
+# PAM config for sshd. Public-key auth bypasses the auth stack; account and
+# session still run so pam_systemd registers the logind session (seat,
+# XDG_RUNTIME_DIR) for the SSH login. Defers to the shared system-auth stack.
+auth      include  system-auth
+account   include  system-auth
+session   include  system-auth

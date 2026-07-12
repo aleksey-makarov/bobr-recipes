@@ -103,7 +103,7 @@ exec qemu-system-x86_64 \
   -initrd "${initrd_path}" \
   -drive "file=${image_path},format=raw,if=virtio,readonly=on" \
   -drive "file=${home_img},format=raw,if=virtio" \
-  -nic user,model=virtio-net-pci \
+  -nic "user,model=virtio-net-pci,hostfwd=tcp::${QEMU_SSH_PORT:-2222}-:22" \
   -append "${APPEND}" \
   -nographic \
   -no-reboot \
