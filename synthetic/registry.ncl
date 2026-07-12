@@ -1,3 +1,4 @@
+let cargo = import "../cargo.ncl" in
 fun pkgs =>
   let buildscript_autotools = {
     name = "buildscript-autotools",
@@ -46,6 +47,16 @@ fun pkgs =>
     origin = {
       tag = "RecipePath",
       path = "synthetic/perl-module.sh",
+    },
+  }
+  in
+  let buildscript_cargo = {
+    name = "buildscript-cargo",
+    tag = "Source",
+    object_hash = import "cargo.sh.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "synthetic/cargo.sh",
     },
   }
   in
@@ -187,6 +198,12 @@ fun pkgs =>
     common_native_package_default_build_deps
     @ [
       pkgs.perl,
+    ]
+  in
+  let rust_package_default_build_deps =
+    common_native_package_default_build_deps
+    @ [
+      pkgs.rust_bin,
     ]
   in
   let sandbox_build_default_build_deps = [
@@ -597,6 +614,80 @@ fun pkgs =>
         synthetic_inputs buildscript_perl_module node.inputs,
     }
   in
+  let lower_cargo_node = fun node =>
+    let node_config = record_get_or "config" {} node in
+    let post_install_steps =
+      normalize_hook_steps node_config "post_install" "@{out}"
+    in
+    let lowered_script_config =
+      let with_features =
+        if std.record.has_field "features" node_config then
+          { features = node_config.features }
+        else
+          {}
+      in
+      let with_bins =
+        if std.record.has_field "bins" node_config then
+          std.record.insert "bins" node_config.bins with_features
+        else
+          with_features
+      in
+      let with_no_default =
+        if record_get_or "no_default_features" false node_config then
+          std.record.insert "no_default_features" "true" with_bins
+        else
+          with_bins
+      in
+      let with_env =
+        if std.record.has_field "env" node_config then
+          std.record.insert "env" node_config.env with_no_default
+        else
+          with_no_default
+      in
+      if std.record.has_field "source_subdir" node_config then
+        std.record.insert "source_subdir" node_config.source_subdir with_env
+      else
+        with_env
+    in
+    let cargo_step_env =
+      std.record.insert "BOBR_CRATES_DIR" "@{crates}" (synthetic_step_env node)
+    in
+    {
+      name = node.name,
+      tag = "Sandbox",
+      config = {
+        steps =
+          [synthetic_prepare_step cargo_step_env]
+          @ [
+            {
+              name = "bobr_vendor_crates",
+              run_as = "build-user",
+              cwd = "@{build}",
+              argv = ["@{script}", "vendor"],
+              env = cargo_step_env,
+            },
+            {
+              name = "bobr_build",
+              run_as = "build-user",
+              cwd = "@{build}",
+              argv = ["@{script}", "build"],
+              env = cargo_step_env,
+            },
+            {
+              name = "bobr_install",
+              run_as = "root",
+              cwd = "@{build}",
+              argv = ["@{script}", "install"],
+              env = cargo_step_env,
+            },
+          ]
+          @ post_install_steps,
+        script_config = lowered_script_config,
+      },
+      inputs =
+        synthetic_inputs buildscript_cargo node.inputs,
+    }
+  in
   let lower_makefile_package_node = fun node =>
     let build_rootfs = build_rootfs_for makefile_package_default_build_deps node in
     let package_inputs =
@@ -642,6 +733,24 @@ fun pkgs =>
         (record_replace "tag" "PerlModuleRootfs" node)
     )
   in
+  let lower_cargo_package_node = fun node =>
+    let build_rootfs = build_rootfs_for rust_package_default_build_deps node in
+    let crates_bundle =
+      cargo.vendor_bundle (node.name ++ "-crates") node.cargo_lock
+    in
+    let package_inputs =
+      record_replace
+        "_rootfs"
+        build_rootfs
+        (record_replace "crates" crates_bundle node.inputs)
+    in
+    lower_cargo_node (
+      record_replace
+        "inputs"
+        package_inputs
+        (record_replace "tag" "CargoRootfs" node)
+    )
+  in
   let lower_sandbox_build_node = fun node =>
     let build_rootfs = build_rootfs_for sandbox_build_default_build_deps node in
     let package_inputs =
@@ -670,4 +779,6 @@ fun pkgs =>
     "MesonRootfs" = lower_meson_node,
     "PerlModuleRootfs" = lower_perl_module_node,
     "SandboxBuildRootfs" = lower_sandbox_build_rootfs_node,
+    "Cargo" = lower_cargo_package_node,
+    "CargoRootfs" = lower_cargo_node,
   }
