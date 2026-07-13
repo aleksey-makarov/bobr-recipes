@@ -1,4 +1,5 @@
 let cargo = import "../cargo.ncl" in
+let br = import "../build-rootfs.ncl" in
 fun pkgs =>
   let buildscript_autotools = {
     name = "buildscript-autotools",
@@ -106,102 +107,31 @@ fun pkgs =>
         inputs
     )
   in
-  let deps_or_empty = fun node =>
-    record_get_or "deps" { build = [], runtime = [] } node
-  in
-  let runtime_deps_or_empty = fun node =>
-    record_get_or "runtime" [] (deps_or_empty node)
-  in
-  let build_deps_or_empty = fun node =>
-    record_get_or "build" [] (deps_or_empty node)
-  in
-  let dependency_cycle_error = fun stack =>
-    fun name =>
-      fail (
-        "runtime dependency cycle: "
-        ++ std.string.join " -> " (stack @ [name])
-      )
-  in
-  let runtime_closure_set = fun roots =>
-    let rec visit = fun visiting =>
-      fun visited =>
-        fun stack =>
-          fun node =>
-            let name = node.name in
-            if std.record.has_field name visiting then
-              dependency_cycle_error stack name
-            else if std.record.has_field name visited then
-              visited
-            else
-              let visiting_with_node = std.record.insert name true visiting in
-              let visited_with_deps =
-                std.array.fold_left
-                  (fun acc =>
-                    fun dep =>
-                      visit visiting_with_node acc (stack @ [name]) dep
-                  )
-                  visited
-                  (runtime_deps_or_empty node)
-              in
-              std.record.insert name node visited_with_deps
-    in
-    std.array.fold_left
-      (fun acc => fun node => visit {} acc [] node)
-      {}
-      roots
-  in
-  let sorted_closure_nodes = fun closure_set =>
-    # `std.record.fields` already returns names sorted; avoid Nickel's quadratic
-    # `std.array.sort` (a few hundred names take tens of seconds).
-    std.array.map
-      (fun name => std.record.get name closure_set)
-      (std.record.fields closure_set)
-  in
-  let common_native_package_default_build_deps = [
-    pkgs.linux_headers,
-    pkgs.glibc,
-    pkgs.binutils,
-    pkgs.gcc,
-    pkgs.bash,
-    pkgs.make,
-    pkgs.coreutils,
-    pkgs.gawk,
-    pkgs.sed,
-    pkgs.grep,
-    pkgs.tar,
-    pkgs.gzip,
-    pkgs.bzip2,
-    pkgs.xz,
-    pkgs.patch,
-    pkgs.findutils,
-    pkgs.diffutils,
-  ]
-  in
   let autotools_package_default_build_deps =
-    common_native_package_default_build_deps
+    br.native_build_deps pkgs
     @ [
       pkgs.autoconf,
       pkgs.m4,
       pkgs.perl,
     ]
   in
-  let makefile_package_default_build_deps = common_native_package_default_build_deps
+  let makefile_package_default_build_deps = br.native_build_deps pkgs
   in
   let meson_package_default_build_deps =
-    common_native_package_default_build_deps
+    br.native_build_deps pkgs
     @ [
       pkgs.pkgconf,
       pkgs.python,
     ]
   in
   let perl_module_package_default_build_deps =
-    common_native_package_default_build_deps
+    br.native_build_deps pkgs
     @ [
       pkgs.perl,
     ]
   in
   let rust_package_default_build_deps =
-    common_native_package_default_build_deps
+    br.native_build_deps pkgs
     @ [
       pkgs.rust_bin,
     ]
@@ -217,18 +147,10 @@ fun pkgs =>
   in
   let build_rootfs_for = fun default_build_deps =>
     fun node =>
-      let build_base = pkgs.base_filesystem in
-      let build_deps = default_build_deps @ build_deps_or_empty node in
-      let closure_nodes = sorted_closure_nodes (runtime_closure_set build_deps) in
-      if std.array.length closure_nodes == 0 then
-        build_base
-      else
-        {
-          name = node.name ++ "-build-rootfs",
-          tag = "TreeMerge",
-          config = {},
-          inputs = numbered_inputs ([build_base] @ closure_nodes),
-        }
+      br.build_rootfs_closure
+        pkgs
+        (node.name ++ "-build-rootfs")
+        (default_build_deps @ br.build_deps_or_empty node)
   in
   let rootfs_closure_for = fun node =>
     let root_fields = std.record.fields node.inputs in # already sorted
@@ -240,7 +162,7 @@ fun pkgs =>
         name = node.name,
         tag = "TreeMerge",
         config = {},
-        inputs = numbered_inputs ([pkgs.base_filesystem] @ sorted_closure_nodes (runtime_closure_set roots)),
+        inputs = numbered_inputs ([pkgs.base_filesystem] @ br.sorted_closure_nodes (br.runtime_closure_set roots)),
       }
   in
   let synthetic_source_root_expr = fun node_config =>

@@ -1,4 +1,5 @@
 let synthetic_registry_for = import "synthetic/registry.ncl" in
+let build_rootfs_lib = import "build-rootfs.ncl" in
 let lower_node = fun pkgs =>
   fun node =>
     let synthetic_registry = synthetic_registry_for pkgs in
@@ -123,6 +124,13 @@ in
   },
 
   numbered_inputs = numbered_inputs_fn,
+
+  # base_filesystem + runtime closure of the native toolchain plus `extra_deps`
+  # (no system_rootfs_X). For custom multi-step recipes; the synthetic builders
+  # use the same machinery from build-rootfs.ncl. See there for the pieces.
+  native_build_rootfs = build_rootfs_lib.native_build_rootfs,
+  native_build_deps = build_rootfs_lib.native_build_deps,
+  build_rootfs_closure = build_rootfs_lib.build_rootfs_closure,
 
   split = {
     libs = fun base =>
