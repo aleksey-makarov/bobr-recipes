@@ -28,6 +28,21 @@ ensure_cargo_offline() {
   fi
 }
 
+# mozjs-140 regression (Bugzilla 1973994): js-config.h.in lost the XP_UNIX /
+# XP_WIN placeholders, so the generated (installed) js-config.h never defines
+# the platform macro. mozilla/UniquePtrExtensions.h -- reached through the public
+# jsapi headers -- gates its UniqueFileHandle typedef on XP_UNIX/XP_WIN, so
+# embedders such as gjs fail to compile against our headers. Re-add the
+# placeholders (upstream's temporary fix by the gjs maintainer): the build's
+# substitution turns `#undef XP_UNIX` into `#define XP_UNIX 1` on Linux and
+# leaves XP_WIN undefined, baking the macro into the installed header.
+patch_js_config() {
+  local f="${source_dir}/js/src/js-config.h.in"
+  if [ -f "$f" ] && ! grep -q 'XP_UNIX' "$f"; then
+    sed -i 's|#endif /\* js_config_h \*/|/* Controls API in UniquePtrExtensions.h. */\n#undef XP_UNIX\n#undef XP_WIN\n\n#endif /* js_config_h */|' "$f"
+  fi
+}
+
 mozjs_env() {
   export CARGO_HOME="${build_dir}/.cargo-home"
   export HOME="${build_dir}"
@@ -42,6 +57,7 @@ mozjs_env() {
 
 step_configure() {
   ensure_cargo_offline
+  patch_js_config
   mozjs_env
   mkdir -p "$objdir"
   cd "$objdir"
