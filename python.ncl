@@ -190,6 +190,19 @@ fun pkgs =>
       & recipe.numbered_inputs [
         pkgs.expat,
         pkgs.libffi,
+        # ncurses so the _curses stdlib extension builds (mozjs's configure
+        # imports it via mach.logging -> blessed -> curses).
+        pkgs.ncurses,
+        # openssl so the _ssl / _hashlib extensions build (mozjs's configure
+        # imports ssl via mozboot).
+        pkgs.openssl,
+        # Round out the stdlib C extensions: _bz2, readline, _gdbm/_dbm, _uuid
+        # (util-linux provides libuuid + uuid.h). _lzma/_sqlite3 already build;
+        # only _tkinter (GUI, no tk) is intentionally left out.
+        pkgs.bzip2,
+        pkgs.readline,
+        pkgs.gdbm,
+        pkgs.util_linux,
       ],
   }
   in
@@ -269,6 +282,16 @@ fun pkgs =>
         # ctypes fail at import.
         pkgs.expat,
         pkgs.libffi,
+        # _curses links libncursesw.so.6.
+        pkgs.ncurses,
+        # _ssl / _hashlib link libssl.so / libcrypto.so.
+        pkgs.openssl_libs,
+        # _bz2 -> libbz2, readline -> libreadline, _gdbm/_dbm -> libgdbm,
+        # _uuid -> libuuid.so.1 (util-linux libs split).
+        pkgs.bzip2,
+        pkgs.readline,
+        pkgs.gdbm,
+        pkgs.util_linux_libs,
       ],
     },
     config = {
