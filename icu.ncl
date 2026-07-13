@@ -46,6 +46,10 @@ fun pkgs =>
         "--enable-shared",
         "--disable-samples",
         "--disable-tests",
+        # usrmerge: /usr/sbin is a symlink to bin, and ICU installs some data
+        # tools (gennorm2, icupkg, ...) to sbindir -- send them to /usr/bin or
+        # the sbin directory clashes with the symlink in a TreeMerge.
+        "--sbindir=/usr/bin",
       ],
     },
     inputs = {

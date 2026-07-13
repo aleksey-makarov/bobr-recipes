@@ -138,6 +138,10 @@ step_install() {
   if [ -d "${stage_dir}/bin" ]; then
     cp -a "${stage_dir}/bin/." "${out_dir}/usr/bin/"
   fi
+  # cp -a preserves the build-user ownership from the staged binaries; normalize
+  # to root:root to match the root-owned convention (relevant once the package
+  # lands in a TreeMerge build rootfs).
+  chown -R 0:0 "${out_dir}/usr"
 }
 
 load_env_files

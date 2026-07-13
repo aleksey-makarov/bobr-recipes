@@ -65,6 +65,16 @@ fun pkgs =>
               # relocatable toolchain into /usr.
               mkdir -p "@{out}/usr"
               cp -a "@{build}/source/." "@{out}/usr/"
+              # cp -a preserves the unpack (build-user) ownership; normalize to
+              # root:root so this tree's dir metadata matches every other package
+              # in a TreeMerge (they install as root -> 0:0).
+              chown -R 0:0 "@{out}/usr"
+              # The ubuntu-18.04 prebuilt clang links libtinfo.so.5 (a separate
+              # terminfo lib in that era); our ncurses folds terminfo into
+              # libncursesw.so.6 (no --with-termlib). Bridge the soname so the
+              # clang binary can start -- the terminfo ABI is stable across
+              # ncurses 5/6. (ncurses is in this package's runtime deps.)
+              ln -sf libncursesw.so.6 "@{out}/usr/lib/libtinfo.so.5"
             "%,
           ],
         },
