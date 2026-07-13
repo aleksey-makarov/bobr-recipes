@@ -103,6 +103,7 @@ let base_modules = [
   import "gsettings-desktop-schemas.ncl",
   import "rust-bin.ncl",
   import "llvm-bin.ncl",
+  import "nasm.ncl",
   import "lcms2.ncl",
   import "sqlite.ncl",
   import "libgudev.ncl",

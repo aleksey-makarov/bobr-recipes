@@ -157,6 +157,19 @@ fun pkgs =>
   }
   in
 
+  let six_src = {
+    name = "six-src-1.17.0",
+    tag = "Source",
+    object_hash = "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://pypi.org/packages/source/s/six/six-1.17.0.tar.gz",
+      ],
+    },
+  }
+  in
+
   let python_modules_helper = {
     name = "buildscript-python-modules",
     tag = "Source",
@@ -277,6 +290,7 @@ fun pkgs =>
         "packaging",
         "wheel",
         "setuptools",
+        "six",
         "MarkupSafe",
         "Mako",
         "PyYAML",
@@ -319,6 +333,7 @@ fun pkgs =>
       packaging = packaging_src,
       wheel = wheel_src,
       setuptools = setuptools_src,
+      six = six_src,
       MarkupSafe = markupsafe_src,
       Mako = mako_src,
       PyYAML = pyyaml_src,

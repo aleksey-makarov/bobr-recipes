@@ -1,7 +1,8 @@
 let recipe = import "recipe-lib.ncl" in
 
-# Prebuilt Rust toolchain (rustc + cargo + host std), used as a BUILD tool only
-# (glycin/librsvg/mozjs need Rust; bootstrapping Rust from source is a huge
+# Prebuilt Rust toolchain (rustc + cargo + host std + rustfmt), used as a BUILD
+# tool only (glycin/librsvg/mozjs need Rust, and mozjs runs rustfmt on its
+# bindgen output; bootstrapping Rust from source is a huge
 # detour). The official dist targets an old glibc, so it runs on our newer glibc
 # (forward-compatible); rustc is relocatable (finds its sysroot next to the
 # binary), so installing it to /usr works. It never ships in a runtime rootfs --
@@ -58,7 +59,7 @@ fun pkgs =>
               cd "@{build}/source"
               ./install.sh \
                 --prefix="@{out}/usr" \
-                --components=rustc,cargo,rust-std-x86_64-unknown-linux-gnu \
+                --components=rustc,cargo,rust-std-x86_64-unknown-linux-gnu,rustfmt-preview \
                 --disable-ldconfig \
                 --without=rust-docs
             "%,
