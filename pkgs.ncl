@@ -106,6 +106,7 @@ let base_modules = [
   import "nasm.ncl",
   import "icu.ncl",
   import "mozjs/mozjs.ncl",
+  import "gjs.ncl",
   import "lcms2.ncl",
   import "sqlite.ncl",
   import "libgudev.ncl",
