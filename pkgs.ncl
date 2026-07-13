@@ -105,6 +105,7 @@ let base_modules = [
   import "llvm-bin.ncl",
   import "nasm.ncl",
   import "icu.ncl",
+  import "mozjs/mozjs.ncl",
   import "lcms2.ncl",
   import "sqlite.ncl",
   import "libgudev.ncl",
