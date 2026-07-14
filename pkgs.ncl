@@ -118,6 +118,7 @@ let base_modules = [
   import "polkit.ncl",
   import "nghttp2.ncl",
   import "libpsl.ncl",
+  import "libical.ncl",
   import "lcms2.ncl",
   import "sqlite.ncl",
   import "libgudev.ncl",
