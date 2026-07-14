@@ -122,6 +122,7 @@ let base_modules = [
   import "libsecret.ncl",
   import "libsoup.ncl",
   import "nspr.ncl",
+  import "nss/nss.ncl",
   import "lcms2.ncl",
   import "sqlite.ncl",
   import "libgudev.ncl",
