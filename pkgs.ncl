@@ -116,6 +116,7 @@ let base_modules = [
   import "gnome-desktop.ncl",
   import "duktape/duktape.ncl",
   import "polkit.ncl",
+  import "nghttp2.ncl",
   import "lcms2.ncl",
   import "sqlite.ncl",
   import "libgudev.ncl",
