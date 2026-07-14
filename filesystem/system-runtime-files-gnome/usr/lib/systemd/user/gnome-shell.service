@@ -1,0 +1,24 @@
+# GNOME Shell as the graphical session, run as a systemd --user service. Runs
+# gnome-shell as the Wayland display server (it embeds mutter as the compositor),
+# taking control of seat0 from the tty1 login whose identity
+# /etc/profile.d/graphical-session.sh imports into the user manager. Wrapped in
+# dbus-run-session so the shell has a private session bus even without a full
+# gnome-session. The launch path mirrors the earlier mutter.service stand-in.
+[Unit]
+Description=GNOME Shell (Wayland session)
+# graphical-session.target refuses manual start; the shell brings it up by
+# pulling it in as a dependency.
+Wants=graphical-session.target
+Before=graphical-session.target
+After=graphical-session-pre.target
+
+[Service]
+Type=simple
+Environment=XDG_SESSION_TYPE=wayland
+# Cursor theme/size for the session (mutter/gnome-shell also read
+# org.gnome.desktop.interface cursor-* from gsettings).
+Environment=XCURSOR_THEME=Bibata-Modern-Classic
+Environment=XCURSOR_SIZE=16
+ExecStart=/usr/bin/dbus-run-session -- /usr/bin/gnome-shell --wayland --display-server
+Restart=always
+RestartSec=1

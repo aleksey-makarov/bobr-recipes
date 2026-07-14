@@ -148,6 +148,39 @@ fun pkgs =>
         pkgs.at_spi2_core,
         pkgs.libei,
         pkgs.mutter,
+        # 6c: gnome-shell and its runtime closure (beyond the base rootfs, which
+        # already carries dbus/expat/libffi/linux-pam/util-linux/zlib/glib/
+        # systemd, and beyond the GNOME/GTK4 stack listed above).
+        #  - gjs + mozjs (+ icu): the JS engine the shell runs on
+        #  - gcr stack: libgcrypt (+libgpg-error), p11-kit (+libtasn1)
+        #  - gnome-desktop (+iso-codes)
+        #  - polkit (+duktape): the in-session authentication agent
+        #  - evolution-data-server + its chain (libsoup/libpsl/nghttp2, libical,
+        #    libsecret, nspr, nss): the shell's clock/calendar backend
+        pkgs.icu,
+        pkgs.mozjs,
+        pkgs.gjs,
+        pkgs.libgpg_error,
+        pkgs.libgcrypt,
+        pkgs.libtasn1,
+        pkgs.p11_kit,
+        pkgs.gcr,
+        pkgs.iso_codes,
+        pkgs.gnome_desktop,
+        pkgs.duktape,
+        pkgs.polkit,
+        pkgs.nghttp2,
+        pkgs.libpsl,
+        pkgs.libsoup,
+        pkgs.libical,
+        pkgs.libsecret,
+        pkgs.nspr,
+        pkgs.nss,
+        pkgs.evolution_data_server,
+        #  - libpulse (+libsndfile) for the shell's gvc volume control
+        pkgs.libsndfile,
+        pkgs.pulseaudio,
+        pkgs.gnome_shell,
       ],
   }
   in
