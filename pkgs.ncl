@@ -117,6 +117,7 @@ let base_modules = [
   import "duktape/duktape.ncl",
   import "polkit.ncl",
   import "nghttp2.ncl",
+  import "libpsl.ncl",
   import "lcms2.ncl",
   import "sqlite.ncl",
   import "libgudev.ncl",
