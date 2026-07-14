@@ -222,6 +222,68 @@ run_graphics_check() {
   assert_present "gallium driver" /usr/lib/libgallium-*.so /usr/lib/dri/*_dri.so
 }
 
+run_gnome_typelib_check() {
+  # GJS applications -- notably gnome-shell -- load GObject-Introspection
+  # typelibs dynamically, by namespace, from JavaScript. The ELF/ldd scan cannot
+  # see these, so a missing typelib surfaces only as a runtime JS error
+  # ("Typelib file for namespace ... not found") that crashes the shell.
+  # gnome-shell bundles its JS as an (uncompressed) GResource linked into
+  # libshell-*.so, so scan the shell libraries for their gi:// imports and assert
+  # a matching typelib exists in the introspection repository.
+  #
+  # Some referenced namespaces are optional -- features we deliberately do not
+  # ship (NetworkManager, weather, geoclue, ...). Their JS modules are bundled
+  # but not loaded, so a missing typelib is harmless; list them in the
+  # `gnome_optional_typelibs` config value to report them as INFO, not FAIL.
+  log_check "gnome-shell GI typelibs resolve"
+  if ! command -v strings >/dev/null 2>&1; then
+    log_fail "strings (binutils) is required for the GI typelib check"
+    return
+  fi
+  local -a shell_libs=()
+  local lib
+  for lib in /usr/lib/gnome-shell/*.so; do
+    [ -e "$lib" ] && shell_libs+=("$lib")
+  done
+  if [ "${#shell_libs[@]}" -eq 0 ]; then
+    log_fail "no gnome-shell libraries found under /usr/lib/gnome-shell"
+    return
+  fi
+  local optional=""
+  if [ -f "${cfg}/gnome_optional_typelibs" ]; then
+    optional="$(cat "${cfg}/gnome_optional_typelibs")"
+  fi
+  local namespaces ns
+  namespaces="$(strings -- "${shell_libs[@]}" 2>/dev/null \
+    | grep -oE 'gi://[A-Za-z][A-Za-z0-9_]*' \
+    | sed 's|gi://||' | sort -u)"
+  if [ -z "$namespaces" ]; then
+    log_fail "no gi:// imports found in the gnome-shell libraries"
+    return
+  fi
+  # Typelibs live in the standard repository AND in private per-project
+  # directories (e.g. mutter-*/, gnome-shell/) that gnome-shell/mutter add to
+  # GI_TYPELIB_PATH at runtime, so collect every installed namespace rather than
+  # only looking in /usr/lib/girepository-1.0. Strip the "-<version>.typelib"
+  # suffix from each file name to get the namespace.
+  local avail
+  avail="$(find /usr/lib -maxdepth 2 -name '*.typelib' 2>/dev/null \
+    | sed -E 's#.*/##; s/-[0-9].*//' | sort -u)"
+  for ns in $namespaces; do
+    if printf '%s\n' "$avail" | grep -qxF "$ns"; then
+      continue
+    fi
+    case " ${optional} " in
+      *" ${ns} "*)
+        echo "INFO  optional GI namespace '${ns}' has no typelib (feature not shipped)"
+        ;;
+      *)
+        log_fail "gnome-shell imports GI namespace '${ns}' but no typelib is installed"
+        ;;
+    esac
+  done
+}
+
 if ! command -v ldd >/dev/null 2>&1; then
   status="error"
   have_ldd="no"
@@ -309,6 +371,13 @@ fi
     run_python_check
   else
     echo "INFO  python check disabled"
+  fi
+
+  echo
+  if config_flag check_gnome; then
+    run_gnome_typelib_check
+  else
+    echo "INFO  gnome typelib check disabled"
   fi
 
   echo

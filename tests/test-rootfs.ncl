@@ -133,6 +133,13 @@ fun pkgs =>
         name = "gnome-rootfs",
         check_python = "true",
         check_graphics = "true",
+        check_gnome = "true",
+        # gnome-shell's JS references these GI namespaces, but their features are
+        # deliberately not shipped (no NetworkManager, weather, geoclue,
+        # bluetooth, parental controls, or the Rsvg GI). Their modules are bundled
+        # but not loaded, so a missing typelib is harmless -- reported as INFO,
+        # not a failure. Everything else the shell imports must have a typelib.
+        gnome_optional_typelibs = "NM NMA4 GWeather Geoclue GnomeBluetooth Malcontent Rsvg",
       },
       steps = [
         {
