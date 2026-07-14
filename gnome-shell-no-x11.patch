@@ -1,0 +1,19 @@
+Drop the vestigial X11 includes from shell-app-usage.c.
+
+gnome-shell 50 includes <X11/Xlib.h> and <X11/Xatom.h> unconditionally in
+src/shell-app-usage.c, but the file uses no X11 symbols -- the includes are
+left-over cruft. The X11 headers are only wired into the build when mutter
+reports have_xwayland, and our mutter is Wayland-only, so the file fails to
+compile. Remove the dead includes.
+
+--- a/src/shell-app-usage.c
++++ b/src/shell-app-usage.c
+@@ -5,8 +5,6 @@
+ #include <string.h>
+ #include <stdlib.h>
+
+-#include <X11/Xlib.h>
+-#include <X11/Xatom.h>
+ #include <glib.h>
+ #include <gio/gio.h>
+ #include <meta/display.h>

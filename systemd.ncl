@@ -170,6 +170,9 @@ fun pkgs =>
         # udev.pc lives in share/pkgconfig (pkgconfigdatadir) and exposes the
         # `udevdir` variable that consumers like mutter read at configure time.
         "usr/share/pkgconfig/udev.pc",
+        # systemd.pc (also in share/pkgconfig) exposes systemduserunitdir and
+        # friends, read at configure time by consumers such as gnome-shell.
+        "usr/share/pkgconfig/systemd.pc",
         "usr/lib/systemd/libsystemd-shared-*.so",
       ],
     },

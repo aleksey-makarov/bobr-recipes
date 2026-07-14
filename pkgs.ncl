@@ -124,6 +124,7 @@ let base_modules = [
   import "nspr.ncl",
   import "nss/nss.ncl",
   import "evolution-data-server.ncl",
+  import "gnome-shell.ncl",
   import "libsndfile.ncl",
   import "pulseaudio.ncl",
   import "lcms2.ncl",
