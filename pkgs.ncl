@@ -125,6 +125,7 @@ let base_modules = [
   import "nss/nss.ncl",
   import "evolution-data-server.ncl",
   import "libsndfile.ncl",
+  import "pulseaudio.ncl",
   import "lcms2.ncl",
   import "sqlite.ncl",
   import "libgudev.ncl",
