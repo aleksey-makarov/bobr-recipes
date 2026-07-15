@@ -294,6 +294,13 @@ fun pkgs =>
               out="$BOBR_OUT_DIR"
               cp -a "$BOBR_INPUTS_DIR/_tree/." "$out/"
 
+              # Networking in the GNOME image is handled by NetworkManager, so
+              # drop the base rootfs's systemd-networkd DHCP profile: otherwise
+              # networkd also claims eth0 (the "potentially unpredictable
+              # interface name" warning) and races NM for the link. The plain
+              # (non-GNOME) rootfs keeps 10-eth-dhcp.network.
+              rm -f "$out/etc/systemd/network/10-eth-dhcp.network"
+
               # GSettings schemas -> gschemas.compiled
               if [ -d "$out/usr/share/glib-2.0/schemas" ]; then
                 glib-compile-schemas "$out/usr/share/glib-2.0/schemas"
