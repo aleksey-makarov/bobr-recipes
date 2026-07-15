@@ -51,6 +51,14 @@ fun _pkgs =>
           { type = "dir", path = "var/mail" },
           { type = "dir", path = "var/spool" },
           { type = "dir", path = "var/tmp" },
+          # Default system time zone. Requires the tzdata package (zoneinfo) in
+          # the rootfs; without a named zone the calendar/ICU code paths get a
+          # NULL zone.
+          {
+            type = "symlink",
+            path = "etc/localtime",
+            target = "../usr/share/zoneinfo/Europe/Berlin",
+          },
         ],
       },
     },

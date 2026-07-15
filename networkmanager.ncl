@@ -101,6 +101,15 @@ fun pkgs =>
         "-Dman=false",
         "-Dtests=no",
       ],
+      # NetworkManager-initrd.service is a dracut-in-initramfs unit; it declares
+      # the same D-Bus name (org.freedesktop.NetworkManager) as the normal
+      # service, so systemd loads it, sees the bus name claimed twice and logs a
+      # boot-time error. We have no NM-in-initramfs, so drop the unit.
+      post_install = {
+        name = "drop_initrd_unit",
+        run_as = "root",
+        argv = ["/bin/sh", "-ec", "rm -f @{out}/usr/lib/systemd/system/NetworkManager-initrd.service"],
+      },
     },
     inputs = {
       source = networkmanager_src version source_object_hash,

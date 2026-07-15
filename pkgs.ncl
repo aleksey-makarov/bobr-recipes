@@ -174,6 +174,7 @@ let base_modules = [
   import "gnutls.ncl",
   import "popt.ncl",
   import "libtirpc.ncl",
+  import "tzdata.ncl",
   import "parse-yapp.ncl",
   import "samba.ncl",
   import "gnome-control-center.ncl",

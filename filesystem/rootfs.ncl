@@ -5,6 +5,7 @@ fun pkgs =>
     pkgs.system_runtime_files,
     pkgs.man_pages,
     pkgs.iana_etc,
+    pkgs.tzdata,
     pkgs.linux_headers,
     pkgs.linux_modules,
     pkgs.glibc,
