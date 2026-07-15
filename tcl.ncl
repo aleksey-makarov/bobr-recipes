@@ -74,7 +74,6 @@ fun pkgs =>
 
   {
     include [
-      buildscript_tcl,
       tcl,
     ],
   }

@@ -60,7 +60,6 @@ fun pkgs =>
 
   {
     include [
-      buildscript_iana_etc,
       iana_etc,
     ],
   }

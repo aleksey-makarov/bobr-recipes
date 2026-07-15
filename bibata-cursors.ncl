@@ -63,7 +63,6 @@ fun pkgs =>
 
   {
     include [
-      buildscript_bibata_cursors,
       bibata_cursors,
     ],
   }

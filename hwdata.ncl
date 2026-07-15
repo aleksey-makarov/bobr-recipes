@@ -65,7 +65,6 @@ fun pkgs =>
 
   {
     include [
-      buildscript_hwdata,
       hwdata,
     ],
   }

@@ -62,7 +62,6 @@ fun pkgs =>
 
   {
     include [
-      buildscript_dejavu,
       dejavu,
     ],
   }

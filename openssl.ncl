@@ -87,7 +87,6 @@ fun pkgs =>
 
   {
     include [
-      buildscript_openssl,
       openssl,
       openssl_libs,
     ],

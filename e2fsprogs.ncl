@@ -74,7 +74,6 @@ fun pkgs =>
 
   {
     include [
-      buildscript_e2fsprogs,
       e2fsprogs,
     ],
   }
