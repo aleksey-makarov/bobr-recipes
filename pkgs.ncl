@@ -242,6 +242,7 @@ let base_modules = [
   import "libdisplay-info.ncl",
   import "bibata-cursors.ncl",
   import "weston.ncl",
+  import "gnome-session.ncl",
   import "gnome.ncl",
   import "aggregate.ncl",
 ]

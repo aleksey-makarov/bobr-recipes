@@ -221,6 +221,13 @@ fun pkgs =>
         pkgs.gsound,
         pkgs.gnome_bluetooth,
         pkgs.gnome_shell,
+        #  - gnome-session: the session manager. It registers
+        #    org.gnome.SessionManager, seeds the D-Bus/systemd activation
+        #    environment, and drives the systemd-managed session
+        #    (gnome-session@gnome.target -> org.gnome.Shell@user.service +
+        #    gnome-session-services.target). gdm launches it via the
+        #    wayland-sessions/gnome.desktop it ships (Exec=gnome-session).
+        pkgs.gnome_session,
         #  - gnome-control-center (the Settings app) and the runtime closure of
         #    its panels beyond what the shell already pulls in: libgtop (Usage),
         #    libpwquality (Users), colord-gtk (Color), libwacom (Wacom), tecla
