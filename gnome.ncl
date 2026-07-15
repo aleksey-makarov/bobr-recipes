@@ -209,7 +209,43 @@ fun pkgs =>
         pkgs.libnotify,
         pkgs.alsa_lib,
         pkgs.gnome_settings_daemon,
+        #  - Bluetooth: gnome-shell loads its quick-settings indicator when the
+        #    GnomeBluetooth-3.0 typelib is present (runtime pkg.checkSymbol).
+        #    gnome-bluetooth pulls in libadwaita (+ its AppStream/libyaml/
+        #    libxmlb/curl closure) and gsound.
+        pkgs.libyaml,
+        pkgs.libxmlb,
+        pkgs.curl,
+        pkgs.appstream,
+        pkgs.libadwaita,
+        pkgs.gsound,
+        pkgs.gnome_bluetooth,
         pkgs.gnome_shell,
+        #  - gnome-control-center (the Settings app) and the runtime closure of
+        #    its panels beyond what the shell already pulls in: libgtop (Usage),
+        #    libpwquality (Users), colord-gtk (Color), libwacom (Wacom), tecla
+        #    (Keyboard preview), gnome-online-accounts + librest (Online
+        #    Accounts), CUPS + Samba (Printers), ModemManager (WWan), udisks +
+        #    krb5 (System). Samba/GOA drag in the GnuTLS stack (nettle,
+        #    libunistring, gmp, libtasn1) plus popt and libtirpc.
+        pkgs.libgtop,
+        pkgs.libpwquality,
+        pkgs.colord_gtk,
+        pkgs.libwacom,
+        pkgs.tecla,
+        pkgs.librest,
+        pkgs.goa,
+        pkgs.cups,
+        pkgs.samba,
+        pkgs.gnutls,
+        pkgs.nettle,
+        pkgs.libunistring,
+        pkgs.popt,
+        pkgs.libtirpc,
+        pkgs.modemmanager,
+        pkgs.krb5,
+        pkgs.udisks,
+        pkgs.gnome_control_center,
       ],
   }
   in

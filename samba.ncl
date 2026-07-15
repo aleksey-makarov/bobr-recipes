@@ -1,0 +1,112 @@
+# Samba -- we build it only for libsmbclient (smbclient.pc), a hard dependency of
+# gnome-control-center's Printers panel (SMB printer discovery). Samba uses a waf
+# build driven through a ./configure + make wrapper, built in-tree.
+#
+# This is a trimmed client build: the AD domain controller, LDAP/ADS, winbind,
+# PAM, systemd, JSON audit, GPGME, libarchive and the Python bindings are all
+# off, so we avoid pulling in lmdb, jansson, openldap, etc. Samba's internal
+# libraries (talloc/tdb/tevent/ldb and bundled Heimdal) are built bundled.
+# `version`/`source_object_hash` are node fields (overridable).
+fun pkgs =>
+  let samba_src = fun version =>
+    fun hash =>
+      {
+        name = "samba-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://download.samba.org/pub/samba/stable/samba-%{version}.tar.gz",
+        },
+      }
+  in
+
+  let samba = {
+    version | default = "4.24.4",
+    source_object_hash
+      | default
+      = "df2c51ab4361ec626ab9988e5946efcca8465bc7afae834291d5558468265ff8",
+    name = "samba-%{version}",
+    tag = "Autotools",
+    deps = {
+      build = [
+        pkgs.python,
+        pkgs.perl,
+        pkgs.parse_yapp,
+        pkgs.flex,
+        pkgs.bison,
+        pkgs.gnutls,
+        pkgs.popt,
+        pkgs.libtirpc,
+        pkgs.gmp,
+        pkgs.zlib,
+        pkgs.libtasn1,
+        pkgs.libxcrypt,
+        pkgs.gettext,
+        pkgs.pkgconf,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.gcc_libs,
+        pkgs.gnutls,
+        pkgs.popt,
+        pkgs.libtirpc,
+        pkgs.gmp,
+        pkgs.zlib,
+        pkgs.libtasn1,
+        pkgs.libxcrypt_libs,
+      ],
+    },
+    config = {
+      # Samba's waf build runs in-tree (bin/).
+      "in-tree" = true,
+      configure_args = [
+        "--enable-fhs",
+        "--sysconfdir=/etc",
+        "--localstatedir=/var",
+        # merged-usr: /usr/sbin is a symlink to bin.
+        "--sbindir=/usr/bin",
+        "--bundled-libraries=ALL",
+        "--without-ad-dc",
+        "--without-ldb-lmdb",
+        "--without-json",
+        "--without-ldap",
+        "--without-ads",
+        "--without-pam",
+        "--without-systemd",
+        "--without-gpgme",
+        "--without-libarchive",
+        "--without-winbind",
+        "--without-regedit",
+        "--without-acl-support",
+        "--disable-python",
+        "--disable-cups",
+        "--disable-iprint",
+        "--disable-cephfs",
+        "--disable-glusterfs",
+        # vfs_snapper needs dbus-1 which we don't ship in this client build.
+        "--with-shared-modules=!vfs_snapper",
+      ],
+      # We ship Samba only for libsmbclient; its baked server-state directories
+      # collide with the base rootfs's volatile /var layout (var/lock and
+      # var/run are symlinks there). Drop them from the install tree.
+      post_install = {
+        name = "drop_volatile_state_dirs",
+        run_as = "root",
+        # Also drop the bundled-Heimdal build tools (compile_et, asn1_compile)
+        # that collide with the same-named binaries krb5 installs -- we ship
+        # Samba only for libsmbclient, so its /usr/bin build helpers are unneeded.
+        argv = [
+          "/bin/sh",
+          "-ec",
+          "rm -rf @{out}/var/lock @{out}/var/run @{out}/run; rm -f @{out}/usr/bin/compile_et @{out}/usr/bin/asn1_compile",
+        ],
+      },
+    },
+    inputs = {
+      source = samba_src version source_object_hash,
+    },
+  }
+  in
+
+  { include [ samba ] }

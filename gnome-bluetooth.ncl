@@ -31,6 +31,7 @@ fun pkgs =>
       build = [
         pkgs.glib,
         pkgs.gtk4,
+        pkgs.libadwaita,
         pkgs.gsound,
         pkgs.libnotify,
         pkgs.systemd_dev,
@@ -45,6 +46,7 @@ fun pkgs =>
         pkgs.gcc_libs,
         pkgs.glib,
         pkgs.gtk4,
+        pkgs.libadwaita,
         pkgs.gsound,
         pkgs.libnotify,
         pkgs.systemd_libs,
