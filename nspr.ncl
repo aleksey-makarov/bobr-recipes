@@ -40,6 +40,18 @@ fun pkgs =>
     },
     inputs = {
       source = nspr_src version source_object_hash,
+      # NSPR bakes the wall-clock build time into its libraries; make it derive
+      # the build time from SOURCE_DATE_EPOCH so the output is reproducible.
+      # Applied by the synthetic builder (input key matches ^patch).
+      patch_source_date_epoch = {
+        name = "nspr-source-date-epoch-patch",
+        tag = "Source",
+        object_hash = import "nspr-source-date-epoch.patch.fsobj-hash" as 'Text,
+        origin = {
+          tag = "RecipePath",
+          path = "nspr-source-date-epoch.patch",
+        },
+      },
     },
   }
   in

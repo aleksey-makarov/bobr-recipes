@@ -1,0 +1,50 @@
+Make NSPR's embedded build time honour SOURCE_DATE_EPOCH.
+
+Each shared library's version info (prvrsion.c/plvrsion.c) carries a build
+time, generated in the per-library Makefile.in from the wall clock in two
+places -- `date` for the human-readable _BUILD_STRING and the `now` helper
+(time(NULL)) for the _BUILD_TIME microseconds -- neither of which respects
+SOURCE_DATE_EPOCH. That bakes the real build timestamp into libnspr4.so
+(pr/src), libplc4.so (lib/libc/src) and libplds4.so (lib/ds), so the same
+inputs produce different outputs on different machines/times. Derive both
+from SOURCE_DATE_EPOCH (pinned by the sandbox) in all three Makefiles.
+
+--- a/nspr/pr/src/Makefile.in
++++ b/nspr/pr/src/Makefile.in
+@@ -276,8 +276,8 @@
+ PROD = $(notdir $(SHARED_LIBRARY))
+
+ NOW = $(MOD_DEPTH)/config/$(OBJDIR)/now
+-SH_DATE = $(shell date "+%Y-%m-%d %T")
+-SH_NOW = $(shell $(NOW))
++SH_DATE = $(shell date -u -d "@$${SOURCE_DATE_EPOCH:-0}" "+%Y-%m-%d %T")
++SH_NOW = $(shell echo $$(( $${SOURCE_DATE_EPOCH:-0} * 1000000 )))
+
+ ifeq ($(NS_USE_GCC)_$(OS_ARCH),_WINNT)
+ 	SUF = i64
+--- a/nspr/lib/libc/src/Makefile.in
++++ b/nspr/lib/libc/src/Makefile.in
+@@ -93,8 +93,8 @@
+ TINC = $(OBJDIR)/_pl_bld.h
+ PROD = $(notdir $(SHARED_LIBRARY))
+ NOW = $(MOD_DEPTH)/config/$(OBJDIR)/now
+-SH_DATE = $(shell date "+%Y-%m-%d %T")
+-SH_NOW = $(shell $(NOW))
++SH_DATE = $(shell date -u -d "@$${SOURCE_DATE_EPOCH:-0}" "+%Y-%m-%d %T")
++SH_NOW = $(shell echo $$(( $${SOURCE_DATE_EPOCH:-0} * 1000000 )))
+
+ ifeq ($(NS_USE_GCC)_$(OS_ARCH),_WINNT)
+ 	SUF = i64
+--- a/nspr/lib/ds/Makefile.in
++++ b/nspr/lib/ds/Makefile.in
+@@ -91,8 +91,8 @@
+ TINC = $(OBJDIR)/_pl_bld.h
+ PROD = $(notdir $(SHARED_LIBRARY))
+ NOW = $(MOD_DEPTH)/config/$(OBJDIR)/now
+-SH_DATE = $(shell date "+%Y-%m-%d %T")
+-SH_NOW = $(shell $(NOW))
++SH_DATE = $(shell date -u -d "@$${SOURCE_DATE_EPOCH:-0}" "+%Y-%m-%d %T")
++SH_NOW = $(shell echo $$(( $${SOURCE_DATE_EPOCH:-0} * 1000000 )))
+
+ ifeq ($(NS_USE_GCC)_$(OS_ARCH),_WINNT)
+ 	SUF = i64
