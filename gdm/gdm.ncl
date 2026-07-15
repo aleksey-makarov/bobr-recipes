@@ -8,6 +8,9 @@
 # wired into the rootfs separately.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
+  # download.gnome.org groups gdm tarballs by major version ("50" for 50.1).
+  let series = fun v => std.array.at 0 (std.string.split "." v) in
+
   let gdm_src = fun version =>
     fun hash =>
       {
@@ -16,16 +19,16 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "https://download.gnome.org/sources/gdm/49/gdm-%{version}.tar.xz",
+          url = "https://download.gnome.org/sources/gdm/%{series version}/gdm-%{version}.tar.xz",
         },
       }
   in
 
   let gdm = {
-    version | default = "49.3",
+    version | default = "50.1",
     source_object_hash
       | default
-      = "539491ff0ddffe392b0f32e2b12f4179b60796c100cfe03fe6f83ee91b34496c",
+      = "770159373512192410f412b5d0c4678ec1573f1ae4b39c81fe75861fe8890174",
     name = "gdm-%{version}",
     tag = "Meson",
     deps = {
@@ -62,13 +65,19 @@ fun pkgs =>
         # Merged-usr: /usr/sbin is a symlink to bin, so send the daemon there.
         "--sbindir=/usr/bin",
         "-Dx11-support=false",
-        "-Dwayland-support=true",
         "-Dplymouth=disabled",
         "-Dselinux=disabled",
         "-Dlibaudit=disabled",
-        "-Dxdmcp=disabled",
         "-Ddefault-pam-config=none",
       ],
+      # gdm installs a stock /etc/gdm/custom.conf; drop it so the one shipped in
+      # the gnome runtime tree (with WaylandEnable + automatic login) is the sole
+      # provider and the rootfs merge does not conflict on it.
+      post_install = {
+        name = "drop_default_custom_conf",
+        run_as = "root",
+        argv = ["/bin/sh", "-ec", "rm -f @{out}/etc/gdm/custom.conf"],
+      },
     },
     inputs = {
       source = gdm_src version source_object_hash,

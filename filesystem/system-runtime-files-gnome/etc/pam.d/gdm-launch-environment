@@ -1,0 +1,10 @@
+# PAM for the gdm greeter's launch environment (runs as the gdm user, which is
+# not authenticated). Only the session stack really matters: pam_systemd gives
+# the greeter a logind session so it can take seat0 (GPU/input). gdm is built
+# with -Ddefault-pam-config=none, so these files are provided here.
+auth      required  pam_permit.so
+account   required  pam_permit.so
+password  required  pam_deny.so
+session   required  pam_loginuid.so
+session   required  pam_unix.so
+session   optional  pam_systemd.so

@@ -1,13 +1,9 @@
-# Keep the display manager off for now: the graphical session is started via the
-# tty1 autologin -> user gnome-shell.service path (see autologin.conf and
-# graphical-session.sh). gdm is shipped only for its Gdm-1.0 typelib (which
-# gnome-shell imports at startup) until it is wired up as the real session
-# launcher (gdm user/group, PAM, custom.conf, wayland-sessions). Presets are
-# reapplied on every boot here (volatile /etc, empty machine-id), so this is the
-# supported way to override the vendor default that would enable gdm. Lower
-# preset numbers win over systemd's 99-default.preset.
-disable gdm.service
-disable display-manager.service
+# gdm is the session launcher: it is wired up (gdm user/group, PAM,
+# custom.conf with WaylandEnable + automatic login of `user`, and a
+# wayland-sessions/gnome.desktop), so let the vendor default enable it. Presets
+# are reapplied on every boot here (volatile /etc, empty machine-id). The old
+# tty1-autologin -> user gnome-shell.service path is retired (its autologin.conf
+# and graphical-session.sh are removed) so it does not fight gdm for seat0.
 
 # Diagnostic root console on the second serial port (ttyS1). The qemu runner
 # wires ttyS1 to a host unix socket (diag.sock) so the agent can drive the guest

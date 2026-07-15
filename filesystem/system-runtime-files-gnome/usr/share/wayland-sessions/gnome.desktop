@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=GNOME
+Comment=This session logs you into GNOME
+# We ship no gnome-session; gdm runs this Exec directly (wrapped by
+# gdm-wayland-session, which provides a D-Bus session bus). gnome-shell runs as
+# the Wayland display server (embedding mutter) and registers the session with
+# gdm itself.
+Exec=/usr/bin/gnome-shell --wayland --display-server
+Type=Application
+DesktopNames=GNOME

@@ -1,0 +1,8 @@
+# PAM for gdm automatic login. Auth is skipped (passwordless autologin, like the
+# console `agetty --autologin`), which is the only way in for `user` since its
+# account has a locked password. account/password/session defer to the shared
+# stack, so pam_systemd registers the logind session (seat0, XDG_RUNTIME_DIR).
+auth      required  pam_permit.so
+account   include   system-auth
+password  include   system-auth
+session   include   system-auth
