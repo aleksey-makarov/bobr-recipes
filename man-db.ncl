@@ -23,6 +23,12 @@ fun pkgs =>
         pkgs.gdbm,
         pkgs.groff,
         pkgs.libpipeline,
+        # configure probes PATH for `col` (util-linux) and bakes its path into
+        # PROG_COL. Without it PROG_COL is empty, and at runtime mandb's stray-cat
+        # pass calls pipecmd_new_argstr("") -> libpipeline aborts with "badly
+        # formed configuration directive: ''", failing man-db.service. col is
+        # already present at runtime; it was only missing from the build root.
+        pkgs.util_linux,
       ],
       runtime = [
         pkgs.glibc_libs,

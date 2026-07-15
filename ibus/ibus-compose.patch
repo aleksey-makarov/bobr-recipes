@@ -1,0 +1,24 @@
+Provide a minimal X11 Compose file for the build-time compose-table generator.
+
+ibus embeds an internal compose table into libibus as a GResource. The
+gencomposetable helper builds it from a Compose file, looking first for
+`./Compose` in the build directory and otherwise falling back to
+X11_LOCALEDATADIR/<lang>/Compose from libX11 -- which we do not ship. With
+neither present the helper aborts and the whole build fails. gnome-shell only
+needs the resulting IBus-1.0 typelib and does not use ibus's compose table for
+its own compositor-side compose handling, so the exact sequences are
+immaterial; a small valid table is enough to satisfy the generator. We build
+in-tree so `./Compose` resolves to this file.
+
+--- /dev/null
++++ b/src/Compose
+@@ -0,0 +1,9 @@
++# Minimal compose sequences (see recipe patch header for rationale).
++<Multi_key> <o> <c> : "©" U00A9 # COPYRIGHT SIGN
++<Multi_key> <o> <r> : "®" U00AE # REGISTERED SIGN
++<Multi_key> <plus> <minus> : "±" U00B1 # PLUS-MINUS SIGN
++<Multi_key> <colon> <minus> : "÷" U00F7 # DIVISION SIGN
++<Multi_key> <x> <x> : "×" U00D7 # MULTIPLICATION SIGN
++<Multi_key> <minus> <minus> <minus> : "—" U2014 # EM DASH
++<Multi_key> <period> <less> : "‹" U2039 # SINGLE LEFT ANGLE QUOTATION
++<Multi_key> <period> <greater> : "›" U203A # SINGLE RIGHT ANGLE QUOTATION

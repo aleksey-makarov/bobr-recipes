@@ -58,7 +58,13 @@ fun pkgs =>
         "--with-curses",
         "--docdir=/usr/share/doc/readline-%{version}",
       ],
-      env = { SHLIB_LIBS = "-lncursesw" },
+      # Link libreadline.so against libtinfo (the terminfo/termcap routines live
+      # there now that ncurses is built --with-termlib=tinfo), so the shared
+      # library is self-contained: consumers such as nmcli that link -lreadline
+      # without also linking curses resolve tgetent/tputs through it. This must
+      # be a make command-line assignment: the Makefile sets SHLIB_LIBS itself
+      # (from configure), which would override the same name inherited from env.
+      make_args = ["SHLIB_LIBS=-ltinfo"],
     },
     inputs = {
       _rootfs = readline_build_rootfs,

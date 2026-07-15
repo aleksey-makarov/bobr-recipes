@@ -1,0 +1,30 @@
+# Diagnostic root shell on the second serial port (ttyS1), for the agent.
+#
+# The qemu-run-gnome script wires ttyS1 to a host unix socket (diag.sock); this
+# service puts a root bash directly on /dev/ttyS1 -- no getty/login/PAM, so there
+# are fewer ways for it to fail than an autologin serial getty. It exists only in
+# the gnome tree (the plain rootfs has no second serial). A concrete unit is used
+# rather than serial-getty@ttyS1 because preset-all only enables concrete units.
+[Unit]
+Description=Diagnostic root shell on ttyS1 (agent diag console)
+After=systemd-user-sessions.service systemd-logind.service
+ConditionPathExists=/dev/ttyS1
+
+[Service]
+Environment=TERM=vt220
+ExecStart=/bin/bash --norc -i
+StandardInput=tty
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/ttyS1
+TTYReset=yes
+TTYVHangup=yes
+Restart=always
+RestartSec=1
+# Interactive bash ignores SIGTERM, which would stall shutdown for the default
+# 90s stop timeout. Nothing here needs a clean stop, so kill it outright.
+KillSignal=SIGKILL
+TimeoutStopSec=2
+
+[Install]
+WantedBy=multi-user.target

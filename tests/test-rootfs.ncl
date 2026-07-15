@@ -134,12 +134,14 @@ fun pkgs =>
         check_python = "true",
         check_graphics = "true",
         check_gnome = "true",
-        # gnome-shell's JS references these GI namespaces, but their features are
-        # deliberately not shipped (no NetworkManager, weather, geoclue,
-        # bluetooth, parental controls, or the Rsvg GI). Their modules are bundled
-        # but not loaded, so a missing typelib is harmless -- reported as INFO,
-        # not a failure. Everything else the shell imports must have a typelib.
-        gnome_optional_typelibs = "NM NMA4 GWeather Geoclue GnomeBluetooth Malcontent Rsvg",
+        # gnome-shell's JS references these GI namespaces, but they are only
+        # loaded behind compile-time flags we built without (NetworkManager,
+        # bluetooth) or a runtime try/catch (Malcontent parental controls), so a
+        # missing typelib is harmless -- reported as INFO, not a failure. The
+        # unconditionally-required imports (Geoclue, GWeather, Rsvg) are NOT
+        # listed here: their typelibs must be present or the shell crashes at
+        # startup (misc/dependencies.js). Everything else must have a typelib.
+        gnome_optional_typelibs = "GnomeBluetooth Malcontent",
       },
       steps = [
         {

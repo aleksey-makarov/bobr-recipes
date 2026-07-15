@@ -180,6 +180,35 @@ fun pkgs =>
         #  - libpulse (+libsndfile) for the shell's gvc volume control
         pkgs.libsndfile,
         pkgs.pulseaudio,
+        #  - GI typelibs gnome-shell imports at startup that ldd cannot see:
+        #    AccountsService, UPowerGlib, IBus, Gdm. dconf is the GSettings
+        #    backend and gdm's session launcher.
+        pkgs.accountsservice,
+        pkgs.upower,
+        pkgs.ibus,
+        pkgs.dconf,
+        pkgs.gdm,
+        #  - typelibs gnome-shell imports unconditionally (misc/dependencies.js):
+        #    Geoclue, GWeather, Rsvg. geocode-glib + gweather-locations are the
+        #    libgweather runtime closure (the world locations database).
+        pkgs.geoclue,
+        pkgs.geocode_glib,
+        pkgs.gweather_locations,
+        pkgs.libgweather,
+        pkgs.librsvg,
+        #  - gnome-settings-daemon installs the org.gnome.settings-daemon.*
+        #    GSettings schemas gnome-shell looks up at startup, and runs as a
+        #    session service. Its runtime closure: NetworkManager (libnm) +
+        #    libndp, libcanberra (+ libvorbis/libogg), libnotify, alsa-lib.
+        pkgs.networkmanager,
+        pkgs.libndp,
+        pkgs.libnma,
+        pkgs.libcanberra,
+        pkgs.libvorbis,
+        pkgs.libogg,
+        pkgs.libnotify,
+        pkgs.alsa_lib,
+        pkgs.gnome_settings_daemon,
         pkgs.gnome_shell,
       ],
   }
@@ -227,12 +256,18 @@ fun pkgs =>
                 glib-compile-schemas "$out/usr/share/glib-2.0/schemas"
               fi
 
-              # gdk-pixbuf loaders.cache. The tool writes absolute loader paths;
-              # strip the build-time $out prefix so they are the runtime /usr
-              # paths.
+              # gdk-pixbuf loaders.cache. query-loaders dlopens each loader to
+              # read its format info; the SVG loader (librsvg) pulls in
+              # librsvg-2.so and its deps, which live in the rootfs being built,
+              # not in this cache env -- so LD_LIBRARY_PATH points the loader at
+              # $out/usr/lib, otherwise dlopen fails and the SVG loader is
+              # silently dropped (blank symbolic icons everywhere). The tool
+              # writes absolute loader paths; strip the build-time $out prefix so
+              # they are the runtime /usr paths.
               gdkdir="$out/usr/lib/gdk-pixbuf-2.0/2.10.0"
               if [ -d "$gdkdir/loaders" ]; then
                 GDK_PIXBUF_MODULEDIR="$gdkdir/loaders" \
+                LD_LIBRARY_PATH="$out/usr/lib" \
                   gdk-pixbuf-query-loaders > "$gdkdir/loaders.cache"
                 sed -i "s|$out||g" "$gdkdir/loaders.cache"
               fi

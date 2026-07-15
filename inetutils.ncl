@@ -49,6 +49,11 @@ fun pkgs =>
           "sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c",
         ],
       },
+      # telnet uses both curses (cbreak, in libncursesw) and termcap (tgetent,
+      # now split into libtinfo by our ncurses --with-termlib build). Its
+      # configure only picks up the termcap library, so force both onto the link
+      # line; --as-needed drops the unused ones from the non-telnet tools.
+      env = { LIBS = "-lncursesw -ltinfo" },
       configure_args = [
         "--bindir=/usr/bin",
         "--localstatedir=/var",

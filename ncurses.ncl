@@ -35,6 +35,13 @@ fun pkgs =>
         "--with-cxx-shared",
         "--enable-pc-files",
         "--with-pkg-config-libdir=/usr/lib/pkgconfig",
+        # Split the low-level terminfo/termcap routines (tgetent, tputs,
+        # setupterm, ...) into a separate libtinfo, as the big distros do. The
+        # "=tinfo" argument forces the name libtinfo (not libtinfow) even though
+        # this is a wide-character build, so consumers get a real libtinfo.so.6:
+        # readline links it directly (self-contained libreadline.so) and the
+        # prebuilt clang's libtinfo.so.N resolves to it instead of a symlink hack.
+        "--with-termlib=tinfo",
       ],
       post_install = [
         {

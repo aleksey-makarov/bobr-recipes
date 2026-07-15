@@ -1,0 +1,17 @@
+Drop the docs subdir from the build.
+
+gdm's docs/meson.build calls gnome.yelp(), which unconditionally requires the
+itstool program (and the yelp help toolchain) with no meson option to disable
+it. The yelp help pages are irrelevant to our headless server/QEMU target, so
+we remove the subdir rather than pull in itstool. The Gdm-1.0 typelib and the
+daemon/greeter are unaffected.
+
+--- a/meson.build
++++ b/meson.build
+@@ -343,7 +343,6 @@ if have_xdmcp
+   subdir('chooser')
+ endif
+-subdir('docs')
+
+ gnome.post_install(
+   glib_compile_schemas: true,

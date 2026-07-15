@@ -101,6 +101,12 @@ fi
 # virtio input devices give a keyboard and a tablet (absolute pointer); the
 # serial console stays multiplexed on stdio via -serial mon:stdio.
 mem_mb="${QEMU_MEM_MB:-4096}"
+
+# Second serial (guest ttyS1) exposed as a host unix socket in the current
+# directory, so the agent can drive the guest's autologin-root diag console over
+# it (see guest-exec.py). Relative path -> lands next to where you launch this.
+# Remove a stale socket first so qemu can rebind on a rerun.
+rm -f diag.sock
 exec qemu-system-x86_64 \
   -enable-kvm \
   -cpu host \
@@ -119,6 +125,8 @@ exec qemu-system-x86_64 \
   -device virtio-keyboard-pci \
   -device virtio-tablet-pci \
   -serial mon:stdio \
+  -chardev socket,id=diag,path=diag.sock,server=on,wait=off \
+  -serial chardev:diag \
   -append "${APPEND}" \
   -no-reboot \
   "${qemu_args[@]}"
