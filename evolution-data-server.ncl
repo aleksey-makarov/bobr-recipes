@@ -72,6 +72,12 @@ fun pkgs =>
       ],
     },
     config = {
+      # Build single-threaded: EDS's gettext handling races under parallel make
+      # -- msgmerge rewrites po/*.po while `msgfmt --desktop` reads them to build
+      # the translated .desktop, so msgfmt intermittently sees a half-written
+      # as.po ("end-of-file within string"). The builder runs `make -j<nproc>
+      # <make_args>`; a trailing -j1 wins (GNU make honours the last -j).
+      make_args = ["-j1"],
       pre_build = {
         name = "cmake_configure",
         run_as = "build-user",
