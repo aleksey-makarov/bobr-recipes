@@ -359,7 +359,10 @@ fi
       *"not found"*|*"error while loading shared libraries:"*)
         log_fail "$path has unresolved shared libraries"
         while IFS= read -r line; do
-          [ -n "$line" ] && echo "INFO  ${line}"
+          # Strip the trailing ASLR load address "(0x...)": it is randomized by
+          # the kernel per run, so keeping it makes the report non-reproducible;
+          # only the "lib => path / not found" resolution matters here.
+          [ -n "$line" ] && echo "INFO  ${line% (0x*)}"
         done <<< "$ldd_out"
         ;;
     esac
