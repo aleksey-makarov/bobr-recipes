@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "4.2.2",
     source_object_hash | default = "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01",
     name = "mpfr-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.gmp,

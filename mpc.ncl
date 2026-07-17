@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "1.3.1",
     source_object_hash | default = "ab642492f5cf882b74aa0cb730cd410a81edcdbec895183ce930e706c1c759b8",
     name = "mpc-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.gmp,

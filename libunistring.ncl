@@ -21,7 +21,7 @@ fun pkgs =>
       | default
       = "5b46e74377ed7409c5b75e7a96f95377b095623b689d8522620927964a41499c",
     name = "libunistring-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.pkgconf,

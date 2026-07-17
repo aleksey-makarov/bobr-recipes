@@ -25,7 +25,7 @@ fun pkgs =>
       | default
       = "1d8a444a223cc5464240777346e125de51d8e6abf0b8bac742ac84609167dc87",
     name = "libtasn1-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [],
       runtime = [
