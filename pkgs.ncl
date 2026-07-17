@@ -216,7 +216,6 @@ let base_modules = [
   import "e2fsprogs.ncl",
   import "tests/test-rootfs.ncl",
   import "tests/test-reports.ncl",
-  import "tests/sandbox-install-smoke.ncl",
   import "vim.ncl",
   import "libdrm.ncl",
   import "mesa.ncl",

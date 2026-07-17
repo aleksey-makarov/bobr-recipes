@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "23.7",
     source_object_hash | default = "58c55d9c1402474065adae669511c191de374b0871eec781239ab400b907c327",
     name = "psmisc-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.ncurses,

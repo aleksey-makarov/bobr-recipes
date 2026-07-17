@@ -19,6 +19,8 @@ let KnownTags = [
   "PerlModuleRootfs",
   "SandboxBuildRootfs",
   "SandboxInstall",
+  "AutotoolsInstall",
+  "AutotoolsInstallRootfs",
   "OciExtract",
 ]
 in
@@ -549,12 +551,12 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | FsTreeExportConfig,
       }
-    else if checked.tag == "AutotoolsRootfs" then
+    else if checked.tag == "AutotoolsRootfs" || checked.tag == "AutotoolsInstallRootfs" then
       checked
       & {
         config = checked.config | AutotoolsConfig,
       }
-    else if checked.tag == "Autotools" then
+    else if checked.tag == "Autotools" || checked.tag == "AutotoolsInstall" then
       checked
       & {
         config = checked.config | AutotoolsConfig,
@@ -760,13 +762,13 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | FsTreeExportConfig,
         inputs = validate_fs_tree_export_inputs checked.inputs,
       }
-    else if checked.tag == "AutotoolsRootfs" then
+    else if checked.tag == "AutotoolsRootfs" || checked.tag == "AutotoolsInstallRootfs" then
       checked
       & {
         config = checked.config | AutotoolsConfig,
         inputs = validate_synthetic_rootfs_inputs checked.inputs,
       }
-    else if checked.tag == "Autotools" then
+    else if checked.tag == "Autotools" || checked.tag == "AutotoolsInstall" then
       checked
       & {
         config = checked.config | AutotoolsConfig,

@@ -11,6 +11,16 @@ fun pkgs =>
     },
   }
   in
+  let buildscript_autotools_install = {
+    name = "buildscript-autotools-install",
+    tag = "Source",
+    object_hash = import "autotools-install.sh.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "synthetic/autotools-install.sh",
+    },
+  }
+  in
   let buildscript_common = {
     name = "buildscript-synthetic-common",
     tag = "Source",
@@ -231,14 +241,14 @@ fun pkgs =>
         else
           []
   in
-  let lower_autotools_node = fun node =>
+  let lower_autotools_node_with = fun builder_tag => fun script_source => fun post_install_cwd => fun node =>
     let node_config = node.config in
     let source_root_expr = synthetic_source_root_expr node_config in
     let pre_configure_steps =
       normalize_hook_steps node_config "pre_configure" source_root_expr
     in
     let post_install_steps =
-      normalize_hook_steps node_config "post_install" "@{out}"
+      normalize_hook_steps node_config "post_install" post_install_cwd
     in
     let lowered_script_config =
       let with_configure_args =
@@ -280,7 +290,7 @@ fun pkgs =>
     in
     {
       name = node.name,
-      tag = "Sandbox",
+      tag = builder_tag,
       config = {
         steps =
           [synthetic_prepare_step autotools_step_env]
@@ -312,8 +322,12 @@ fun pkgs =>
         script_config = lowered_script_config,
       },
       inputs =
-        synthetic_inputs buildscript_autotools node.inputs,
+        synthetic_inputs script_source node.inputs,
     }
+  in
+  let lower_autotools_node = lower_autotools_node_with "Sandbox" buildscript_autotools "@{out}" in
+  let lower_autotools_install_node =
+    lower_autotools_node_with "SandboxInstall" buildscript_autotools_install "/"
   in
   let lower_autotools_package_node = fun node =>
     let build_rootfs = build_rootfs_for autotools_package_default_build_deps node in
@@ -328,6 +342,21 @@ fun pkgs =>
         "inputs"
         package_inputs
         (record_replace "tag" "AutotoolsRootfs" node)
+    )
+  in
+  let lower_autotools_install_package_node = fun node =>
+    let build_rootfs = build_rootfs_for autotools_package_default_build_deps node in
+    let package_inputs =
+      record_replace
+        "_rootfs"
+        build_rootfs
+        node.inputs
+    in
+    lower_autotools_install_node (
+      record_replace
+        "inputs"
+        package_inputs
+        (record_replace "tag" "AutotoolsInstallRootfs" node)
     )
   in
   let lower_makefile_node = fun node =>
@@ -692,11 +721,13 @@ fun pkgs =>
   {
     "RootfsClosure" = rootfs_closure_for,
     "Autotools" = lower_autotools_package_node,
+    "AutotoolsInstall" = lower_autotools_install_package_node,
     "Makefile" = lower_makefile_package_node,
     "Meson" = lower_meson_package_node,
     "PerlModule" = lower_perl_module_package_node,
     "SandboxBuild" = lower_sandbox_build_node,
     "AutotoolsRootfs" = lower_autotools_node,
+    "AutotoolsInstallRootfs" = lower_autotools_install_node,
     "MakefileRootfs" = lower_makefile_node,
     "MesonRootfs" = lower_meson_node,
     "PerlModuleRootfs" = lower_perl_module_node,
