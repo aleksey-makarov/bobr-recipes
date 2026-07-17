@@ -21,7 +21,7 @@ fun pkgs =>
     version | default = "3.1.0",
     source_object_hash | default = "9564c72b1dfd1d6fe6274c5f95a8d989b59854575d4bbee44ade7bc17aa9bc93",
     name = "libjpeg-turbo-%{version}",
-    tag = "MakefileInstall",
+    tag = "Makefile",
     deps = {
       build = [
         pkgs.cmake,

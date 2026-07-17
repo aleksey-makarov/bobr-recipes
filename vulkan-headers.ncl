@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "1.4.350.0",
     source_object_hash | default = "70270d10bf2c1e074a06ee37a50b75d332993d1b80a1d9526eeed2da6d82ed22",
     name = "vulkan-headers-%{version}",
-    tag = "MakefileInstall",
+    tag = "Makefile",
     deps = {
       build = [
         pkgs.cmake,

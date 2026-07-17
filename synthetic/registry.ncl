@@ -667,22 +667,11 @@ fun pkgs =>
         synthetic_inputs buildscript_cargo node.inputs,
     }
   in
+  # The package-level `Makefile` tag builds with the additive SandboxInstall
+  # model (install into the overlay root). The `MakefileRootfs` tag is
+  # deliberately still on the staging model (see the dispatch table); those
+  # bootstrap recipes are migrated separately.
   let lower_makefile_package_node = fun node =>
-    let build_rootfs = build_rootfs_for makefile_package_default_build_deps node in
-    let package_inputs =
-      record_replace
-        "_rootfs"
-        build_rootfs
-        node.inputs
-    in
-    lower_makefile_node (
-      record_replace
-        "inputs"
-        package_inputs
-        (record_replace "tag" "MakefileRootfs" node)
-    )
-  in
-  let lower_makefile_install_package_node = fun node =>
     let build_rootfs = build_rootfs_for makefile_package_default_build_deps node in
     let package_inputs =
       record_replace
@@ -694,7 +683,7 @@ fun pkgs =>
       record_replace
         "inputs"
         package_inputs
-        (record_replace "tag" "MakefileInstallRootfs" node)
+        (record_replace "tag" "MakefileRootfs" node)
     )
   in
   let lower_meson_package_node = fun node =>
@@ -781,7 +770,6 @@ fun pkgs =>
     "Autotools" = lower_autotools_package_node,
     "AutotoolsInstall" = lower_autotools_install_package_node,
     "Makefile" = lower_makefile_package_node,
-    "MakefileInstall" = lower_makefile_install_package_node,
     "Meson" = lower_meson_package_node,
     "MesonInstall" = lower_meson_install_package_node,
     "PerlModule" = lower_perl_module_package_node,
@@ -789,7 +777,6 @@ fun pkgs =>
     "AutotoolsRootfs" = lower_autotools_node,
     "AutotoolsInstallRootfs" = lower_autotools_install_node,
     "MakefileRootfs" = lower_makefile_node,
-    "MakefileInstallRootfs" = lower_makefile_install_node,
     "MesonRootfs" = lower_meson_node,
     "MesonInstallRootfs" = lower_meson_install_node,
     "PerlModuleRootfs" = lower_perl_module_node,

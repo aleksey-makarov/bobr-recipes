@@ -18,7 +18,7 @@ fun pkgs =>
     version | default = "7.1.0",
     source_object_hash | default = "fd9fa1b95809417157ca83dd72957e3261bdbce896353cb936f80af0b33a4b5c",
     name = "iproute2-%{version}",
-    tag = "MakefileInstall",
+    tag = "Makefile",
     deps = {
       build = [
         pkgs.bison,

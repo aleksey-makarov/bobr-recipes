@@ -18,7 +18,7 @@ fun pkgs =>
     version | default = "1.4.350.0",
     source_object_hash | default = "3079796d51b29ce49dc7b7c7e243df93b343d54c3be9d4a8292c3231b9698deb",
     name = "vulkan-tools-%{version}",
-    tag = "MakefileInstall",
+    tag = "Makefile",
     deps = {
       build = [
         pkgs.cmake,

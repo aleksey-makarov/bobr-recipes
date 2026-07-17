@@ -32,7 +32,7 @@ fun pkgs =>
       | default
       = "df4ec29950f29a76eac6fbe0f814c48d2cef7d3fdb905002a4a883dd761ce93c",
     name = "evolution-data-server-%{version}",
-    tag = "MakefileInstall",
+    tag = "Makefile",
     deps = {
       build = [
         pkgs.cmake,
@@ -86,6 +86,17 @@ fun pkgs =>
           "-ec",
           "cmake -S . -B . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DENABLE_GTK=OFF -DENABLE_GTK4=OFF -DENABLE_GOA=OFF -DENABLE_WEATHER=OFF -DENABLE_OAUTH2_WEBKITGTK=OFF -DENABLE_OAUTH2_WEBKITGTK4=OFF -DWITH_LIBDB=OFF -DWITH_KRB5=OFF -DWITH_OPENLDAP=OFF -DENABLE_CANBERRA=OFF -DENABLE_EXAMPLES=OFF -DENABLE_TESTS=OFF -DENABLE_INSTALLED_TESTS=OFF -DENABLE_GTK_DOC=OFF -DENABLE_VALA_BINDINGS=OFF -DENABLE_INTROSPECTION=ON",
         ],
+      },
+      # Without DESTDIR (the SandboxInstall model installs into the live overlay
+      # root), EDS's CMake install runs glib-compile-schemas and ships
+      # gschemas.compiled. Packages must not ship that cache: it is a
+      # whole-system derived file that gnome-finalize regenerates. Drop the
+      # cache we just created (an upper-only removal, so the layer stays
+      # additive); the schema .xml files are still shipped.
+      post_install = {
+        name = "drop_glib_schema_cache",
+        run_as = "root",
+        argv = ["rm", "-fv", "/usr/share/glib-2.0/schemas/gschemas.compiled"],
       },
     },
     inputs = {
