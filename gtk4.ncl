@@ -28,7 +28,7 @@ fun pkgs =>
     version | default = "4.22.4",
     source_object_hash | default = "51bd9f60c7d23a665a556c7364c21fb2e4e282566b3e7e092455e8f910330893",
     name = "gtk4-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

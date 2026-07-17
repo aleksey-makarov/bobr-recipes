@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "c176b889b75630a17f4e3d7ef24c09a3e12368e633496087459c8b53ac3a122d",
     name = "colord-gtk-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

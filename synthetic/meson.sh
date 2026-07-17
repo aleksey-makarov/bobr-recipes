@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
+# Meson build script for the Meson builder (SandboxInstall model): installs into
+# the live read-write overlay root (--prefix=/usr). The build's additions become
+# the captured fs-tree layer. The install uses --destdir=/ so files still land
+# under /usr while meson's post-install cache hooks (schemas/mime/icon/gio/pixbuf)
+# detect DESTDIR and skip -- those whole-system caches are regenerated once by
+# gnome-finalize.
 set -euo pipefail
 
 cfg="${BOBR_CONFIG_DIR:?BOBR_CONFIG_DIR is required}"
 step="${1:-${BOBR_STEP_NAME:-}}"
 step="${step:?step name is required}"
 source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
-out_dir="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
 build_workspace_dir="${BOBR_BUILD_DIR:?BOBR_BUILD_DIR is required}"
 synthetic_common="${BOBR_SYNTHETIC_COMMON:?BOBR_SYNTHETIC_COMMON is required}"
 
@@ -80,8 +85,22 @@ step_install() {
   project_source_dir="$(resolve_project_source_dir)"
   build_dir="$(resolve_build_dir "$project_source_dir")"
   prepare_tmpdir "$build_dir"
-  mkdir -p "$out_dir"
-  DESTDIR="$out_dir" meson install -C "$build_dir"
+  # Install into the live overlay root (configured --prefix=/usr); the writes
+  # land in the overlay upper layer and become the captured fs-tree.
+  #
+  # --destdir=/ still installs under /usr (DESTDIR is prepended to the prefix,
+  # and "/" + "/usr" collapses to /usr), but it makes meson treat this as a
+  # staged install: every meson.add_install_script post-install hook
+  # (glib-compile-schemas, gdk-pixbuf-query-loaders, gio-querymodules,
+  # update-mime-database, gtk-update-icon-cache, update-desktop-database, ...)
+  # detects DESTDIR and skips. Those hooks regenerate whole-system caches and
+  # indexes that packages must not ship: some create fresh cache files, others
+  # rewrite shared files already provided by the base tree (e.g.
+  # update-mime-database rewrites /usr/share/mime/* from shared-mime-info),
+  # which the additive builder rejects. gnome-finalize regenerates all of them
+  # once, over the merged tree. This mirrors exactly what the old staging
+  # DESTDIR=$out install did.
+  meson install -C "$build_dir" --destdir /
 }
 
 load_env_files

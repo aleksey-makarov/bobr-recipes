@@ -21,7 +21,7 @@ fun pkgs =>
     version | default = "20251024-f60e50e",
     source_object_hash | default = "e676b733d351d345b9cbf919dfaf84a5ef16e71f328c542f5614027bd4ca2e05",
     name = "kmscube-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.libdrm,

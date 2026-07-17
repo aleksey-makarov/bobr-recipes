@@ -31,7 +31,7 @@ fun pkgs =>
       | default
       = "450458c44a26d25a9b84288e12b9005d4c5c44648cfc6b790be19a05de7f1735",
     name = "gnome-shell-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.mutter,

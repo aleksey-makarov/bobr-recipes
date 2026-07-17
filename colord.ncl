@@ -21,7 +21,7 @@ fun pkgs =>
     version | default = "1.4.8",
     source_object_hash | default = "21500bd68975312a7f0f3ce6019d9f75f42aacaa75ca7115ec720b5445406896",
     name = "colord-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

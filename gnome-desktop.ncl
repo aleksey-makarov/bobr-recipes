@@ -29,7 +29,7 @@ fun pkgs =>
       | default
       = "20e0995a6e3a03e8c1026c5a27bc3f45e69ffcc392ad743dcab6107a541d232f",
     name = "gnome-desktop-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

@@ -17,7 +17,7 @@ fun pkgs =>
     version | default = "2.44",
     source_object_hash | default = "54d2c33eeebb031d48fa590c543e54c9bcbd0f00386ebc6489b2f47a0da4342a",
     name = "xkeyboard-config-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.gettext,

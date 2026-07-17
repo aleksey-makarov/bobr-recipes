@@ -29,7 +29,7 @@ fun pkgs =>
     version | default = "1.4.1",
     source_object_hash | default = "c3e78cdfd27ee4635e657ce7f9c4454fc67ad4dbf0a3f9ada057b130bbafe278",
     name = "libei-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.libevdev,

@@ -26,7 +26,7 @@ fun pkgs =>
     version | default = "26.1.4",
     source_object_hash | default = "072705caa9adf4740f1489194b13e278ad959166863b5271fe423a86353c9ab6",
     name = "mesa-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.libdrm,

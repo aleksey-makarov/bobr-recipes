@@ -31,7 +31,7 @@ fun pkgs =>
     source_object_hash | default = "11b9821892b75d19af7b21f0f7f4e53636638147faf3e6a4ded78b40cb38993f",
     man_pages_object_hash | default = "b0c143b3388afac9e1154facf0821809b396ab86f3f61ddc8028679a7d65d83c",
     name = "systemd-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.attr,

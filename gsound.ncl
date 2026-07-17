@@ -22,7 +22,7 @@ fun pkgs =>
       | default
       = "ca2d039e1ebd148647017a7f548862350bc9af01986d39f10cfdc8e95f07881a",
     name = "gsound-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

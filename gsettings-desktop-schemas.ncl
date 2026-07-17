@@ -28,7 +28,7 @@ fun pkgs =>
     version | default = "50.1",
     source_object_hash | default = "0a2aa25082672585d16fcdab61c7b0e33f035fb87476505c794f29565afa485b",
     name = "gsettings-desktop-schemas-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

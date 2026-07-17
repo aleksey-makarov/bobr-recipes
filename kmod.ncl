@@ -16,7 +16,7 @@ fun pkgs =>
     version | default = "34.2",
     source_object_hash | default = "5a5d5073070cc7e0c7a7a3c6ec2a0e1780850c8b47b3e3892226b93ffcb9cb54",
     name = "kmod-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.openssl,

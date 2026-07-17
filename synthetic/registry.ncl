@@ -61,16 +61,6 @@ fun pkgs =>
     },
   }
   in
-  let buildscript_meson_install = {
-    name = "buildscript-meson-install",
-    tag = "Source",
-    object_hash = import "meson-install.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/meson-install.sh",
-    },
-  }
-  in
   let buildscript_perl_module = {
     name = "buildscript-perl-module",
     tag = "Source",
@@ -506,10 +496,10 @@ fun pkgs =>
         synthetic_inputs script_source node.inputs,
     }
   in
-  let lower_meson_node = lower_meson_node_with "Sandbox" buildscript_meson "@{build}" in
-  let lower_meson_install_node =
-    lower_meson_node_with "SandboxInstall" buildscript_meson_install "/"
-  in
+  # Meson has a single additive builder: no bootstrap/rootfs recipes need the
+  # staging model (glib's two-pass build is handled by installing gen1 into a
+  # private prefix -- see glib.ncl).
+  let lower_meson_node = lower_meson_node_with "SandboxInstall" buildscript_meson "/" in
   let lower_perl_module_node = fun node =>
     let node_config = node.config in
     let source_root_expr = synthetic_source_root_expr node_config in
@@ -687,22 +677,7 @@ fun pkgs =>
       record_replace
         "inputs"
         package_inputs
-        (record_replace "tag" "MesonRootfs" node)
-    )
-  in
-  let lower_meson_install_package_node = fun node =>
-    let build_rootfs = build_rootfs_for meson_package_default_build_deps node in
-    let package_inputs =
-      record_replace
-        "_rootfs"
-        build_rootfs
-        node.inputs
-    in
-    lower_meson_install_node (
-      record_replace
-        "inputs"
-        package_inputs
-        (record_replace "tag" "MesonInstallRootfs" node)
+        (record_replace "tag" "Meson" node)
     )
   in
   let lower_perl_module_package_node = fun node =>
@@ -759,13 +734,10 @@ fun pkgs =>
     "Autotools" = lower_autotools_package_node,
     "Makefile" = lower_makefile_package_node,
     "Meson" = lower_meson_package_node,
-    "MesonInstall" = lower_meson_install_package_node,
     "PerlModule" = lower_perl_module_package_node,
     "SandboxBuild" = lower_sandbox_build_node,
     "AutotoolsRootfs" = lower_autotools_node,
     "MakefileRootfs" = lower_makefile_node,
-    "MesonRootfs" = lower_meson_node,
-    "MesonInstallRootfs" = lower_meson_install_node,
     "PerlModuleRootfs" = lower_perl_module_node,
     "SandboxBuildRootfs" = lower_sandbox_build_rootfs_node,
     "Cargo" = lower_cargo_package_node,

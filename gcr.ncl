@@ -30,7 +30,7 @@ fun pkgs =>
       | default
       = "0c3c341e49f9f4f2532a4884509804190a0c2663e6120360bb298c5d174a8098",
     name = "gcr-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

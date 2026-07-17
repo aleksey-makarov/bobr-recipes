@@ -17,7 +17,7 @@ fun pkgs =>
     version | default = "1.48",
     source_object_hash | default = "398036ac0eb6484982ddbde7ff86848d753231f9cdeeae983f06b52946625aa1",
     name = "wayland-protocols-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.wayland,

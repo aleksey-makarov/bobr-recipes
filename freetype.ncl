@@ -17,7 +17,7 @@ fun pkgs =>
     version | default = "2.14.3",
     source_object_hash | default = "36bc4f1cc413335368ee656c42afca65c5a3987e8768cc28cf11ba775e785a5f",
     name = "freetype-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.zlib,

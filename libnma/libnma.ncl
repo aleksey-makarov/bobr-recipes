@@ -27,7 +27,7 @@ fun pkgs =>
       | default
       = "53a6fb2b190ad37c5986caed3e98bede7c3c602399ee4f93c8fc054303d76dab",
     name = "libnma-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

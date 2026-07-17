@@ -25,7 +25,7 @@ fun pkgs =>
       | default
       = "ba4dddeb22a1929ed5987e74cb69c592e22bc74f0c04cfdb9028b907cf688af6",
     name = "blueprint-compiler-v%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.python,

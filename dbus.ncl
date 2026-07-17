@@ -16,7 +16,7 @@ fun pkgs =>
     version | default = "1.16.2",
     source_object_hash | default = "0ba2a1a4b16afe7bceb2c07e9ce99a8c2c3508e5dec290dbb643384bd6beb7e2",
     name = "dbus-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.expat,

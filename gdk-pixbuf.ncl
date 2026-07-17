@@ -26,7 +26,7 @@ fun pkgs =>
     version | default = "2.44.7",
     source_object_hash | default = "172f80e3626ec31520a970400f1a3694e04718f6c2cd2885f75250fb5a6995a4",
     name = "gdk-pixbuf-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

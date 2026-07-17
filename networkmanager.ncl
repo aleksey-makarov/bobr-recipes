@@ -30,7 +30,7 @@ fun pkgs =>
       | default
       = "b0ee9a89dfba39d2a1a69d60868be99096d3b6b66a1a22bf8a9d5a38b8aed50e",
     name = "networkmanager-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

@@ -20,7 +20,7 @@ fun pkgs =>
     version | default = "238",
     source_object_hash | default = "61266ab1afc9d73dbc60a8b2af73e99d2fdff47d99544d085760e4fa667b5dd1",
     name = "libgudev-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

@@ -18,7 +18,7 @@ fun pkgs =>
     version | default = "1.13.2",
     source_object_hash | default = "acc4d5f7c3cbba5f9f8d08d8bdbeede84ecede46792f47929aa9321873385528",
     name = "libxkbcommon-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.bison,

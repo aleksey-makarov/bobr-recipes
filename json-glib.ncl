@@ -26,7 +26,7 @@ fun pkgs =>
     version | default = "1.10.8",
     source_object_hash | default = "55c5c141a564245b8f8fbe7698663c87a45a7333c2a2c56f06f811ab73b212dd",
     name = "json-glib-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

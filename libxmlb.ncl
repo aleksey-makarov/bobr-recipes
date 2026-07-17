@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "5982b4fe344deb36e57b40d7582f594ecd9414f86fb8258bb56f8b1a38e1d527",
     name = "libxmlb-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

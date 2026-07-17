@@ -26,7 +26,7 @@ fun pkgs =>
     version | default = "1.56.4",
     source_object_hash | default = "17065e2fcc5f5a5bdbffc884c956bfc7c451a96e8c4fb2f8ad837c6413cb5a01",
     name = "pango-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

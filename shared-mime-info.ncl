@@ -21,7 +21,7 @@ fun pkgs =>
     version | default = "2.5.1",
     source_object_hash | default = "b75b420da9b0be9a3d99b1bee6ed87957b56ab54583ac1a97fbd0dc98ddddb25",
     name = "shared-mime-info-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.glib,

@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "15.0.1",
     source_object_hash | default = "551d039bfb0c837ba5a4d027cdb8ee16bded0eedb789821f8025d8a64b791f6d",
     name = "weston-%{version}",
-    tag = "MesonInstall",
+    tag = "Meson",
     deps = {
       build = [
         pkgs.wayland,
