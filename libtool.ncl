@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "2.5.4",
     source_object_hash | default = "f81f5860666b0bc7d84baddefa60d1cb9fa6fceb2398cc3baca6afaa60266675",
     name = "libtool-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [],
       runtime = [
@@ -39,7 +39,7 @@ fun pkgs =>
         argv = [
           "rm",
           "-fv",
-          "@{out}/usr/lib/libltdl.a",
+          "/usr/lib/libltdl.a",
         ],
       },
     },

@@ -24,7 +24,7 @@ fun pkgs =>
       | default
       = "6fcf18b75d305d99d04d2e42982ed5b787a081af2842220ed63287a2d6a10988",
     name = "libpwquality-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.linux_pam,

@@ -22,7 +22,7 @@ fun pkgs =>
       | default
       = "b47d3ac19d3549e54a05d0019a6c400674da716123858cfdb6d3bdd70a66c702",
     name = "libtirpc-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.pkgconf,

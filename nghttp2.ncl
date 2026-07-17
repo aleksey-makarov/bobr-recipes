@@ -22,7 +22,7 @@ fun pkgs =>
       | default
       = "1fb324b6ec2c56f6bde0658f4139ffd8209fa9e77ce98fd7a5f63af8d0e508ad",
     name = "nghttp2-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [],
       runtime = [

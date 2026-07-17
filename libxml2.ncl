@@ -28,7 +28,7 @@ fun pkgs =>
     version | default = "2.15.3",
     source_object_hash | default = "78262a6e7ac170d6528ebfe2efccdf220191a5af6a6cd61ea4a9a9a5042c7a07",
     name = "libxml2-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.zlib,

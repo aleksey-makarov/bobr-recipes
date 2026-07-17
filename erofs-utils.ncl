@@ -18,7 +18,7 @@ fun pkgs =>
     version | default = "1.8.6",
     source_object_hash | default = "5b221dc3fd6d151425b30534ede46fb7a90dc233a8659cba0372796b0a066547",
     name = "erofs-utils-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         # autogen.sh (the kernel.org snapshot ships no configure script) needs

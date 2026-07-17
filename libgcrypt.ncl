@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "7ce33c2492221a0436f96a8500215e9f3e3dcb5fd26a757cd415e7a843babd5e",
     name = "libgcrypt-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.libgpg_error,

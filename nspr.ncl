@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "bbd02ee87a55676063a63e5bc819e0227de2666b47307b2a0134414cdf42368e",
     name = "nspr-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [],
       runtime = [
