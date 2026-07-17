@@ -257,80 +257,57 @@ fun pkgs =>
   }
   in
 
-  # Build env holding the aggregate-cache generators (glib-compile-schemas and
-  # gio-querymodules from glib, gdk-pixbuf-query-loaders from gdk-pixbuf,
-  # gtk4-update-icon-cache from gtk4) plus a shell/coreutils.
-  let gnome_rootfs_cache_env = {
-    name = "gnome-rootfs-cache-env",
-    tag = "RootfsClosure",
-    config = {},
-    inputs = {
-      gtk4 = pkgs.gtk4,
-      glib = pkgs.glib,
-      gdk_pixbuf = pkgs.gdk_pixbuf,
-      bash = pkgs.bash,
-      coreutils = pkgs.coreutils,
-      sed = pkgs.sed,
-    },
-  }
-  in
-
-  # Finalize the merged tree with the aggregate GNOME caches. These index files
-  # contributed by many packages and cannot be regenerated on the read-only /usr
-  # at runtime, so they are baked here at build time (as rpm-ostree/mkosi do).
-  let gnome_rootfs = {
-    name = "gnome-rootfs",
-    tag = "SandboxBuildRootfs",
+  # Finalize: regenerate the aggregate caches over the merged tree. These index
+  # files are contributed by many packages and cannot be regenerated on the
+  # read-only /usr at runtime, so they are baked here at build time (as
+  # rpm-ostree/mkosi do). The build runs with the merged tree as a read-write
+  # overlay root and captures ONLY the generated caches as an additive layer
+  # (SandboxInstall) -- nothing is removed or modified. The generator tools come
+  # from the tree itself, so there is no parallel cache env and no version skew.
+  # (ld.so.cache is absent from the tree -- glibc no longer ships a partial one;
+  # 10-eth-dhcp.network is masked via system-runtime-files-gnome, not deleted.)
+  let gnome_finalize = {
+    name = "gnome-finalize",
+    tag = "SandboxInstall",
     config = {
+      script_config = {},
       steps = [
         {
           name = "finalize_caches",
           run_as = "root",
-          cwd = "@{out}",
+          cwd = "/",
           argv = [
             "/bin/bash",
             "-ec",
             m%"
-              out="$BOBR_OUT_DIR"
-              cp -a "$BOBR_INPUTS_DIR/_tree/." "$out/"
-
-              # Networking in the GNOME image is handled by NetworkManager, so
-              # drop the base rootfs's systemd-networkd DHCP profile: otherwise
-              # networkd also claims eth0 (the "potentially unpredictable
-              # interface name" warning) and races NM for the link. The plain
-              # (non-GNOME) rootfs keeps 10-eth-dhcp.network.
-              rm -f "$out/etc/systemd/network/10-eth-dhcp.network"
+              # Complete ld.so.cache over the whole tree (glibc ships none now).
+              # -X: write only the cache, do not recreate the version symlinks
+              # packages already installed.
+              ldconfig -X
 
               # GSettings schemas -> gschemas.compiled
-              if [ -d "$out/usr/share/glib-2.0/schemas" ]; then
-                glib-compile-schemas "$out/usr/share/glib-2.0/schemas"
+              if [ -d /usr/share/glib-2.0/schemas ]; then
+                glib-compile-schemas /usr/share/glib-2.0/schemas
               fi
 
-              # gdk-pixbuf loaders.cache. query-loaders dlopens each loader to
-              # read its format info; the SVG loader (librsvg) pulls in
-              # librsvg-2.so and its deps, which live in the rootfs being built,
-              # not in this cache env -- so LD_LIBRARY_PATH points the loader at
-              # $out/usr/lib, otherwise dlopen fails and the SVG loader is
-              # silently dropped (blank symbolic icons everywhere). The tool
-              # writes absolute loader paths; strip the build-time $out prefix so
-              # they are the runtime /usr paths.
-              gdkdir="$out/usr/lib/gdk-pixbuf-2.0/2.10.0"
+              # gdk-pixbuf loaders.cache. Querying the loaders at their runtime
+              # path means the SVG loader (librsvg) resolves librsvg-2.so on the
+              # normal /usr/lib and the cache records /usr paths directly -- no
+              # LD_LIBRARY_PATH and no $out prefix rewriting needed anymore.
+              gdkdir=/usr/lib/gdk-pixbuf-2.0/2.10.0
               if [ -d "$gdkdir/loaders" ]; then
-                GDK_PIXBUF_MODULEDIR="$gdkdir/loaders" \
-                LD_LIBRARY_PATH="$out/usr/lib" \
-                  gdk-pixbuf-query-loaders > "$gdkdir/loaders.cache"
-                sed -i "s|$out||g" "$gdkdir/loaders.cache"
+                gdk-pixbuf-query-loaders > "$gdkdir/loaders.cache"
               fi
 
-              # GIO modules cache (stores basenames, no prefix to strip)
-              if [ -d "$out/usr/lib/gio/modules" ]; then
-                gio-querymodules "$out/usr/lib/gio/modules"
+              # GIO modules cache
+              if [ -d /usr/lib/gio/modules ]; then
+                gio-querymodules /usr/lib/gio/modules
               fi
 
               # Icon theme caches
               for theme in Adwaita hicolor; do
-                if [ -d "$out/usr/share/icons/$theme" ]; then
-                  gtk4-update-icon-cache -qtf "$out/usr/share/icons/$theme"
+                if [ -d "/usr/share/icons/$theme" ]; then
+                  gtk4-update-icon-cache -qtf "/usr/share/icons/$theme"
                 fi
               done
             "%,
@@ -339,9 +316,21 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = gnome_rootfs_cache_env,
-      _tree = gnome_rootfs_contents,
+      _rootfs = gnome_rootfs_contents,
     },
+  }
+  in
+
+  # The final GNOME rootfs = the merged contents plus the finalize cache layer.
+  let gnome_rootfs = {
+    name = "gnome-rootfs",
+    tag = "TreeMerge",
+    config = {},
+    inputs =
+      recipe.numbered_inputs [
+        gnome_rootfs_contents,
+        gnome_finalize,
+      ],
   }
   in
 

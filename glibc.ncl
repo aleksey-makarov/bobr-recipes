@@ -113,6 +113,20 @@ fun pkgs =>
           ],
         },
       ],
+      # ld.so.cache is a whole-system derived file: it is regenerated over the
+      # complete image at finalize (ldconfig), so glibc must not ship its own
+      # partial one -- otherwise it would be a stale cache in every rootfs and,
+      # for the additive SandboxInstall finalize, an existing file the finalize
+      # ldconfig would have to modify rather than add.
+      post_install = {
+        name = "drop_ld_so_cache",
+        run_as = "root",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          "rm -f @{out}/etc/ld.so.cache",
+        ],
+      },
     },
     inputs = {
       _rootfs = pkgs.system_rootfs_0,
