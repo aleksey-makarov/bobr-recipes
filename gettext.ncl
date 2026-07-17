@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "0.26",
     source_object_hash | default = "d1fb86e260cfe7da6031f94d2e44c0da55903dbae0a2fa0fae78c91ae1b56f00",
     name = "gettext-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [],
       runtime = [
@@ -39,7 +39,7 @@ fun pkgs =>
           "chmod",
           "-v",
           "0755",
-          "@{out}/usr/lib/preloadable_libintl.so",
+          "/usr/lib/preloadable_libintl.so",
         ],
       },
     },

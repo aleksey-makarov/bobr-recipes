@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "775676df958e2ea2452f7568f28b2ea581063d312773dd5c0b7624c1b9b2da8c",
     name = "libgtop-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.glib,

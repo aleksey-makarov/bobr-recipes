@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "7.2",
     source_object_hash | default = "0329d7788fbef113fa82cb80889ca197a344ce0df7646fe000974c5d714363a6",
     name = "texinfo-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.ncurses,
@@ -40,16 +40,28 @@ fun pkgs =>
           "sed 's/! $output_file eq/$output_file ne/' -i tp/Texinfo/Convert/*.pm",
         ],
       },
-      post_install = {
-        name = "install_tex_support",
-        run_as = "root",
-        cwd = "@{build}/build",
-        argv = [
-          "/bin/sh",
-          "-ec",
-          "make DESTDIR=\"@{out}\" TEXMF=/usr/share/texmf install-tex",
-        ],
-      },
+      post_install = [
+        {
+          name = "install_tex_support",
+          run_as = "root",
+          cwd = "@{build}/build",
+          argv = [
+            "/bin/sh",
+            "-ec",
+            "make TEXMF=/usr/share/texmf install-tex",
+          ],
+        },
+        # Without DESTDIR the `make install` step runs install-info, which
+        # creates the system-wide /usr/share/info/dir TOC. Packages must not
+        # ship that derived index (each would clobber the others on merge);
+        # drop the copy we just created -- it is an upper-only file, so the
+        # layer stays additive.
+        {
+          name = "drop_info_dir",
+          run_as = "root",
+          argv = ["rm", "-fv", "/usr/share/info/dir"],
+        },
+      ],
     },
     inputs = {
       source = texinfo_src version source_object_hash,

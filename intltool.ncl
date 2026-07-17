@@ -20,7 +20,7 @@ fun pkgs =>
     version | default = "0.51.0",
     source_object_hash | default = "67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd",
     name = "intltool-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.xml_parser,
@@ -50,7 +50,7 @@ fun pkgs =>
           "-v",
           "-Dm644",
           "@{build}/source/doc/I18N-HOWTO",
-          "@{out}/usr/share/doc/intltool-%{version}/I18N-HOWTO",
+          "/usr/share/doc/intltool-%{version}/I18N-HOWTO",
         ],
       },
     },

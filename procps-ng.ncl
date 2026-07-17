@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "4.0.5",
     source_object_hash | default = "c2e6d193cc78f84cd6ddb72aaf6d5c6a9162f0470e5992092057f5ff518562fa",
     name = "procps-ng-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.pkgconf,

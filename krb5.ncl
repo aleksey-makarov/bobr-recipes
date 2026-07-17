@@ -24,7 +24,7 @@ fun pkgs =>
       | default
       = "3243ffbc8ea4d4ac22ddc7dd2a1dc54c57874c40648b60ff97009763554eaf13",
     name = "krb5-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.bison,
@@ -60,7 +60,7 @@ fun pkgs =>
         argv = [
           "/bin/sh",
           "-ec",
-          "rm -f @{out}/usr/bin/compile_et @{out}/usr/bin/mk_cmds @{out}/usr/include/com_err.h @{out}/usr/lib/libcom_err.so @{out}/usr/lib/libcom_err.a @{out}/usr/lib/pkgconfig/com_err.pc @{out}/usr/share/man/man1/compile_et.1 @{out}/usr/share/man/man1/mk_cmds.1 @{out}/usr/share/man/man3/com_err.3; rm -rf @{out}/usr/include/et @{out}/usr/share/et",
+          "rm -f /usr/bin/compile_et /usr/bin/mk_cmds /usr/include/com_err.h /usr/lib/libcom_err.so /usr/lib/libcom_err.a /usr/lib/pkgconfig/com_err.pc /usr/share/man/man1/compile_et.1 /usr/share/man/man1/mk_cmds.1 /usr/share/man/man3/com_err.3; rm -rf /usr/include/et /usr/share/et",
         ],
       },
     },
