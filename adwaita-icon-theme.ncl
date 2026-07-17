@@ -29,7 +29,7 @@ fun pkgs =>
     version | default = "50.0",
     source_object_hash | default = "fac6e0401fca714780561a081b8f7e27c3bc1db34ebda4da175081f26b24d460",
     name = "adwaita-icon-theme-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.gtk4,

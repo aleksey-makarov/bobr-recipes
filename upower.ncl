@@ -25,7 +25,7 @@ fun pkgs =>
       | default
       = "12227b3dcd34c5097bbda25984b192ea0bd5e11dce479358d9ef70415a38e4b6",
     name = "upower-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

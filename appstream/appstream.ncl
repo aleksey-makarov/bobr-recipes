@@ -26,7 +26,7 @@ fun pkgs =>
       | default
       = "d4f722d79c6a2f29d9dc5c6f464927469543353f386581c778c9bed7c60a54ed",
     name = "appstream-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

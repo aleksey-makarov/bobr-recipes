@@ -78,7 +78,7 @@ fun pkgs =>
       = "6c09757ee906330a60b6705753aa56bca007ad219b95e6e3537510d41bc341c8",
     cargo_lock | default = import "Cargo.lock" as 'Toml,
     name = "glycin-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

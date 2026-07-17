@@ -25,7 +25,7 @@ fun pkgs =>
     source_object_hash | default = "62d2ba47f014e58522e86162eeb57f44b21077112139cfd61ab4c34b027f3f6f",
     series | default = "2.58",
     name = "at-spi2-core-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

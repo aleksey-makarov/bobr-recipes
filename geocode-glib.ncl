@@ -24,7 +24,7 @@ fun pkgs =>
       | default
       = "2d9a6826d158470449a173871221596da0f83ebdcff98b90c7049089056a37aa",
     name = "geocode-glib-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,
