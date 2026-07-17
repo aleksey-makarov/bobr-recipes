@@ -23,6 +23,8 @@ let KnownTags = [
   "AutotoolsInstallRootfs",
   "MesonInstall",
   "MesonInstallRootfs",
+  "MakefileInstall",
+  "MakefileInstallRootfs",
   "OciExtract",
 ]
 in
@@ -564,12 +566,12 @@ let ValidateRecipeShallow = fun recipe =>
         config = checked.config | AutotoolsConfig,
         deps = checked.deps | RecipeDeps,
       }
-    else if checked.tag == "MakefileRootfs" then
+    else if checked.tag == "MakefileRootfs" || checked.tag == "MakefileInstallRootfs" then
       checked
       & {
         config = checked.config | MakefileConfig,
       }
-    else if checked.tag == "Makefile" then
+    else if checked.tag == "Makefile" || checked.tag == "MakefileInstall" then
       checked
       & {
         config = checked.config | MakefileConfig,
@@ -777,13 +779,13 @@ let rec ValidateRecipe = fun recipe =>
         deps = checked.deps | RecipeDeps,
         inputs = validate_synthetic_package_inputs checked.inputs,
       }
-    else if checked.tag == "MakefileRootfs" then
+    else if checked.tag == "MakefileRootfs" || checked.tag == "MakefileInstallRootfs" then
       checked
       & {
         config = checked.config | MakefileConfig,
         inputs = validate_synthetic_rootfs_inputs checked.inputs,
       }
-    else if checked.tag == "Makefile" then
+    else if checked.tag == "Makefile" || checked.tag == "MakefileInstall" then
       checked
       & {
         config = checked.config | MakefileConfig,

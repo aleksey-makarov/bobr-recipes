@@ -18,7 +18,7 @@ fun pkgs =>
     version | default = "7.1.0",
     source_object_hash | default = "fd9fa1b95809417157ca83dd72957e3261bdbce896353cb936f80af0b33a4b5c",
     name = "iproute2-%{version}",
-    tag = "Makefile",
+    tag = "MakefileInstall",
     deps = {
       build = [
         pkgs.bison,
@@ -53,7 +53,7 @@ fun pkgs =>
         argv = [
           "/bin/sh",
           "-ec",
-          "install -vDm644 COPYING README* -t \"@{out}/usr/share/doc/iproute2-%{version}\"",
+          "install -vDm644 COPYING README* -t \"/usr/share/doc/iproute2-%{version}\"",
         ],
       },
     },

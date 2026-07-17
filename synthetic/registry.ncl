@@ -41,6 +41,16 @@ fun pkgs =>
     },
   }
   in
+  let buildscript_gnu_make_install = {
+    name = "buildscript-gnu-make-install",
+    tag = "Source",
+    object_hash = import "gnu-make-install.sh.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "synthetic/gnu-make-install.sh",
+    },
+  }
+  in
   let buildscript_meson = {
     name = "buildscript-meson",
     tag = "Source",
@@ -369,14 +379,14 @@ fun pkgs =>
         (record_replace "tag" "AutotoolsInstallRootfs" node)
     )
   in
-  let lower_makefile_node = fun node =>
+  let lower_makefile_node_with = fun builder_tag => fun script_source => fun post_install_cwd => fun node =>
     let node_config = node.config in
     let source_root_expr = synthetic_source_root_expr node_config in
     let pre_build_steps =
       normalize_hook_steps node_config "pre_build" source_root_expr
     in
     let post_install_steps =
-      normalize_hook_steps node_config "post_install" "@{out}"
+      normalize_hook_steps node_config "post_install" post_install_cwd
     in
     let lowered_script_config =
       let with_make_args =
@@ -406,7 +416,7 @@ fun pkgs =>
     in
     {
       name = node.name,
-      tag = "Sandbox",
+      tag = builder_tag,
       config = {
         steps =
           [synthetic_prepare_step makefile_step_env]
@@ -431,8 +441,12 @@ fun pkgs =>
         script_config = lowered_script_config,
       },
       inputs =
-        synthetic_inputs buildscript_gnu_make node.inputs,
+        synthetic_inputs script_source node.inputs,
     }
+  in
+  let lower_makefile_node = lower_makefile_node_with "Sandbox" buildscript_gnu_make "@{out}" in
+  let lower_makefile_install_node =
+    lower_makefile_node_with "SandboxInstall" buildscript_gnu_make_install "/"
   in
   let lower_meson_node_with = fun builder_tag => fun script_source => fun post_install_cwd => fun node =>
     let node_config = node.config in
@@ -668,6 +682,21 @@ fun pkgs =>
         (record_replace "tag" "MakefileRootfs" node)
     )
   in
+  let lower_makefile_install_package_node = fun node =>
+    let build_rootfs = build_rootfs_for makefile_package_default_build_deps node in
+    let package_inputs =
+      record_replace
+        "_rootfs"
+        build_rootfs
+        node.inputs
+    in
+    lower_makefile_install_node (
+      record_replace
+        "inputs"
+        package_inputs
+        (record_replace "tag" "MakefileInstallRootfs" node)
+    )
+  in
   let lower_meson_package_node = fun node =>
     let build_rootfs = build_rootfs_for meson_package_default_build_deps node in
     let package_inputs =
@@ -752,6 +781,7 @@ fun pkgs =>
     "Autotools" = lower_autotools_package_node,
     "AutotoolsInstall" = lower_autotools_install_package_node,
     "Makefile" = lower_makefile_package_node,
+    "MakefileInstall" = lower_makefile_install_package_node,
     "Meson" = lower_meson_package_node,
     "MesonInstall" = lower_meson_install_package_node,
     "PerlModule" = lower_perl_module_package_node,
@@ -759,6 +789,7 @@ fun pkgs =>
     "AutotoolsRootfs" = lower_autotools_node,
     "AutotoolsInstallRootfs" = lower_autotools_install_node,
     "MakefileRootfs" = lower_makefile_node,
+    "MakefileInstallRootfs" = lower_makefile_install_node,
     "MesonRootfs" = lower_meson_node,
     "MesonInstallRootfs" = lower_meson_install_node,
     "PerlModuleRootfs" = lower_perl_module_node,
