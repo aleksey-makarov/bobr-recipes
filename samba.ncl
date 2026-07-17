@@ -27,7 +27,7 @@ fun pkgs =>
       | default
       = "df2c51ab4361ec626ab9988e5946efcca8465bc7afae834291d5558468265ff8",
     name = "samba-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.python,
@@ -97,19 +97,22 @@ fun pkgs =>
         # vfs_snapper needs dbus-1 which we don't ship in this client build.
         "--with-shared-modules=!vfs_snapper",
       ],
-      # We ship Samba only for libsmbclient; its baked server-state directories
-      # collide with the base rootfs's volatile /var layout (var/lock and
-      # var/run are symlinks there). Drop them from the install tree.
+      # Samba installs its own var/lock and var/run state directories, but the
+      # base filesystem provides those paths as symlinks (var/lock -> ../run/lock,
+      # var/run -> ../run); shipping them as directories would collide at the
+      # rootfs TreeMerge. Samba creates them fresh (they are not in its build
+      # rootfs), so removing them here is an upper-only deletion and the layer
+      # stays additive. We do NOT touch /run itself -- it is a sandbox mountpoint
+      # and Samba installs nothing there. Also drop the bundled-Heimdal build
+      # tools (compile_et, asn1_compile) that collide with krb5's binaries; we
+      # ship Samba only for libsmbclient, so its /usr/bin helpers are unneeded.
       post_install = {
         name = "drop_volatile_state_dirs",
         run_as = "root",
-        # Also drop the bundled-Heimdal build tools (compile_et, asn1_compile)
-        # that collide with the same-named binaries krb5 installs -- we ship
-        # Samba only for libsmbclient, so its /usr/bin build helpers are unneeded.
         argv = [
           "/bin/sh",
           "-ec",
-          "rm -rf @{out}/var/lock @{out}/var/run @{out}/run; rm -f @{out}/usr/bin/compile_et @{out}/usr/bin/asn1_compile",
+          "rm -rf /var/lock /var/run; rm -f /usr/bin/compile_et /usr/bin/asn1_compile",
         ],
       },
     },

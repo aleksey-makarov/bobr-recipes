@@ -24,7 +24,7 @@ fun pkgs =>
     version | default = "1.6.1",
     source_object_hash | default = "f8923c740159052d719dbfc2a2f81942d68dd34fcaf61c706a02c9b80feeef8e",
     name = "linux-pam-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.libxcrypt,
@@ -57,18 +57,21 @@ fun pkgs =>
         "--disable-econf",
         "--disable-examples",
       ],
-      # PAM ships a non-empty default /etc/environment; the base system already
-      # provides the canonical (empty) one, so drop PAM's copy to avoid a
-      # TreeMerge conflict wherever linux-pam is merged. pam_env reads
-      # /etc/environment regardless of which package installs it.
-      post_install = {
-        name = "drop_default_environment",
-        run_as = "root",
-        cwd = "@{out}",
+      # PAM's `make install` unconditionally installs its own non-empty default
+      # /etc/environment (pam_env's `dist_sysconf_DATA = environment`), which
+      # would overwrite the canonical empty one the base filesystem provides
+      # (present in the overlay's lower layer) -- a non-additive modification.
+      # The base file is the authoritative one (pam_env reads whatever is on
+      # disk), so stop PAM from installing its copy: drop `environment` from the
+      # pam_env Makefile before configure regenerates it. (Edit Makefile.in, not
+      # Makefile.am -- automake is not a build dep, so the .am must stay older.)
+      pre_configure = {
+        name = "drop_pam_env_environment_install",
+        run_as = "build-user",
         argv = [
           "/bin/sh",
           "-ec",
-          "rm -f \"@{out}/etc/environment\"",
+          "sed -i 's/^dist_sysconf_DATA = environment$/dist_sysconf_DATA =/' modules/pam_env/Makefile.in",
         ],
       },
     },
