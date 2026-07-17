@@ -20,7 +20,7 @@ fun pkgs =>
     version | default = "4.8.33",
     source_object_hash | default = "cae149d42f844e5185d8c81d7db3913a8fa214c65f852200a9d896b468af164c",
     name = "mc-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.glib,

@@ -21,7 +21,7 @@ fun pkgs =>
     source_object_hash | default = "9f306d8a25fc688ad2b814c1c420833ed20ff86deca907a81db0af08dde51a6f",
     runtime_dir = "vim92",
     name = "vim-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.ncurses,
@@ -54,17 +54,17 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            mkdir -p "@{out}/usr/bin"
-            mkdir -p "@{out}/usr/share/doc"
-            mkdir -p "@{out}/etc"
-            ln -svf vim "@{out}/usr/bin/vi"
-            for L in "@{out}"/usr/share/man/{,*/}man1/vim.1; do
+            mkdir -p "/usr/bin"
+            mkdir -p "/usr/share/doc"
+            mkdir -p "/etc"
+            ln -svf vim "/usr/bin/vi"
+            for L in /usr/share/man/{,*/}man1/vim.1; do
               if [ -e "$L" ]; then
                 ln -svf vim.1 "$(dirname "$L")/vi.1"
               fi
             done
-            ln -svf ../vim/%{runtime_dir}/doc "@{out}/usr/share/doc/vim-%{version}"
-            cat > "@{out}/etc/vimrc" <<'EOF_INNER'
+            ln -svf ../vim/%{runtime_dir}/doc "/usr/share/doc/vim-%{version}"
+            cat > "/etc/vimrc" <<'EOF_INNER'
             " Begin /etc/vimrc
 
             source $VIMRUNTIME/defaults.vim

@@ -29,7 +29,7 @@ fun pkgs =>
     version | default = "2.10.0",
     source_object_hash | default = "6e5ca4f8d76ee9e3a8db700b667f13e12aac9933828a64e1aaad93d26be9b479",
     name = "kbd-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.flex,
@@ -63,8 +63,8 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            install -vdm755 "@{out}/usr/share/doc"
-            cp -R -v "@{build}/source/docs/doc" -T "@{out}/usr/share/doc/kbd-%{version}"
+            install -vdm755 "/usr/share/doc"
+            cp -R -v "@{build}/source/docs/doc" -T "/usr/share/doc/kbd-%{version}"
           "%,
         ],
       },

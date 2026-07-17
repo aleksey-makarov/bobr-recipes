@@ -26,7 +26,7 @@ fun pkgs =>
     version | default = "10.4p1",
     source_object_hash | default = "ef6026dd2aea8d56059638d5d3262902c892ceba9f88395835e0d06d3fb63238",
     name = "openssh-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.openssl,
@@ -54,13 +54,13 @@ fun pkgs =>
       post_install = {
         name = "prepare_ssh_config",
         run_as = "root",
-        cwd = "@{out}",
+        cwd = "/",
         argv = [
           "/bin/sh",
           "-ec",
           m%"
-            rm -f "@{out}"/etc/ssh/ssh_host_*
-            cfg="@{out}/etc/ssh/sshd_config"
+            rm -f /etc/ssh/ssh_host_*
+            cfg="/etc/ssh/sshd_config"
             if [ -f "$cfg" ]; then
               printf 'Include /etc/ssh/sshd_config.d/*.conf\n' \
                 | cat - "$cfg" > "$cfg.new" && mv "$cfg.new" "$cfg"

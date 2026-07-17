@@ -30,7 +30,7 @@ fun pkgs =>
     version | default = "5.45.4",
     source_object_hash | default = "49a7da83b0bdd9f46d04a04deec19c7767bb9a323e40c4781f89caf760b92c34",
     name = "expect-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.tcl,
@@ -67,7 +67,7 @@ fun pkgs =>
           "ln",
           "-sfv",
           "expect%{version}/libexpect%{version}.so",
-          "@{out}/usr/lib/libexpect%{version}.so",
+          "/usr/lib/libexpect%{version}.so",
         ],
       },
     },

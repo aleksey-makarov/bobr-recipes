@@ -71,7 +71,7 @@ fun pkgs =>
       = "074671a3ed6fbcd67cae2a40e539107f4f097ca8a4ab1a894c05e2524ff340ef",
     cargo_lock | default = import "Cargo.lock" as 'Toml,
     name = "librsvg-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.rust_bin,
@@ -117,6 +117,16 @@ fun pkgs =>
         "--disable-always-build-tests",
       ],
       pre_configure = vendor_crates_step,
+      # Without DESTDIR the install runs gdk-pixbuf-query-loaders and ships
+      # loaders.cache. That whole-system cache must not come from a package --
+      # gnome-finalize regenerates it -- so drop the freshly created copy (an
+      # upper-only removal, so the layer stays additive). The SVG loader module
+      # itself is still shipped.
+      post_install = {
+        name = "drop_pixbuf_loaders_cache",
+        run_as = "root",
+        argv = ["rm", "-fv", "/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"],
+      },
     },
     inputs = {
       source = librsvg_src version source_object_hash,

@@ -24,7 +24,7 @@ fun pkgs =>
       | default
       = "820984b12a67f98705785aae2dd1347fe0ac097828001d4583ff64574aed6389",
     name = "cups-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.zlib,
