@@ -18,6 +18,7 @@ let KnownTags = [
   "MesonRootfs",
   "PerlModuleRootfs",
   "SandboxBuildRootfs",
+  "SandboxInstall",
   "OciExtract",
 ]
 in
@@ -592,7 +593,7 @@ let ValidateRecipeShallow = fun recipe =>
         config = checked.config | PerlModuleConfig,
         deps = checked.deps | RecipeDeps,
       }
-    else if checked.tag == "SandboxBuildRootfs" then
+    else if checked.tag == "SandboxBuildRootfs" || checked.tag == "SandboxInstall" then
       checked
       & {
         config = checked.config | SandboxConfig,
@@ -811,7 +812,7 @@ let rec ValidateRecipe = fun recipe =>
         deps = checked.deps | RecipeDeps,
         inputs = validate_synthetic_package_inputs checked.inputs,
       }
-    else if checked.tag == "SandboxBuildRootfs" then
+    else if checked.tag == "SandboxBuildRootfs" || checked.tag == "SandboxInstall" then
       checked
       & {
         config = checked.config | SandboxConfig,
