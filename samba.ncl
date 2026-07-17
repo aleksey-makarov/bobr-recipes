@@ -60,13 +60,23 @@ fun pkgs =>
     config = {
       # Samba's waf build runs in-tree (bin/).
       "in-tree" = true,
+      # Some of Samba's private libraries (e.g. libsmbpasswdparser) are linked
+      # against other private libs in /usr/lib/samba but the waf build fails to
+      # record a RUNPATH for them (a known Samba bug, Debian #1010922), so at
+      # runtime they cannot find their siblings and `ldd` reports them
+      # unresolved. Inject the private libdir into the link RUNPATH for every
+      # object; the private libs all live there, so this makes them resolvable
+      # without exposing the dir globally via ld.so.conf.
+      env = {
+        LDFLAGS = "-Wl,-rpath,/usr/lib/samba -Wl,--enable-new-dtags",
+      },
       configure_args = [
         "--enable-fhs",
         "--sysconfdir=/etc",
         "--localstatedir=/var",
         # merged-usr: /usr/sbin is a symlink to bin.
         "--sbindir=/usr/bin",
-        "--bundled-libraries=ALL",
+        "--bundled-libraries=ALL,!popt",
         "--without-ad-dc",
         "--without-ldb-lmdb",
         "--without-json",
