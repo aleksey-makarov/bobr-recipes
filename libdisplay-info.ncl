@@ -17,7 +17,7 @@ fun pkgs =>
     version | default = "0.3.0",
     source_object_hash | default = "6ae77cd937f9cf7d1321d35c116062c4911e8447010a6a713ac4286f7a9d5987",
     name = "libdisplay-info-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.hwdata,

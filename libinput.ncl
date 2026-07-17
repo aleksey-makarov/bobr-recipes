@@ -17,7 +17,7 @@ fun pkgs =>
     version | default = "1.31.3",
     source_object_hash | default = "b6749bf6f1890f6631c0a70a027c35fec9d2e096a39f720548896e41474a9854",
     name = "libinput-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.libevdev,

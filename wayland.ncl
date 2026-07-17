@@ -17,7 +17,7 @@ fun pkgs =>
     version | default = "1.24.0",
     source_object_hash | default = "82892487a01ad67b334eca83b54317a7c86a03a89cfadacfef5211f11a5d0536",
     name = "wayland-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.libffi,

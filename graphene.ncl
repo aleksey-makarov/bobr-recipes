@@ -25,7 +25,7 @@ fun pkgs =>
     version | default = "1.10.8",
     source_object_hash | default = "a37bb0e78a419dcbeaa9c7027bcff52f5ec2367c25ec859da31dfde2928f279a",
     name = "graphene-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

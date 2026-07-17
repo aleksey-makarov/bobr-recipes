@@ -20,7 +20,7 @@ fun pkgs =>
     version | default = "1.5.10",
     source_object_hash | default = "a7ced37f4102b745ac86d6a70a9da399cc139ff168ba6b8002b4d8d43c900c15",
     name = "libepoxy-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.mesa,
