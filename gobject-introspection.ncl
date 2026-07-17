@@ -32,7 +32,7 @@ fun pkgs =>
     version | default = "1.86.0",
     source_object_hash | default = "920d1a3fcedeadc32acff95c2e203b319039dd4b4a08dd1a2dfd283d19c0b9ae",
     name = "gobject-introspection-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib_gen1,

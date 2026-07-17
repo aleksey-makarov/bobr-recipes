@@ -15,7 +15,7 @@ fun pkgs =>
     version | default = "2.16.0",
     source_object_hash | default = "6a33dc555cc9ba8b10caf7695878ef134eeb36d0af366041f639b1da9b6ed220",
     name = "fontconfig-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.freetype,

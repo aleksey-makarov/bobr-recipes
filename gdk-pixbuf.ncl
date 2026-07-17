@@ -26,7 +26,7 @@ fun pkgs =>
     version | default = "2.44.7",
     source_object_hash | default = "172f80e3626ec31520a970400f1a3694e04718f6c2cd2885f75250fb5a6995a4",
     name = "gdk-pixbuf-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,
@@ -58,6 +58,15 @@ fun pkgs =>
         "-Ddocumentation=false",
         "-Dgtk_doc=false",
       ],
+      # Without DESTDIR, meson's gdk-pixbuf-query-loaders post-install runs and
+      # ships loaders.cache -- a whole-system cache gnome-finalize regenerates.
+      # Drop the freshly created copy (upper-only, additive); the loader
+      # modules themselves are still shipped.
+      post_install = {
+        name = "drop_pixbuf_loaders_cache",
+        run_as = "root",
+        argv = ["rm", "-fv", "/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"],
+      },
     },
     inputs = {
       source = mk_src version source_object_hash,

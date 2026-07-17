@@ -26,7 +26,7 @@ fun pkgs =>
       | default
       = "e7570a3661e0a752a06387b2032585cf588fc56770b1f9f39f1a55d17b2835fe",
     name = "gweather-locations-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.python,

@@ -17,7 +17,7 @@ fun pkgs =>
     version | default = "1.18.4",
     source_object_hash | default = "445ed8208a6e4823de1226a74ca319d3600e83f6369f99b14265006599c32ccb",
     name = "cairo-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.pixman,

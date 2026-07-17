@@ -28,7 +28,7 @@ fun pkgs =>
     version | default = "50.1",
     source_object_hash | default = "0a2aa25082672585d16fcdab61c7b0e33f035fb87476505c794f29565afa485b",
     name = "gsettings-desktop-schemas-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,
@@ -45,6 +45,14 @@ fun pkgs =>
         "--libdir=/usr/lib",
         "-Dintrospection=true",
       ],
+      # Without DESTDIR, meson's glib-compile-schemas post-install runs and
+      # ships gschemas.compiled -- a whole-system cache gnome-finalize
+      # regenerates. Drop the freshly created copy (upper-only, additive).
+      post_install = {
+        name = "drop_gschemas_cache",
+        run_as = "root",
+        argv = ["rm", "-fv", "/usr/share/glib-2.0/schemas/gschemas.compiled"],
+      },
     },
     inputs = {
       source = mk_src version source_object_hash,
