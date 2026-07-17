@@ -21,7 +21,7 @@ fun pkgs =>
       | default
       = "7a85413f2bc354f4f8aa832b718af122e48965e9e0eb9012ee659c13c6385c93",
     name = "libgpg-error-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.gettext,

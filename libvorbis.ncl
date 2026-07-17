@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b",
     name = "libvorbis-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.libogg,

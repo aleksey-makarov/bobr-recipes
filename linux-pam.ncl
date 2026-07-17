@@ -24,7 +24,7 @@ fun pkgs =>
     version | default = "1.6.1",
     source_object_hash | default = "f8923c740159052d719dbfc2a2f81942d68dd34fcaf61c706a02c9b80feeef8e",
     name = "linux-pam-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.libxcrypt,

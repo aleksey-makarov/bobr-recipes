@@ -16,7 +16,7 @@ fun pkgs =>
     version | default = "2.13.1",
     source_object_hash | default = "8afebb6f7eb6bb8542929458841f5c7e6f240e30c86358c1fbcefbea076c87d9",
     name = "man-db-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.pkgconf,

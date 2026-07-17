@@ -30,7 +30,7 @@ fun pkgs =>
       | default
       = "588e431f77327c39031ffbb8843c0e3bc122c211374485fa87dc5f3faff24061",
     name = "icu-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [],
       runtime = [

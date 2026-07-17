@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "608dc9002b45a91d11ed59e352469ecc05e4f58fc1259fc9a9f5b8f0f8348a03",
     name = "sassc-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.libsass,

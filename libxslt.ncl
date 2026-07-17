@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "9acfe68419c4d06a45c550321b3212762d92f41465062ca4ea19e632ee5d216e",
     name = "libxslt-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.libxml2,

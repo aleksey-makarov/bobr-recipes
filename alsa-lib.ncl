@@ -24,7 +24,7 @@ fun pkgs =>
       | default
       = "be9c88a0b3604367dd74167a2b754a35e142f670292ae47a2fdef27a2ee97a32",
     name = "alsa-lib-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.pkgconf,

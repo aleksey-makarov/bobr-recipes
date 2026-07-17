@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "11f0bb3709a4f20285507419d7618f3877a425c0131ea8df40fe6196129df15d",
     name = "libsass-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.automake,

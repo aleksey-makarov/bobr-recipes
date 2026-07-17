@@ -27,7 +27,7 @@ fun pkgs =>
       | default
       = "e88c52bae02fa13414604bbef42c6bb91c2e24177ee0057ed55c6bd7451bcb6d",
     name = "udisks-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.glib,

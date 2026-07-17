@@ -25,7 +25,7 @@ fun pkgs =>
       | default
       = "ffed8ec1bf09c2426d4f14aae377de4753b53e537d685e604e99a8b16ca9c97e",
     name = "gnutls-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.nettle,

@@ -20,7 +20,7 @@ fun pkgs =>
     version | default = "0.51.0",
     source_object_hash | default = "67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd",
     name = "intltool-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.xml_parser,

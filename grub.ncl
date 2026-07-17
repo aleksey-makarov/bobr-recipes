@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "2.12",
     source_object_hash | default = "f3c97391f7c4eaa677a78e090c7e97e6dc47b16f655f04683ebd37bef7fe0faa",
     name = "grub-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.bison,

@@ -21,7 +21,7 @@ fun pkgs =>
     source_object_hash | default = "9f306d8a25fc688ad2b814c1c420833ed20ff86deca907a81db0af08dde51a6f",
     runtime_dir = "vim92",
     name = "vim-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.ncurses,

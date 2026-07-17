@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "7.2",
     source_object_hash | default = "0329d7788fbef113fa82cb80889ca197a344ce0df7646fe000974c5d714363a6",
     name = "texinfo-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.ncurses,

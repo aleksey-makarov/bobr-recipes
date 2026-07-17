@@ -24,7 +24,7 @@ fun pkgs =>
       | default
       = "3799ca9924d3125038880367bf1468e53a1b7e3686a934f098b7e1d286cdb80e",
     name = "libsndfile-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.python,

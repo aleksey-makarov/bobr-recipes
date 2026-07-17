@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "2.41.5",
     source_object_hash | default = "f586e35d320ff537aab3ffeca37e9ecd482ccbe013590db4429a414d8aa6a728",
     name = "util-linux-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.ncurses,

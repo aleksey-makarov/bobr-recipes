@@ -22,7 +22,7 @@ fun pkgs =>
     version | default = "2.6.0",
     source_object_hash | default = "83b6085232d1588c379dc9b9cae47bb37407cf262e6e74993c61ba72d2a784dc",
     name = "libseccomp-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.gperf,

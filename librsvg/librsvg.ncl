@@ -71,7 +71,7 @@ fun pkgs =>
       = "074671a3ed6fbcd67cae2a40e539107f4f097ca8a4ab1a894c05e2524ff340ef",
     cargo_lock | default = import "Cargo.lock" as 'Toml,
     name = "librsvg-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.rust_bin,

@@ -26,7 +26,7 @@ fun pkgs =>
     version | default = "10.4p1",
     source_object_hash | default = "ef6026dd2aea8d56059638d5d3262902c892ceba9f88395835e0d06d3fb63238",
     name = "openssh-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.openssl,

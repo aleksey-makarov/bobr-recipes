@@ -27,7 +27,7 @@ fun pkgs =>
       | default
       = "df2c51ab4361ec626ab9988e5946efcca8465bc7afae834291d5558468265ff8",
     name = "samba-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.python,

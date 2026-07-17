@@ -34,7 +34,7 @@ fun pkgs =>
       | default
       = "12a72210ce5250f8a66df562a75e034e67b2bce74c4df2983dc86d1154894943",
     name = "ibus-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.glib,

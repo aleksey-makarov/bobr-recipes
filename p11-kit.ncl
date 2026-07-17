@@ -22,7 +22,7 @@ fun pkgs =>
       | default
       = "89c3ffb10e076ee036e14732bf6547a1e1c4fb48699a5dee7ceb5ce4f7c0c462",
     name = "p11-kit-%{version}",
-    tag = "AutotoolsInstall",
+    tag = "Autotools",
     deps = {
       build = [
         pkgs.pkgconf,

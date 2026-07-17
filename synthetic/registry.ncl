@@ -349,22 +349,11 @@ fun pkgs =>
   let lower_autotools_install_node =
     lower_autotools_node_with "SandboxInstall" buildscript_autotools_install "/"
   in
+  # The package-level `Autotools` tag builds with the additive SandboxInstall
+  # model (install into the overlay root). The `AutotoolsRootfs` tag is
+  # deliberately still on the staging model (see the dispatch table); those
+  # bootstrap-toolchain recipes are migrated separately.
   let lower_autotools_package_node = fun node =>
-    let build_rootfs = build_rootfs_for autotools_package_default_build_deps node in
-    let package_inputs =
-      record_replace
-        "_rootfs"
-        build_rootfs
-        node.inputs
-    in
-    lower_autotools_node (
-      record_replace
-        "inputs"
-        package_inputs
-        (record_replace "tag" "AutotoolsRootfs" node)
-    )
-  in
-  let lower_autotools_install_package_node = fun node =>
     let build_rootfs = build_rootfs_for autotools_package_default_build_deps node in
     let package_inputs =
       record_replace
@@ -376,7 +365,7 @@ fun pkgs =>
       record_replace
         "inputs"
         package_inputs
-        (record_replace "tag" "AutotoolsInstallRootfs" node)
+        (record_replace "tag" "AutotoolsRootfs" node)
     )
   in
   let lower_makefile_node_with = fun builder_tag => fun script_source => fun post_install_cwd => fun node =>
@@ -768,14 +757,12 @@ fun pkgs =>
   {
     "RootfsClosure" = rootfs_closure_for,
     "Autotools" = lower_autotools_package_node,
-    "AutotoolsInstall" = lower_autotools_install_package_node,
     "Makefile" = lower_makefile_package_node,
     "Meson" = lower_meson_package_node,
     "MesonInstall" = lower_meson_install_package_node,
     "PerlModule" = lower_perl_module_package_node,
     "SandboxBuild" = lower_sandbox_build_node,
     "AutotoolsRootfs" = lower_autotools_node,
-    "AutotoolsInstallRootfs" = lower_autotools_install_node,
     "MakefileRootfs" = lower_makefile_node,
     "MesonRootfs" = lower_meson_node,
     "MesonInstallRootfs" = lower_meson_install_node,
