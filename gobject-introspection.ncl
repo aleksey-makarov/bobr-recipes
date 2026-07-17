@@ -47,6 +47,16 @@ fun pkgs =>
       ],
     },
     config = {
+      # glib_gen1 installs into a private prefix (/usr/lib/glib-gen1), not /usr,
+      # so g-i is pointed there: pkg-config finds glib's .pc files, and the rpath
+      # lets libgirepository/g-ir-scanner load gen1's libglib at build time. The
+      # rpath is harmless in the final image (that directory does not exist there,
+      # so the loader falls back to /usr/lib, i.e. the final glib).
+      env = {
+        PKG_CONFIG_PATH = "/usr/lib/glib-gen1/lib/pkgconfig",
+        LD_LIBRARY_PATH = "/usr/lib/glib-gen1/lib",
+        LDFLAGS = "-Wl,-rpath,/usr/lib/glib-gen1/lib",
+      },
       setup_args = [
         "--buildtype=release",
         "--libdir=/usr/lib",
