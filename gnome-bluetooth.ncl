@@ -26,7 +26,7 @@ fun pkgs =>
       | default
       = "41f20e6d6176b72590af63552b232d83f2fffdd77ecfaa5eaf32c5a4a86fad64",
     name = "gnome-bluetooth-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

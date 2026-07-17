@@ -26,7 +26,7 @@ fun pkgs =>
       | default
       = "5435f7d48105fe89a4259f807658281e854881267254bcd4eeac6e26c222055b",
     name = "geoclue-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

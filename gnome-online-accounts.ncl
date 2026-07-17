@@ -27,7 +27,7 @@ fun pkgs =>
       | default
       = "9ec1900cc51409c2067c07c828c10be06fe3bf68d2999bb72d7d5ed325ed9bbc",
     name = "gnome-online-accounts-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,
