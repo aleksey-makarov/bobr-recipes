@@ -21,7 +21,7 @@ fun pkgs =>
     version | default = "0.4.9",
     source_object_hash | default = "9df5ef301d6a4b361002aa52cce1165a87a89744055879bdbab31e7e86f1e846",
     name = "libgusb-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

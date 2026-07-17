@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "f39b9631b3d369a21259ea4654f8875c0ec6995ce9551c0eb5d423e4c011f911",
     name = "libpsl-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.python,

@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "0.9.3",
     source_object_hash | default = "302564d54d8e28191fadfd734f2675ecb0c9e0615a58011b89ef15dfa4dbaa96",
     name = "seatd-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.systemd_dev,

@@ -22,7 +22,7 @@ fun pkgs =>
       | default
       = "8dd84e75d322aa5f33b2fe781cb67efa5706fedcf483737b4657557f33055a93",
     name = "libwacom-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

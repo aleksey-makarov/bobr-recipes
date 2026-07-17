@@ -24,7 +24,7 @@ fun pkgs =>
     version | default = "14.2.1",
     source_object_hash | default = "a54a5d8e9380a41fbb762ce367bcbf7704792dfca0d93f1bbca86c5a57902e0e",
     name = "harfbuzz-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.freetype,

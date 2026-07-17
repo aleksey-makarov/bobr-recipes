@@ -25,7 +25,7 @@ fun pkgs =>
       | default
       = "5d551f3ddb32548c4321e9011720fd97751af0107592f79ebffc939bd32f2268",
     name = "iso-codes-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.python,

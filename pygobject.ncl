@@ -25,7 +25,7 @@ fun pkgs =>
       | default
       = "12760e4a0e3d04b6eb95e06f7a27e362c826d567ea613373a92c003b6c70d2d6",
     name = "pygobject-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.python,
