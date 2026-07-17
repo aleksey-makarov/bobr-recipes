@@ -21,7 +21,7 @@ fun pkgs =>
     version | default = "1.6.50",
     source_object_hash | default = "4df396518620a7aa3651443e87d1b2862e4e88cad135a8b93423e01706232307",
     name = "libpng-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.zlib,
@@ -44,7 +44,7 @@ fun pkgs =>
         argv = [
           "/bin/sh",
           "-ec",
-          "ln -sfv libpng16.pc \"@{out}/usr/lib/pkgconfig/libpng.pc\"",
+          "ln -sfv libpng16.pc \"/usr/lib/pkgconfig/libpng.pc\"",
         ],
       },
     },

@@ -21,7 +21,7 @@ fun pkgs =>
     version | default = "4.7.0",
     source_object_hash | default = "273a0a73b1f0bed640afee4a5df0337357ced5b53d3d5d1c405b936501f71017",
     name = "libtiff-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.zlib,

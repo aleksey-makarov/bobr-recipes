@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "e564f5914a6b1b799c3afa64c258824a801c1b79a29e2fe6525b682249c65261",
     name = "libndp-%{version}",
-    tag = "Autotools",
+    tag = "AutotoolsInstall",
     deps = {
       build = [
         pkgs.automake,
