@@ -596,7 +596,7 @@ fun pkgs =>
   let lower_cargo_node = fun node =>
     let node_config = record_get_or "config" {} node in
     let post_install_steps =
-      normalize_hook_steps node_config "post_install" "@{out}"
+      normalize_hook_steps node_config "post_install" "/"
     in
     let lowered_script_config =
       let with_features =
@@ -633,7 +633,7 @@ fun pkgs =>
     in
     {
       name = node.name,
-      tag = "Sandbox",
+      tag = "SandboxInstall",
       config = {
         steps =
           [synthetic_prepare_step cargo_step_env]

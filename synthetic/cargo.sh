@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
+# Cargo build script for the SandboxInstall builder: installs the built binaries
+# into the live read-write overlay root (/usr/bin) rather than into a staging
+# $out. The build's additions become the captured fs-tree layer.
 set -euo pipefail
 
 cfg="${BOBR_CONFIG_DIR:?BOBR_CONFIG_DIR is required}"
 step="${1:-${BOBR_STEP_NAME:-}}"
 step="${step:?step name is required}"
 source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
-out_dir="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
 build_workspace_dir="${BOBR_BUILD_DIR:?BOBR_BUILD_DIR is required}"
 synthetic_common="${BOBR_SYNTHETIC_COMMON:?BOBR_SYNTHETIC_COMMON is required}"
 crates_dir="${BOBR_CRATES_DIR:?BOBR_CRATES_DIR is required}"
@@ -102,7 +104,7 @@ EOF
 
 # `cargo install` builds (release) and installs the crate's [[bin]] targets into
 # <root>/bin. Stage under the build workspace so this runs as build-user, then
-# the install step copies into the package output as root.
+# the install step copies into the live root as root.
 step_build() {
   local project_source_dir
   local extra_args=()
@@ -134,14 +136,16 @@ step_build() {
 }
 
 step_install() {
-  mkdir -p "${out_dir}/usr/bin"
+  # Install the staged binaries into the live overlay root as root:root; the
+  # writes land in the overlay upper layer and become the captured fs-tree.
+  # (Do NOT chown -R /usr -- that would copy up and modify the whole tree.)
   if [ -d "${stage_dir}/bin" ]; then
-    cp -a "${stage_dir}/bin/." "${out_dir}/usr/bin/"
+    local f
+    for f in "${stage_dir}/bin/"*; do
+      [ -e "$f" ] || continue
+      install -Dm755 "$f" "/usr/bin/$(basename "$f")"
+    done
   fi
-  # cp -a preserves the build-user ownership from the staged binaries; normalize
-  # to root:root to match the root-owned convention (relevant once the package
-  # lands in a TreeMerge build rootfs).
-  chown -R 0:0 "${out_dir}/usr"
 }
 
 load_env_files

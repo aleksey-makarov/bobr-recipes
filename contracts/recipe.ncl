@@ -25,6 +25,8 @@ let KnownTags = [
   "MesonInstallRootfs",
   "MakefileInstall",
   "MakefileInstallRootfs",
+  "Cargo",
+  "CargoRootfs",
   "OciExtract",
 ]
 in
@@ -424,6 +426,15 @@ let PerlModuleConfig = {
   post_install | AutotoolsHook | optional,
 }
 in
+let CargoConfig = {
+  features | Array String | optional,
+  bins | Array String | optional,
+  no_default_features | Bool | optional,
+  env | Dyn | optional,
+  source_subdir | String | optional,
+  post_install | AutotoolsHook | optional,
+}
+in
 let TreeMergeConfig =
   std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
 in
@@ -586,6 +597,17 @@ let ValidateRecipeShallow = fun recipe =>
       checked
       & {
         config = checked.config | MesonConfig,
+        deps = checked.deps | RecipeDeps,
+      }
+    else if checked.tag == "CargoRootfs" then
+      checked
+      & {
+        config = checked.config | CargoConfig,
+      }
+    else if checked.tag == "Cargo" then
+      checked
+      & {
+        config = checked.config | CargoConfig,
         deps = checked.deps | RecipeDeps,
       }
     else if checked.tag == "PerlModuleRootfs" then
@@ -805,6 +827,19 @@ let rec ValidateRecipe = fun recipe =>
         deps = checked.deps | RecipeDeps,
         inputs = validate_synthetic_package_inputs checked.inputs,
       }
+    else if checked.tag == "CargoRootfs" then
+      checked
+      & {
+        config = checked.config | CargoConfig,
+        inputs = validate_synthetic_rootfs_inputs checked.inputs,
+      }
+    else if checked.tag == "Cargo" then
+      checked
+      & {
+        config = checked.config | CargoConfig,
+        deps = checked.deps | RecipeDeps,
+        inputs = validate_synthetic_package_inputs checked.inputs,
+      }
     else if checked.tag == "PerlModuleRootfs" then
       checked
       & {
@@ -899,6 +934,9 @@ in
   perl_module_config
     | doc "Config contract for synthetic `PerlModule` and `PerlModuleRootfs` recipe nodes."
     = PerlModuleConfig,
+  cargo_config
+    | doc "Config contract for synthetic `Cargo` and `CargoRootfs` recipe nodes."
+    = CargoConfig,
   sandbox_config
     | doc "Config contract for synthetic `SandboxBuild` and `SandboxBuildRootfs` recipe nodes."
     = SandboxConfig,
