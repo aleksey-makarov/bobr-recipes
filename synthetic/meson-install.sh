@@ -84,7 +84,20 @@ step_install() {
   prepare_tmpdir "$build_dir"
   # Install into the live overlay root (configured --prefix=/usr); the writes
   # land in the overlay upper layer and become the captured fs-tree.
-  meson install -C "$build_dir"
+  #
+  # --destdir=/ still installs under /usr (DESTDIR is prepended to the prefix,
+  # and "/" + "/usr" collapses to /usr), but it makes meson treat this as a
+  # staged install: every meson.add_install_script post-install hook
+  # (glib-compile-schemas, gdk-pixbuf-query-loaders, gio-querymodules,
+  # update-mime-database, gtk-update-icon-cache, update-desktop-database, ...)
+  # detects DESTDIR and skips. Those hooks regenerate whole-system caches and
+  # indexes that packages must not ship: some create fresh cache files, others
+  # rewrite shared files already provided by the base tree (e.g.
+  # update-mime-database rewrites /usr/share/mime/* from shared-mime-info),
+  # which the additive builder rejects. gnome-finalize regenerates all of them
+  # once, over the merged tree. This mirrors exactly what the old staging
+  # DESTDIR=$out install did.
+  meson install -C "$build_dir" --destdir /
 }
 
 load_env_files

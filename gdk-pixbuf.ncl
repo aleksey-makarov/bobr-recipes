@@ -58,15 +58,6 @@ fun pkgs =>
         "-Ddocumentation=false",
         "-Dgtk_doc=false",
       ],
-      # Without DESTDIR, meson's gdk-pixbuf-query-loaders post-install runs and
-      # ships loaders.cache -- a whole-system cache gnome-finalize regenerates.
-      # Drop the freshly created copy (upper-only, additive); the loader
-      # modules themselves are still shipped.
-      post_install = {
-        name = "drop_pixbuf_loaders_cache",
-        run_as = "root",
-        argv = ["rm", "-fv", "/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"],
-      },
     },
     inputs = {
       source = mk_src version source_object_hash,

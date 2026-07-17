@@ -50,15 +50,6 @@ fun pkgs =>
         "-Dman=false",
         "-Dvapi=false",
       ],
-      # Without DESTDIR, meson's gio-querymodules post-install runs and ships
-      # giomodule.cache -- a whole-system cache gnome-finalize regenerates.
-      # Drop the freshly created copy (upper-only, additive); the GIO module
-      # itself is still shipped.
-      post_install = {
-        name = "drop_giomodule_cache",
-        run_as = "root",
-        argv = ["rm", "-fv", "/usr/lib/gio/modules/giomodule.cache"],
-      },
     },
     inputs = {
       source = dconf_src version source_object_hash,
