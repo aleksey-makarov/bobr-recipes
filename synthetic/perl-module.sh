@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
+# Perl-module build script for the SandboxInstall builder: installs into the live
+# read-write overlay root (make pure_install, no DESTDIR) rather than into a
+# staging $out. The build's additions become the captured fs-tree layer.
+#
+# The `pure_install` target installs the module files (lib, man, and the
+# module's own auto/<Module>/.packlist) but, unlike `install`, does not run
+# doc_install and therefore never writes the shared perllocal.pod. That keeps
+# the layer additive (perllocal.pod already exists in the lower rootfs and
+# appending to it would be a modification) and reproducible in one move.
 set -euo pipefail
 
 cfg="${BOBR_CONFIG_DIR:?BOBR_CONFIG_DIR is required}"
 step="${1:-${BOBR_STEP_NAME:-}}"
 step="${step:?step name is required}"
 source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
-out_dir="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
 synthetic_common="${BOBR_SYNTHETIC_COMMON:?BOBR_SYNTHETIC_COMMON is required}"
 
 . "$synthetic_common"
@@ -78,11 +86,10 @@ step_install() {
   cd "$project_source_dir"
   prepare_tmpdir "$project_source_dir"
   append_dir_files_to_array "${cfg}/make_args" make_args
-  mkdir -p "$out_dir"
-  make DESTDIR="$out_dir" "${make_args[@]}" install
-  # perllocal.pod records a wall-clock install date (ExtUtils::Install ignores
-  # SOURCE_DATE_EPOCH); drop the install log to keep the tree reproducible.
-  find "$out_dir" -name perllocal.pod -type f -delete
+  # Install into the live overlay root; the writes land in the overlay upper
+  # layer and become the captured fs-tree. `pure_install` skips doc_install so
+  # the shared perllocal.pod is never touched.
+  make "${make_args[@]}" pure_install
 }
 
 load_env_files

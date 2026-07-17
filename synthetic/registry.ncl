@@ -528,7 +528,7 @@ fun pkgs =>
       normalize_hook_steps node_config "pre_configure" source_root_expr
     in
     let post_install_steps =
-      normalize_hook_steps node_config "post_install" "@{out}"
+      normalize_hook_steps node_config "post_install" "/"
     in
     let lowered_script_config =
       let with_perl_args =
@@ -558,7 +558,7 @@ fun pkgs =>
     in
     {
       name = node.name,
-      tag = "Sandbox",
+      tag = "SandboxInstall",
       config = {
         steps =
           [synthetic_prepare_step perl_module_step_env]
