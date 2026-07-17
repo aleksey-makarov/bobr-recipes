@@ -30,7 +30,7 @@ fun pkgs =>
       | default
       = "770159373512192410f412b5d0c4678ec1573f1ae4b39c81fe75861fe8890174",
     name = "gdm-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,
@@ -76,7 +76,7 @@ fun pkgs =>
       post_install = {
         name = "drop_default_custom_conf",
         run_as = "root",
-        argv = ["/bin/sh", "-ec", "rm -f @{out}/etc/gdm/custom.conf"],
+        argv = ["/bin/sh", "-ec", "rm -f /etc/gdm/custom.conf"],
       },
     },
     inputs = {

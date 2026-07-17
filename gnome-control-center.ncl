@@ -30,7 +30,7 @@ fun pkgs =>
       | default
       = "06eebb0fd3056c4d8d78bbd3754c96108f381d70b760da423c5024946944287c",
     name = "gnome-control-center-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

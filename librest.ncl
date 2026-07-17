@@ -23,7 +23,7 @@ fun pkgs =>
       | default
       = "9266a5c10ece383e193dfb7ffb07b509cc1f51521ab8dad76af96ed14212c2e3",
     name = "rest-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

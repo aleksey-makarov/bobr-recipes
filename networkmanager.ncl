@@ -30,7 +30,7 @@ fun pkgs =>
       | default
       = "b0ee9a89dfba39d2a1a69d60868be99096d3b6b66a1a22bf8a9d5a38b8aed50e",
     name = "networkmanager-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,
@@ -108,7 +108,7 @@ fun pkgs =>
       post_install = {
         name = "drop_initrd_unit",
         run_as = "root",
-        argv = ["/bin/sh", "-ec", "rm -f @{out}/usr/lib/systemd/system/NetworkManager-initrd.service"],
+        argv = ["/bin/sh", "-ec", "rm -f /usr/lib/systemd/system/NetworkManager-initrd.service"],
       },
     },
     inputs = {

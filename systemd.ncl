@@ -31,7 +31,7 @@ fun pkgs =>
     source_object_hash | default = "11b9821892b75d19af7b21f0f7f4e53636638147faf3e6a4ded78b40cb38993f",
     man_pages_object_hash | default = "b0c143b3388afac9e1154facf0821809b396ab86f3f61ddc8028679a7d65d83c",
     name = "systemd-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.attr,
@@ -107,24 +107,24 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            install -vdm755 "@{out}/usr/share/man"
+            install -vdm755 "/usr/share/man"
             tar -xf "@{man_pages}" \
                 --no-same-owner --strip-components=1 \
-                -C "@{out}/usr/share/man"
-            install -vdm755 "@{out}/etc"
+                -C "/usr/share/man"
+            install -vdm755 "/etc"
             # Ship the special "uninitialized" marker rather than an empty file:
             # an empty /etc/machine-id is NOT treated as first boot, but the
             # string "uninitialized" is (machine-id(5)). With a volatile /etc the
             # marker reappears every boot, so systemd re-runs first-boot init --
             # notably presetting units -- on each boot, which is how getty@tty1
             # etc. get enabled per policy (no build-time preset, no hand enable).
-            printf 'uninitialized\n' > "@{out}/etc/machine-id"
+            printf 'uninitialized\n' > "/etc/machine-id"
 
-            for shared_lib in "@{out}"/usr/lib/systemd/libsystemd-shared-*.so; do
+            for shared_lib in /usr/lib/systemd/libsystemd-shared-*.so; do
                 [ -e "$shared_lib" ]
                 shared_lib_name="$(basename "$shared_lib")"
                 ln -sfv "systemd/$shared_lib_name" \
-                    "@{out}/usr/lib/$shared_lib_name"
+                    "/usr/lib/$shared_lib_name"
             done
           "%,
         ],

@@ -26,7 +26,7 @@ fun pkgs =>
     source_object_hash | default = "25663fa7afc96a4c092448990c0da664b7f04dd8d9f5e3b9be2b498b1b303cb4",
     series | default = "50",
     name = "mutter-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,

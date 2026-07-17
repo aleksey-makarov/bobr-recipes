@@ -26,7 +26,7 @@ fun pkgs =>
       | default
       = "2814a7281989f6baa9e57bd33bbc5e148827e2721ccef22aaf28ab2b376068e8",
     name = "polkit-%{version}",
-    tag = "Meson",
+    tag = "MesonInstall",
     deps = {
       build = [
         pkgs.glib,
