@@ -51,6 +51,16 @@ fun pkgs =>
     },
   }
   in
+  let buildscript_meson_install = {
+    name = "buildscript-meson-install",
+    tag = "Source",
+    object_hash = import "meson-install.sh.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "synthetic/meson-install.sh",
+    },
+  }
+  in
   let buildscript_perl_module = {
     name = "buildscript-perl-module",
     tag = "Source",
@@ -424,14 +434,14 @@ fun pkgs =>
         synthetic_inputs buildscript_gnu_make node.inputs,
     }
   in
-  let lower_meson_node = fun node =>
+  let lower_meson_node_with = fun builder_tag => fun script_source => fun post_install_cwd => fun node =>
     let node_config = node.config in
     let source_root_expr = synthetic_source_root_expr node_config in
     let pre_configure_steps =
       normalize_hook_steps node_config "pre_configure" source_root_expr
     in
     let post_install_steps =
-      normalize_hook_steps node_config "post_install" "@{build}"
+      normalize_hook_steps node_config "post_install" post_install_cwd
     in
     let lowered_script_config =
       let with_setup_args =
@@ -458,7 +468,7 @@ fun pkgs =>
     in
     {
       name = node.name,
-      tag = "Sandbox",
+      tag = builder_tag,
       config = {
         steps =
           [synthetic_prepare_step meson_step_env]
@@ -490,8 +500,12 @@ fun pkgs =>
         script_config = lowered_script_config,
       },
       inputs =
-        synthetic_inputs buildscript_meson node.inputs,
+        synthetic_inputs script_source node.inputs,
     }
+  in
+  let lower_meson_node = lower_meson_node_with "Sandbox" buildscript_meson "@{build}" in
+  let lower_meson_install_node =
+    lower_meson_node_with "SandboxInstall" buildscript_meson_install "/"
   in
   let lower_perl_module_node = fun node =>
     let node_config = node.config in
@@ -669,6 +683,21 @@ fun pkgs =>
         (record_replace "tag" "MesonRootfs" node)
     )
   in
+  let lower_meson_install_package_node = fun node =>
+    let build_rootfs = build_rootfs_for meson_package_default_build_deps node in
+    let package_inputs =
+      record_replace
+        "_rootfs"
+        build_rootfs
+        node.inputs
+    in
+    lower_meson_install_node (
+      record_replace
+        "inputs"
+        package_inputs
+        (record_replace "tag" "MesonInstallRootfs" node)
+    )
+  in
   let lower_perl_module_package_node = fun node =>
     let build_rootfs = build_rootfs_for perl_module_package_default_build_deps node in
     let package_inputs =
@@ -724,12 +753,14 @@ fun pkgs =>
     "AutotoolsInstall" = lower_autotools_install_package_node,
     "Makefile" = lower_makefile_package_node,
     "Meson" = lower_meson_package_node,
+    "MesonInstall" = lower_meson_install_package_node,
     "PerlModule" = lower_perl_module_package_node,
     "SandboxBuild" = lower_sandbox_build_node,
     "AutotoolsRootfs" = lower_autotools_node,
     "AutotoolsInstallRootfs" = lower_autotools_install_node,
     "MakefileRootfs" = lower_makefile_node,
     "MesonRootfs" = lower_meson_node,
+    "MesonInstallRootfs" = lower_meson_install_node,
     "PerlModuleRootfs" = lower_perl_module_node,
     "SandboxBuildRootfs" = lower_sandbox_build_rootfs_node,
     "Cargo" = lower_cargo_package_node,
