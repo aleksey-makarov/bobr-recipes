@@ -14,12 +14,12 @@ fun pkgs =>
   # Header-only (+ registry + CMake package config), consumed by vulkan-loader,
   # Mesa's venus/zink, and vulkan-tools. Built via the Makefile builder: a
   # pre_build step runs cmake (Unix Makefiles generator), then `make` /
-  # `make DESTDIR=... install`.
+  # `make install` into the overlay root.
   let vulkan_headers = {
     version | default = "1.4.350.0",
     source_object_hash | default = "70270d10bf2c1e074a06ee37a50b75d332993d1b80a1d9526eeed2da6d82ed22",
     name = "vulkan-headers-%{version}",
-    tag = "Makefile",
+    tag = "MakefileInstall",
     deps = {
       build = [
         pkgs.cmake,

@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "1.4.350.0",
     source_object_hash | default = "91f88fc43abb36821a568c7fbb3f815e9baf946d5fe187928df279708d45e509",
     name = "vulkan-loader-%{version}",
-    tag = "Makefile",
+    tag = "MakefileInstall",
     deps = {
       build = [
         pkgs.cmake,

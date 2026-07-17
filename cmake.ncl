@@ -13,14 +13,14 @@ fun pkgs =>
 
   # Bootstrap build: no cmake exists yet, so ./bootstrap builds a bootstrap
   # cmake and then the full one; the Makefile builder then runs `make` and
-  # `make DESTDIR=... install`. Bundled deps (curl/zlib/libarchive/expat/...) are
+  # `make install` into the overlay root. Bundled deps (curl/zlib/libarchive/expat/...) are
   # used; OpenSSL is off (not in the build rootfs, and not needed here). Needed
   # to build the CMake-based vulkan-headers/loader/tools.
   let cmake = {
     version | default = "3.31.6",
     source_object_hash | default = "653427f0f5014750aafff22727fb2aa60c6c732ca91808cfb78ce22ddd9e55f0",
     name = "cmake-%{version}",
-    tag = "Makefile",
+    tag = "MakefileInstall",
     deps = {
       build = [],
       runtime = [

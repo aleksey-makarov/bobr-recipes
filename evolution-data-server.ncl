@@ -32,7 +32,7 @@ fun pkgs =>
       | default
       = "df4ec29950f29a76eac6fbe0f814c48d2cef7d3fdb905002a4a883dd761ce93c",
     name = "evolution-data-server-%{version}",
-    tag = "Makefile",
+    tag = "MakefileInstall",
     deps = {
       build = [
         pkgs.cmake,
