@@ -1,10 +1,13 @@
 # gobject-introspection -- the GIR scanner/compiler and libgirepository, needed
-# to build typelibs (gjs and most GNOME libs consume them). Built against
-# glib_gen1 (no-gir glib) to break the glib<->g-i cycle; its runtime dep is also
-# glib_gen1 (NOT the final glib) so that glib's gir pass, which build-deps on
-# g-i, does not form a build-graph cycle. In the rootfs the final glib provides
-# the identically-versioned libglib. `version`/`source_object_hash` are node fields
-# (overridable), as in linux.ncl.
+# to build typelibs (gjs and most GNOME libs consume them). A MesonRootfs recipe:
+# it supplies its own build rootfs (_rootfs), built from the normal meson build
+# deps plus g-i's own build deps, but with the final glib substituted by
+# glib_gen1 (the no-gir glib) -- so g-i builds against gen1 and the
+# glib<->gobject-introspection build cycle is broken. deps.build is ignored for
+# *Rootfs recipes; deps.runtime is honest (the FINAL glib), so a runtime closure
+# ships the final glib and never gen1. `version`/`source_object_hash` are node
+# fields (overridable), as in linux.ncl.
+let br = import "build-rootfs.ncl" in
 
 let branch = fun version =>
   let matched = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
@@ -32,26 +35,22 @@ fun pkgs =>
     version | default = "1.86.0",
     source_object_hash | default = "920d1a3fcedeadc32acff95c2e203b319039dd4b4a08dd1a2dfd283d19c0b9ae",
     name = "gobject-introspection-%{version}",
-    tag = "Meson",
+    tag = "MesonRootfs",
     deps = {
-      build = [
-        pkgs.glib_gen1,
-        pkgs.flex,
-        pkgs.bison,
-        pkgs.libffi,
-      ],
+      build = [],
+      # Honest runtime dep on the FINAL glib, so a runtime closure ships it, not
+      # gen1. (The build environment is _rootfs below, which uses gen1 instead.)
       runtime = [
         pkgs.glibc_libs,
-        pkgs.glib_gen1,
+        pkgs.glib,
         pkgs.libffi,
       ],
     },
     config = {
-      # glib_gen1 installs into a private prefix (/usr/lib/glib-gen1), not /usr,
-      # so g-i is pointed there: pkg-config finds glib's .pc files, and the rpath
-      # lets libgirepository/g-ir-scanner load gen1's libglib at build time. The
-      # rpath is harmless in the final image (that directory does not exist there,
-      # so the loader falls back to /usr/lib, i.e. the final glib).
+      # gen1 lives in its private prefix (/usr/lib/glib-gen1); point pkg-config
+      # and the loader there so g-i builds/links against it. The rpath is
+      # harmless in the final image (that dir does not exist there, so the loader
+      # falls back to /usr/lib, i.e. the final glib).
       env = {
         PKG_CONFIG_PATH = "/usr/lib/glib-gen1/lib/pkgconfig",
         LD_LIBRARY_PATH = "/usr/lib/glib-gen1/lib",
@@ -68,6 +67,16 @@ fun pkgs =>
     },
     inputs = {
       source = mk_src version source_object_hash,
+      # Build rootfs: the standard meson build deps + g-i's own build deps, but
+      # with the final glib swapped for glib_gen1 so g-i compiles against the
+      # no-gir glib (breaking the build cycle).
+      _rootfs =
+        br.build_rootfs_closure_substituting
+          pkgs
+          "gobject-introspection-%{version}-build-rootfs"
+          (br.meson_build_deps pkgs @ [pkgs.glib, pkgs.flex, pkgs.bison, pkgs.libffi])
+          pkgs.glib
+          pkgs.glib_gen1,
     },
   }
   in

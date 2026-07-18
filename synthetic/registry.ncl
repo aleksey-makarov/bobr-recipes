@@ -137,12 +137,7 @@ fun pkgs =>
   in
   let makefile_package_default_build_deps = br.native_build_deps pkgs
   in
-  let meson_package_default_build_deps =
-    br.native_build_deps pkgs
-    @ [
-      pkgs.pkgconf,
-      pkgs.python,
-    ]
+  let meson_package_default_build_deps = br.meson_build_deps pkgs
   in
   let perl_module_package_default_build_deps =
     br.native_build_deps pkgs
@@ -738,6 +733,7 @@ fun pkgs =>
     "SandboxBuild" = lower_sandbox_build_node,
     "AutotoolsRootfs" = lower_autotools_node,
     "MakefileRootfs" = lower_makefile_node,
+    "MesonRootfs" = lower_meson_node,
     "PerlModuleRootfs" = lower_perl_module_node,
     "SandboxBuildRootfs" = lower_sandbox_build_rootfs_node,
     "Cargo" = lower_cargo_package_node,
