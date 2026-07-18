@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let bzip2_src = fun version => fun hash => {
@@ -15,10 +15,10 @@ fun pkgs =>
   let bzip2_install_docs_patch = {
     name = "bzip2-install-docs-patch-1.0.8",
     tag = "Source",
-    object_hash = "35e3bbd9642af51fef2a8a83afba040d272da42d7e3a251d8e43255a7b496702",
+    object_hash = import "bzip2-1.0.8-install_docs-1.patch.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "bzip2-1.0.8-install_docs-1.patch",
+      path = "bzip2/bzip2-1.0.8-install_docs-1.patch",
     },
   }
   in

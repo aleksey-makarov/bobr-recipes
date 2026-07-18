@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let man_pages_src = fun version => fun hash => {
@@ -18,7 +18,7 @@ fun pkgs =>
     object_hash = import "man-pages-build.sh.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "man-pages-build.sh",
+      path = "man-pages/man-pages-build.sh",
     },
   }
   in

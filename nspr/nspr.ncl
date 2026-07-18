@@ -49,7 +49,7 @@ fun pkgs =>
         object_hash = import "nspr-source-date-epoch.patch.fsobj-hash" as 'Text,
         origin = {
           tag = "RecipePath",
-          path = "nspr-source-date-epoch.patch",
+          path = "nspr/nspr-source-date-epoch.patch",
         },
       },
     },

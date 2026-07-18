@@ -115,7 +115,7 @@ fun pkgs =>
         object_hash = import "gnome-shell-no-x11.patch.fsobj-hash" as 'Text,
         origin = {
           tag = "RecipePath",
-          path = "gnome-shell-no-x11.patch",
+          path = "gnome-shell/gnome-shell-no-x11.patch",
         },
       },
     },

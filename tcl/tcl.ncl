@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let tcl_src = fun version => fun hash => {
@@ -21,7 +21,7 @@ fun pkgs =>
     object_hash = import "tcl-build.sh.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "tcl-build.sh",
+      path = "tcl/tcl-build.sh",
     },
   }
   in

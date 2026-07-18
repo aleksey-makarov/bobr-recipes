@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let dejavu_src = fun version => fun hash => {
@@ -18,7 +18,7 @@ fun pkgs =>
     object_hash = import "dejavu-build.sh.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "dejavu-build.sh",
+      path = "dejavu/dejavu-build.sh",
     },
   }
   in

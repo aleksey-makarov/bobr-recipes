@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let bibata_cursors_src = fun version => fun hash => {
@@ -18,7 +18,7 @@ fun pkgs =>
     object_hash = import "bibata-cursors-build.sh.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "bibata-cursors-build.sh",
+      path = "bibata-cursors/bibata-cursors-build.sh",
     },
   }
   in

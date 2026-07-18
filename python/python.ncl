@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let python_src = fun version => fun hash => {
@@ -176,7 +176,7 @@ fun pkgs =>
     object_hash = import "python-modules.sh.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "python-modules.sh",
+      path = "python/python-modules.sh",
     },
   }
   in

@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let expect_src = fun version => fun hash => {
@@ -18,10 +18,10 @@ fun pkgs =>
   let expect_gcc15_patch = {
     name = "expect-gcc15-patch",
     tag = "Source",
-    object_hash = "ab5fc0af9e2e0f80d7623c1a3a3dbeb1da3d8c9134276792199df401f9eb2cec",
+    object_hash = import "expect-5.45.4-gcc15-1.patch.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "expect-5.45.4-gcc15-1.patch",
+      path = "expect/expect-5.45.4-gcc15-1.patch",
     },
   }
   in

@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let kbd_src = fun version =>
@@ -17,10 +17,10 @@ fun pkgs =>
   let kbd_backspace_patch = {
     name = "kbd-backspace-patch",
     tag = "Source",
-    object_hash = "8be28dcb11420624a500f2ea4fe975f771174bffee50e54ec8cd295a2dec104e",
+    object_hash = import "kbd-2.8.0-backspace-1.patch.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "kbd-2.8.0-backspace-1.patch",
+      path = "kbd/kbd-2.8.0-backspace-1.patch",
     },
   }
   in

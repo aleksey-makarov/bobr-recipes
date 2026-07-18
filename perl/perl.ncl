@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let buildscript_perl_configure = {
@@ -7,7 +7,7 @@ fun pkgs =>
     object_hash = import "perl-configure.sh.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "perl-configure.sh",
+      path = "perl/perl-configure.sh",
     },
   }
   in

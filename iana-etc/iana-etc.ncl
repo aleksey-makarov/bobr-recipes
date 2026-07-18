@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let iana_etc_src = fun version => fun hash => {
@@ -18,7 +18,7 @@ fun pkgs =>
     object_hash = import "iana-etc-build.sh.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "iana-etc-build.sh",
+      path = "iana-etc/iana-etc-build.sh",
     },
   }
   in

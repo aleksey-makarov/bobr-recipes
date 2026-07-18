@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let hwdata_src = fun version => fun hash => {
@@ -18,7 +18,7 @@ fun pkgs =>
     object_hash = import "hwdata-build.sh.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "hwdata-build.sh",
+      path = "hwdata/hwdata-build.sh",
     },
   }
   in

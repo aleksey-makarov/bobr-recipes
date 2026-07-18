@@ -1,13 +1,13 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let glibc_fhs_patch_2_42 = {
     name = "glibc-fhs-patch-2.42",
     tag = "Source",
-    object_hash = "643552db030e2f2d7ffde4f558e0f5f83d3fabf34a2e0e56ebdb49750ac27b0d",
+    object_hash = import "glibc-2.42-fhs-1.patch.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "glibc-2.42-fhs-1.patch",
+      path = "glibc/glibc-2.42-fhs-1.patch",
     },
   }
   in

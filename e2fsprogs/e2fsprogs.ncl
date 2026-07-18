@@ -1,35 +1,32 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let dejagnu_src = fun version => fun hash => {
-    name = "dejagnu-src-%{version}",
+  let e2fsprogs_src = fun version => fun hash => {
+    name = "e2fsprogs-src-%{version}",
     tag = "Source",
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/dejagnu/dejagnu-%{version}.tar.gz",
-        "https://mirrors.kernel.org/gnu/dejagnu/dejagnu-%{version}.tar.gz",
-      ],
+      url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v%{version}/e2fsprogs-%{version}.tar.gz",
     },
   }
   in
 
-  let buildscript_dejagnu = {
-    name = "buildscript-dejagnu",
+  let buildscript_e2fsprogs = {
+    name = "buildscript-e2fsprogs",
     tag = "Source",
-    object_hash = import "dejagnu-build.sh.fsobj-hash" as 'Text,
+    object_hash = import "e2fsprogs-build.sh.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "dejagnu-build.sh",
+      path = "e2fsprogs/e2fsprogs-build.sh",
     },
   }
   in
 
-  let dejagnu = {
-    version | default = "1.6.3",
-    source_object_hash | default = "87daefacd7958b4a69f88c6856dbd1634261963c414079d0c371f589cd66a2e3",
-    name = "dejagnu-%{version}",
+  let e2fsprogs = {
+    version | default = "1.47.3",
+    source_object_hash | default = "2f5164e64dd7d91eadd1e0e8a77d92c06dd7837bb19f1d9189ce1939b363d2b4",
+    name = "e2fsprogs-%{version}",
     tag = "SandboxInstallBuild",
     deps = {
       build = [
@@ -44,14 +41,12 @@ fun pkgs =>
         pkgs.grep,
         pkgs.findutils,
         pkgs.diffutils,
-        pkgs.tcl,
-        pkgs.expect,
+        pkgs.pkgconf,
+        pkgs.util_linux,
         pkgs.texinfo,
       ],
       runtime = [
         pkgs.glibc_libs,
-        pkgs.expect,
-        pkgs.tcl,
       ],
     },
     config = {
@@ -71,14 +66,14 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      script = buildscript_dejagnu,
-      source = dejagnu_src version source_object_hash,
+      script = buildscript_e2fsprogs,
+      source = e2fsprogs_src version source_object_hash,
     },
   }
   in
 
   {
     include [
-      dejagnu,
+      e2fsprogs,
     ],
   }

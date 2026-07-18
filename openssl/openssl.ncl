@@ -1,4 +1,4 @@
-let recipe = import "recipe-lib.ncl" in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let openssl_src = fun version =>
@@ -20,7 +20,7 @@ fun pkgs =>
     object_hash = import "openssl-build.sh.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "openssl-build.sh",
+      path = "openssl/openssl-build.sh",
     },
   }
   in
