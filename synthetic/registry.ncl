@@ -708,19 +708,27 @@ fun pkgs =>
         (record_replace "tag" "CargoRootfs" node)
     )
   in
-  let lower_sandbox_build_node = fun node =>
-    let build_rootfs = build_rootfs_for sandbox_build_default_build_deps node in
-    let package_inputs =
+  # Generic sandbox synthetic builders: derive the build rootfs from
+  # sandbox_build_default_build_deps + node.deps.build, then lower to the given
+  # low-level tag. `Sandbox` (staging, via SandboxBuild) captures @{out};
+  # `SandboxInstall` (additive, via SandboxInstallBuild) installs into the live
+  # overlay root (/) and captures only the additions.
+  let lower_sandbox_build_with = fun target_tag =>
+    fun node =>
+      let build_rootfs = build_rootfs_for sandbox_build_default_build_deps node in
+      let package_inputs =
+        record_replace
+          "_rootfs"
+          build_rootfs
+          node.inputs
+      in
       record_replace
-        "_rootfs"
-        build_rootfs
-        node.inputs
-    in
-    record_replace
-      "inputs"
-      package_inputs
-      (record_replace "tag" "Sandbox" node)
+        "inputs"
+        package_inputs
+        (record_replace "tag" target_tag node)
   in
+  let lower_sandbox_build_node = lower_sandbox_build_with "Sandbox" in
+  let lower_sandbox_install_build_node = lower_sandbox_build_with "SandboxInstall" in
   let lower_sandbox_build_rootfs_node = fun node =>
     record_replace "tag" "Sandbox" node
   in
@@ -731,6 +739,7 @@ fun pkgs =>
     "Meson" = lower_meson_package_node,
     "PerlModule" = lower_perl_module_package_node,
     "SandboxBuild" = lower_sandbox_build_node,
+    "SandboxInstallBuild" = lower_sandbox_install_build_node,
     "AutotoolsRootfs" = lower_autotools_node,
     "MakefileRootfs" = lower_makefile_node,
     "MesonRootfs" = lower_meson_node,

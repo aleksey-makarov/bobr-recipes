@@ -64,6 +64,7 @@ run_case "perl-module-rootfs" pass '{"name":"pkg-rootfs","tag":"PerlModuleRootfs
 run_case "perl-module-package" pass '{"name":"pkg-package","tag":"PerlModule","deps":{"build":[],"runtime":[]},"config":{"perl_args":["INSTALLDIRS=vendor"]},"inputs":{"source":'"${source_node}"'}}'
 run_case "sandbox-build-rootfs" pass '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "sandbox-build-package" pass '{"name":"sandbox-build-package","tag":"SandboxBuild","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
+run_case "sandbox-install-build-package" pass '{"name":"sandbox-install-build-package","tag":"SandboxInstallBuild","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "oci-extract" pass '{"name":"img-rootfs","tag":"OciExtract","config":{},"inputs":{"image":{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","platform":{"os":"linux","architecture":"amd64"}}}}}'
 
 run_case "unknown-tag" fail '{"name":"bad","tag":"Demo","config":{},"inputs":{}}'
@@ -341,7 +342,7 @@ autotools_package_lowering_json="$(
 )"
 
 jq -e '
-  .root.tag == "Sandbox"
+  .root.tag == "SandboxInstall"
   and (.root.inputs | has("_rootfs"))
   and ([.[] | select(.name == "pkg-build-rootfs" and .tag == "TreeMerge")] | length == 1)
   and ([.[] | select(.name == "pkg-build-rootfs")][0].inputs | length == 4)
@@ -598,7 +599,7 @@ meson_package_lowering_json="$(
 )"
 
 jq -e '
-  .root.tag == "Sandbox"
+  .root.tag == "SandboxInstall"
   and (.root.inputs | has("_rootfs"))
   and ([.[] | select(.name == "pkg-build-rootfs" and .tag == "TreeMerge")] | length == 1)
   and ([.[] | select(.name == "common-native-tool")] | length == 1)
@@ -1020,13 +1021,94 @@ meson_synthetic_lowering_json="$(
 )"
 
 jq -e '
-  .root.tag == "Sandbox"
+  .root.tag == "SandboxInstall"
   and .root.config.steps[0].name == "bobr_prepare_source"
   and .root.config.steps[0].env.BOBR_SOURCE_DIR == "@{build}/source"
   and [.root.config.steps[].name] == ["bobr_prepare_source", "pre", "bobr_configure", "bobr_build", "bobr_install"]
   and .root.config.steps[1].cwd == "@{build}/source/subdir"
   and (.root.config.script_config | has("build_dir") | not)
 ' <<<"${meson_synthetic_lowering_json}" >/dev/null
+
+cat > "${tmpdir}/check-sandbox-install-build-lowering.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let source_src = {
+  name = "src",
+  tag = "Source",
+  object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  origin = {
+    tag = "Http",
+    url = "https://example.invalid/src.tar.xz",
+  },
+} in
+let base_tree = {
+  name = "base-filesystem",
+  tag = "Tree",
+  config = { tree = { entries = [{ type = "dir", path = "bin" }] } },
+  inputs = {},
+} in
+let tool_tree = {
+  name = "sandbox-default-tool",
+  tag = "Tree",
+  deps = { build = [], runtime = [] },
+  config = { tree = { entries = [{ type = "dir", path = "usr/bin" }] } },
+  inputs = {},
+} in
+let build_dep_tree = {
+  name = "sandbox-build-dep",
+  tag = "Tree",
+  deps = { build = [], runtime = [] },
+  config = { tree = { entries = [{ type = "dir", path = "opt" }] } },
+  inputs = {},
+} in
+# Only the sandbox default build deps + the recipe's own deps.build must exist
+# in fake_pkgs; the build rootfs is base_filesystem + their runtime closure.
+let fake_pkgs = {
+  base_filesystem = base_tree,
+  bash = tool_tree,
+  tar = tool_tree,
+  gzip = tool_tree,
+  bzip2 = tool_tree,
+  xz = tool_tree,
+  patch = tool_tree,
+} in
+recipe.to_request { recipes_path = "/recipes" } fake_pkgs {
+  name = "pkg",
+  tag = "SandboxInstallBuild",
+  deps = {
+    build = [build_dep_tree],
+    runtime = [],
+  },
+  config = {
+    script_config = {},
+    steps = [
+      {
+        name = "install",
+        run_as = "root",
+        cwd = "/",
+        argv = ["/bin/sh", "-ec", "true"],
+      },
+    ],
+  },
+  inputs = {
+    source = source_src,
+  },
+}
+EOF_INNER
+
+sandbox_install_build_lowering_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-sandbox-install-build-lowering.ncl --format json
+)"
+
+# SandboxInstallBuild must lower to the low-level additive tag SandboxInstall
+# (not the staging Sandbox), with a build rootfs derived from deps.build.
+jq -e '
+  .root.tag == "SandboxInstall"
+  and (.root.inputs | has("_rootfs"))
+  and ([.[] | select(.name == "pkg-build-rootfs" and .tag == "TreeMerge")] | length == 1)
+  and ([.[] | select(.name == "base-filesystem")] | length == 1)
+  and .root.config.steps[0].name == "install"
+' <<<"${sandbox_install_build_lowering_json}" >/dev/null
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER
 let raw_pkgs = (import "${repo_root}/pkgs.ncl") [] in

@@ -13,6 +13,7 @@ let KnownTags = [
   "Meson",
   "PerlModule",
   "SandboxBuild",
+  "SandboxInstallBuild",
   "AutotoolsRootfs",
   "MakefileRootfs",
   "MesonRootfs",
@@ -620,7 +621,7 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | SandboxConfig,
       }
-    else if checked.tag == "SandboxBuild" then
+    else if checked.tag == "SandboxBuild" || checked.tag == "SandboxInstallBuild" then
       checked
       & {
         config = checked.config | SandboxConfig,
@@ -853,7 +854,7 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | SandboxConfig,
         inputs = validate_sandbox_inputs checked.inputs,
       }
-    else if checked.tag == "SandboxBuild" then
+    else if checked.tag == "SandboxBuild" || checked.tag == "SandboxInstallBuild" then
       checked
       & {
         config = checked.config | SandboxConfig,
