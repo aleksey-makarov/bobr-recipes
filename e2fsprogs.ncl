@@ -27,7 +27,7 @@ fun pkgs =>
     version | default = "1.47.3",
     source_object_hash | default = "2f5164e64dd7d91eadd1e0e8a77d92c06dd7837bb19f1d9189ce1939b363d2b4",
     name = "e2fsprogs-%{version}",
-    tag = "SandboxBuild",
+    tag = "SandboxInstallBuild",
     deps = {
       build = [
         pkgs.linux_headers,
@@ -59,7 +59,7 @@ fun pkgs =>
           argv = ["@{script}"],
           env = {
             BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
+            BOBR_INSTALL_DIR = "/",
           },
         },
       ],

@@ -27,7 +27,7 @@ fun pkgs =>
     version | default = "6.15",
     source_object_hash | default = "03d8ebf618bd5df57cb4bf355efa3f4cd3a00b771efd623d4fd042b5dceb4465",
     name = "man-pages-%{version}",
-    tag = "SandboxBuild",
+    tag = "SandboxInstallBuild",
     deps = {
       build = [
         pkgs.coreutils,
@@ -46,7 +46,7 @@ fun pkgs =>
           argv = ["@{script}"],
           env = {
             BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
+            BOBR_INSTALL_DIR = "/",
           },
         },
       ],

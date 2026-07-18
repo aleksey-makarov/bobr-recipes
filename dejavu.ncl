@@ -29,7 +29,7 @@ fun pkgs =>
     version | default = "2.37",
     source_object_hash | default = "fa9ca4d13871dd122f61258a80d01751d603b4d3ee14095d65453b4e846e17d7",
     name = "dejavu-%{version}",
-    tag = "SandboxBuild",
+    tag = "SandboxInstallBuild",
     deps = {
       build = [
         pkgs.coreutils,
@@ -47,7 +47,7 @@ fun pkgs =>
           argv = ["@{script}"],
           env = {
             BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
+            BOBR_INSTALL_DIR = "/",
           },
         },
       ],

@@ -29,7 +29,7 @@ fun pkgs =>
     version | default = "3.5.7",
     source_object_hash | default = "a8c0d28a529ca480f9f36cf5792e2cd21984552a3c8e4aa11a24aa31aeac98e8",
     name = "openssl-%{version}",
-    tag = "SandboxBuild",
+    tag = "SandboxInstallBuild",
     deps = {
       build = [
         pkgs.linux_headers,
@@ -60,7 +60,7 @@ fun pkgs =>
           argv = ["@{script}"],
           env = {
             BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
+            BOBR_INSTALL_DIR = "/",
           },
         },
       ],

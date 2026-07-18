@@ -43,7 +43,7 @@ fun pkgs =>
       | default
       = "e4a178a4477f3d0ea77cc31828ff72aa38feff8d61aa13e7e99e142e9d902be4",
     name = "tzdata-%{version}",
-    tag = "SandboxBuild",
+    tag = "SandboxInstallBuild",
     deps = {
       build = [
         pkgs.linux_headers,
@@ -93,7 +93,7 @@ fun pkgs =>
             "%,
           ],
           env = {
-            OUT = "@{out}",
+            OUT = "/",
             TZDATA_TARBALL = "@{tzdata}",
           },
         },

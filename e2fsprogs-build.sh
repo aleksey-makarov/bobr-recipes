@@ -13,6 +13,15 @@ jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
 make -j"$jobs"
 make DESTDIR="${BOBR_INSTALL_DIR}" install
 
+# e2fsprogs' --enable-elf-shlibs install runs `ldconfig` (unconditionally, per
+# its elf-lib template), which regenerates /etc/ld.so.cache. Under DESTDIR
+# staging that cache landed in the discarded build root; under the additive
+# SandboxInstall model (DESTDIR=/) it lands in the captured overlay. The tree's
+# ld.so.cache is a finalize artifact (gnome-finalize regenerates it with
+# `ldconfig -X`), so no package may ship one -- drop e2fsprogs' copy. It is our
+# own freshly written upper file (glibc ships none), so removing it is additive.
+rm -f "${BOBR_INSTALL_DIR}/etc/ld.so.cache"
+
 rm -fv "${BOBR_INSTALL_DIR}/usr/lib/libcom_err.a" \
        "${BOBR_INSTALL_DIR}/usr/lib/libe2p.a" \
        "${BOBR_INSTALL_DIR}/usr/lib/libext2fs.a" \
@@ -32,14 +41,11 @@ if [ -f "${BOBR_INSTALL_DIR}/etc/mke2fs.conf" ]; then
   sed 's/metadata_csum_seed,//' -i "${BOBR_INSTALL_DIR}/etc/mke2fs.conf"
 fi
 
-if [ -f /etc/cron.d/e2scrub_all ]; then
-  install -v -Dm644 /etc/cron.d/e2scrub_all "${BOBR_INSTALL_DIR}/etc/cron.d/e2scrub_all"
-  rm -f /etc/cron.d/e2scrub_all
-fi
-
-for unit in e2scrub@.service e2scrub_all.service e2scrub_all.timer e2scrub_fail@.service; do
-  if [ -f "/usr/lib/systemd/system/${unit}" ]; then
-    install -v -Dm644 "/usr/lib/systemd/system/${unit}" "${BOBR_INSTALL_DIR}/usr/lib/systemd/system/${unit}"
-    rm -f "/usr/lib/systemd/system/${unit}"
-  fi
-done
+# NOTE: upstream's install ships the e2scrub cron job + systemd units under
+# /etc/cron.d and /usr/lib/systemd/system. The former LFS-style blocks here
+# (relocate them out of the real root into DESTDIR, then delete from /) were
+# dead no-ops under the DESTDIR staging model -- the real-root paths they
+# probed never existed, so the units stayed in the package. Under the additive
+# SandboxInstall model DESTDIR is /, so those blocks would `install` a file
+# onto itself and error; they are removed. The e2scrub units remain installed,
+# exactly as the staging output shipped them.

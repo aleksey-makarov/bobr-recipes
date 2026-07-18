@@ -30,7 +30,7 @@ fun pkgs =>
     version | default = "8.6.16",
     source_object_hash | default = "91cb8fa61771c63c262efb553059b7c7ad6757afa5857af6265e4b0bdc2a14a5",
     name = "tcl-%{version}",
-    tag = "SandboxBuild",
+    tag = "SandboxInstallBuild",
     deps = {
       build = [
         pkgs.linux_headers,
@@ -59,7 +59,7 @@ fun pkgs =>
           argv = ["@{script}"],
           env = {
             BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
+            BOBR_INSTALL_DIR = "/",
           },
         },
       ],

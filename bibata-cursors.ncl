@@ -30,7 +30,7 @@ fun pkgs =>
     version | default = "2.0.7",
     source_object_hash | default = "7d3495864e5bbef02f5e77de760b2905903b63c71495a78ef6306d19a3b556d8",
     name = "bibata-cursors-%{version}",
-    tag = "SandboxBuild",
+    tag = "SandboxInstallBuild",
     deps = {
       build = [
         pkgs.coreutils,
@@ -48,7 +48,7 @@ fun pkgs =>
           argv = ["@{script}"],
           env = {
             BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
+            BOBR_INSTALL_DIR = "/",
           },
         },
       ],
