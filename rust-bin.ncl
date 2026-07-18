@@ -27,7 +27,7 @@ fun pkgs =>
     version | default = "1.97.0",
     source_object_hash | default = "1cf17e4905b841d4c8e3f76467ac148d55fb3f54bf213c86f0d287a36471d904",
     name = "rust-bin-%{version}",
-    tag = "SandboxBuild",
+    tag = "SandboxInstallBuild",
     deps = {
       build = [
         pkgs.coreutils,
@@ -58,7 +58,7 @@ fun pkgs =>
             m%"
               cd "@{build}/source"
               ./install.sh \
-                --prefix="@{out}/usr" \
+                --prefix="/usr" \
                 --components=rustc,cargo,rust-std-x86_64-unknown-linux-gnu,rustfmt-preview \
                 --disable-ldconfig \
                 --without=rust-docs

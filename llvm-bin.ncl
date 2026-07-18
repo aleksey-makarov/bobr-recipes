@@ -28,7 +28,7 @@ fun pkgs =>
       | default
       = "54ec30358afcc9fb8aa74307db3046f5187f9fb89fb37064cdde906e062ebf36",
     name = "llvm-bin-%{version}",
-    tag = "SandboxBuild",
+    tag = "SandboxInstallBuild",
     deps = {
       build = [
         pkgs.coreutils,
@@ -62,19 +62,22 @@ fun pkgs =>
             m%"
               # The tarball unpacks to bin/ lib/ include/ libexec/ share/ under
               # @{build}/source (prepare_source strips the top dir); drop the whole
-              # relocatable toolchain into /usr.
-              mkdir -p "@{out}/usr"
-              cp -a "@{build}/source/." "@{out}/usr/"
-              # cp -a preserves the unpack (build-user) ownership; normalize to
-              # root:root so this tree's dir metadata matches every other package
-              # in a TreeMerge (they install as root -> 0:0).
-              chown -R 0:0 "@{out}/usr"
+              # relocatable toolchain into /usr in the live overlay root (additive).
+              #
+              # cp -Rd --preserve=mode: keep symlinks and exec bits, but let the
+              # new files be created as root:root (this step runs as root) -- do NOT
+              # preserve the unpack (build-user) ownership, and do NOT chown -R
+              # /usr afterwards (that would rewrite the ownership of the lower
+              # toolchain's files too -> a non-additive copy-up, rejected by the
+              # additive validator). Existing lower dirs (/usr/bin, /usr/lib, ...)
+              # keep their metadata; only the new files/dirs are added.
+              cp -Rd --preserve=mode "@{build}/source/." "/usr/"
               # The ubuntu-18.04 prebuilt clang links libtinfo.so.5 (a separate
               # terminfo lib in that era). Our ncurses is built
               # --with-termlib=tinfo, so a real libtinfo.so.6 exists; bridge the
               # soname to it (the terminfo ABI is stable across ncurses 5/6).
               # (ncurses is in this package's runtime deps.)
-              ln -sf libtinfo.so.6 "@{out}/usr/lib/libtinfo.so.5"
+              ln -sf libtinfo.so.6 "/usr/lib/libtinfo.so.5"
             "%,
           ],
         },
