@@ -76,6 +76,16 @@ fun pkgs =>
         pkgs.networkmanager,
         pkgs.libnma,
         pkgs.systemd_libs,
+        # librsvg: gnome-shell imports the Rsvg typelib unconditionally
+        # (misc/dependencies.js) and needs the SVG gdk-pixbuf loader; neither is
+        # visible to ldd.
+        pkgs.librsvg,
+        # Icon themes the shell renders with (ldd cannot see them): hicolor is
+        # the freedesktop fallback, Adwaita the GNOME default. They live here,
+        # not on gtk4, because adwaita-icon-theme build-depends on gtk4
+        # (gtk4-update-icon-cache) -- a gtk4 runtime dep on it would be a cycle.
+        pkgs.adwaita_icon_theme,
+        pkgs.hicolor_icon_theme,
       ],
     },
     config = {

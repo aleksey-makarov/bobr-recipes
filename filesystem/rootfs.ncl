@@ -83,9 +83,8 @@ fun pkgs =>
     pkgs.util_linux,
     pkgs.e2fsprogs,
     pkgs.vim,
-    # mc links libglib-2.0 (which needs libpcre2, added above); the flat rootfs
-    # list has no transitive runtime closure, so glib must be listed explicitly.
-    pkgs.glib,
+    # mc links libglib-2.0; glib (and other transitive runtime deps) are pulled
+    # automatically by the RootfsClosure below, so they need not be listed here.
     pkgs.mc,
     pkgs.openssh,
   ]
@@ -96,9 +95,14 @@ fun pkgs =>
   # every boot is a first boot, so presets are (re)applied on every boot. Units
   # we want on by default that the vendor preset does not cover go in a
   # /usr/lib/systemd/system-preset/*.preset file, not enabled by hand or at build.
+  # RootfsClosure: base_filesystem + the runtime closure of the listed roots.
+  # The roots are the tools/packages we want in the image (a self-hosting dev
+  # toolchain, so they stay explicit -- runtime closure would otherwise pull
+  # only *-libs splits without headers); their transitive runtime deps are added
+  # automatically, so pure-library deps no longer need hand-listing.
   let rootfs = {
     name = "rootfs",
-    tag = "TreeMerge",
+    tag = "RootfsClosure",
     config = {},
     inputs = recipe.numbered_inputs rootfs_deps,
   }

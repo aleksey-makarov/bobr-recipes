@@ -56,6 +56,9 @@ fun pkgs =>
         pkgs.json_glib,
         pkgs.linux_pam,
         pkgs.dbus,
+        # dconf is the GSettings backend (a GIO module glib dlopens, not a link
+        # dep) and gdm's session launcher; declare it so the closure ships it.
+        pkgs.dconf,
       ],
     },
     config = {

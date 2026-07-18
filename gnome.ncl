@@ -82,176 +82,45 @@ fun pkgs =>
   }
   in
 
+  # The image contents as a runtime closure: base_filesystem + the runtime
+  # closure of these roots. The whole GTK/GNOME library stack below the
+  # top-level apps is pulled automatically from the recipes' deps.runtime, so
+  # the former hand-curated flat list is gone. Roots are only the things wanted
+  # for their own sake (not reachable as a runtime dep of another root): the
+  # base rootfs, the graphics/session runtime-files overlays, the accel-graphics
+  # + Wayland stack, fonts/cursors (pure data), and the top-level GNOME apps.
+  # "Invisible" deps that ldd cannot see (icon themes, base typelibs, the
+  # GSettings dconf backend, the SVG loader) now live in the owning recipes'
+  # deps.runtime: gtk4, gjs, gdm, gnome-shell.
   let gnome_rootfs_contents = {
     name = "gnome-rootfs-contents",
-    tag = "TreeMerge",
+    tag = "RootfsClosure",
     config = {},
     inputs =
       recipe.numbered_inputs [
         pkgs.rootfs,
         # Graphics-only runtime files (tty1 autologin, weston user service +
-        # graphical-session wiring); kept out of the plain rootfs.
+        # graphical-session wiring) and the system weston config/launcher.
         pkgs.system_runtime_files_gnome,
-        pkgs.libdrm,
+        weston_config,
+        # Accel graphics + Wayland session stack.
         pkgs.mesa,
         pkgs.vulkan_loader,
         pkgs.vulkan_tools,
         pkgs.kmscube,
-        # Wayland session stack (step 3: Weston via seatd).
-        pkgs.libpng,
-        pkgs.pixman,
-        pkgs.freetype,
-        pkgs.fontconfig,
-        pkgs.cairo,
-        pkgs.dejavu,
-        pkgs.wayland,
-        pkgs.libevdev,
-        pkgs.mtdev,
-        pkgs.libinput,
-        pkgs.xkeyboard_config,
-        pkgs.libxkbcommon,
-        pkgs.seatd,
-        pkgs.libdisplay_info,
-        pkgs.bibata_cursors,
         pkgs.weston,
-        weston_config,
-        # GNOME/GTK4 library stack (step 6a). Runtime artifacts only: glib_gen1
-        # is a build-only intermediate (its libs are identical to glib's).
-        pkgs.pcre2,
-        pkgs.libxml2,
-        pkgs.libjpeg_turbo,
-        pkgs.libtiff,
-        pkgs.glib,
-        pkgs.gobject_introspection,
-        pkgs.graphene,
-        pkgs.fribidi,
-        pkgs.harfbuzz,
-        pkgs.pango,
-        pkgs.libepoxy,
-        pkgs.shared_mime_info,
-        pkgs.gdk_pixbuf,
+        pkgs.seatd,
+        pkgs.xkeyboard_config,
+        # Fonts + cursor theme (pure data, not reachable via link deps).
+        pkgs.dejavu,
+        pkgs.bibata_cursors,
+        # Top-level GNOME toolkit/session/apps; the whole GNOME library stack is
+        # their runtime closure.
         pkgs.gtk4,
-        pkgs.hicolor_icon_theme,
-        pkgs.adwaita_icon_theme,
-        # 6b (mutter deps so far)
-        pkgs.json_glib,
-        pkgs.gsettings_desktop_schemas,
-        pkgs.lcms2,
-        pkgs.sqlite,
-        pkgs.colord,
-        pkgs.libusb,
-        pkgs.libgusb,
-        pkgs.libgudev,
-        pkgs.libseccomp,
-        pkgs.glycin,
-        # 6b: mutter (Wayland compositor) and its remaining new runtime deps.
-        pkgs.at_spi2_core,
-        pkgs.libei,
-        pkgs.mutter,
-        # 6c: gnome-shell and its runtime closure (beyond the base rootfs, which
-        # already carries dbus/expat/libffi/linux-pam/util-linux/zlib/glib/
-        # systemd, and beyond the GNOME/GTK4 stack listed above).
-        #  - gjs + mozjs (+ icu): the JS engine the shell runs on
-        #  - gcr stack: libgcrypt (+libgpg-error), p11-kit (+libtasn1)
-        #  - gnome-desktop (+iso-codes)
-        #  - polkit (+duktape): the in-session authentication agent
-        #  - evolution-data-server + its chain (libsoup/libpsl/nghttp2, libical,
-        #    libsecret, nspr, nss): the shell's clock/calendar backend
-        pkgs.icu,
-        pkgs.mozjs,
-        pkgs.gjs,
-        pkgs.libgpg_error,
-        pkgs.libgcrypt,
-        pkgs.libtasn1,
-        pkgs.p11_kit,
-        pkgs.gcr,
-        pkgs.iso_codes,
-        pkgs.gnome_desktop,
-        pkgs.duktape,
-        pkgs.polkit,
-        pkgs.nghttp2,
-        pkgs.libpsl,
-        pkgs.libsoup,
-        pkgs.libical,
-        pkgs.libsecret,
-        pkgs.nspr,
-        pkgs.nss,
-        pkgs.evolution_data_server,
-        #  - libpulse (+libsndfile) for the shell's gvc volume control
-        pkgs.libsndfile,
-        pkgs.pulseaudio,
-        #  - GI typelibs gnome-shell imports at startup that ldd cannot see:
-        #    AccountsService, UPowerGlib, IBus, Gdm. dconf is the GSettings
-        #    backend and gdm's session launcher.
-        pkgs.accountsservice,
-        pkgs.upower,
-        pkgs.ibus,
-        pkgs.dconf,
-        pkgs.gdm,
-        #  - typelibs gnome-shell imports unconditionally (misc/dependencies.js):
-        #    Geoclue, GWeather, Rsvg. geocode-glib + gweather-locations are the
-        #    libgweather runtime closure (the world locations database).
-        pkgs.geoclue,
-        pkgs.geocode_glib,
-        pkgs.gweather_locations,
-        pkgs.libgweather,
-        pkgs.librsvg,
-        #  - gnome-settings-daemon installs the org.gnome.settings-daemon.*
-        #    GSettings schemas gnome-shell looks up at startup, and runs as a
-        #    session service. Its runtime closure: NetworkManager (libnm) +
-        #    libndp, libcanberra (+ libvorbis/libogg), libnotify, alsa-lib.
-        pkgs.networkmanager,
-        pkgs.libndp,
-        pkgs.libnma,
-        pkgs.libcanberra,
-        pkgs.libvorbis,
-        pkgs.libogg,
-        pkgs.libnotify,
-        pkgs.alsa_lib,
-        pkgs.gnome_settings_daemon,
-        #  - Bluetooth: gnome-shell loads its quick-settings indicator when the
-        #    GnomeBluetooth-3.0 typelib is present (runtime pkg.checkSymbol).
-        #    gnome-bluetooth pulls in libadwaita (+ its AppStream/libyaml/
-        #    libxmlb/curl closure) and gsound.
-        pkgs.libyaml,
-        pkgs.libxmlb,
-        pkgs.curl,
-        pkgs.appstream,
-        pkgs.libadwaita,
-        pkgs.gsound,
-        pkgs.gnome_bluetooth,
         pkgs.gnome_shell,
-        #  - gnome-session: the session manager. It registers
-        #    org.gnome.SessionManager, seeds the D-Bus/systemd activation
-        #    environment, and drives the systemd-managed session
-        #    (gnome-session@gnome.target -> org.gnome.Shell@user.service +
-        #    gnome-session-services.target). gdm launches it via the
-        #    wayland-sessions/gnome.desktop it ships (Exec=gnome-session).
         pkgs.gnome_session,
-        #  - gnome-control-center (the Settings app) and the runtime closure of
-        #    its panels beyond what the shell already pulls in: libgtop (Usage),
-        #    libpwquality (Users), colord-gtk (Color), libwacom (Wacom), tecla
-        #    (Keyboard preview), gnome-online-accounts + librest (Online
-        #    Accounts), CUPS + Samba (Printers), ModemManager (WWan), udisks +
-        #    krb5 (System). Samba/GOA drag in the GnuTLS stack (nettle,
-        #    libunistring, gmp, libtasn1) plus popt and libtirpc.
-        pkgs.libgtop,
-        pkgs.libpwquality,
-        pkgs.colord_gtk,
-        pkgs.libwacom,
-        pkgs.tecla,
-        pkgs.librest,
-        pkgs.goa,
-        pkgs.cups,
-        pkgs.samba,
-        pkgs.gnutls,
-        pkgs.nettle,
-        pkgs.libunistring,
-        pkgs.popt,
-        pkgs.libtirpc,
-        pkgs.modemmanager,
-        pkgs.krb5,
-        pkgs.udisks,
+        pkgs.gdm,
+        pkgs.gnome_settings_daemon,
         pkgs.gnome_control_center,
       ],
   }

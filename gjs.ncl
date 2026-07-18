@@ -46,6 +46,10 @@ fun pkgs =>
         pkgs.glib,
         pkgs.cairo,
         pkgs.mozjs,
+        # gjs links libgirepository and loads typelibs at runtime; ldd sees the
+        # lib but not the gobject-introspection package that ships it + the base
+        # GIRepository typelib.
+        pkgs.gobject_introspection,
       ],
     },
     config = {
