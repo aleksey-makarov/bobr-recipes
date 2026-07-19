@@ -16,7 +16,20 @@ fun pkgs =>
     version | default = "1.5.7",
     source_object_hash | default = "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3",
     name = "zstd-%{version}",
-    tag = "MakefileRootfs",
+    tag = "Makefile",
+    deps = {
+      # zstd's Makefile links zlib into the CLI when zlib.h is present (as in the
+      # old system_rootfs_2 environment); declare it so the deps-derived build
+      # rootfs still has it and the binary is unchanged. lzma comes from xz,
+      # which is already in the native toolchain.
+      build = [
+        pkgs.zlib,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.zlib,
+      ],
+    },
     config = {
       make_args = [
         "prefix=/usr",
@@ -27,12 +40,11 @@ fun pkgs =>
         argv = [
           "rm",
           "-fv",
-          "@{out}/usr/lib/libzstd.a",
+          "/usr/lib/libzstd.a",
         ],
       },
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_2,
       source = zstd_src version source_object_hash,
     },
   }

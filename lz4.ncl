@@ -16,7 +16,13 @@ fun pkgs =>
     version | default = "1.10.0",
     source_object_hash | default = "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b",
     name = "lz4-%{version}",
-    tag = "MakefileRootfs",
+    tag = "Makefile",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {
       make_args = [
         "BUILD_STATIC=no",
@@ -24,7 +30,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_2,
       source = lz4_src version source_object_hash,
     },
   }
