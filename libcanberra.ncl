@@ -13,7 +13,12 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "http://0pointer.de/lennart/projects/libcanberra/libcanberra-%{version}.tar.xz",
+          url = [
+            "http://0pointer.de/lennart/projects/libcanberra/libcanberra-%{version}.tar.xz",
+            # 0pointer.de is frequently down; the BLFS conglomeration mirror
+            # keeps the identical upstream tarball.
+            "https://ftp.osuosl.org/pub/blfs/conglomeration/libcanberra/libcanberra-%{version}.tar.xz",
+          ],
         },
       }
   in

@@ -11,7 +11,10 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "https://ftp.gnu.org/gnu/nettle/nettle-%{version}.tar.gz",
+          url = [
+            "https://ftp.gnu.org/gnu/nettle/nettle-%{version}.tar.gz",
+            "https://mirrors.kernel.org/gnu/nettle/nettle-%{version}.tar.gz",
+          ],
         },
       }
   in
