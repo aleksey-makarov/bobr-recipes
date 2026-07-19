@@ -12,7 +12,7 @@ fun pkgs =>
   }
   in
 
-  let pkgconf_config = fun version => {
+  let pkgconf_config = fun version => fun install_dir => {
     configure_args = [
       "--disable-static",
       "--docdir=/usr/share/doc/pkgconf-%{version}",
@@ -32,7 +32,7 @@ fun pkgs =>
           "ln",
           "-sv",
           "pkgconf",
-          "@{out}/usr/bin/pkg-config",
+          "%{install_dir}/usr/bin/pkg-config",
         ],
       },
       {
@@ -42,7 +42,7 @@ fun pkgs =>
           "ln",
           "-sv",
           "pkgconf.1",
-          "@{out}/usr/share/man/man1/pkg-config.1",
+          "%{install_dir}/usr/share/man/man1/pkg-config.1",
         ],
       },
     ],
@@ -54,7 +54,7 @@ fun pkgs =>
     source_object_hash | default = "cd05c9589b9f86ecf044c10a2269822bc9eb001eced2582cfffd658b0a50c243",
     name = "pkgconf-gen1-%{version}",
     tag = "AutotoolsRootfs",
-    config = pkgconf_config version,
+    config = pkgconf_config version "@{out}",
     inputs = {
       _rootfs = pkgs.system_rootfs_1,
       source = pkgconf_src version source_object_hash,
@@ -66,10 +66,15 @@ fun pkgs =>
     version | default = "2.5.1",
     source_object_hash | default = "cd05c9589b9f86ecf044c10a2269822bc9eb001eced2582cfffd658b0a50c243",
     name = "pkgconf-%{version}",
-    tag = "AutotoolsRootfs",
-    config = pkgconf_config version,
+    tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
+    config = pkgconf_config version "/",
     inputs = {
-      _rootfs = pkgs.system_rootfs_2,
       source = pkgconf_src version source_object_hash,
     },
   }

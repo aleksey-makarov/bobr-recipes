@@ -19,12 +19,18 @@ fun pkgs =>
     version | default = "3.3",
     source_object_hash | default = "fd87e0aba7e43ae054837afd6cd4db03a3f2693deb3619085e6ed9d8d9604ad8",
     name = "gperf-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.gcc_libs,
+      ],
+    },
     config = {
       configure_args = ["--docdir=/usr/share/doc/gperf-%{version}"],
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_2,
       source = gperf_src version source_object_hash,
     },
   }

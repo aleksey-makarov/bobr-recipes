@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "2.8.2",
     source_object_hash | default = "3ad89b8588e6644bd4e49981480d48b21289eebbcd4f0a1a4afb1c29f99b6ab4",
     name = "expat-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "Autotools",
     deps = {
       build = [],
       runtime = [
@@ -33,7 +33,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_2,
       source = expat_src version source_object_hash,
     },
   }

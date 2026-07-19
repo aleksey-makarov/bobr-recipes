@@ -16,7 +16,13 @@ fun pkgs =>
     version | default = "2.5.2",
     source_object_hash | default = "39bf67452fa41d0948c2197601053f48b3d78a029389734332a6309a680c6c87",
     name = "attr-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "Autotools",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {
       configure_args = [
         "--disable-static",
@@ -25,7 +31,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_2,
       source = attr_src version source_object_hash,
     },
   }
