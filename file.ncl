@@ -1,5 +1,3 @@
-let recipe = import "recipe-lib.ncl" in
-
 fun pkgs =>
   let file_src = fun version => fun hash => {
     name = "file-src-%{version}",
@@ -12,28 +10,29 @@ fun pkgs =>
   }
   in
 
-  let file_build_rootfs = {
-    name = "file-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs_2 }
-      & recipe.numbered_inputs [
-        pkgs.bzip2,
-      ],
-  }
-  in
-
   let file = {
     version | default = "5.46",
     source_object_hash | default = "c9cc77c7c560c543135edc555af609d5619dbef011997e988ce40a3d75d86088",
     name = "file-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "Autotools",
+    deps = {
+      # file's configure auto-links compression libs when their headers are
+      # present: bzip2 and xz(lzma) come from the native toolchain, but zlib must
+      # be added so libmagic keeps gzip support (system_rootfs_2 provided zlib).
+      build = [
+        pkgs.zlib,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.zlib,
+        pkgs.xz_libs,
+        pkgs.bzip2,
+      ],
+    },
     config = {
       configure_args = [],
     },
     inputs = {
-      _rootfs = file_build_rootfs,
       source = file_src version source_object_hash,
     },
   }

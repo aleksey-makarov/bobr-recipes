@@ -14,9 +14,14 @@ fun pkgs =>
     version | default = "3.4.2",
     source_object_hash | default = "ff10aa2c151cd4b2dbbe6135126dbc854046113d2dfb49572a348233267eb315",
     name = "rsync-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "Autotools",
     deps = {
-      build = [],
+      # --without-included-zlib links the system zlib, so its headers must be in
+      # the build rootfs (system_rootfs_2 provided them; the deps-derived rootfs
+      # does not by default).
+      build = [
+        pkgs.zlib,
+      ],
       runtime = [
         pkgs.glibc_libs,
         pkgs.zlib,
@@ -32,7 +37,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_2,
       source = rsync_src version source_object_hash,
     },
   }
