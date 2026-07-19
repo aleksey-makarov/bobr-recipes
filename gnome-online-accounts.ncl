@@ -21,7 +21,7 @@ fun pkgs =>
       }
   in
 
-  let goa = {
+  let gnome_online_accounts = {
     version | default = "3.58.1",
     source_object_hash
       | default
@@ -78,6 +78,6 @@ fun pkgs =>
 
   {
     include [
-      goa,
+      gnome_online_accounts,
     ],
   }
