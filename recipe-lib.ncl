@@ -23,6 +23,18 @@ let pad3 = fun n =>
   else
     digits
 in
+# A readable slug of a node name for request node ids: the name with its
+# version segments dropped (any `-`-segment that starts with a digit, which also
+# strips the version from `<pkg>-<ver>-build-rootfs`). Purely cosmetic -- node
+# ids are request-local labels and never enter a build key.
+let node_name_slug = fun name =>
+  let kept =
+    std.array.filter
+      (fun part => part != "" && !std.string.is_match "^[0-9]" part)
+      (std.string.split "-" name)
+  in
+  if std.array.length kept == 0 then name else std.string.join "-" kept
+in
 let numbered_inputs_fn = fun inputs =>
   std.record.from_array (
     std.array.map_with_index
@@ -288,7 +300,7 @@ in
             fun name =>
               {
                 field = name,
-                value = "n" ++ std.string.from_number idx,
+                value = "n" ++ std.string.from_number idx ++ "_" ++ node_name_slug name,
               }
           )
           other_names
