@@ -1,5 +1,3 @@
-let recipe = import "recipe-lib.ncl" in
-
 fun pkgs =>
   let readline_src = fun version => fun hash => {
     name = "readline-src-%{version}",
@@ -15,25 +13,15 @@ fun pkgs =>
   }
   in
 
-  let readline_build_rootfs = {
-    name = "readline-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs_2 }
-      & recipe.numbered_inputs [
-        pkgs.ncurses,
-      ],
-  }
-  in
-
   let readline = {
     version | default = "8.3",
     source_object_hash | default = "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc",
     name = "readline-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "Autotools",
     deps = {
-      build = [],
+      build = [
+        pkgs.ncurses,
+      ],
       runtime = [
         pkgs.glibc_libs,
         pkgs.ncurses_libs,
@@ -67,7 +55,6 @@ fun pkgs =>
       make_args = ["SHLIB_LIBS=-ltinfo"],
     },
     inputs = {
-      _rootfs = readline_build_rootfs,
       source = readline_src version source_object_hash,
     },
   }

@@ -18,7 +18,7 @@ fun pkgs =>
     version | default = "6.6",
     source_object_hash | default = "355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11",
     name = "ncurses-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "Autotools",
     deps = {
       build = [],
       runtime = [
@@ -52,7 +52,7 @@ fun pkgs =>
             "-e",
             "s/^#if.*XOPEN.*$/#if 1/",
             "-i",
-            "@{out}/usr/include/curses.h",
+            "/usr/include/curses.h",
           ],
         },
         {
@@ -62,12 +62,12 @@ fun pkgs =>
             "/bin/sh",
             "-ec",
             m%"
-              mkdir -p "@{out}/usr/lib/pkgconfig"
+              mkdir -p "/usr/lib/pkgconfig"
               for lib in ncurses form panel menu; do
-                ln -sfv "lib"$lib"w.so" "@{out}/usr/lib/lib"$lib".so"
-                ln -sfv "$lib"w.pc "@{out}/usr/lib/pkgconfig/"$lib".pc"
+                ln -sfv "lib"$lib"w.so" "/usr/lib/lib"$lib".so"
+                ln -sfv "$lib"w.pc "/usr/lib/pkgconfig/"$lib".pc"
               done
-              ln -sfv libncursesw.so "@{out}/usr/lib/libcurses.so"
+              ln -sfv libncursesw.so "/usr/lib/libcurses.so"
             "%,
           ],
         },
@@ -78,15 +78,23 @@ fun pkgs =>
             "/bin/sh",
             "-ec",
             m%"
-              mkdir -p "@{out}/usr/share/doc"
-              cp -v -R "@{build}/source/doc" -T "@{out}/usr/share/doc/ncurses-%{version}"
+              mkdir -p "/usr/share/doc"
+              cp -v -R "@{build}/source/doc" -T "/usr/share/doc/ncurses-%{version}"
             "%,
           ],
+        },
+        {
+          # ncurses' install runs ldconfig, writing /etc/ld.so.cache. That is a
+          # generated cache gnome-finalize rebuilds over the whole tree, so no
+          # package may ship one; drop our freshly written copy (the build rootfs
+          # ships none, so this is an additive add we simply undo).
+          name = "drop_ld_so_cache",
+          run_as = "root",
+          argv = ["rm", "-fv", "/etc/ld.so.cache"],
         },
       ],
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_2,
       source = ncurses_src version source_object_hash,
     },
   }

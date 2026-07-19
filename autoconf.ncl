@@ -25,7 +25,6 @@ fun pkgs =>
       { base = pkgs.system_rootfs_2 }
       & recipe.numbered_inputs [
         pkgs.perl,
-        pkgs.inetutils,
       ],
   }
   in
