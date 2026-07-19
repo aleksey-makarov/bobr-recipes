@@ -6,6 +6,7 @@ let KnownTags = [
   "FsTreeExport",
   "TreeMerge",
   "TreeSubset",
+  "TreeMove",
   "RootfsClosure",
   "Initramfs",
   "Autotools",
@@ -446,6 +447,12 @@ let TreeSubsetConfig = {
   include | Array String | NonEmptyArray,
 }
 in
+let TreeMoveConfig = {
+  strip_prefix
+    | String
+    | doc "Subdirectory to re-root the input tree at (its leading path component is stripped).",
+}
+in
 let FsTreeExportConfig = {
   copies
     | Array {
@@ -497,6 +504,12 @@ let TreeSubsetInputsShape = {
   tree
     | Dyn
     | doc "Single fs-tree input to subset.",
+}
+in
+let TreeMoveInputsShape = {
+  tree
+    | Dyn
+    | doc "Single fs-tree input to re-root.",
 }
 in
 let RootfsClosureInputsShape = { .. }
@@ -637,6 +650,11 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | TreeSubsetConfig,
       }
+    else if checked.tag == "TreeMove" then
+      checked
+      & {
+        config = checked.config | TreeMoveConfig,
+      }
     else if checked.tag == "RootfsClosure" then
       checked
       & {
@@ -743,6 +761,12 @@ let rec ValidateRecipe = fun recipe =>
     in
     let validate_tree_subset_inputs = fun inputs =>
       let checked = inputs | TreeSubsetInputsShape in
+      std.record.map
+        (fun _ input => ValidateRecipe input)
+        checked
+    in
+    let validate_tree_move_inputs = fun inputs =>
+      let checked = inputs | TreeMoveInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -872,6 +896,12 @@ let rec ValidateRecipe = fun recipe =>
       & {
         config = checked.config | TreeSubsetConfig,
         inputs = validate_tree_subset_inputs checked.inputs,
+      }
+    else if checked.tag == "TreeMove" then
+      checked
+      & {
+        config = checked.config | TreeMoveConfig,
+        inputs = validate_tree_move_inputs checked.inputs,
       }
     else if checked.tag == "RootfsClosure" then
       checked
