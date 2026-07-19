@@ -1,5 +1,3 @@
-let recipe = import "recipe-lib.ncl" in
-
 fun pkgs =>
   let shadow_src = fun version =>
     fun hash =>
@@ -14,26 +12,28 @@ fun pkgs =>
     }
   in
 
-  let shadow_build_rootfs = {
-    name = "shadow-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs_2 }
-      & recipe.numbered_inputs [
+  let shadow = {
+    version | default = "4.19.4",
+    source_object_hash | default = "ce57a313e315a0a7cb04a8f50cc20753e994e487bbe9b78a2a824ca75cb486c0",
+    name = "shadow-%{version}",
+    tag = "Autotools",
+    deps = {
+      # pkgconf is not among the default Autotools build deps, so it must be
+      # listed explicitly (as must libxcrypt, PAM and the systemd dev headers).
+      build = [
         pkgs.libxcrypt,
         pkgs.linux_pam,
         pkgs.pkgconf,
         pkgs.systemd_dev,
       ],
-  }
-  in
-
-  let shadow = {
-    version | default = "4.19.4",
-    source_object_hash | default = "ce57a313e315a0a7cb04a8f50cc20753e994e487bbe9b78a2a824ca75cb486c0",
-    name = "shadow-%{version}",
-    tag = "AutotoolsRootfs",
+      # login/su/passwd link libpam and libcrypt; login's PAM stack loads the
+      # pam modules from the full linux_pam package (usr/lib/security).
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.libxcrypt_libs,
+        pkgs.linux_pam,
+      ],
+    },
     config = {
       pre_configure = [
         {
@@ -86,15 +86,16 @@ fun pkgs =>
           # pam_systemd) in system-runtime-files, and shadow's references the
           # removed pam_securetty.so. The other shadow pam.d files (su, passwd,
           # ...) are unique and defer to our /etc/pam.d/system-auth, so keep them.
+          # Additive install: writes land directly in the overlay root, so no
+          # DESTDIR (the main install already used --prefix=/usr, no DESTDIR).
           m%"
-            make DESTDIR="@{out}" -C man install-man
-            rm -f "@{out}/etc/pam.d/login"
+            make -C man install-man
+            rm -f /etc/pam.d/login
           "%,
         ],
       },
     },
     inputs = {
-      _rootfs = shadow_build_rootfs,
       source = shadow_src version source_object_hash,
     },
   }

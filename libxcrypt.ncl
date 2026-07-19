@@ -14,23 +14,19 @@ fun pkgs =>
     }
   in
 
-  let libxcrypt_build_rootfs = {
-    name = "libxcrypt-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs_2 }
-      & recipe.numbered_inputs [
-        pkgs.perl,
-      ],
-  }
-  in
-
   let libxcrypt = {
     version | default = "4.5.2",
     source_object_hash | default = "71513a31c01a428bccd5367a32fd95f115d6dac50fb5b60c779d5c7942aec071",
     name = "libxcrypt-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "Autotools",
+    # perl -- the only extra the old build rootfs added on top of the toolchain
+    # -- is already a default Autotools build dep, so deps.build stays empty.
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
     config = {
       configure_args = [
         "--enable-hashes=strong,glibc",
@@ -40,7 +36,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = libxcrypt_build_rootfs,
       source = libxcrypt_src version source_object_hash,
     },
   }

@@ -12,23 +12,20 @@ fun pkgs =>
   }
   in
 
-  let acl_build_rootfs = {
-    name = "acl-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs_2 }
-      & recipe.numbered_inputs [
-        pkgs.attr,
-      ],
-  }
-  in
-
   let acl = {
     version | default = "2.3.2",
     source_object_hash | default = "97203a72cae99ab89a067fe2210c1cbf052bc492b479eca7d226d9830883b0bd",
     name = "acl-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "Autotools",
+    deps = {
+      build = [
+        pkgs.attr,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.attr_libs,
+      ],
+    },
     config = {
       configure_args = [
         "--disable-static",
@@ -36,7 +33,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = acl_build_rootfs,
       source = acl_src version source_object_hash,
     },
   }
