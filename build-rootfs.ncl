@@ -92,9 +92,15 @@ let sorted_closure_nodes = fun closure_set =>
     (fun name => std.record.get name closure_set)
     (std.record.fields closure_set)
 in
-# The default native C/C++ build toolchain every native build needs.
-let native_build_deps = fun pkgs => [
-  pkgs.linux_headers,
+# The native C/C++ toolchain (compiler, binutils, libc, and the shell utilities
+# a configure/make run needs) WITHOUT the kernel UAPI headers, so callers pick
+# which kernel headers to add. Ordinary builds add the canonical `linux_headers`
+# -- that is `native_build_deps`. Building `linux_headers` itself instead adds
+# `linux_headers_gen1`: the compile still needs kernel headers (glibc's
+# <bits/errno.h> pulls in <linux/errno.h>, so even host tools like unifdef won't
+# compile without them), but using the gen1 headers rather than the package's own
+# output avoids a build cycle.
+let native_toolchain_deps = fun pkgs => [
   pkgs.glibc,
   pkgs.binutils,
   pkgs.gcc,
@@ -113,6 +119,10 @@ let native_build_deps = fun pkgs => [
   pkgs.diffutils,
 ]
 in
+# The default native build toolchain every ordinary native build needs: the
+# toolchain plus the kernel UAPI headers (which ordinary packages compile
+# against).
+let native_build_deps = fun pkgs => [pkgs.linux_headers] @ native_toolchain_deps pkgs in
 # The default build deps every Meson package needs: the native toolchain plus
 # pkgconf and python. Shared so both the Meson package builder and recipes that
 # assemble their own build rootfs (the glib bootstrap) use one list.
@@ -187,6 +197,7 @@ in
     build_deps_or_empty,
     runtime_closure_set,
     sorted_closure_nodes,
+    native_toolchain_deps,
     native_build_deps,
     meson_build_deps,
     build_rootfs_closure,

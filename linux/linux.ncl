@@ -1,4 +1,5 @@
 let recipe = import "../recipe-lib.ncl" in
+let br = import "../build-rootfs.ncl" in
 
 # The source release. `version` picks the kernel version and
 # `source_object_hash` is its source tarball hash; both are node fields, so an
@@ -20,8 +21,8 @@ in
 # merged on top of the corresponding `make` base (defconfig / tinyconfig).
 # Overlays layer `config_options` over the selected set rather than editing
 # these files.
-let distro_config = import "distro-config.ncl" in
-let tiny_config = import "tinyconfig.ncl" in
+let config_distro = import "config-distro.ncl" in
+let config_tiny = import "config-tiny.ncl" in
 
 # Right-biased record merge: `overrides` win over `base`, new keys are added.
 # Used so `config_options` can override individual base options with a plain
@@ -93,14 +94,18 @@ fun pkgs =>
       let headers_env = {
         BOBR_LINUX_BUILD_KIND = "headers",
         BOBR_SOURCE_DIR = "@{build}/source",
-        BOBR_INSTALL_DIR = "@{out}",
+        # Install into a virgin /stage: the UAPI headers overlap the build rootfs
+        # (buildpack / system_rootfs_2 already carry kernel headers), so an
+        # additive install to the real /usr/include would be rejected. The
+        # SandboxStageRootfs lowering re-roots /stage -> / via TreeMove.
+        BOBR_INSTALL_DIR = "/stage",
       }
       in
       {
         version | default = "6.18.38",
         source_object_hash | default = "ac26e508abd56e9f8b89872b6e10c49fc823bcc70d8068a5d8504c1a7c4ff045",
         name = "linux-headers%{variant}-%{version}",
-        tag = "SandboxBuildRootfs",
+        tag = "SandboxStageRootfs",
         config = {
           steps = [
             recipe.prepare_source_step,
@@ -137,7 +142,22 @@ fun pkgs =>
   in
 
   let linux_headers_gen1 = mk_linux_headers "-gen1" pkgs.buildpack_deps_rootfs in
-  let linux_headers = mk_linux_headers "" pkgs.system_rootfs_2 in
+  # Plain headers build in a deps-derived closure (no system_rootfs_2): the
+  # native toolchain plus the gen1 kernel headers. The gen1 headers are needed
+  # to compile the build's host tools (glibc's <bits/errno.h> pulls in
+  # <linux/errno.h>); using gen1 rather than this package's own output avoids a
+  # cycle. Installing into /stage (SandboxStageRootfs) then keeps clear of the
+  # gen1 headers already at /usr/include.
+  let linux_headers =
+    mk_linux_headers
+      ""
+      (
+        br.build_rootfs_closure
+          pkgs
+          "linux-headers-build-rootfs"
+          (br.native_toolchain_deps pkgs @ [pkgs.linux_headers_gen1])
+      )
+  in
 
   let linux = {
     version | default = "6.18.38",
@@ -145,7 +165,7 @@ fun pkgs =>
     config_options | default = {},
     use_tinyconfig | default = false,
     name = "linux%{if use_tinyconfig then "-tiny" else ""}-%{version}",
-    tag = "SandboxBuild",
+    tag = "SandboxInstallBuild",
     deps = {
       build = [
         pkgs.linux_headers_gen1,
@@ -187,7 +207,7 @@ fun pkgs =>
             BOBR_LINUX_BUILD_KIND = "full",
             BOBR_LINUX_CONFIG_BASE = if use_tinyconfig then "tinyconfig" else "defconfig",
             BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
+            BOBR_INSTALL_DIR = "/",
           },
         },
         {
@@ -198,7 +218,7 @@ fun pkgs =>
           env = {
             BOBR_LINUX_BUILD_KIND = "full",
             BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
+            BOBR_INSTALL_DIR = "/",
           },
         },
         {
@@ -209,13 +229,13 @@ fun pkgs =>
           env = {
             BOBR_LINUX_BUILD_KIND = "full",
             BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "@{out}",
+            BOBR_INSTALL_DIR = "/",
           },
         },
       ],
       script_config = {
         "config.fragment" =
-          let base = if use_tinyconfig then tiny_config else distro_config in
+          let base = if use_tinyconfig then config_tiny else config_distro in
           kconfig_fragment (merge_over base config_options),
       },
     },
