@@ -66,6 +66,7 @@ run_case "meson-package" pass '{"name":"pkg-package","tag":"Meson","deps":{"buil
 run_case "perl-module-rootfs" pass '{"name":"pkg-rootfs","tag":"PerlModuleRootfs","config":{"perl_args":["INSTALLDIRS=vendor"],"make_args":["DESTDIR=/tmp/out"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "perl-module-package" pass '{"name":"pkg-package","tag":"PerlModule","deps":{"build":[],"runtime":[]},"config":{"perl_args":["INSTALLDIRS=vendor"]},"inputs":{"source":'"${source_node}"'}}'
 run_case "sandbox-build-rootfs" pass '{"name":"sandbox-build-rootfs","tag":"SandboxBuildRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
+run_case "sandbox-stage-rootfs" pass '{"name":"sandbox-stage-rootfs","tag":"SandboxStageRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/stage","argv":["/bin/sh","-c","true"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "sandbox-build-package" pass '{"name":"sandbox-build-package","tag":"SandboxBuild","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "sandbox-install-build-package" pass '{"name":"sandbox-install-build-package","tag":"SandboxInstallBuild","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "oci-extract" pass '{"name":"img-rootfs","tag":"OciExtract","config":{},"inputs":{"image":{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","platform":{"os":"linux","architecture":"amd64"}}}}}'
@@ -1112,6 +1113,63 @@ jq -e '
   and ([.[] | select(.name == "base-filesystem")] | length == 1)
   and .root.config.steps[0].name == "install"
 ' <<<"${sandbox_install_build_lowering_json}" >/dev/null
+
+cat > "${tmpdir}/check-sandbox-stage-rootfs-lowering.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let source_src = {
+  name = "src",
+  tag = "Source",
+  object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  origin = {
+    tag = "Http",
+    url = "https://example.invalid/src.tar.xz",
+  },
+} in
+let rootfs_tree = {
+  name = "provided-rootfs",
+  tag = "Tree",
+  config = { tree = { entries = [{ type = "dir", path = "usr" }] } },
+  inputs = {},
+} in
+# SandboxStageRootfs is self-rootfs: the recipe provides inputs._rootfs, so no
+# fake_pkgs derivation is needed.
+recipe.to_request { recipes_path = "/recipes" } {} {
+  name = "pkg",
+  tag = "SandboxStageRootfs",
+  config = {
+    script_config = {},
+    steps = [
+      {
+        name = "install",
+        run_as = "root",
+        cwd = "/stage",
+        argv = ["/bin/sh", "-ec", "true"],
+      },
+    ],
+  },
+  inputs = {
+    _rootfs = rootfs_tree,
+    source = source_src,
+  },
+}
+EOF_INNER
+
+sandbox_stage_rootfs_lowering_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-sandbox-stage-rootfs-lowering.ncl --format json
+)"
+
+# SandboxStageRootfs must lower to a TreeMove(strip_prefix="stage") wrapping an
+# additive SandboxInstall that keeps the recipe's steps and self-provided
+# _rootfs.
+jq -e '
+  .root.tag == "TreeMove"
+  and .root.config.strip_prefix == "stage"
+  and (.root.inputs | has("tree"))
+  and ([.[] | select(.name == "pkg-staged" and .tag == "SandboxInstall")] | length == 1)
+  and ([.[] | select(.name == "pkg-staged")][0].inputs | has("_rootfs"))
+  and ([.[] | select(.name == "pkg-staged")][0].config.steps[0].name == "install")
+' <<<"${sandbox_stage_rootfs_lowering_json}" >/dev/null
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER
 let raw_pkgs = (import "${repo_root}/pkgs.ncl") [] in
