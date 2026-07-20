@@ -1,4 +1,5 @@
 let recipe = import "recipe-lib.ncl" in
+let br = import "build-rootfs.ncl" in
 
 fun pkgs =>
   let xz_src = fun version => fun hash => {
@@ -30,6 +31,35 @@ fun pkgs =>
   }
   in
 
+  # Deps-derived build rootfs, replacing the curated system_rootfs_2. xz is a
+  # native-toolchain member, so it stays on the staging (AutotoolsRootfs) model
+  # -- an additive install would overwrite the xz already present in the rootfs.
+  #
+  # Two gen1 substitutions: use gen1 kernel headers because plain linux_headers
+  # builds in native_toolchain_deps (which contains xz), an xz <-> linux_headers
+  # cycle; and use xz_gen1 (not the full xz built here) to unpack the .tar.xz
+  # source, avoiding a self-cycle. Both gen1 packages build in the external
+  # buildpack rootfs and their content is equivalent.
+  let xz_build_deps = [
+    pkgs.linux_headers_gen1,
+    pkgs.glibc,
+    pkgs.binutils,
+    pkgs.gcc,
+    pkgs.bash,
+    pkgs.make,
+    pkgs.coreutils,
+    pkgs.gawk,
+    pkgs.sed,
+    pkgs.grep,
+    pkgs.tar,
+    pkgs.gzip,
+    pkgs.xz_gen1,
+    pkgs.patch,
+    pkgs.findutils,
+    pkgs.diffutils,
+  ]
+  in
+
   let xz = {
     version | default = "5.8.1",
     source_object_hash | default = "0b54f79df85912504de0b14aec7971e3f964491af1812d83447005807513cd9e",
@@ -48,7 +78,8 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_2,
+      _rootfs =
+        br.build_rootfs_closure pkgs "xz-%{version}-build-rootfs" xz_build_deps,
       source = xz_src version source_object_hash,
     },
   }
