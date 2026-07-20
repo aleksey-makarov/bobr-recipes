@@ -61,7 +61,7 @@ fun pkgs =>
     version | default = "3.13.7",
     source_object_hash | default = "5462f9099dfd30e238def83c71d91897d8caa5ff6ebc7a50f14d4802cdaaa79a",
     name = "python-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       in-tree = true,
       pre_configure = {
@@ -104,7 +104,7 @@ fun pkgs =>
           "ln",
           "-svf",
           "python3",
-          "@{out}/usr/bin/python",
+          "/stage/usr/bin/python",
         ],
       },
     },
@@ -119,7 +119,7 @@ fun pkgs =>
     version | default = "3.13.7",
     source_object_hash | default = "5462f9099dfd30e238def83c71d91897d8caa5ff6ebc7a50f14d4802cdaaa79a",
     name = "python-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     deps = {
       build = [],
       runtime = [
@@ -165,7 +165,7 @@ fun pkgs =>
           "ln",
           "-svf",
           "python3",
-          "@{out}/usr/bin/python",
+          "/stage/usr/bin/python",
         ],
       },
     },
