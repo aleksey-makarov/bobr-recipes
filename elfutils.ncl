@@ -12,19 +12,6 @@ fun pkgs =>
   }
   in
 
-  let elfutils_rootfs = {
-    name = "elfutils-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs = {
-      base = pkgs.system_rootfs_1,
-      bzip2 = pkgs.bzip2_gen1,
-      pkgconf = pkgs.pkgconf_gen1,
-      zlib = pkgs.zlib,
-    },
-  }
-  in
-
   let elfutils = {
     version | default = "0.193",
     source_object_hash | default = "7857f44b624f4d8d421df851aaae7b1402cfe6bcdd2d8049f15fc07d3dde7635",
@@ -42,7 +29,15 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = elfutils_rootfs,
+      # bootstrap toolchain (replaces the system-rootfs-1 base) plus elfutils's
+      # own extra build deps: bzip2/pkgconf (gen1, this is a gen1-stage build) and
+      # zlib, which --with-zlib links.
+      _rootfs =
+        recipe.bootstrap_toolchain_rootfs pkgs "elfutils-build-rootfs" [
+          pkgs.bzip2_gen1,
+          pkgs.pkgconf_gen1,
+          pkgs.zlib,
+        ],
       source = elfutils_src version source_object_hash,
     },
   }
@@ -50,7 +45,6 @@ fun pkgs =>
 
   {
     include [
-      elfutils_rootfs,
       elfutils,
     ],
   }

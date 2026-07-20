@@ -41,7 +41,7 @@ fun pkgs =>
       env = { gl_cv_func_strcasecmp_works = "y" },
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_1,
+      _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "diffutils-build-rootfs" [],
       source = diffutils_src version source_object_hash,
     },
   }

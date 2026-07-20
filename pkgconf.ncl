@@ -56,7 +56,7 @@ fun pkgs =>
     tag = "AutotoolsRootfs",
     config = pkgconf_config version "@{out}",
     inputs = {
-      _rootfs = pkgs.system_rootfs_1,
+      _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "pkgconf-gen1-build-rootfs" [],
       source = pkgconf_src version source_object_hash,
     },
   }

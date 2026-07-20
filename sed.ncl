@@ -39,7 +39,7 @@ fun pkgs =>
       configure_args = ["--disable-nls", "--without-selinux"],
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_1,
+      _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "sed-build-rootfs" [],
       source = sed_src version source_object_hash,
     },
   }

@@ -143,6 +143,9 @@ in
   native_build_rootfs = build_rootfs_lib.native_build_rootfs,
   native_build_deps = build_rootfs_lib.native_build_deps,
   build_rootfs_closure = build_rootfs_lib.build_rootfs_closure,
+  # For the final builds of the native userland itself: bootstrap toolchain
+  # (gen1 userland + final compiler) closure. Replaces system-rootfs-1.
+  bootstrap_toolchain_rootfs = build_rootfs_lib.bootstrap_toolchain_rootfs,
 
   split = {
     libs = fun base =>

@@ -81,7 +81,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_1,
+      _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "coreutils-build-rootfs" [],
       source = coreutils_src version source_object_hash,
     },
   }

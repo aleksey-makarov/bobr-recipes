@@ -123,6 +123,36 @@ in
 # toolchain plus the kernel UAPI headers (which ordinary packages compile
 # against).
 let native_build_deps = fun pkgs => [pkgs.linux_headers] @ native_toolchain_deps pkgs in
+# The bootstrap toolchain that builds the FINAL native userland: the final
+# compiler (glibc/binutils/gcc) over the still-*_gen1 userland, plus the gen1
+# kernel headers. These utilities (bash, coreutils, grep, ...) cannot build with
+# native_build_deps -- they ARE its members, that would be a cycle -- so they
+# bootstrap here, one stage below the final toolchain. This is the deps-closure
+# that replaces the curated system-rootfs-1 snapshot: same package set, so the
+# build environment (PATH tools) matches what the snapshot provided.
+let bootstrap_toolchain_deps = fun pkgs => [
+  pkgs.linux_headers_gen1,
+  pkgs.glibc,
+  pkgs.binutils,
+  pkgs.gcc,
+  pkgs.bash_gen1,
+  pkgs.gawk_gen1,
+  pkgs.awk_symlink,
+  pkgs.bison_gen1,
+  pkgs.make_gen1,
+  pkgs.coreutils_gen1,
+  pkgs.sed_gen1,
+  pkgs.grep_gen1,
+  pkgs.gzip_gen1,
+  pkgs.xz_gen1,
+  pkgs.tar_gen1,
+  pkgs.patch_gen1,
+  pkgs.findutils_gen1,
+  pkgs.diffutils_gen1,
+  pkgs.m4_gen1,
+  pkgs.python_gen1,
+]
+in
 # The default build deps every Meson package needs: the native toolchain plus
 # pkgconf and python. Shared so both the Meson package builder and recipes that
 # assemble their own build rootfs (the glib bootstrap) use one list.
@@ -211,6 +241,7 @@ in
     sorted_closure_nodes,
     native_toolchain_deps,
     native_build_deps,
+    bootstrap_toolchain_deps,
     meson_build_deps,
     build_rootfs_closure,
     build_rootfs_closure_substituting,
@@ -221,4 +252,11 @@ in
     fun name =>
       fun extra_deps =>
         build_rootfs_closure pkgs name (native_build_deps pkgs @ extra_deps),
+  # Convenience for the final builds of the native userland itself: the bootstrap
+  # toolchain (gen1 userland + final compiler) plus `extra_deps`. Replaces the
+  # curated system-rootfs-1 snapshot.
+  bootstrap_toolchain_rootfs = fun pkgs =>
+    fun name =>
+      fun extra_deps =>
+        build_rootfs_closure pkgs name (bootstrap_toolchain_deps pkgs @ extra_deps),
 }

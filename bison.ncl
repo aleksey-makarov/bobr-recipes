@@ -42,7 +42,7 @@ fun pkgs =>
     },
     config = {},
     inputs = {
-      _rootfs = pkgs.system_rootfs_1,
+      _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "bison-build-rootfs" [],
       source = bison_src version source_object_hash,
     },
   }

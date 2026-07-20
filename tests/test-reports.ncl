@@ -32,9 +32,8 @@ fun pkgs =>
       _rootfs = pkgs.buildpack_deps_rootfs,
       script = test_reports_script_source,
       report000 = pkgs.test_system_rootfs_0,
-      report001 = pkgs.test_system_rootfs_1,
-      report002 = pkgs.test_rootfs,
-      report003 = pkgs.test_gnome_rootfs,
+      report001 = pkgs.test_rootfs,
+      report002 = pkgs.test_gnome_rootfs,
     },
   }
   in

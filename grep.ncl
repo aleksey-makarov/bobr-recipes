@@ -39,7 +39,7 @@ fun pkgs =>
       configure_args = ["--disable-nls", "--disable-perl-regexp"],
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_1,
+      _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "grep-build-rootfs" [],
       source = grep_src version source_object_hash,
     },
   }
