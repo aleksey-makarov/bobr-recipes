@@ -35,6 +35,8 @@ fun pkgs =>
         pkgs.polkit,
         pkgs.python,
         pkgs.gobject_introspection,
+        # g-ir-scanner imports distutils (gone in 3.13); setuptools provides it.
+        pkgs.python_setuptools,
         pkgs.libxslt,
         pkgs.gettext,
         pkgs.pkgconf,

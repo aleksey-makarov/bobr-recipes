@@ -114,8 +114,12 @@ check_shebang_interpreter() {
 run_python_check() {
   local cmd version import_output
 
-  log_check "python toolchain commands are present"
-  for cmd in python3 pip3 meson ninja; do
+  # The build-only tools (meson, ninja) and PyPI build backends are no longer
+  # bundled into the shipped interpreter, so the image is expected NOT to carry
+  # them. Verify only that the shipped Python interpreter and pip are present and
+  # that the interpreter's C extensions link.
+  log_check "python interpreter commands are present"
+  for cmd in python3 pip3; do
     if command -v "$cmd" >/dev/null 2>&1; then
       log_ok "command available: $cmd -> $(command -v "$cmd")"
     else
@@ -138,47 +142,32 @@ run_python_check() {
     log_fail "python3 -m pip --version failed"
   fi
 
-  if version="$(meson --version 2>&1)"; then
-    log_ok "meson --version"
-    echo "INFO  meson ${version}"
-  else
-    log_fail "meson --version failed"
-  fi
-
-  if version="$(ninja --version 2>&1)"; then
-    log_ok "ninja --version"
-    echo "INFO  ninja ${version}"
-  else
-    log_fail "ninja --version failed"
-  fi
-
-  log_check "python modules import successfully"
+  log_check "python stdlib C extensions import successfully"
   if import_output="$(python3 - <<'EOF_INNER'
-import flit_core
-import packaging
-import wheel
-import setuptools
-import markupsafe
-import jinja2
-import mesonbuild
+# Verify the shipped interpreter's C extensions link and import. Limited to the
+# ones the build's runtime deps guarantee (zlib, openssl, libffi, bzip2, ncurses,
+# expat); sqlite3/lzma are not built (no lib in the rootfs). The build-only PyPI
+# modules are intentionally absent from the image.
+import zlib
+import ssl
+import ctypes
+import bz2
+import curses
+import xml.parsers.expat
 
 print('IMPORTS_OK')
-print('flit_core=' + flit_core.__file__)
-print('packaging=' + packaging.__file__)
-print('wheel=' + wheel.__file__)
-print('setuptools=' + setuptools.__file__)
-print('markupsafe=' + markupsafe.__file__)
-print('jinja2=' + jinja2.__file__)
-print('mesonbuild=' + mesonbuild.__file__)
+print('ssl=' + ssl.__file__)
+print('ctypes=' + ctypes.__file__)
+print('bz2=' + bz2.__file__)
 EOF_INNER
  2>&1)"; then
     if grep -qx 'IMPORTS_OK' <<< "${import_output}"; then
-      log_ok "python module imports"
+      log_ok "python stdlib C extension imports"
       while IFS= read -r line; do
         echo "INFO  ${line}"
       done <<< "${import_output}"
     else
-      log_fail "python module imports did not emit success marker"
+      log_fail "python stdlib C extension imports did not emit success marker"
       while IFS= read -r line; do
         [ -n "$line" ] && echo "INFO  ${line}"
       done <<< "${import_output}"

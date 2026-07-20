@@ -43,6 +43,9 @@ fun pkgs =>
         pkgs.linux_pam,
         pkgs.openssl,
         pkgs.util_linux,
+        # systemd's meson build renders templated sources with Jinja2 (no longer
+        # bundled into the interpreter).
+        pkgs.python_jinja2,
       ],
       runtime = [
         pkgs.glibc_libs,

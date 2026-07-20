@@ -29,6 +29,8 @@ fun pkgs =>
     tag = "Meson",
     deps = {
       build = [
+        # mutter renders its man pages from reStructuredText via docutils' rst2man.
+        pkgs.docutils,
         pkgs.glib,
         pkgs.gsettings_desktop_schemas,
         pkgs.graphene,

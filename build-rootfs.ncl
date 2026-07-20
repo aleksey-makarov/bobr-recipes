@@ -131,6 +131,18 @@ let meson_build_deps = fun pkgs =>
   @ [
     pkgs.pkgconf,
     pkgs.python,
+    # meson (a PythonModule) and ninja (the backend it drives) are no longer
+    # bundled into the interpreter, so pull them in explicitly. meson's runtime
+    # closure already includes ninja; ninja is listed too for clarity.
+    pkgs.meson,
+    pkgs.ninja,
+    # setuptools and packaging used to ship inside the interpreter; many meson
+    # builds probe for them (`py.find_installation(modules: ['setuptools'])`,
+    # packaging/distutils checks -- distutils is gone in 3.13), so keep them in
+    # the default meson build toolchain. Nicher modules (mako, jinja2, ...) stay
+    # per-recipe.
+    pkgs.python_setuptools,
+    pkgs.python_packaging,
   ]
 in
 # base_filesystem + runtime closure of `build_deps`, as a TreeMerge named

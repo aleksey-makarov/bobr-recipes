@@ -71,6 +71,16 @@ fun pkgs =>
     },
   }
   in
+  let buildscript_python_module = {
+    name = "buildscript-python-module",
+    tag = "Source",
+    object_hash = import "python-module.sh.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "synthetic/python-module.sh",
+    },
+  }
+  in
   let buildscript_cargo = {
     name = "buildscript-cargo",
     tag = "Source",
@@ -143,6 +153,12 @@ fun pkgs =>
     br.native_build_deps pkgs
     @ [
       pkgs.perl,
+    ]
+  in
+  let python_module_package_default_build_deps =
+    br.native_build_deps pkgs
+    @ [
+      pkgs.python,
     ]
   in
   let rust_package_default_build_deps =
@@ -567,6 +583,66 @@ fun pkgs =>
         synthetic_inputs buildscript_perl_module node.inputs,
     }
   in
+  let lower_python_module_node = fun node =>
+    let node_config = node.config in
+    let source_root_expr = synthetic_source_root_expr node_config in
+    let pre_configure_steps =
+      normalize_hook_steps node_config "pre_configure" source_root_expr
+    in
+    let post_install_steps =
+      normalize_hook_steps node_config "post_install" "/"
+    in
+    let lowered_script_config =
+      let with_env =
+        if std.record.has_field "env" node_config then
+          { env = node_config.env }
+        else
+          {}
+      in
+      if std.record.has_field "source_subdir" node_config then
+        std.record.insert "source_subdir" node_config.source_subdir with_env
+      else
+        with_env
+    in
+    let python_module_step_env = synthetic_step_env node
+    in
+    {
+      name = node.name,
+      tag = "SandboxInstall",
+      config = {
+        steps =
+          [synthetic_prepare_step python_module_step_env]
+          @ pre_configure_steps
+          @ [
+            {
+              name = "bobr_configure",
+              run_as = "build-user",
+              cwd = "@{build}",
+              argv = ["@{script}", "configure"],
+              env = python_module_step_env,
+            },
+            {
+              name = "bobr_build",
+              run_as = "build-user",
+              cwd = "@{build}",
+              argv = ["@{script}", "build"],
+              env = python_module_step_env,
+            },
+            {
+              name = "bobr_install",
+              run_as = "root",
+              cwd = "@{build}",
+              argv = ["@{script}", "install"],
+              env = python_module_step_env,
+            },
+          ]
+          @ post_install_steps,
+        script_config = lowered_script_config,
+      },
+      inputs =
+        synthetic_inputs buildscript_python_module node.inputs,
+    }
+  in
   let lower_cargo_node = fun node =>
     let node_config = record_get_or "config" {} node in
     let post_install_steps =
@@ -687,7 +763,22 @@ fun pkgs =>
       record_replace
         "inputs"
         package_inputs
-        (record_replace "tag" "PerlModuleRootfs" node)
+        node
+    )
+  in
+  let lower_python_module_package_node = fun node =>
+    let build_rootfs = build_rootfs_for python_module_package_default_build_deps node in
+    let package_inputs =
+      record_replace
+        "_rootfs"
+        build_rootfs
+        node.inputs
+    in
+    lower_python_module_node (
+      record_replace
+        "inputs"
+        package_inputs
+        node
     )
   in
   let lower_cargo_package_node = fun node =>
@@ -759,12 +850,12 @@ fun pkgs =>
     "Makefile" = lower_makefile_package_node,
     "Meson" = lower_meson_package_node,
     "PerlModule" = lower_perl_module_package_node,
+    "PythonModule" = lower_python_module_package_node,
     "SandboxBuild" = lower_sandbox_build_node,
     "SandboxInstallBuild" = lower_sandbox_install_build_node,
     "AutotoolsRootfs" = lower_autotools_node,
     "MakefileRootfs" = lower_makefile_node,
     "MesonRootfs" = lower_meson_node,
-    "PerlModuleRootfs" = lower_perl_module_node,
     "SandboxBuildRootfs" = lower_sandbox_build_rootfs_node,
     "SandboxStageRootfs" = lower_sandbox_stage_rootfs_node,
     "Cargo" = lower_cargo_package_node,

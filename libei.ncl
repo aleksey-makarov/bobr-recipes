@@ -2,8 +2,8 @@
 # libeis-1.0 (server); mutter links both, unconditionally. liboeffis (the portal
 # helper, sd-bus based) is off -- mutter is the EIS side and does not need it,
 # which also drops the sd-bus dependency. The protocol C code is generated at
-# build time by proto/ei-scanner, which needs Python jinja2; that comes with
-# `pkgs.python` (a Meson default build dep bundles it), so nothing extra here.
+# build time by proto/ei-scanner, which needs Python jinja2 (pkgs.python_jinja2
+# in deps.build -- the interpreter no longer bundles it).
 #
 # Source is fetched from the freedesktop GitLab archive with `unpack = true`, so
 # the object hash is the extracted tree's fsobj-hash rather than the tarball
@@ -34,6 +34,7 @@ fun pkgs =>
       build = [
         pkgs.libevdev,
         pkgs.libxkbcommon,
+        pkgs.python_jinja2,
       ],
       runtime = [
         pkgs.glibc_libs,

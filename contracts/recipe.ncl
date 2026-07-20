@@ -13,12 +13,12 @@ let KnownTags = [
   "Makefile",
   "Meson",
   "PerlModule",
+  "PythonModule",
   "SandboxBuild",
   "SandboxInstallBuild",
   "AutotoolsRootfs",
   "MakefileRootfs",
   "MesonRootfs",
-  "PerlModuleRootfs",
   "SandboxBuildRootfs",
   "SandboxStageRootfs",
   "SandboxInstall",
@@ -423,6 +423,13 @@ let PerlModuleConfig = {
   post_install | AutotoolsHook | optional,
 }
 in
+let PythonModuleConfig = {
+  env | Dyn | optional,
+  source_subdir | String | optional,
+  pre_configure | AutotoolsHook | optional,
+  post_install | AutotoolsHook | optional,
+}
+in
 let CargoConfig = {
   features | Array String | optional,
   bins | Array String | optional,
@@ -619,15 +626,16 @@ let ValidateRecipeShallow = fun recipe =>
         config = checked.config | CargoConfig,
         deps = checked.deps | RecipeDeps,
       }
-    else if checked.tag == "PerlModuleRootfs" then
-      checked
-      & {
-        config = checked.config | PerlModuleConfig,
-      }
     else if checked.tag == "PerlModule" then
       checked
       & {
         config = checked.config | PerlModuleConfig,
+        deps = checked.deps | RecipeDeps,
+      }
+    else if checked.tag == "PythonModule" then
+      checked
+      & {
+        config = checked.config | PythonModuleConfig,
         deps = checked.deps | RecipeDeps,
       }
     else if checked.tag == "SandboxBuildRootfs" || checked.tag == "SandboxInstall" || checked.tag == "SandboxStageRootfs" then
@@ -860,16 +868,17 @@ let rec ValidateRecipe = fun recipe =>
         deps = checked.deps | RecipeDeps,
         inputs = validate_synthetic_package_inputs checked.inputs,
       }
-    else if checked.tag == "PerlModuleRootfs" then
-      checked
-      & {
-        config = checked.config | PerlModuleConfig,
-        inputs = validate_synthetic_rootfs_inputs checked.inputs,
-      }
     else if checked.tag == "PerlModule" then
       checked
       & {
         config = checked.config | PerlModuleConfig,
+        deps = checked.deps | RecipeDeps,
+        inputs = validate_synthetic_package_inputs checked.inputs,
+      }
+    else if checked.tag == "PythonModule" then
+      checked
+      & {
+        config = checked.config | PythonModuleConfig,
         deps = checked.deps | RecipeDeps,
         inputs = validate_synthetic_package_inputs checked.inputs,
       }
@@ -958,8 +967,11 @@ in
     | doc "Config contract for synthetic `Meson` and `MesonRootfs` recipe nodes."
     = MesonConfig,
   perl_module_config
-    | doc "Config contract for synthetic `PerlModule` and `PerlModuleRootfs` recipe nodes."
+    | doc "Config contract for synthetic `PerlModule` recipe nodes."
     = PerlModuleConfig,
+  python_module_config
+    | doc "Config contract for synthetic `PythonModule` recipe nodes."
+    = PythonModuleConfig,
   cargo_config
     | doc "Config contract for synthetic `Cargo` and `CargoRootfs` recipe nodes."
     = CargoConfig,

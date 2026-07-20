@@ -49,6 +49,8 @@ fun pkgs =>
         pkgs.util_linux,
         pkgs.json_glib,
         pkgs.gobject_introspection,
+        # g-ir-scanner imports distutils (gone in 3.13); setuptools provides it.
+        pkgs.python_setuptools,
         pkgs.gettext,
         pkgs.gperf,
         pkgs.python,
