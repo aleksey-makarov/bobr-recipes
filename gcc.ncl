@@ -49,7 +49,7 @@ fun pkgs =>
     version | default = "15.2.0",
     source_object_hash | default = "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e",
     name = "gcc-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       pre_configure = gcc_prereqs_pre_configure,
       configure_args = [
@@ -75,7 +75,7 @@ fun pkgs =>
     version | default = "15.2.0",
     source_object_hash | default = "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e",
     name = "gcc-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       pre_configure = gcc_prereqs_pre_configure,
       configure_args = [
@@ -95,7 +95,7 @@ fun pkgs =>
           "ln",
           "-sv",
           "gcc",
-          "@{out}/usr/bin/cc",
+          "/stage/usr/bin/cc",
         ],
       },
     },

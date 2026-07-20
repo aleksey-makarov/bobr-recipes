@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "1.35",
     source_object_hash | default = "4d62ff37342ec7aed748535323930c7cf94acf71c3591882b26a7ea50f3edc16",
     name = "tar-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--disable-nls",
@@ -37,7 +37,7 @@ fun pkgs =>
     version | default = "1.35",
     source_object_hash | default = "4d62ff37342ec7aed748535323930c7cf94acf71c3591882b26a7ea50f3edc16",
     name = "tar-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--disable-nls",

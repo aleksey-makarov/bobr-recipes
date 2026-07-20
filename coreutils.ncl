@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "9.7",
     source_object_hash | default = "e8bb26ad0293f9b5a1fc43fb42ba970e312c66ce92c1b0b16713d7500db251bf",
     name = "coreutils-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--disable-nls",
@@ -35,11 +35,11 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            mkdir -pv "@{out}/usr/share/man/man8"
-            mv -v "@{out}/usr/share/man/man1/chroot.1" \
-                  "@{out}/usr/share/man/man8/chroot.8"
+            mkdir -pv "/stage/usr/share/man/man8"
+            mv -v "/stage/usr/share/man/man1/chroot.1" \
+                  "/stage/usr/share/man/man8/chroot.8"
             sed -i 's/"1"/"8"/' \
-                   "@{out}/usr/share/man/man8/chroot.8"
+                   "/stage/usr/share/man/man8/chroot.8"
           "%,
         ],
       },
@@ -55,7 +55,7 @@ fun pkgs =>
     version | default = "9.7",
     source_object_hash | default = "e8bb26ad0293f9b5a1fc43fb42ba970e312c66ce92c1b0b16713d7500db251bf",
     name = "coreutils-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--disable-nls",
@@ -71,11 +71,11 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            mkdir -pv "@{out}/usr/share/man/man8"
-            mv -v "@{out}/usr/share/man/man1/chroot.1" \
-                  "@{out}/usr/share/man/man8/chroot.8"
+            mkdir -pv "/stage/usr/share/man/man8"
+            mv -v "/stage/usr/share/man/man1/chroot.1" \
+                  "/stage/usr/share/man/man8/chroot.8"
             sed -i 's/"1"/"8"/' \
-                   "@{out}/usr/share/man/man8/chroot.8"
+                   "/stage/usr/share/man/man8/chroot.8"
           "%,
         ],
       },

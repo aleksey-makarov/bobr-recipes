@@ -17,7 +17,7 @@ fun pkgs =>
     version | default = "5.8.1",
     source_object_hash | default = "0b54f79df85912504de0b14aec7971e3f964491af1812d83447005807513cd9e",
     name = "xz-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--disable-static",
@@ -32,8 +32,10 @@ fun pkgs =>
   in
 
   # Deps-derived build rootfs, replacing the curated system_rootfs_2. xz is a
-  # native-toolchain member, so it stays on the staging (AutotoolsRootfs) model
-  # -- an additive install would overwrite the xz already present in the rootfs.
+  # native-toolchain member, so its output overlaps the xz already present in the
+  # rootfs; AutotoolsStageRootfs installs into a virgin /stage and TreeMove
+  # re-roots it, so the overlap never arises (a plain additive install into /
+  # would collide).
   #
   # Two gen1 substitutions: use gen1 kernel headers because plain linux_headers
   # builds in native_toolchain_deps (which contains xz), an xz <-> linux_headers

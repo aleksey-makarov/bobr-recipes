@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "4.4.1",
     source_object_hash | default = "dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3",
     name = "make-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls"],
     },
@@ -34,7 +34,7 @@ fun pkgs =>
     version | default = "4.4.1",
     source_object_hash | default = "dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3",
     name = "make-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls"],
     },

@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "4.9",
     source_object_hash | default = "6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181",
     name = "sed-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls", "--without-selinux"],
     },
@@ -34,7 +34,7 @@ fun pkgs =>
     version | default = "4.9",
     source_object_hash | default = "6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181",
     name = "sed-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls", "--without-selinux"],
     },

@@ -40,7 +40,7 @@ fun pkgs =>
 
   let glibc_gen1 = {
     name = "glibc-gen1-2.42",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "libc_cv_slibdir=/usr/lib64",
@@ -81,7 +81,7 @@ fun pkgs =>
 
   let glibc = {
     name = "glibc-2.42",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "libc_cv_slibdir=/usr/lib64",
@@ -124,7 +124,7 @@ fun pkgs =>
         argv = [
           "/bin/sh",
           "-ec",
-          "rm -f @{out}/etc/ld.so.cache",
+          "rm -f /stage/etc/ld.so.cache",
         ],
       },
     },

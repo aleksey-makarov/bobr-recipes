@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "5.3.2",
     source_object_hash | default = "f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc",
     name = "gawk-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--without-readline"],
       pre_configure = {
@@ -38,10 +38,10 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            if [ -L "@{out}/usr/bin/awk" ]; then
-              rm -v "@{out}/usr/bin/awk"
-            elif [ -e "@{out}/usr/bin/awk" ]; then
-              echo "refusing to remove non-symlink @{out}/usr/bin/awk" >&2
+            if [ -L "/stage/usr/bin/awk" ]; then
+              rm -v "/stage/usr/bin/awk"
+            elif [ -e "/stage/usr/bin/awk" ]; then
+              echo "refusing to remove non-symlink /stage/usr/bin/awk" >&2
               exit 1
             fi
           "%,
@@ -93,7 +93,7 @@ fun pkgs =>
     version | default = "5.3.2",
     source_object_hash | default = "f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc",
     name = "gawk-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--without-readline"],
       pre_configure = {

@@ -16,7 +16,7 @@ fun pkgs =>
     version | default = "0.193",
     source_object_hash | default = "7857f44b624f4d8d421df851aaae7b1402cfe6bcdd2d8049f15fc07d3dde7635",
     name = "elfutils-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--disable-debuginfod",

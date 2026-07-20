@@ -16,7 +16,7 @@ fun pkgs =>
     version | default = "7.0.3",
     source_object_hash | default = "efc1df54c5378be62a93662e34f6829af1738a858211bd51c8d9b6c0892825ac",
     name = "bc-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--disable-history",

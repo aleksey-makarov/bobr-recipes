@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "1.14",
     source_object_hash | default = "01a7b881bd220bfdf615f97b8718f80bdfd3f6add385b993dcf6efd14e8c0ac6",
     name = "gzip-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls"],
     },
@@ -34,7 +34,7 @@ fun pkgs =>
     version | default = "1.14",
     source_object_hash | default = "01a7b881bd220bfdf615f97b8718f80bdfd3f6add385b993dcf6efd14e8c0ac6",
     name = "gzip-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls"],
     },

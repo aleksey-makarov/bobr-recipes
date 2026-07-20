@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "3.12",
     source_object_hash | default = "2649b27c0e90e632eadcd757be06c6e9a4f48d941de51e7c0f83ff76408a07b9",
     name = "grep-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls", "--disable-perl-regexp"],
     },
@@ -34,7 +34,7 @@ fun pkgs =>
     version | default = "3.12",
     source_object_hash | default = "2649b27c0e90e632eadcd757be06c6e9a4f48d941de51e7c0f83ff76408a07b9",
     name = "grep-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls", "--disable-perl-regexp"],
     },

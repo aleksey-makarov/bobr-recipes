@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "5.3",
     source_object_hash | default = "0d5cd86965f869a26cf64f4b71be7b96f90a3ba8b3d74e27e8e9d9d5550f31ba",
     name = "bash-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--without-bash-malloc",
@@ -32,7 +32,7 @@ fun pkgs =>
           "ln",
           "-svf",
           "bash",
-          "@{out}/usr/bin/sh",
+          "/stage/usr/bin/sh",
         ],
       },
     },
@@ -47,7 +47,7 @@ fun pkgs =>
     version | default = "5.3",
     source_object_hash | default = "0d5cd86965f869a26cf64f4b71be7b96f90a3ba8b3d74e27e8e9d9d5550f31ba",
     name = "bash-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     deps = {
       build = [],
       runtime = [
@@ -65,7 +65,7 @@ fun pkgs =>
           "ln",
           "-svf",
           "bash",
-          "@{out}/usr/bin/sh",
+          "/stage/usr/bin/sh",
         ],
       },
     },

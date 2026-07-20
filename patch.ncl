@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "2.8",
     source_object_hash | default = "f87cee69eec2b4fcbf60a396b030ad6aa3415f192aa5f7ee84cad5e11f7f5ae3",
     name = "patch-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls"],
     },
@@ -34,7 +34,7 @@ fun pkgs =>
     version | default = "2.8",
     source_object_hash | default = "f87cee69eec2b4fcbf60a396b030ad6aa3415f192aa5f7ee84cad5e11f7f5ae3",
     name = "patch-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls"],
     },

@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "4.10.0",
     source_object_hash | default = "1387e0b67ff247d2abde998f90dfbf70c1491391a59ddfecb8ae698789f0a4f5",
     name = "findutils-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--disable-nls",
@@ -38,7 +38,7 @@ fun pkgs =>
     version | default = "4.10.0",
     source_object_hash | default = "1387e0b67ff247d2abde998f90dfbf70c1491391a59ddfecb8ae698789f0a4f5",
     name = "findutils-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--disable-nls",

@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "2.45",
     source_object_hash | default = "c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2",
     name = "binutils-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--disable-nls",
@@ -42,7 +42,7 @@ fun pkgs =>
     version | default = "2.45",
     source_object_hash | default = "c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2",
     name = "binutils-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
         "--libdir=/usr/lib64",

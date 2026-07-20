@@ -19,7 +19,7 @@ fun pkgs =>
     version | default = "3.12",
     source_object_hash | default = "7c8b7f9fc8609141fdea9cece85249d308624391ff61dedaf528fcb337727dfd",
     name = "diffutils-gen1-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls"],
       env = { gl_cv_func_strcasecmp_works = "y" },
@@ -35,7 +35,7 @@ fun pkgs =>
     version | default = "3.12",
     source_object_hash | default = "7c8b7f9fc8609141fdea9cece85249d308624391ff61dedaf528fcb337727dfd",
     name = "diffutils-%{version}",
-    tag = "AutotoolsRootfs",
+    tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls"],
       env = { gl_cv_func_strcasecmp_works = "y" },
