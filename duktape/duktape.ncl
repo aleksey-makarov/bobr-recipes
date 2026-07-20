@@ -44,7 +44,11 @@ fun pkgs =>
       | default
       = "90f8d2fa8b5567c6899830ddef2c03f3c27960b11aca222fa17aa7ac613c2890",
     name = "duktape-%{version}",
-    tag = "SandboxBuildRootfs",
+    # Plain additive SandboxInstall (not a *StageRootfs): the install lays out
+    # only new paths (libduktape.so*, the two headers, duktape.pc) that the
+    # native-toolchain build rootfs does not carry, so there is no overlap and
+    # no need for the /stage + TreeMove indirection -- install straight into /.
+    tag = "SandboxInstall",
     deps = {
       build = [],
       runtime = [
