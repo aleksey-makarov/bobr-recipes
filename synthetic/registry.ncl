@@ -21,6 +21,16 @@ fun pkgs =>
     },
   }
   in
+  let buildscript_autotools_stage_install = {
+    name = "buildscript-autotools-stage-install",
+    tag = "Source",
+    object_hash = import "autotools-stage-install.sh.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "synthetic/autotools-stage-install.sh",
+    },
+  }
+  in
   let buildscript_common = {
     name = "buildscript-synthetic-common",
     tag = "Source",
@@ -349,6 +359,27 @@ fun pkgs =>
   let lower_autotools_node = lower_autotools_node_with "Sandbox" buildscript_autotools "@{out}" in
   let lower_autotools_install_node =
     lower_autotools_node_with "SandboxInstall" buildscript_autotools_install "/"
+  in
+  let lower_autotools_stage_install_node =
+    lower_autotools_node_with "SandboxInstall" buildscript_autotools_stage_install "/stage"
+  in
+  # Additive-staging variant of AutotoolsRootfs: runs the synthetic autotools
+  # steps but installs into a virgin /stage (autotools-stage-install.sh), which
+  # is captured additively and then re-rooted /stage -> / by TreeMove. Use it for
+  # explicit-rootfs recipes whose output overlaps the build rootfs (e.g. a
+  # toolchain member rebuilt on a rootfs that already carries it), where a plain
+  # additive install into / would modify lower-layer files.
+  let lower_autotools_stage_rootfs_node = fun node =>
+    let staged =
+      lower_autotools_stage_install_node
+        (record_replace "name" (node.name ++ "-staged") node)
+    in
+    {
+      name = node.name,
+      tag = "TreeMove",
+      config = { strip_prefix = "stage" },
+      inputs = { tree = staged },
+    }
   in
   # The package-level `Autotools` tag builds with the additive SandboxInstall
   # model (install into the overlay root). The `AutotoolsRootfs` tag is
@@ -854,6 +885,7 @@ fun pkgs =>
     "SandboxBuild" = lower_sandbox_build_node,
     "SandboxInstallBuild" = lower_sandbox_install_build_node,
     "AutotoolsRootfs" = lower_autotools_node,
+    "AutotoolsStageRootfs" = lower_autotools_stage_rootfs_node,
     "MakefileRootfs" = lower_makefile_node,
     "MesonRootfs" = lower_meson_node,
     "SandboxBuildRootfs" = lower_sandbox_build_rootfs_node,
