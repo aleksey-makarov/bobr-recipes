@@ -866,7 +866,6 @@ fun pkgs =>
         package_inputs
         (record_replace "tag" target_tag node)
   in
-  let lower_sandbox_build_node = lower_sandbox_build_with "Sandbox" in
   let lower_sandbox_install_build_node = lower_sandbox_build_with "SandboxInstall" in
   let lower_sandbox_build_rootfs_node = fun node =>
     record_replace "tag" "Sandbox" node
@@ -899,7 +898,6 @@ fun pkgs =>
     "Meson" = lower_meson_package_node,
     "PerlModule" = lower_perl_module_package_node,
     "PythonModule" = lower_python_module_package_node,
-    "SandboxBuild" = lower_sandbox_build_node,
     "SandboxInstallBuild" = lower_sandbox_install_build_node,
     "AutotoolsRootfs" = lower_autotools_node,
     "AutotoolsStageRootfs" = lower_autotools_stage_rootfs_node,
