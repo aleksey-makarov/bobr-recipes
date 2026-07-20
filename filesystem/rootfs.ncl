@@ -67,7 +67,7 @@ fun pkgs =>
     pkgs.pkgconf,
     pkgs.psmisc,
     pkgs.python,
-    pkgs.xml_parser,
+    pkgs.perl_xml_parser,
     pkgs.sed,
     pkgs.shadow,
     # libpam + PAM modules (pam_unix/pam_systemd/...) and helpers. systemd ships

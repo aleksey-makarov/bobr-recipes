@@ -23,11 +23,11 @@ fun pkgs =>
     tag = "Autotools",
     deps = {
       build = [
-        pkgs.xml_parser,
+        pkgs.perl_xml_parser,
       ],
       runtime = [
         pkgs.perl,
-        pkgs.xml_parser,
+        pkgs.perl_xml_parser,
       ],
     },
     config = {

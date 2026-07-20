@@ -1,4 +1,8 @@
 let recipe = import "../recipe-lib.ncl" in
+# Perl and its build-only CPAN modules are aggregated here so pkgs.ncl imports
+# only perl/perl.ncl (not each module file individually).
+let mk_perl_parse_yapp = import "perl-parse-yapp.ncl" in
+let mk_perl_xml_parser = import "perl-xml-parser.ncl" in
 
 fun pkgs =>
   let buildscript_perl_configure = {
@@ -12,15 +16,17 @@ fun pkgs =>
   }
   in
 
-  let perl_src = fun version => fun hash => {
-    name = "perl-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://www.cpan.org/src/5.0/perl-%{version}.tar.xz",
-    },
-  }
+  let perl_src = fun version =>
+    fun hash =>
+      {
+        name = "perl-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://www.cpan.org/src/5.0/perl-%{version}.tar.xz",
+        },
+      }
   in
 
   let perl_build_rootfs = {
@@ -82,8 +88,8 @@ fun pkgs =>
   }
   in
 
-  {
-    include [
-      perl,
-    ],
-  }
+  # `include` names each field after the identifier, so bind the applied nodes
+  # to their attribute names first (it cannot take an application expression).
+  let perl_parse_yapp = mk_perl_parse_yapp pkgs in
+  let perl_xml_parser = mk_perl_xml_parser pkgs in
+  { include [perl, perl_parse_yapp, perl_xml_parser] }

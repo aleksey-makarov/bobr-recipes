@@ -32,7 +32,7 @@ fun pkgs =>
       build = [
         pkgs.python,
         pkgs.perl,
-        pkgs.parse_yapp,
+        pkgs.perl_parse_yapp,
         pkgs.flex,
         pkgs.bison,
         pkgs.gnutls,
