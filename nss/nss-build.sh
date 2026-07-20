@@ -9,7 +9,10 @@ set -euo pipefail
 step="${1:-${BOBR_STEP_NAME:-}}"
 step="${step:?step name is required}"
 source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
-out_dir="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
+# Install into the virgin /stage (SandboxStageRootfs): everything lands under
+# /stage/usr so the recursive `chown -R 0:0` touches only nss's own files, and
+# the lowering's TreeMove re-roots /stage -> /.
+out_dir="/stage"
 
 make_flags=(
   BUILD_OPT=1
