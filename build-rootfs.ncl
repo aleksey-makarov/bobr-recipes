@@ -153,6 +153,36 @@ let bootstrap_toolchain_deps = fun pkgs => [
   pkgs.python_gen1,
 ]
 in
+# The fully-gen1 toolchain that builds the FINAL compiler (glibc, binutils,
+# gcc): the gen1 compiler over the gen1 userland. Differs from
+# bootstrap_toolchain_deps only in the three compiler entries -- gen1 instead of
+# final -- which breaks the cycle (the final glibc/gcc/binutils cannot build in a
+# rootfs that already contains themselves). The gen1 nodes declare no runtime
+# deps, so this closure does not expand and reproduces the old system-rootfs-0
+# snapshot exactly. Replaces the curated system-rootfs-0.
+let gen1_toolchain_deps = fun pkgs => [
+  pkgs.linux_headers_gen1,
+  pkgs.glibc_gen1,
+  pkgs.binutils_gen1,
+  pkgs.gcc_gen1,
+  pkgs.bash_gen1,
+  pkgs.gawk_gen1,
+  pkgs.awk_symlink,
+  pkgs.bison_gen1,
+  pkgs.make_gen1,
+  pkgs.coreutils_gen1,
+  pkgs.sed_gen1,
+  pkgs.grep_gen1,
+  pkgs.gzip_gen1,
+  pkgs.xz_gen1,
+  pkgs.tar_gen1,
+  pkgs.patch_gen1,
+  pkgs.findutils_gen1,
+  pkgs.diffutils_gen1,
+  pkgs.m4_gen1,
+  pkgs.python_gen1,
+]
+in
 # The default build deps every Meson package needs: the native toolchain plus
 # pkgconf and python. Shared so both the Meson package builder and recipes that
 # assemble their own build rootfs (the glib bootstrap) use one list.
@@ -242,6 +272,7 @@ in
     native_toolchain_deps,
     native_build_deps,
     bootstrap_toolchain_deps,
+    gen1_toolchain_deps,
     meson_build_deps,
     build_rootfs_closure,
     build_rootfs_closure_substituting,
@@ -259,4 +290,10 @@ in
     fun name =>
       fun extra_deps =>
         build_rootfs_closure pkgs name (bootstrap_toolchain_deps pkgs @ extra_deps),
+  # Convenience for the final compiler builds (glibc/binutils/gcc): the fully-gen1
+  # toolchain plus `extra_deps`. Replaces the curated system-rootfs-0 snapshot.
+  gen1_toolchain_rootfs = fun pkgs =>
+    fun name =>
+      fun extra_deps =>
+        build_rootfs_closure pkgs name (gen1_toolchain_deps pkgs @ extra_deps),
 }

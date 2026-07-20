@@ -58,7 +58,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_0,
+      _rootfs = recipe.gen1_toolchain_rootfs pkgs "binutils-build-rootfs" [],
       source = binutils_src version source_object_hash,
     },
   }

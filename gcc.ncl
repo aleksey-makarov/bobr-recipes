@@ -100,7 +100,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_0,
+      _rootfs = recipe.gen1_toolchain_rootfs pkgs "gcc-build-rootfs" [],
       source = gcc_src version source_object_hash,
       gmp = pkgs.gmp.inputs.source,
       mpfr = pkgs.mpfr.inputs.source,

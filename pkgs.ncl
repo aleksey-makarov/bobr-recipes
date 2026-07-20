@@ -208,7 +208,6 @@ let base_modules = [
   import "filesystem/system-runtime-files-gnome.ncl",
   import "filesystem/rootfs.ncl",
   import "filesystem/initrd.ncl",
-  import "system-rootfs.ncl",
   import "tcl/tcl.ncl",
   import "expect/expect.ncl",
   import "dejagnu/dejagnu.ncl",

@@ -129,7 +129,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      _rootfs = pkgs.system_rootfs_0,
+      _rootfs = recipe.gen1_toolchain_rootfs pkgs "glibc-build-rootfs" [],
       source = glibc_src,
       fhs_patch = glibc_fhs_patch_2_42,
     },

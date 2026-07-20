@@ -146,6 +146,9 @@ in
   # For the final builds of the native userland itself: bootstrap toolchain
   # (gen1 userland + final compiler) closure. Replaces system-rootfs-1.
   bootstrap_toolchain_rootfs = build_rootfs_lib.bootstrap_toolchain_rootfs,
+  # For the final compiler builds (glibc/binutils/gcc): fully-gen1 toolchain
+  # closure. Replaces system-rootfs-0.
+  gen1_toolchain_rootfs = build_rootfs_lib.gen1_toolchain_rootfs,
 
   split = {
     libs = fun base =>
