@@ -891,6 +891,23 @@ fun pkgs =>
       inputs = { tree = staged },
     }
   in
+  # Deps-derived additive-staging builder: the deps-derived twin of
+  # SandboxStageRootfs. Like SandboxInstallBuild it assembles the build rootfs
+  # from sandbox_build_default_build_deps + node.deps.build (no hand-rolled
+  # `inputs._rootfs`), but installs into a virgin `/stage` and re-roots
+  # `/stage` -> `/` via TreeMove -- for bespoke builds whose output overlaps the
+  # build rootfs or whose install touches shared paths (a recursive chown, a
+  # re-rooted DESTDIR). Recipes using this tag MUST install into `/stage`.
+  let lower_sandbox_stage_build_node = fun node =>
+    let installed = lower_sandbox_build_with "SandboxInstall" node in
+    let staged = record_replace "name" (node.name ++ "-staged") installed in
+    {
+      name = node.name,
+      tag = "TreeMove",
+      config = { strip_prefix = "stage" },
+      inputs = { tree = staged },
+    }
+  in
   {
     "RootfsClosure" = rootfs_closure_for,
     "Autotools" = lower_autotools_package_node,
@@ -899,6 +916,7 @@ fun pkgs =>
     "PerlModule" = lower_perl_module_package_node,
     "PythonModule" = lower_python_module_package_node,
     "SandboxInstallBuild" = lower_sandbox_install_build_node,
+    "SandboxStageBuild" = lower_sandbox_stage_build_node,
     "AutotoolsRootfs" = lower_autotools_node,
     "AutotoolsStageRootfs" = lower_autotools_stage_rootfs_node,
     "MakefileStageRootfs" = lower_makefile_stage_rootfs_node,

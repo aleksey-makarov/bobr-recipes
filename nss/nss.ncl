@@ -32,16 +32,6 @@ fun pkgs =>
       }
   in
 
-  let nss_build_rootfs =
-    recipe.native_build_rootfs pkgs "nss-build-rootfs" [
-      pkgs.nspr,
-      pkgs.sqlite,
-      pkgs.zlib,
-      pkgs.perl,
-      pkgs.python,
-    ]
-  in
-
   let step_env = { BOBR_SOURCE_DIR = "@{build}/source" } in
 
   let nss = {
@@ -50,15 +40,24 @@ fun pkgs =>
       | default
       = "1ad541f10da7c58dec01f540ecc44d28cbbc033f741a57473de5a0893d91606d",
     name = "nss-%{version}",
-    # SandboxStageRootfs, not a plain additive SandboxInstall: the install ends
-    # with `chown -R 0:0 ${out_dir}/usr`, which under a direct install into /
-    # would recurse the live /usr and rewrite lower-layer file metadata (an
+    # SandboxStageBuild, not a plain additive SandboxInstallBuild: the install
+    # ends with `chown -R 0:0 ${out_dir}/usr`, which under a direct install into
+    # / would recurse the live /usr and rewrite lower-layer file metadata (an
     # additive violation). Installing into the virgin /stage scopes both the
     # install and the recursive chown to nss's own files; the lowering's
-    # TreeMove re-roots /stage -> /.
-    tag = "SandboxStageRootfs",
+    # TreeMove re-roots /stage -> /. The build rootfs is deps-derived (no
+    # hand-rolled _rootfs).
+    tag = "SandboxStageBuild",
     deps = {
-      build = [],
+      build =
+        recipe.native_build_deps pkgs
+        @ [
+          pkgs.nspr,
+          pkgs.sqlite,
+          pkgs.zlib,
+          pkgs.perl,
+          pkgs.python,
+        ],
       runtime = [
         pkgs.glibc_libs,
         pkgs.gcc_libs,
@@ -87,7 +86,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = nss_build_rootfs,
       script = buildscript_nss,
       source = nss_src version source_object_hash,
     },

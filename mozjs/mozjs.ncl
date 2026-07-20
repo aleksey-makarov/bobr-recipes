@@ -33,19 +33,6 @@ fun pkgs =>
       }
   in
 
-  let mozjs_build_rootfs =
-    recipe.native_build_rootfs pkgs "mozjs-build-rootfs" [
-      pkgs.llvm_bin,
-      pkgs.rust_bin,
-      pkgs.cbindgen,
-      pkgs.nasm,
-      pkgs.python,
-      pkgs.pkgconf,
-      pkgs.icu,
-      pkgs.zlib,
-    ]
-  in
-
   let step_env = { BOBR_SOURCE_DIR = "@{build}/source" } in
 
   let mozjs = {
@@ -54,9 +41,24 @@ fun pkgs =>
       | default
       = "85dfb9f6021152b4302b8968ef485d958c8c471cb02415a19853daaad5acce62",
     name = "mozjs-%{version}",
-    tag = "SandboxStageRootfs",
+    tag = "SandboxStageBuild",
     deps = {
-      build = [],
+      # Deps-derived build rootfs (SandboxStageBuild assembles it, no hand-rolled
+      # _rootfs): the native toolchain plus our prebuilt clang (libclang for
+      # bindgen), rust (+rustfmt), cbindgen, nasm, python, pkgconf and system
+      # ICU/zlib -- replacing system_rootfs_X.
+      build =
+        recipe.native_build_deps pkgs
+        @ [
+          pkgs.llvm_bin,
+          pkgs.rust_bin,
+          pkgs.cbindgen,
+          pkgs.nasm,
+          pkgs.python,
+          pkgs.pkgconf,
+          pkgs.icu,
+          pkgs.zlib,
+        ],
       runtime = [
         pkgs.glibc_libs,
         pkgs.gcc_libs,
@@ -91,7 +93,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = mozjs_build_rootfs,
       script = buildscript_mozjs,
       source = mozjs_src version source_object_hash,
     },

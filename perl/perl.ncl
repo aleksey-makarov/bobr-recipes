@@ -30,24 +30,18 @@ fun pkgs =>
       }
   in
 
-  # Deps-derived build rootfs, replacing the curated system_rootfs_2: the native
-  # toolchain (already includes bzip2/xz) plus zlib, which perl's Compress::Zlib
-  # links. perl is a default Autotools build dep but not a native-toolchain
-  # member, so this closure does not pull perl back in.
-  let perl_build_rootfs =
-    br.build_rootfs_closure
-      pkgs
-      "perl-build-rootfs"
-      (br.native_build_deps pkgs @ [pkgs.zlib])
-  in
-
   let perl = {
     version | default = "5.42.2",
     source_object_hash | default = "0a585eeb9e363c0f80482ddb3571625250c2c86aeb408853e8ea50805cfb14bb",
     name = "perl-%{version}",
-    tag = "SandboxStageRootfs",
+    tag = "SandboxStageBuild",
     deps = {
-      build = [],
+      # Deps-derived build rootfs (SandboxStageBuild assembles it, no hand-rolled
+      # _rootfs), replacing the curated system_rootfs_2: the native toolchain
+      # (already includes bzip2/xz) plus zlib, which perl's Compress::Zlib links.
+      # perl is a default Autotools build dep but not a native-toolchain member,
+      # so this closure does not pull perl back in.
+      build = br.native_build_deps pkgs @ [pkgs.zlib],
       runtime = [
         pkgs.glibc_libs,
         pkgs.bzip2,
@@ -81,7 +75,6 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = perl_build_rootfs,
       script = buildscript_perl_configure,
       source = perl_src version source_object_hash,
     },

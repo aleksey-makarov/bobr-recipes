@@ -15,6 +15,7 @@ let KnownTags = [
   "PerlModule",
   "PythonModule",
   "SandboxInstallBuild",
+  "SandboxStageBuild",
   "AutotoolsRootfs",
   "AutotoolsStageRootfs",
   "MakefileStageRootfs",
@@ -648,7 +649,7 @@ let ValidateRecipeShallow = fun recipe =>
       & {
         config = checked.config | SandboxConfig,
       }
-    else if checked.tag == "SandboxInstallBuild" then
+    else if checked.tag == "SandboxInstallBuild" || checked.tag == "SandboxStageBuild" then
       checked
       & {
         config = checked.config | SandboxConfig,
@@ -899,7 +900,7 @@ let rec ValidateRecipe = fun recipe =>
         config = checked.config | SandboxConfig,
         inputs = validate_sandbox_inputs checked.inputs,
       }
-    else if checked.tag == "SandboxInstallBuild" then
+    else if checked.tag == "SandboxInstallBuild" || checked.tag == "SandboxStageBuild" then
       checked
       & {
         config = checked.config | SandboxConfig,
