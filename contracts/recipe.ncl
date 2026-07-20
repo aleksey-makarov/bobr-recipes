@@ -20,7 +20,7 @@ let KnownTags = [
   "AutotoolsStageRootfs",
   "MakefileStageRootfs",
   "MesonRootfs",
-  "SandboxBuildRootfs",
+  "Sandbox",
   "SandboxStageRootfs",
   "SandboxInstall",
   "Cargo",
@@ -494,7 +494,7 @@ let FsTreeExportInputsShape = {
     | doc "Single fs-tree node whose entries are exported to a plain object.",
 }
 in
-let SandboxBuildRootfsInputsShape = {
+let SandboxRootfsInputsShape = {
   _rootfs
     | Dyn
     | doc "Single materialized fs-tree node for the rootfs directory input.",
@@ -644,7 +644,7 @@ let ValidateRecipeShallow = fun recipe =>
         config = checked.config | PythonModuleConfig,
         deps = checked.deps | RecipeDeps,
       }
-    else if checked.tag == "SandboxBuildRootfs" || checked.tag == "SandboxInstall" || checked.tag == "SandboxStageRootfs" then
+    else if checked.tag == "Sandbox" || checked.tag == "SandboxInstall" || checked.tag == "SandboxStageRootfs" then
       checked
       & {
         config = checked.config | SandboxConfig,
@@ -751,7 +751,7 @@ let rec ValidateRecipe = fun recipe =>
       }
     in
     let validate_sandbox_inputs = fun inputs =>
-      let checked = inputs | SandboxBuildRootfsInputsShape in
+      let checked = inputs | SandboxRootfsInputsShape in
       std.record.map
         (fun _ input => ValidateRecipe input)
         checked
@@ -894,7 +894,7 @@ let rec ValidateRecipe = fun recipe =>
         deps = checked.deps | RecipeDeps,
         inputs = validate_synthetic_package_inputs checked.inputs,
       }
-    else if checked.tag == "SandboxBuildRootfs" || checked.tag == "SandboxInstall" || checked.tag == "SandboxStageRootfs" then
+    else if checked.tag == "Sandbox" || checked.tag == "SandboxInstall" || checked.tag == "SandboxStageRootfs" then
       checked
       & {
         config = checked.config | SandboxConfig,
@@ -988,7 +988,7 @@ in
     | doc "Config contract for synthetic `Cargo` and `CargoRootfs` recipe nodes."
     = CargoConfig,
   sandbox_config
-    | doc "Config contract for synthetic `SandboxBuild` and `SandboxBuildRootfs` recipe nodes."
+    | doc "Config contract for the low-level `Sandbox`/`SandboxInstall` builders and their synthetic `*StageRootfs`/`*Build` variants."
     = SandboxConfig,
   tree_merge_config
     | doc "Config contract for `TreeMerge` recipe nodes."

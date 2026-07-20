@@ -867,11 +867,8 @@ fun pkgs =>
         (record_replace "tag" target_tag node)
   in
   let lower_sandbox_install_build_node = lower_sandbox_build_with "SandboxInstall" in
-  let lower_sandbox_build_rootfs_node = fun node =>
-    record_replace "tag" "Sandbox" node
-  in
   # Self-rootfs, additive-staging builder: the recipe brings its own steps and
-  # `inputs._rootfs` (like SandboxBuildRootfs) but installs into a virgin
+  # `inputs._rootfs` (like the low-level Sandbox) but installs into a virgin
   # `/stage` inside the overlay. It lowers to an additive `SandboxInstall`
   # (captures the /stage additions) wrapped in a `TreeMove` that re-roots the
   # tree at `/stage`, yielding a standalone tree even when the output overlaps
@@ -921,7 +918,6 @@ fun pkgs =>
     "AutotoolsStageRootfs" = lower_autotools_stage_rootfs_node,
     "MakefileStageRootfs" = lower_makefile_stage_rootfs_node,
     "MesonRootfs" = lower_meson_node,
-    "SandboxBuildRootfs" = lower_sandbox_build_rootfs_node,
     "SandboxStageRootfs" = lower_sandbox_stage_rootfs_node,
     "Cargo" = lower_cargo_package_node,
     "CargoRootfs" = lower_cargo_node,

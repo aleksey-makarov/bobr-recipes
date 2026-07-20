@@ -14,7 +14,7 @@ fun pkgs =>
 
   let test_system_rootfs_0 = {
     name = "test-system-rootfs-0",
-    tag = "SandboxBuildRootfs",
+    tag = "Sandbox",
     config = {
       # Test reports are plain files; capture the output as a plain-object
       # directory (chowned) rather than an ownership-aware fs-tree, so the
@@ -41,7 +41,7 @@ fun pkgs =>
 
   let test_system_rootfs_1 = {
     name = "test-system-rootfs-1",
-    tag = "SandboxBuildRootfs",
+    tag = "Sandbox",
     config = {
       # Test reports are plain files; capture the output as a plain-object
       # directory (chowned) rather than an ownership-aware fs-tree, so the
@@ -68,7 +68,7 @@ fun pkgs =>
 
   let test_rootfs = {
     name = "test-rootfs",
-    tag = "SandboxBuildRootfs",
+    tag = "Sandbox",
     config = {
       # Test reports are plain files; capture the output as a plain-object
       # directory (chowned) rather than an ownership-aware fs-tree, so the
@@ -96,7 +96,7 @@ fun pkgs =>
 
   let test_gnome_rootfs = {
     name = "test-gnome-rootfs",
-    tag = "SandboxBuildRootfs",
+    tag = "Sandbox",
     config = {
       # Test reports are plain files; capture the output as a plain-object
       # directory (chowned) rather than an ownership-aware fs-tree, so the

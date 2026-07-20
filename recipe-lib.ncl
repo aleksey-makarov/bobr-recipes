@@ -191,7 +191,7 @@ in
       in
       {
         name = args.name,
-        tag = "SandboxBuildRootfs",
+        tag = "Sandbox",
         config = {
           preserve_ownership = false,
           steps = [

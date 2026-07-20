@@ -14,7 +14,7 @@ fun pkgs =>
 
   let test_reports = {
     name = "test-reports",
-    tag = "SandboxBuildRootfs",
+    tag = "Sandbox",
     config = {
       # The collected reports are plain files; capture as a plain-object
       # directory rather than an ownership-aware fs-tree.
