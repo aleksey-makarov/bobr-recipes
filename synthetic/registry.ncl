@@ -1,16 +1,6 @@
 let cargo = import "../cargo.ncl" in
 let br = import "../build-rootfs.ncl" in
 fun pkgs =>
-  let buildscript_autotools = {
-    name = "buildscript-autotools",
-    tag = "Source",
-    object_hash = import "autotools.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/autotools.sh",
-    },
-  }
-  in
   let buildscript_autotools_install = {
     name = "buildscript-autotools-install",
     tag = "Source",
@@ -356,16 +346,15 @@ fun pkgs =>
         synthetic_inputs script_source node.inputs,
     }
   in
-  let lower_autotools_node = lower_autotools_node_with "Sandbox" buildscript_autotools "@{out}" in
   let lower_autotools_install_node =
     lower_autotools_node_with "SandboxInstall" buildscript_autotools_install "/"
   in
   let lower_autotools_stage_install_node =
     lower_autotools_node_with "SandboxInstall" buildscript_autotools_stage_install "/stage"
   in
-  # Additive-staging variant of AutotoolsRootfs: runs the synthetic autotools
-  # steps but installs into a virgin /stage (autotools-stage-install.sh), which
-  # is captured additively and then re-rooted /stage -> / by TreeMove. Use it for
+  # Explicit-rootfs additive-staging autotools builder: runs the synthetic
+  # autotools steps but installs into a virgin /stage (autotools-stage-install.sh),
+  # which is captured additively and then re-rooted /stage -> / by TreeMove. Use it for
   # explicit-rootfs recipes whose output overlaps the build rootfs (e.g. a
   # toolchain member rebuilt on a rootfs that already carries it), where a plain
   # additive install into / would modify lower-layer files.
@@ -382,9 +371,7 @@ fun pkgs =>
     }
   in
   # The package-level `Autotools` tag builds with the additive SandboxInstall
-  # model (install into the overlay root). The `AutotoolsRootfs` tag is
-  # deliberately still on the staging model (see the dispatch table); those
-  # bootstrap-toolchain recipes are migrated separately.
+  # model (install into the overlay root).
   let lower_autotools_package_node = fun node =>
     let build_rootfs = build_rootfs_for autotools_package_default_build_deps node in
     let package_inputs =
@@ -393,12 +380,7 @@ fun pkgs =>
         build_rootfs
         node.inputs
     in
-    lower_autotools_install_node (
-      record_replace
-        "inputs"
-        package_inputs
-        (record_replace "tag" "AutotoolsRootfs" node)
-    )
+    lower_autotools_install_node (record_replace "inputs" package_inputs node)
   in
   let lower_makefile_node_with = fun builder_tag => fun script_source => fun post_install_cwd => fun node =>
     let node_config = node.config in
@@ -914,7 +896,6 @@ fun pkgs =>
     "PythonModule" = lower_python_module_package_node,
     "SandboxInstallBuild" = lower_sandbox_install_build_node,
     "SandboxStageBuild" = lower_sandbox_stage_build_node,
-    "AutotoolsRootfs" = lower_autotools_node,
     "AutotoolsStageRootfs" = lower_autotools_stage_rootfs_node,
     "MakefileStageRootfs" = lower_makefile_stage_rootfs_node,
     "MesonRootfs" = lower_meson_node,

@@ -57,7 +57,7 @@ run_case "rootfs-closure" pass '{"name":"pkg-rootfs","tag":"RootfsClosure","conf
 run_case "initramfs" pass '{"name":"initrd","tag":"Initramfs","config":{},"inputs":{"tree0":'"${rootfs_tree}"'}}'
 run_case "source-http" pass "${source_node}"
 run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","platform":{"os":"linux","architecture":"amd64"}}}'
-run_case "autotools-rootfs" pass '{"name":"pkg-rootfs","tag":"AutotoolsRootfs","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "autotools-stage-rootfs" pass '{"name":"pkg-rootfs","tag":"AutotoolsStageRootfs","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "autotools-package" pass '{"name":"pkg-package","tag":"Autotools","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"configure_args":["--disable-nls"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "makefile-package" pass '{"name":"pkg-package","tag":"Makefile","deps":{"build":[],"runtime":[]},"config":{"make_args":["PREFIX=/usr"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "meson-rootfs" pass '{"name":"pkg-rootfs","tag":"MesonRootfs","config":{"setup_args":["--buildtype=release"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
@@ -95,7 +95,7 @@ run_case "missing-autotools-package-source" fail '{"name":"pkg-package","tag":"A
 run_case "missing-makefile-package-source" fail '{"name":"pkg-package","tag":"Makefile","deps":{"build":[],"runtime":[]},"config":{},"inputs":{"patch":'"${patch_node}"'}}'
 run_case "missing-meson-package-deps" fail '{"name":"pkg-package","tag":"Meson","config":{},"inputs":{"source":'"${source_node}"'}}'
 run_case "sandbox-install-rejected" fail '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493}}]}},"inputs":{"_rootfs":'"${rootfs_tree}"'}}'
-run_case "autotools-rootfs-install-rejected" fail '{"name":"pkg-rootfs","tag":"AutotoolsRootfs","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493}}]}},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
+run_case "autotools-stage-rootfs-install-rejected" fail '{"name":"pkg-rootfs","tag":"AutotoolsStageRootfs","config":{"configure_args":["--disable-nls"],"install":{"rules":[{"path":"**","attrs":{"uid":0,"gid":0,"directory_mode":493,"regular_file_mode":420,"executable_file_mode":493}}]}},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "meson-rootfs-build-dir-rejected" fail '{"name":"pkg-rootfs","tag":"MesonRootfs","config":{"build_dir":"build"},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"'}}'
 run_case "extra-top-level-field" pass '{"name":"hello","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"hello.txt","text":"hi","executable":false}]}},"inputs":{},"extra":true}'
 run_case "bad-group-config" fail '{"name":"all","tag":"Group","config":{"manifest":true},"inputs":{"first":'"${script_node}"'}}'
@@ -196,7 +196,7 @@ let aux_src = {
 } in
 recipe.to_request { recipes_path = "/recipes" } {} {
   name = "pkg",
-  tag = "AutotoolsRootfs",
+  tag = "AutotoolsStageRootfs",
   config = {
     source_subdir = "subdir",
     pre_configure = {
@@ -221,18 +221,21 @@ synthetic_lowering_json="$(
 )"
 
 jq -e '
-  .root.tag == "Sandbox"
-  and .root.config.steps[0].name == "bobr_prepare_source"
-  and .root.config.steps[0].env.BOBR_SOURCE_INPUT == "@{source}"
-  and .root.config.steps[0].env.BOBR_SOURCE_DIR == "@{build}/source"
-  and .root.config.steps[0].env.BOBR_SYNTHETIC_COMMON == "@{synthetic_common}"
-  and .root.config.steps[0].env.BOBR_PATCH_INPUTS == "@{patch} @{patch_extra}"
-  and [.root.config.steps[].name] == ["bobr_prepare_source", "pre", "bobr_configure", "bobr_build", "bobr_install"]
-  and .root.config.steps[1].cwd == "@{build}/source/subdir"
-  and (.root.inputs | has("_rootfs"))
-  and (.root.inputs | has("script"))
-  and (.root.inputs | has("synthetic_common"))
-  and ([.[] | select(.name == "buildscript-autotools" and .origin.tag == "Path" and .origin.path == "/recipes/synthetic/autotools.sh")] | length == 1)
+  ([.[] | select(.name == "pkg-staged")][0]) as $s
+  | .root.tag == "TreeMove"
+  and .root.config.strip_prefix == "stage"
+  and $s.tag == "SandboxInstall"
+  and $s.config.steps[0].name == "bobr_prepare_source"
+  and $s.config.steps[0].env.BOBR_SOURCE_INPUT == "@{source}"
+  and $s.config.steps[0].env.BOBR_SOURCE_DIR == "@{build}/source"
+  and $s.config.steps[0].env.BOBR_SYNTHETIC_COMMON == "@{synthetic_common}"
+  and $s.config.steps[0].env.BOBR_PATCH_INPUTS == "@{patch} @{patch_extra}"
+  and [$s.config.steps[].name] == ["bobr_prepare_source", "pre", "bobr_configure", "bobr_build", "bobr_install"]
+  and $s.config.steps[1].cwd == "@{build}/source/subdir"
+  and ($s.inputs | has("_rootfs"))
+  and ($s.inputs | has("script"))
+  and ($s.inputs | has("synthetic_common"))
+  and ([.[] | select(.name == "buildscript-autotools-stage-install" and .origin.tag == "Path" and .origin.path == "/recipes/synthetic/autotools-stage-install.sh")] | length == 1)
 ' <<<"${synthetic_lowering_json}" >/dev/null
 
 cat > "${tmpdir}/check-autotools-package-lowering.ncl" <<EOF_INNER
