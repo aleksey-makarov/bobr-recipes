@@ -41,16 +41,6 @@ fun pkgs =>
     },
   }
   in
-  let buildscript_gnu_make = {
-    name = "buildscript-gnu-make",
-    tag = "Source",
-    object_hash = import "gnu-make.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/gnu-make.sh",
-    },
-  }
-  in
   let buildscript_gnu_make_install = {
     name = "buildscript-gnu-make-install",
     tag = "Source",
@@ -475,14 +465,13 @@ fun pkgs =>
         synthetic_inputs script_source node.inputs,
     }
   in
-  let lower_makefile_node = lower_makefile_node_with "Sandbox" buildscript_gnu_make "@{out}" in
   let lower_makefile_install_node =
     lower_makefile_node_with "SandboxInstall" buildscript_gnu_make_install "/"
   in
   let lower_makefile_stage_install_node =
     lower_makefile_node_with "SandboxInstall" buildscript_gnu_make_stage_install "/stage"
   in
-  # Additive-staging variant of MakefileRootfs (see AutotoolsStageRootfs): runs
+  # Additive-staging Makefile builder (see AutotoolsStageRootfs): runs
   # the synthetic Makefile steps but installs into a virgin /stage, captured
   # additively, then re-rooted /stage -> / by TreeMove. For explicit-rootfs
   # recipes whose output overlaps the build rootfs.
@@ -778,9 +767,8 @@ fun pkgs =>
     }
   in
   # The package-level `Makefile` tag builds with the additive SandboxInstall
-  # model (install into the overlay root). The `MakefileRootfs` tag is
-  # deliberately still on the staging model (see the dispatch table); those
-  # bootstrap recipes are migrated separately.
+  # model (install into the overlay root). Explicit-rootfs Makefile recipes use
+  # the additive-staging `MakefileStageRootfs` tag.
   let lower_makefile_package_node = fun node =>
     let build_rootfs = build_rootfs_for makefile_package_default_build_deps node in
     let package_inputs =
@@ -793,7 +781,7 @@ fun pkgs =>
       record_replace
         "inputs"
         package_inputs
-        (record_replace "tag" "MakefileRootfs" node)
+        node
     )
   in
   let lower_meson_package_node = fun node =>
@@ -915,7 +903,6 @@ fun pkgs =>
     "SandboxInstallBuild" = lower_sandbox_install_build_node,
     "AutotoolsRootfs" = lower_autotools_node,
     "AutotoolsStageRootfs" = lower_autotools_stage_rootfs_node,
-    "MakefileRootfs" = lower_makefile_node,
     "MakefileStageRootfs" = lower_makefile_stage_rootfs_node,
     "MesonRootfs" = lower_meson_node,
     "SandboxBuildRootfs" = lower_sandbox_build_rootfs_node,

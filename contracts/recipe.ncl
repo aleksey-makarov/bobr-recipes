@@ -18,7 +18,6 @@ let KnownTags = [
   "SandboxInstallBuild",
   "AutotoolsRootfs",
   "AutotoolsStageRootfs",
-  "MakefileRootfs",
   "MakefileStageRootfs",
   "MesonRootfs",
   "SandboxBuildRootfs",
@@ -600,11 +599,6 @@ let ValidateRecipeShallow = fun recipe =>
         config = checked.config | AutotoolsConfig,
         deps = checked.deps | RecipeDeps,
       }
-    else if checked.tag == "MakefileRootfs" then
-      checked
-      & {
-        config = checked.config | MakefileConfig,
-      }
     else if checked.tag == "MakefileStageRootfs" then
       checked
       & {
@@ -847,12 +841,6 @@ let rec ValidateRecipe = fun recipe =>
         deps = checked.deps | RecipeDeps,
         inputs = validate_synthetic_package_inputs checked.inputs,
       }
-    else if checked.tag == "MakefileRootfs" then
-      checked
-      & {
-        config = checked.config | MakefileConfig,
-        inputs = validate_synthetic_rootfs_inputs checked.inputs,
-      }
     else if checked.tag == "MakefileStageRootfs" then
       checked
       & {
@@ -985,7 +973,7 @@ in
     | doc "Config contract for synthetic `Autotools`, `AutotoolsRootfs` and `AutotoolsStageRootfs` recipe nodes."
     = AutotoolsConfig,
   makefile_config
-    | doc "Config contract for synthetic `Makefile`, `MakefileRootfs` and `MakefileStageRootfs` recipe nodes."
+    | doc "Config contract for synthetic `Makefile` and `MakefileStageRootfs` recipe nodes."
     = MakefileConfig,
   meson_config
     | doc "Config contract for synthetic `Meson` and `MesonRootfs` recipe nodes."
