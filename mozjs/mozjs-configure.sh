@@ -10,7 +10,10 @@ set -euo pipefail
 step="${1:-${BOBR_STEP_NAME:-}}"
 step="${step:?step name is required}"
 source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
-out_dir="${BOBR_OUT_DIR:?BOBR_OUT_DIR is required}"
+# Install into the virgin /stage (SandboxStageRootfs): configure baked
+# --prefix=/usr, DESTDIR relocates it, and the lowering's TreeMove re-roots
+# /stage -> /.
+out_dir="/stage"
 build_dir="${BOBR_BUILD_DIR:?BOBR_BUILD_DIR is required}"
 
 objdir="${build_dir}/obj"

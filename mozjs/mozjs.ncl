@@ -54,7 +54,7 @@ fun pkgs =>
       | default
       = "85dfb9f6021152b4302b8968ef485d958c8c471cb02415a19853daaad5acce62",
     name = "mozjs-%{version}",
-    tag = "SandboxBuildRootfs",
+    tag = "SandboxStageRootfs",
     deps = {
       build = [],
       runtime = [
