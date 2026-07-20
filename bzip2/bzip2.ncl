@@ -72,15 +72,40 @@ fun pkgs =>
   }
   in
 
+  # bzip2-gen1 bootstraps the final userland, so it builds one stage earlier than
+  # the final bzip2: the compiler is already final (as in system_rootfs_1) but the
+  # userland is still *_gen1. Same shape as bzip2_build_deps -- the toolchain
+  # WITHOUT bzip2 (and without xz/m4/bison/python, which bzip2's plain-Makefile
+  # build never invokes) -- swapping the final utilities for their gen1 builds.
+  # This replaces the curated system_rootfs_1.
+  let bzip2_gen1_build_deps = [
+    pkgs.linux_headers_gen1,
+    pkgs.glibc,
+    pkgs.binutils,
+    pkgs.gcc,
+    pkgs.bash_gen1,
+    pkgs.make_gen1,
+    pkgs.coreutils_gen1,
+    pkgs.gawk_gen1,
+    pkgs.sed_gen1,
+    pkgs.grep_gen1,
+    pkgs.tar_gen1,
+    pkgs.gzip_gen1,
+    pkgs.patch_gen1,
+    pkgs.findutils_gen1,
+    pkgs.diffutils_gen1,
+  ]
+  in
+
   let bzip2_gen1 = {
     version | default = "1.0.8",
     source_object_hash | default = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
     name = "bzip2-gen1-%{version}",
     tag = "MakefileStageRootfs",
-    # gen1 bootstraps in system_rootfs_1, before the self-hosted toolchain exists.
     config = bzip2_config version,
     inputs = {
-      _rootfs = pkgs.system_rootfs_1,
+      _rootfs =
+        br.build_rootfs_closure pkgs "bzip2-gen1-%{version}-build-rootfs" bzip2_gen1_build_deps,
       source = bzip2_src version source_object_hash,
       install_docs_patch = bzip2_install_docs_patch,
     },
