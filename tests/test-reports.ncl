@@ -33,9 +33,8 @@ fun pkgs =>
       script = test_reports_script_source,
       report000 = pkgs.test_system_rootfs_0,
       report001 = pkgs.test_system_rootfs_1,
-      report002 = pkgs.test_system_rootfs_2,
-      report003 = pkgs.test_rootfs,
-      report004 = pkgs.test_gnome_rootfs,
+      report002 = pkgs.test_rootfs,
+      report003 = pkgs.test_gnome_rootfs,
     },
   }
   in

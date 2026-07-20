@@ -1,4 +1,5 @@
 let recipe = import "../recipe-lib.ncl" in
+let br = import "../build-rootfs.ncl" in
 # Perl and its build-only CPAN modules are aggregated here so pkgs.ncl imports
 # only perl/perl.ncl (not each module file individually).
 let mk_perl_parse_yapp = import "perl-parse-yapp.ncl" in
@@ -29,16 +30,15 @@ fun pkgs =>
       }
   in
 
-  let perl_build_rootfs = {
-    name = "perl-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs_2 }
-      & recipe.numbered_inputs [
-        pkgs.bzip2,
-      ],
-  }
+  # Deps-derived build rootfs, replacing the curated system_rootfs_2: the native
+  # toolchain (already includes bzip2/xz) plus zlib, which perl's Compress::Zlib
+  # links. perl is a default Autotools build dep but not a native-toolchain
+  # member, so this closure does not pull perl back in.
+  let perl_build_rootfs =
+    br.build_rootfs_closure
+      pkgs
+      "perl-build-rootfs"
+      (br.native_build_deps pkgs @ [pkgs.zlib])
   in
 
   let perl = {

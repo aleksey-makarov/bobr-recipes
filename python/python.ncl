@@ -1,4 +1,4 @@
-let recipe = import "../recipe-lib.ncl" in
+let br = import "../build-rootfs.ncl" in
 # The interpreter and its build-only PyPI modules are aggregated here so pkgs.ncl
 # imports only python/python.ncl (not each module file individually). Each module
 # is its own PythonModule recipe (additive install of a pip-built wheel); the
@@ -27,30 +27,34 @@ fun pkgs =>
   }
   in
 
-  let python_build_rootfs = {
-    name = "python-build-rootfs",
-    tag = "TreeMerge",
-    config = {},
-    inputs =
-      { base = pkgs.system_rootfs_2 }
-      & recipe.numbered_inputs [
-        pkgs.expat,
-        pkgs.libffi,
-        # ncurses so the _curses stdlib extension builds (mozjs's configure
-        # imports it via mach.logging -> blessed -> curses).
-        pkgs.ncurses,
-        # openssl so the _ssl / _hashlib extensions build (mozjs's configure
-        # imports ssl via mozboot).
-        pkgs.openssl,
-        # Round out the stdlib C extensions: _bz2, readline, _gdbm/_dbm, _uuid
-        # (util-linux provides libuuid + uuid.h). _lzma/_sqlite3 already build;
-        # only _tkinter (GUI, no tk) is intentionally left out.
-        pkgs.bzip2,
-        pkgs.readline,
-        pkgs.gdbm,
-        pkgs.util_linux,
-      ],
-  }
+  # Deps-derived build rootfs, replacing the curated system_rootfs_2: the native
+  # toolchain plus the libraries the stdlib C extensions link. python is a default
+  # Meson build dep but its own rootfs never pulls python (the deps are C
+  # libraries), so no cycle.
+  let python_build_rootfs =
+    br.build_rootfs_closure
+      pkgs
+      "python-build-rootfs"
+      (
+        br.native_build_deps pkgs
+        @ [
+          pkgs.expat,
+          pkgs.libffi,
+          # _curses stdlib extension (mozjs's configure imports curses via
+          # mach.logging -> blessed).
+          pkgs.ncurses,
+          # _ssl / _hashlib (mozjs's configure imports ssl via mozboot).
+          pkgs.openssl,
+          # _bz2, readline, _gdbm/_dbm, _uuid (util-linux libuuid). _lzma/_sqlite3
+          # already build; only _tkinter (GUI, no tk) is left out.
+          pkgs.bzip2,
+          pkgs.readline,
+          pkgs.gdbm,
+          pkgs.util_linux,
+          # zlib for _zlib (the snapshot carried it; native_build_deps does not).
+          pkgs.zlib,
+        ]
+      )
   in
 
   let python_gen1 = {

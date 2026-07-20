@@ -66,33 +66,6 @@ fun pkgs =>
   }
   in
 
-  let test_system_rootfs_2 = {
-    name = "test-system-rootfs-2",
-    tag = "SandboxBuildRootfs",
-    config = {
-      # Test reports are plain files; capture the output as a plain-object
-      # directory (chowned) rather than an ownership-aware fs-tree, so the
-      # report collector can read them directly via a non-`_` input.
-      preserve_ownership = false,
-      script_config = {
-        name = "system-rootfs-2",
-      },
-      steps = [
-        {
-          name = "check_image",
-          run_as = "root",
-          cwd = "@{out}",
-          argv = ["@{script}"],
-        },
-      ],
-    },
-    inputs = {
-      _rootfs = pkgs.system_rootfs_2,
-      script = test_rootfs_script_source,
-    },
-  }
-  in
-
   let test_rootfs = {
     name = "test-rootfs",
     tag = "SandboxBuildRootfs",
@@ -163,7 +136,6 @@ fun pkgs =>
     include [
       test_system_rootfs_0,
       test_system_rootfs_1,
-      test_system_rootfs_2,
       test_rootfs,
       test_gnome_rootfs,
     ],
