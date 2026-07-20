@@ -61,6 +61,16 @@ fun pkgs =>
     },
   }
   in
+  let buildscript_gnu_make_stage_install = {
+    name = "buildscript-gnu-make-stage-install",
+    tag = "Source",
+    object_hash = import "gnu-make-stage-install.sh.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "synthetic/gnu-make-stage-install.sh",
+    },
+  }
+  in
   let buildscript_meson = {
     name = "buildscript-meson",
     tag = "Source",
@@ -468,6 +478,25 @@ fun pkgs =>
   let lower_makefile_node = lower_makefile_node_with "Sandbox" buildscript_gnu_make "@{out}" in
   let lower_makefile_install_node =
     lower_makefile_node_with "SandboxInstall" buildscript_gnu_make_install "/"
+  in
+  let lower_makefile_stage_install_node =
+    lower_makefile_node_with "SandboxInstall" buildscript_gnu_make_stage_install "/stage"
+  in
+  # Additive-staging variant of MakefileRootfs (see AutotoolsStageRootfs): runs
+  # the synthetic Makefile steps but installs into a virgin /stage, captured
+  # additively, then re-rooted /stage -> / by TreeMove. For explicit-rootfs
+  # recipes whose output overlaps the build rootfs.
+  let lower_makefile_stage_rootfs_node = fun node =>
+    let staged =
+      lower_makefile_stage_install_node
+        (record_replace "name" (node.name ++ "-staged") node)
+    in
+    {
+      name = node.name,
+      tag = "TreeMove",
+      config = { strip_prefix = "stage" },
+      inputs = { tree = staged },
+    }
   in
   let lower_meson_node_with = fun builder_tag => fun script_source => fun post_install_cwd => fun node =>
     let node_config = node.config in
@@ -887,6 +916,7 @@ fun pkgs =>
     "AutotoolsRootfs" = lower_autotools_node,
     "AutotoolsStageRootfs" = lower_autotools_stage_rootfs_node,
     "MakefileRootfs" = lower_makefile_node,
+    "MakefileStageRootfs" = lower_makefile_stage_rootfs_node,
     "MesonRootfs" = lower_meson_node,
     "SandboxBuildRootfs" = lower_sandbox_build_rootfs_node,
     "SandboxStageRootfs" = lower_sandbox_stage_rootfs_node,

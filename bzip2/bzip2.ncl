@@ -24,7 +24,11 @@ fun pkgs =>
   }
   in
 
-  let bzip2_config = fun version => {
+  # `out_dir` is the install root: "@{out}" for the staging gen1 (MakefileRootfs),
+  # "/stage" for the additive full bzip2 (MakefileStageRootfs, re-rooted by
+  # TreeMove). bzip2's Makefile installs via PREFIX (not DESTDIR), so it needs a
+  # custom install hook rather than the synthetic DESTDIR install.
+  let bzip2_config = fun version => fun out_dir => {
     pre_build = {
       name = "prepare_source",
       run_as = "build-user",
@@ -49,20 +53,20 @@ fun pkgs =>
         "/bin/sh",
         "-ec",
         m%"
-          make PREFIX="@{out}/usr" install
-          mkdir -p "@{out}/usr/lib" "@{out}/usr/bin" "@{out}/usr/include"
-          cp -av libbz2.so.* "@{out}/usr/lib/"
-          ln -svf libbz2.so.%{version} "@{out}/usr/lib/libbz2.so"
-          cp -v bzip2-shared "@{out}/usr/bin/bzip2"
-          cp -v bzlib.h "@{out}/usr/include/"
-          for i in "@{out}/usr/bin"/{bzcat,bunzip2,lbzip2}; do
+          make PREFIX="%{out_dir}/usr" install
+          mkdir -p "%{out_dir}/usr/lib" "%{out_dir}/usr/bin" "%{out_dir}/usr/include"
+          cp -av libbz2.so.* "%{out_dir}/usr/lib/"
+          ln -svf libbz2.so.%{version} "%{out_dir}/usr/lib/libbz2.so"
+          cp -v bzip2-shared "%{out_dir}/usr/bin/bzip2"
+          cp -v bzlib.h "%{out_dir}/usr/include/"
+          for i in "%{out_dir}/usr/bin"/{bzcat,bunzip2,lbzip2}; do
             ln -sfv bzip2 "$i"
           done
-          ln -sfv bzdiff "@{out}/usr/bin/bzcmp"
-          ln -sfv bzgrep "@{out}/usr/bin/bzegrep"
-          ln -sfv bzgrep "@{out}/usr/bin/bzfgrep"
-          ln -sfv bzmore "@{out}/usr/bin/bzless"
-          rm -fv "@{out}/usr/lib/libbz2.a"
+          ln -sfv bzdiff "%{out_dir}/usr/bin/bzcmp"
+          ln -sfv bzgrep "%{out_dir}/usr/bin/bzegrep"
+          ln -sfv bzgrep "%{out_dir}/usr/bin/bzfgrep"
+          ln -sfv bzmore "%{out_dir}/usr/bin/bzless"
+          rm -fv "%{out_dir}/usr/lib/libbz2.a"
         "%,
       ],
     },
@@ -75,7 +79,7 @@ fun pkgs =>
     name = "bzip2-gen1-%{version}",
     tag = "MakefileRootfs",
     # gen1 bootstraps in system_rootfs_1, before the self-hosted toolchain exists.
-    config = bzip2_config version,
+    config = bzip2_config version "@{out}",
     inputs = {
       _rootfs = pkgs.system_rootfs_1,
       source = bzip2_src version source_object_hash,
@@ -118,14 +122,14 @@ fun pkgs =>
     version | default = "1.0.8",
     source_object_hash | default = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
     name = "bzip2-%{version}",
-    tag = "MakefileRootfs",
+    tag = "MakefileStageRootfs",
     deps = {
       build = [],
       runtime = [
         pkgs.glibc_libs,
       ],
     },
-    config = bzip2_config version,
+    config = bzip2_config version "/stage",
     inputs = {
       _rootfs =
         br.build_rootfs_closure pkgs "bzip2-%{version}-build-rootfs" bzip2_build_deps,
