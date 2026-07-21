@@ -16,9 +16,8 @@ fun pkgs =>
     name = "test-reports",
     tag = "Sandbox",
     config = {
-      # The collected reports are plain files; capture as a plain-object
-      # directory rather than an ownership-aware fs-tree.
-      preserve_ownership = false,
+      # The `Sandbox` tag captures the collected reports as a plain-object
+      # directory (they are plain files with no meaningful ownership).
       steps = [
         {
           name = "collect_reports",

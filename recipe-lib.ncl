@@ -168,9 +168,9 @@ in
   # `ErofsRootfs` builder: this lowers to a `Sandbox` that runs `mkfs.erofs`
   # (from `pkgs.erofs_utils`) over the materialized tree. The build rootfs is the
   # runtime closure of erofs-utils plus a shell; `mk-erofs.sh` supplies the
-  # reproducibility flags. The result is captured as a plain-object directory
-  # holding a single `erofs-rootfs.erofs` file (`preserve_ownership = false`,
-  # since the image blob has no meaningful ownership of its own).
+  # reproducibility flags. The `Sandbox` tag captures the result as a plain-object
+  # directory holding a single `erofs-rootfs.erofs` file (the image blob has no
+  # meaningful ownership of its own).
   #
   # `args`: { name : String, tree : <fs-tree node to pack> }.
   erofs_image = fun pkgs =>
@@ -199,7 +199,6 @@ in
         name = args.name,
         tag = "Sandbox",
         config = {
-          preserve_ownership = false,
           steps = [
             {
               name = "mkfs_erofs",

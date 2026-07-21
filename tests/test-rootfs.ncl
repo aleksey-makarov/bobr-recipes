@@ -16,10 +16,9 @@ fun pkgs =>
     name = "test-rootfs",
     tag = "Sandbox",
     config = {
-      # Test reports are plain files; capture the output as a plain-object
-      # directory (chowned) rather than an ownership-aware fs-tree, so the
-      # report collector can read them directly via a non-`_` input.
-      preserve_ownership = false,
+      # The `Sandbox` tag captures the output as a plain-object directory, so
+      # the report collector can read the plain report files directly via a
+      # non-`_` input.
       script_config = {
         name = "rootfs",
         check_python = "true",
@@ -44,10 +43,9 @@ fun pkgs =>
     name = "test-gnome-rootfs",
     tag = "Sandbox",
     config = {
-      # Test reports are plain files; capture the output as a plain-object
-      # directory (chowned) rather than an ownership-aware fs-tree, so the
-      # report collector can read them directly via a non-`_` input.
-      preserve_ownership = false,
+      # The `Sandbox` tag captures the output as a plain-object directory, so
+      # the report collector can read the plain report files directly via a
+      # non-`_` input.
       script_config = {
         name = "gnome-rootfs",
         check_python = "true",

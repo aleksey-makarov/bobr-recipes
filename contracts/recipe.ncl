@@ -362,15 +362,6 @@ let SandboxConfig = {
     | Dyn
     | optional
     | doc "Optional script configuration payload passed through to the build script.",
-  preserve_ownership
-    | Bool
-    | optional
-    | doc m%"
-      Capture the output as an ownership-aware fs-tree (default `true`). When
-      `false`, the output tree is chowned to a single owner and captured as a
-      plain object — for self-contained artifacts where per-file ownership is
-      irrelevant.
-    "%,
 }
 in
 let HookStep = {
