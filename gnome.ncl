@@ -151,8 +151,12 @@ fun pkgs =>
             m%"
               # Complete ld.so.cache over the whole tree (glibc ships none now).
               # -X: write only the cache, do not recreate the version symlinks
-              # packages already installed.
-              ldconfig -X
+              # packages already installed. -i: do not write the auxiliary cache
+              # (/var/cache/ldconfig/aux-cache) -- its per-library dev/inode/ctime
+              # keys are non-reproducible across machines, and it is dead weight
+              # on a read-only image (ldconfig never re-runs to use it). Matches
+              # what debootstrap/OpenEmbedded drop for reproducible read-only rootfs.
+              ldconfig -X -i
 
               # GSettings schemas -> gschemas.compiled
               if [ -d /usr/share/glib-2.0/schemas ]; then
