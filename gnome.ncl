@@ -151,12 +151,19 @@ fun pkgs =>
             m%"
               # Complete ld.so.cache over the whole tree (glibc ships none now).
               # -X: write only the cache, do not recreate the version symlinks
-              # packages already installed. -i: do not write the auxiliary cache
-              # (/var/cache/ldconfig/aux-cache) -- its per-library dev/inode/ctime
-              # keys are non-reproducible across machines, and it is dead weight
-              # on a read-only image (ldconfig never re-runs to use it). Matches
-              # what debootstrap/OpenEmbedded drop for reproducible read-only rootfs.
-              ldconfig -X -i
+              # packages already installed.
+              ldconfig -X
+
+              # Drop the auxiliary cache. ldconfig always writes it via
+              # save_aux_cache() when it builds the cache; -i/--ignore-aux-cache
+              # only skips READING an existing one, it does not suppress the
+              # write. Its per-library dev/inode/ctime keys are non-reproducible
+              # across machines, and it is dead weight on a read-only image
+              # (ldconfig never re-runs to use it), so delete it afterwards --
+              # as debootstrap/OpenEmbedded do for a reproducible read-only
+              # rootfs. The whole dir is created by this build (absent from the
+              # base tree), so the removal stays within the additive layer.
+              rm -rf /var/cache/ldconfig
 
               # GSettings schemas -> gschemas.compiled
               if [ -d /usr/share/glib-2.0/schemas ]; then
