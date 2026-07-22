@@ -1,3 +1,4 @@
+let recipe = import "recipe-lib.ncl" in
 # gobject-introspection -- the GIR scanner/compiler and libgirepository, needed
 # to build typelibs (gjs and most GNOME libs consume them). A MesonRootfs recipe:
 # it supplies its own build rootfs (_rootfs), built from the normal meson build
@@ -9,13 +10,7 @@
 # fields (overridable), as in linux.ncl.
 let br = import "build-rootfs.ncl" in
 
-let branch = fun version =>
-  let matched = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
-  if matched.index == 0 && std.array.length matched.groups == 1 then
-    std.array.at 0 matched.groups
-  else
-    std.fail_with "gobject-introspection.ncl: version must be MAJOR.MINOR.PATCH"
-in
+let branch = recipe.version_prefix 2 in
 
 fun pkgs =>
   let mk_src = fun version =>

@@ -14,15 +14,6 @@ let node_inputs = fun node =>
   else
     node.inputs
 in
-let pad3 = fun n =>
-  let digits = std.string.from_number n in
-  if n < 10 then
-    "00" ++ digits
-  else if n < 100 then
-    "0" ++ digits
-  else
-    digits
-in
 # A readable slug of a node name for request node ids: the name with its
 # version segments dropped (any `-`-segment that starts with a digit, which also
 # strips the version from `<pkg>-<ver>-build-rootfs`). Purely cosmetic -- node
@@ -35,27 +26,12 @@ let node_name_slug = fun name =>
   in
   if std.array.length kept == 0 then name else std.string.join "-" kept
 in
-let numbered_inputs_fn = fun inputs =>
-  std.record.from_array (
-    std.array.map_with_index
-      (fun idx =>
-        fun input =>
-          {
-            field = "n" ++ pad3 idx,
-            value = input,
-          }
-      )
-      inputs
-  )
-in
 let split_libs_name = fun base =>
   let matched = std.string.find "^(.+)-([0-9].*)$" base.name in
   if matched.index == 0 && std.array.length matched.groups == 2 then
     std.array.at 0 matched.groups ++ "-libs-" ++ std.array.at 1 matched.groups
   else
-    std.record.get
-      ("recipe.split.libs: base name '" ++ base.name ++ "' does not match package-version")
-      {}
+    std.fail_with "recipe.split.libs: base name '%{base.name}' does not match package-version"
 in
 let split_libs_include = fun globs =>
   if std.is_string globs then
@@ -66,16 +42,7 @@ in
 let old_style_input_error = fun node_name =>
   fun slot_name =>
     fun shape =>
-      std.record.get
-        (
-          "recipe-lib.to_request: input '"
-          ++ slot_name
-          ++ "' of node '"
-          ++ node_name
-          ++ "' uses unsupported old-style "
-          ++ shape
-        )
-        {}
+      std.fail_with "recipe-lib.to_request: input '%{slot_name}' of node '%{node_name}' uses unsupported old-style %{shape}"
 in
 let lower_source_origin = fun ctx =>
   fun origin =>
@@ -94,48 +61,35 @@ let lower_source_origin = fun ctx =>
     else
       origin
 in
+let default_install_attrs = {
+  uid = 0,
+  gid = 0,
+  directory_mode = 0o755,
+  regular_file_mode = 0o644,
+  executable_file_mode = 0o755,
+}
+in
 {
   install = {
-    root_default_attrs = {
-      uid = 0,
-      gid = 0,
-      directory_mode = 0o755,
-      regular_file_mode = 0o644,
-      executable_file_mode = 0o755,
-    },
-    fs_tree_root_default_attrs = {
-      uid = 0,
-      gid = 0,
-      directory_mode = 0o755,
-      regular_file_mode = 0o644,
-      executable_file_mode = 0o755,
-    },
+    root_default_attrs = default_install_attrs,
+    fs_tree_root_default_attrs = default_install_attrs,
 
     rule = fun path => fun attrs => { path, attrs },
 
-    root_default_rule =
-      let default_attrs = {
-        uid = 0,
-        gid = 0,
-        directory_mode = 0o755,
-        regular_file_mode = 0o644,
-        executable_file_mode = 0o755,
-      }
-      in
-      { path = "**", attrs = default_attrs },
-    fs_tree_root_default_rule =
-      let default_attrs = {
-        uid = 0,
-        gid = 0,
-        directory_mode = 0o755,
-        regular_file_mode = 0o644,
-        executable_file_mode = 0o755,
-      }
-      in
-      { path = "**", attrs = default_attrs },
+    root_default_rule = { path = "**", attrs = default_install_attrs },
+    fs_tree_root_default_rule = { path = "**", attrs = default_install_attrs },
   },
 
-  numbered_inputs = numbered_inputs_fn,
+  numbered_inputs = build_rootfs_lib.numbered_inputs,
+
+  # First `n` dot-separated components of a version string, e.g.
+  # `recipe.version_prefix 2 "2.88.2"` == "2.88" (release branch/series in
+  # download URLs) and `recipe.version_prefix 1 "48.1"` == "48" (major-only
+  # directories). Replaces per-recipe hand-rolled `branch`/`series` helpers.
+  # Fails loudly (array out of bounds) when the version has fewer components.
+  version_prefix : Number -> String -> String = fun n =>
+    fun version =>
+      std.string.join "." (std.array.slice 0 n (std.string.split "." version)),
 
   # base_filesystem + runtime closure of the native toolchain plus `extra_deps`
   # (no system_rootfs_X). For custom multi-step recipes; the synthetic builders
@@ -174,7 +128,8 @@ in
   #
   # `args`: { name : String, tree : <fs-tree node to pack> }.
   erofs_image = fun pkgs =>
-    fun args =>
+    fun raw_args =>
+      let args = raw_args | { name | String, tree | Dyn } in
       let mkfs_script = {
         name = "%{args.name}-mkfs-script",
         tag = "Source",
@@ -253,9 +208,10 @@ in
     ],
   },
 
-  to_request = fun ctx =>
+  to_request = fun raw_ctx =>
     fun pkgs =>
     fun root_node =>
+    let ctx = raw_ctx | { recipes_path | String } in
     let lower = lower_node pkgs in
     let lower_origin = lower_source_origin ctx in
     let rec collect = fun seen =>

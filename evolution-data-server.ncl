@@ -1,3 +1,4 @@
+let recipe = import "recipe-lib.ncl" in
 # evolution-data-server -- GNOME's calendar/addressbook/mail data backends.
 # gnome-shell links libecal-2.0 and libedataserver-1.2 (its calendar and clock).
 # CMake project, built via the Makefile builder with a cmake_configure pre-step.
@@ -7,10 +8,7 @@
 # goes through GIO (glib-networking) at runtime, and NSS/krb5/phonenumber are
 # auto-detected (absent, hence inert), so no heavy crypto stack is pulled in.
 # `version`/`source_object_hash`/`series` are node fields (overridable).
-let series = fun v =>
-  let p = std.string.split "." v in
-  "%{std.array.at 0 p}.%{std.array.at 1 p}"
-in
+let series = recipe.version_prefix 2 in
 
 fun pkgs =>
   let eds_src = fun version =>

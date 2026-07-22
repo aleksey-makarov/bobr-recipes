@@ -1,13 +1,11 @@
+let recipe = import "recipe-lib.ncl" in
 # gnome-desktop -- the libgnome-desktop-4 support library (GnomeBG wallpapers,
 # GnomeLanguages, thumbnailing, ...). gnome-shell links gnome-desktop-4. GNOME 50
 # pins the 44.x stable series. Meson build; GTK4 library only (the legacy GTK3
 # libgnome-desktop-3.0 and its X11/xrandr deps are off), docs/tests off, udev and
 # systemd integration off. The thumbnail sandbox uses libseccomp.
 # `version`/`source_object_hash`/`series` are node fields (overridable).
-let series = fun v =>
-  let p = std.string.split "." v in
-  std.array.at 0 p
-in
+let series = recipe.version_prefix 1 in
 
 fun pkgs =>
   let gnome_desktop_src = fun version =>

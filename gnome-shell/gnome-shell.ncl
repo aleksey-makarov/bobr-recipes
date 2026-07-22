@@ -1,3 +1,4 @@
+let recipe = import "../recipe-lib.ncl" in
 # gnome-shell -- the GNOME desktop shell: the mutter-based compositor session UI
 # that gjs runs. Meson build. Links libmutter (compositor), libgjs (JS engine),
 # gtk4, gcr-4, gnome-desktop-4, polkit-agent-1, evolution-data-server
@@ -6,10 +7,7 @@
 # GTK4/libadwaita extensions app and the man pages/tests too -- we want the shell
 # session, not the full optional surface. systemd integration is on.
 # `version`/`source_object_hash`/`series` are node fields (overridable).
-let series = fun v =>
-  let p = std.string.split "." v in
-  std.array.at 0 p
-in
+let series = recipe.version_prefix 1 in
 
 fun pkgs =>
   let gnome_shell_src = fun version =>

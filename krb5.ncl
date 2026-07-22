@@ -1,9 +1,10 @@
+let recipe = import "recipe-lib.ncl" in
 # krb5 -- MIT Kerberos 5. gnome-control-center's System panel hard-requires krb5
 # (`dependency('krb5')` + assert). Autotools build; the configure script lives in
 # the tarball's src/ subdirectory. Installs into merged-usr (sbin -> bin).
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let series = fun v => std.string.join "." (std.array.slice 0 2 (std.string.split "." v)) in
+  let series = recipe.version_prefix 2 in
 
   let krb5_src = fun version =>
     fun hash =>

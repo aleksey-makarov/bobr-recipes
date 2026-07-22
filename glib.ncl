@@ -1,3 +1,4 @@
+let recipe = import "recipe-lib.ncl" in
 # GLib / GObject / GIO -- the base of the GNOME stack. Built in two passes to
 # break the glib <-> gobject-introspection cycle:
 #   glib_gen1 (introspection off) -> gobject-introspection -> glib (gir on).
@@ -5,13 +6,7 @@
 # are node fields (overridable), as in linux.ncl.
 let br = import "build-rootfs.ncl" in
 
-let branch = fun version =>
-  let matched = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
-  if matched.index == 0 && std.array.length matched.groups == 1 then
-    std.array.at 0 matched.groups
-  else
-    std.fail_with "glib.ncl: version must be MAJOR.MINOR.PATCH"
-in
+let branch = recipe.version_prefix 2 in
 
 fun pkgs =>
   let mk_src = fun version =>

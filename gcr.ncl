@@ -1,3 +1,4 @@
+let recipe = import "recipe-lib.ncl" in
 # gcr -- GNOME crypto UI/services library (certificates, keys, PKCS#11 access).
 # gnome-shell links the base gcr-4 library. Meson build. We build the base
 # library only: the GTK4 UI/utilities, the libsecret-backed ssh-agent, systemd
@@ -5,10 +6,7 @@
 # needs libgcr-4, not those. Crypto backend is libgcrypt (the default); trust
 # and PKCS#11 come from p11-kit-1.
 # `version`/`source_object_hash`/`series` are node fields (overridable).
-let series = fun v =>
-  let p = std.string.split "." v in
-  "%{std.array.at 0 p}.%{std.array.at 1 p}"
-in
+let series = recipe.version_prefix 2 in
 
 fun pkgs =>
   let gcr_src = fun version =>

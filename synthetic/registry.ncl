@@ -1,142 +1,58 @@
+# Synthetic-tag lowering registry: maps each synthetic recipe tag to the
+# function that lowers it to the low-level builder graph. The scripted build
+# families (autotools/makefile/meson/perl/python/cargo) share one generic
+# generator, `lower_synthetic_with`, parameterized by a row of
+# `synthetic_families`: which hook field precedes the scripted phases, the
+# phases themselves, which config fields pass through to `script_config`, and
+# which boolean flags lower to the string "true" (script_config supports only
+# string leaves).
 let cargo = import "../cargo.ncl" in
 let br = import "../build-rootfs.ncl" in
 fun pkgs =>
-  let buildscript_autotools_install = {
-    name = "buildscript-autotools-install",
-    tag = "Source",
-    object_hash = import "autotools-install.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/autotools-install.sh",
-    },
-  }
+  # One `Source` node per synthetic build script. The `.fsobj-hash` sidecar
+  # import must stay a literal path at each call site (Nickel imports cannot
+  # be computed), so the hash is passed in.
+  let mk_buildscript = fun slug =>
+    fun file_stem =>
+      fun hash =>
+        {
+          name = "buildscript-%{slug}",
+          tag = "Source",
+          object_hash = hash,
+          origin = {
+            tag = "RecipePath",
+            path = "synthetic/%{file_stem}.sh",
+          },
+        }
   in
-  let buildscript_autotools_stage_install = {
-    name = "buildscript-autotools-stage-install",
-    tag = "Source",
-    object_hash = import "autotools-stage-install.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/autotools-stage-install.sh",
-    },
-  }
+  let buildscript_autotools_install =
+    mk_buildscript "autotools-install" "autotools-install" (import "autotools-install.sh.fsobj-hash" as 'Text)
   in
-  let buildscript_common = {
-    name = "buildscript-synthetic-common",
-    tag = "Source",
-    object_hash = import "common.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/common.sh",
-    },
-  }
+  let buildscript_autotools_stage_install =
+    mk_buildscript "autotools-stage-install" "autotools-stage-install" (import "autotools-stage-install.sh.fsobj-hash" as 'Text)
   in
-  let buildscript_gnu_make_install = {
-    name = "buildscript-gnu-make-install",
-    tag = "Source",
-    object_hash = import "gnu-make-install.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/gnu-make-install.sh",
-    },
-  }
+  let buildscript_common =
+    mk_buildscript "synthetic-common" "common" (import "common.sh.fsobj-hash" as 'Text)
   in
-  let buildscript_gnu_make_stage_install = {
-    name = "buildscript-gnu-make-stage-install",
-    tag = "Source",
-    object_hash = import "gnu-make-stage-install.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/gnu-make-stage-install.sh",
-    },
-  }
+  let buildscript_gnu_make_install =
+    mk_buildscript "gnu-make-install" "gnu-make-install" (import "gnu-make-install.sh.fsobj-hash" as 'Text)
   in
-  let buildscript_meson = {
-    name = "buildscript-meson",
-    tag = "Source",
-    object_hash = import "meson.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/meson.sh",
-    },
-  }
+  let buildscript_gnu_make_stage_install =
+    mk_buildscript "gnu-make-stage-install" "gnu-make-stage-install" (import "gnu-make-stage-install.sh.fsobj-hash" as 'Text)
   in
-  let buildscript_perl_module = {
-    name = "buildscript-perl-module",
-    tag = "Source",
-    object_hash = import "perl-module.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/perl-module.sh",
-    },
-  }
+  let buildscript_meson =
+    mk_buildscript "meson" "meson" (import "meson.sh.fsobj-hash" as 'Text)
   in
-  let buildscript_python_module = {
-    name = "buildscript-python-module",
-    tag = "Source",
-    object_hash = import "python-module.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/python-module.sh",
-    },
-  }
+  let buildscript_perl_module =
+    mk_buildscript "perl-module" "perl-module" (import "perl-module.sh.fsobj-hash" as 'Text)
   in
-  let buildscript_cargo = {
-    name = "buildscript-cargo",
-    tag = "Source",
-    object_hash = import "cargo.sh.fsobj-hash" as 'Text,
-    origin = {
-      tag = "RecipePath",
-      path = "synthetic/cargo.sh",
-    },
-  }
+  let buildscript_python_module =
+    mk_buildscript "python-module" "python-module" (import "python-module.sh.fsobj-hash" as 'Text)
   in
-  let record_get_or = fun field =>
-    fun fallback =>
-      fun record =>
-        if std.record.has_field field record then
-          std.record.get field record
-        else
-          fallback
+  let buildscript_cargo =
+    mk_buildscript "cargo" "cargo" (import "cargo.sh.fsobj-hash" as 'Text)
   in
-  let record_replace = fun field =>
-    fun value =>
-      fun record =>
-        std.record.insert
-          field
-          value
-          (
-            if std.record.has_field field record then
-              std.record.remove field record
-            else
-              record
-          )
-  in
-  let fail = fun message =>
-    std.record.get message {}
-  in
-  let pad3 = fun n =>
-    let digits = std.string.from_number n in
-    if n < 10 then
-      "00" ++ digits
-    else if n < 100 then
-      "0" ++ digits
-    else
-      digits
-  in
-  let numbered_inputs = fun inputs =>
-    std.record.from_array (
-      std.array.map_with_index
-        (fun idx =>
-          fun input =>
-            {
-              field = "n" ++ pad3 idx,
-              value = input,
-            }
-        )
-        inputs
-    )
-  in
+  let numbered_inputs = br.numbered_inputs in
   let autotools_package_default_build_deps =
     br.native_build_deps pkgs
     @ [
@@ -187,7 +103,7 @@ fun pkgs =>
     let root_fields = std.record.fields node.inputs in # already sorted
     let roots = std.array.map (fun field => std.record.get field node.inputs) root_fields in
     if std.array.length roots == 0 then
-      fail ("RootfsClosure '" ++ node.name ++ "' must have at least one input")
+      std.fail_with "RootfsClosure '%{node.name}' must have at least one input"
     else
       {
         name = node.name,
@@ -262,95 +178,128 @@ fun pkgs =>
         else
           []
   in
-  let lower_autotools_node_with = fun builder_tag => fun script_source => fun post_install_cwd => fun node =>
-    let node_config = node.config in
-    let source_root_expr = synthetic_source_root_expr node_config in
-    let pre_configure_steps =
-      normalize_hook_steps node_config "pre_configure" source_root_expr
-    in
-    let post_install_steps =
-      normalize_hook_steps node_config "post_install" post_install_cwd
-    in
-    let lowered_script_config =
-      let with_configure_args =
-        if std.record.has_field "configure_args" node_config then
-          { configure_args = node_config.configure_args }
-        else
-          {}
-      in
-      let with_make_args =
-        if std.record.has_field "make_args" node_config then
-          std.record.insert "make_args" node_config.make_args with_configure_args
-        else
-          with_configure_args
-      in
-      let with_env =
-        if std.record.has_field "env" node_config then
-          std.record.insert "env" node_config.env with_make_args
-        else
-          with_make_args
-      in
-      let with_source_subdir =
-        if std.record.has_field "source_subdir" node_config then
-          std.record.insert "source_subdir" node_config.source_subdir with_env
-        else
-          with_env
-      in
-      let with_python_modules =
-        if std.record.has_field "python_modules" node_config then
-          std.record.insert "python_modules" node_config.python_modules with_source_subdir
-        else
-          with_source_subdir
-      in
-      if record_get_or "in-tree" false node_config then
-        std.record.insert "in-tree" "true" with_python_modules
-      else
-        with_python_modules
-    in
-    let autotools_step_env = synthetic_step_env node
-    in
-    {
-      name = node.name,
-      tag = builder_tag,
-      config = {
-        steps =
-          [synthetic_prepare_step autotools_step_env]
-          @ pre_configure_steps
-          @ [
+  # --- generic scripted-family lowering --------------------------------------
+  let configure_build_install_phases = [
+    { name = "bobr_configure", phase = "configure", run_as = "build-user" },
+    { name = "bobr_build", phase = "build", run_as = "build-user" },
+    { name = "bobr_install", phase = "install", run_as = "root" },
+  ]
+  in
+  let build_install_phases = [
+    { name = "bobr_build", phase = "build", run_as = "build-user" },
+    { name = "bobr_install", phase = "install", run_as = "root" },
+  ]
+  in
+  let synthetic_families = {
+    autotools = {
+      pre_hook = "pre_configure",
+      phases = configure_build_install_phases,
+      passthrough = ["configure_args", "make_args", "env", "source_subdir"],
+      flags = ["in-tree"],
+      extra_step_env = {},
+    },
+    makefile = {
+      pre_hook = "pre_build",
+      phases = build_install_phases,
+      passthrough = ["make_args", "env", "source_subdir"],
+      flags = ["skip_install"],
+      extra_step_env = {},
+    },
+    meson = {
+      pre_hook = "pre_configure",
+      phases = configure_build_install_phases,
+      passthrough = ["setup_args", "env", "source_subdir"],
+      flags = [],
+      extra_step_env = {},
+    },
+    perl_module = {
+      pre_hook = "pre_configure",
+      phases = configure_build_install_phases,
+      passthrough = ["perl_args", "make_args", "env", "source_subdir"],
+      flags = [],
+      extra_step_env = {},
+    },
+    python_module = {
+      pre_hook = "pre_configure",
+      phases = configure_build_install_phases,
+      passthrough = ["env", "source_subdir"],
+      flags = [],
+      extra_step_env = {},
+    },
+    cargo = {
+      pre_hook = null,
+      phases =
+        [{ name = "bobr_vendor_crates", phase = "vendor", run_as = "build-user" }]
+        @ build_install_phases,
+      passthrough = ["features", "bins", "env", "source_subdir"],
+      flags = ["no_default_features"],
+      extra_step_env = { BOBR_CRATES_DIR = "@{crates}" },
+    },
+  }
+  in
+  let lower_synthetic_with = fun family =>
+    fun builder_tag =>
+      fun script_source =>
+        fun post_install_cwd =>
+          fun node =>
+            let node_config = std.record.get_or "config" {} node in
+            let pre_steps =
+              if family.pre_hook == null then
+                []
+              else
+                normalize_hook_steps node_config family.pre_hook (synthetic_source_root_expr node_config)
+            in
+            let post_install_steps =
+              normalize_hook_steps node_config "post_install" post_install_cwd
+            in
+            let lowered_script_config =
+              let passthrough =
+                std.record.filter
+                  (fun field _value => std.array.elem field family.passthrough)
+                  node_config
+              in
+              std.array.fold_left
+                (fun acc =>
+                  fun flag =>
+                    if std.record.get_or flag false node_config then
+                      std.record.insert flag "true" acc
+                    else
+                      acc
+                )
+                passthrough
+                family.flags
+            in
+            let step_env = synthetic_step_env node & family.extra_step_env in
             {
-              name = "bobr_configure",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "configure"],
-              env = autotools_step_env,
-            },
-            {
-              name = "bobr_build",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "build"],
-              env = autotools_step_env,
-            },
-            {
-              name = "bobr_install",
-              run_as = "root",
-              cwd = "@{build}",
-              argv = ["@{script}", "install"],
-              env = autotools_step_env,
-            },
-          ]
-          @ post_install_steps,
-        script_config = lowered_script_config,
-      },
-      inputs =
-        synthetic_inputs script_source node.inputs,
-    }
+              name = node.name,
+              tag = builder_tag,
+              config = {
+                steps =
+                  [synthetic_prepare_step step_env]
+                  @ pre_steps
+                  @ std.array.map
+                    (fun phase =>
+                      {
+                        name = phase.name,
+                        run_as = phase.run_as,
+                        cwd = "@{build}",
+                        argv = ["@{script}", phase.phase],
+                        env = step_env,
+                      }
+                    )
+                    family.phases
+                  @ post_install_steps,
+                script_config = lowered_script_config,
+              },
+              inputs =
+                synthetic_inputs script_source node.inputs,
+            }
   in
   let lower_autotools_install_node =
-    lower_autotools_node_with "SandboxInstall" buildscript_autotools_install "/"
+    lower_synthetic_with synthetic_families.autotools "SandboxInstall" buildscript_autotools_install "/"
   in
   let lower_autotools_stage_install_node =
-    lower_autotools_node_with "SandboxInstall" buildscript_autotools_stage_install "/stage"
+    lower_synthetic_with synthetic_families.autotools "SandboxInstall" buildscript_autotools_stage_install "/stage"
   in
   # Explicit-rootfs additive-staging autotools builder: runs the synthetic
   # autotools steps but installs into a virgin /stage (autotools-stage-install.sh),
@@ -361,7 +310,7 @@ fun pkgs =>
   let lower_autotools_stage_rootfs_node = fun node =>
     let staged =
       lower_autotools_stage_install_node
-        (record_replace "name" (node.name ++ "-staged") node)
+        (std.record.update "name" (node.name ++ "-staged") node)
     in
     {
       name = node.name,
@@ -375,83 +324,18 @@ fun pkgs =>
   let lower_autotools_package_node = fun node =>
     let build_rootfs = build_rootfs_for autotools_package_default_build_deps node in
     let package_inputs =
-      record_replace
+      std.record.update
         "_rootfs"
         build_rootfs
         node.inputs
     in
-    lower_autotools_install_node (record_replace "inputs" package_inputs node)
-  in
-  let lower_makefile_node_with = fun builder_tag => fun script_source => fun post_install_cwd => fun node =>
-    let node_config = node.config in
-    let source_root_expr = synthetic_source_root_expr node_config in
-    let pre_build_steps =
-      normalize_hook_steps node_config "pre_build" source_root_expr
-    in
-    let post_install_steps =
-      normalize_hook_steps node_config "post_install" post_install_cwd
-    in
-    let lowered_script_config =
-      let with_make_args =
-        if std.record.has_field "make_args" node_config then
-          { make_args = node_config.make_args }
-        else
-          {}
-      in
-      let with_env =
-        if std.record.has_field "env" node_config then
-          std.record.insert "env" node_config.env with_make_args
-        else
-          with_make_args
-      in
-      let with_source_subdir =
-        if std.record.has_field "source_subdir" node_config then
-          std.record.insert "source_subdir" node_config.source_subdir with_env
-        else
-          with_env
-      in
-      if record_get_or "skip_install" false node_config then
-        std.record.insert "skip_install" "true" with_source_subdir
-      else
-        with_source_subdir
-    in
-    let makefile_step_env = synthetic_step_env node
-    in
-    {
-      name = node.name,
-      tag = builder_tag,
-      config = {
-        steps =
-          [synthetic_prepare_step makefile_step_env]
-          @ pre_build_steps
-          @ [
-            {
-              name = "bobr_build",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "build"],
-              env = makefile_step_env,
-            },
-            {
-              name = "bobr_install",
-              run_as = "root",
-              cwd = "@{build}",
-              argv = ["@{script}", "install"],
-              env = makefile_step_env,
-            },
-          ]
-          @ post_install_steps,
-        script_config = lowered_script_config,
-      },
-      inputs =
-        synthetic_inputs script_source node.inputs,
-    }
+    lower_autotools_install_node (std.record.update "inputs" package_inputs node)
   in
   let lower_makefile_install_node =
-    lower_makefile_node_with "SandboxInstall" buildscript_gnu_make_install "/"
+    lower_synthetic_with synthetic_families.makefile "SandboxInstall" buildscript_gnu_make_install "/"
   in
   let lower_makefile_stage_install_node =
-    lower_makefile_node_with "SandboxInstall" buildscript_gnu_make_stage_install "/stage"
+    lower_synthetic_with synthetic_families.makefile "SandboxInstall" buildscript_gnu_make_stage_install "/stage"
   in
   # Additive-staging Makefile builder (see AutotoolsStageRootfs): runs
   # the synthetic Makefile steps but installs into a virgin /stage, captured
@@ -460,7 +344,7 @@ fun pkgs =>
   let lower_makefile_stage_rootfs_node = fun node =>
     let staged =
       lower_makefile_stage_install_node
-        (record_replace "name" (node.name ++ "-staged") node)
+        (std.record.update "name" (node.name ++ "-staged") node)
     in
     {
       name = node.name,
@@ -469,284 +353,20 @@ fun pkgs =>
       inputs = { tree = staged },
     }
   in
-  let lower_meson_node_with = fun builder_tag => fun script_source => fun post_install_cwd => fun node =>
-    let node_config = node.config in
-    let source_root_expr = synthetic_source_root_expr node_config in
-    let pre_configure_steps =
-      normalize_hook_steps node_config "pre_configure" source_root_expr
-    in
-    let post_install_steps =
-      normalize_hook_steps node_config "post_install" post_install_cwd
-    in
-    let lowered_script_config =
-      let with_setup_args =
-        if std.record.has_field "setup_args" node_config then
-          { setup_args = node_config.setup_args }
-        else
-          {}
-      in
-      let with_env =
-        if std.record.has_field "env" node_config then
-          std.record.insert "env" node_config.env with_setup_args
-        else
-          with_setup_args
-      in
-      let with_source_subdir =
-        if std.record.has_field "source_subdir" node_config then
-          std.record.insert "source_subdir" node_config.source_subdir with_env
-        else
-          with_env
-      in
-      with_source_subdir
-    in
-    let meson_step_env = synthetic_step_env node
-    in
-    {
-      name = node.name,
-      tag = builder_tag,
-      config = {
-        steps =
-          [synthetic_prepare_step meson_step_env]
-          @ pre_configure_steps
-          @ [
-            {
-              name = "bobr_configure",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "configure"],
-              env = meson_step_env,
-            },
-            {
-              name = "bobr_build",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "build"],
-              env = meson_step_env,
-            },
-            {
-              name = "bobr_install",
-              run_as = "root",
-              cwd = "@{build}",
-              argv = ["@{script}", "install"],
-              env = meson_step_env,
-            },
-          ]
-          @ post_install_steps,
-        script_config = lowered_script_config,
-      },
-      inputs =
-        synthetic_inputs script_source node.inputs,
-    }
-  in
   # Meson has a single additive builder: no bootstrap/rootfs recipes need the
   # staging model (glib's two-pass build is handled by installing gen1 into a
   # private prefix -- see glib.ncl).
-  let lower_meson_node = lower_meson_node_with "SandboxInstall" buildscript_meson "/" in
-  let lower_perl_module_node = fun node =>
-    let node_config = node.config in
-    let source_root_expr = synthetic_source_root_expr node_config in
-    let pre_configure_steps =
-      normalize_hook_steps node_config "pre_configure" source_root_expr
-    in
-    let post_install_steps =
-      normalize_hook_steps node_config "post_install" "/"
-    in
-    let lowered_script_config =
-      let with_perl_args =
-        if std.record.has_field "perl_args" node_config then
-          { perl_args = node_config.perl_args }
-        else
-          {}
-      in
-      let with_make_args =
-        if std.record.has_field "make_args" node_config then
-          std.record.insert "make_args" node_config.make_args with_perl_args
-        else
-          with_perl_args
-      in
-      let with_env =
-        if std.record.has_field "env" node_config then
-          std.record.insert "env" node_config.env with_make_args
-        else
-          with_make_args
-      in
-      if std.record.has_field "source_subdir" node_config then
-        std.record.insert "source_subdir" node_config.source_subdir with_env
-      else
-        with_env
-    in
-    let perl_module_step_env = synthetic_step_env node
-    in
-    {
-      name = node.name,
-      tag = "SandboxInstall",
-      config = {
-        steps =
-          [synthetic_prepare_step perl_module_step_env]
-          @ pre_configure_steps
-          @ [
-            {
-              name = "bobr_configure",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "configure"],
-              env = perl_module_step_env,
-            },
-            {
-              name = "bobr_build",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "build"],
-              env = perl_module_step_env,
-            },
-            {
-              name = "bobr_install",
-              run_as = "root",
-              cwd = "@{build}",
-              argv = ["@{script}", "install"],
-              env = perl_module_step_env,
-            },
-          ]
-          @ post_install_steps,
-        script_config = lowered_script_config,
-      },
-      inputs =
-        synthetic_inputs buildscript_perl_module node.inputs,
-    }
+  let lower_meson_node =
+    lower_synthetic_with synthetic_families.meson "SandboxInstall" buildscript_meson "/"
   in
-  let lower_python_module_node = fun node =>
-    let node_config = node.config in
-    let source_root_expr = synthetic_source_root_expr node_config in
-    let pre_configure_steps =
-      normalize_hook_steps node_config "pre_configure" source_root_expr
-    in
-    let post_install_steps =
-      normalize_hook_steps node_config "post_install" "/"
-    in
-    let lowered_script_config =
-      let with_env =
-        if std.record.has_field "env" node_config then
-          { env = node_config.env }
-        else
-          {}
-      in
-      if std.record.has_field "source_subdir" node_config then
-        std.record.insert "source_subdir" node_config.source_subdir with_env
-      else
-        with_env
-    in
-    let python_module_step_env = synthetic_step_env node
-    in
-    {
-      name = node.name,
-      tag = "SandboxInstall",
-      config = {
-        steps =
-          [synthetic_prepare_step python_module_step_env]
-          @ pre_configure_steps
-          @ [
-            {
-              name = "bobr_configure",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "configure"],
-              env = python_module_step_env,
-            },
-            {
-              name = "bobr_build",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "build"],
-              env = python_module_step_env,
-            },
-            {
-              name = "bobr_install",
-              run_as = "root",
-              cwd = "@{build}",
-              argv = ["@{script}", "install"],
-              env = python_module_step_env,
-            },
-          ]
-          @ post_install_steps,
-        script_config = lowered_script_config,
-      },
-      inputs =
-        synthetic_inputs buildscript_python_module node.inputs,
-    }
+  let lower_perl_module_node =
+    lower_synthetic_with synthetic_families.perl_module "SandboxInstall" buildscript_perl_module "/"
   in
-  let lower_cargo_node = fun node =>
-    let node_config = record_get_or "config" {} node in
-    let post_install_steps =
-      normalize_hook_steps node_config "post_install" "/"
-    in
-    let lowered_script_config =
-      let with_features =
-        if std.record.has_field "features" node_config then
-          { features = node_config.features }
-        else
-          {}
-      in
-      let with_bins =
-        if std.record.has_field "bins" node_config then
-          std.record.insert "bins" node_config.bins with_features
-        else
-          with_features
-      in
-      let with_no_default =
-        if record_get_or "no_default_features" false node_config then
-          std.record.insert "no_default_features" "true" with_bins
-        else
-          with_bins
-      in
-      let with_env =
-        if std.record.has_field "env" node_config then
-          std.record.insert "env" node_config.env with_no_default
-        else
-          with_no_default
-      in
-      if std.record.has_field "source_subdir" node_config then
-        std.record.insert "source_subdir" node_config.source_subdir with_env
-      else
-        with_env
-    in
-    let cargo_step_env =
-      std.record.insert "BOBR_CRATES_DIR" "@{crates}" (synthetic_step_env node)
-    in
-    {
-      name = node.name,
-      tag = "SandboxInstall",
-      config = {
-        steps =
-          [synthetic_prepare_step cargo_step_env]
-          @ [
-            {
-              name = "bobr_vendor_crates",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "vendor"],
-              env = cargo_step_env,
-            },
-            {
-              name = "bobr_build",
-              run_as = "build-user",
-              cwd = "@{build}",
-              argv = ["@{script}", "build"],
-              env = cargo_step_env,
-            },
-            {
-              name = "bobr_install",
-              run_as = "root",
-              cwd = "@{build}",
-              argv = ["@{script}", "install"],
-              env = cargo_step_env,
-            },
-          ]
-          @ post_install_steps,
-        script_config = lowered_script_config,
-      },
-      inputs =
-        synthetic_inputs buildscript_cargo node.inputs,
-    }
+  let lower_python_module_node =
+    lower_synthetic_with synthetic_families.python_module "SandboxInstall" buildscript_python_module "/"
+  in
+  let lower_cargo_node =
+    lower_synthetic_with synthetic_families.cargo "SandboxInstall" buildscript_cargo "/"
   in
   # The package-level `Makefile` tag builds with the additive SandboxInstall
   # model (install into the overlay root). Explicit-rootfs Makefile recipes use
@@ -754,13 +374,13 @@ fun pkgs =>
   let lower_makefile_package_node = fun node =>
     let build_rootfs = build_rootfs_for makefile_package_default_build_deps node in
     let package_inputs =
-      record_replace
+      std.record.update
         "_rootfs"
         build_rootfs
         node.inputs
     in
     lower_makefile_install_node (
-      record_replace
+      std.record.update
         "inputs"
         package_inputs
         node
@@ -769,28 +389,28 @@ fun pkgs =>
   let lower_meson_package_node = fun node =>
     let build_rootfs = build_rootfs_for meson_package_default_build_deps node in
     let package_inputs =
-      record_replace
+      std.record.update
         "_rootfs"
         build_rootfs
         node.inputs
     in
     lower_meson_node (
-      record_replace
+      std.record.update
         "inputs"
         package_inputs
-        (record_replace "tag" "Meson" node)
+        (std.record.update "tag" "Meson" node)
     )
   in
   let lower_perl_module_package_node = fun node =>
     let build_rootfs = build_rootfs_for perl_module_package_default_build_deps node in
     let package_inputs =
-      record_replace
+      std.record.update
         "_rootfs"
         build_rootfs
         node.inputs
     in
     lower_perl_module_node (
-      record_replace
+      std.record.update
         "inputs"
         package_inputs
         node
@@ -799,13 +419,13 @@ fun pkgs =>
   let lower_python_module_package_node = fun node =>
     let build_rootfs = build_rootfs_for python_module_package_default_build_deps node in
     let package_inputs =
-      record_replace
+      std.record.update
         "_rootfs"
         build_rootfs
         node.inputs
     in
     lower_python_module_node (
-      record_replace
+      std.record.update
         "inputs"
         package_inputs
         node
@@ -817,16 +437,16 @@ fun pkgs =>
       cargo.vendor_bundle (node.name ++ "-crates") node.cargo_lock
     in
     let package_inputs =
-      record_replace
+      std.record.update
         "_rootfs"
         build_rootfs
-        (record_replace "crates" crates_bundle node.inputs)
+        (std.record.update "crates" crates_bundle node.inputs)
     in
     lower_cargo_node (
-      record_replace
+      std.record.update
         "inputs"
         package_inputs
-        (record_replace "tag" "CargoRootfs" node)
+        (std.record.update "tag" "CargoRootfs" node)
     )
   in
   # Generic sandbox synthetic builders: derive the build rootfs from
@@ -838,15 +458,15 @@ fun pkgs =>
     fun node =>
       let build_rootfs = build_rootfs_for sandbox_build_default_build_deps node in
       let package_inputs =
-        record_replace
+        std.record.update
           "_rootfs"
           build_rootfs
           node.inputs
       in
-      record_replace
+      std.record.update
         "inputs"
         package_inputs
-        (record_replace "tag" target_tag node)
+        (std.record.update "tag" target_tag node)
   in
   let lower_sandbox_install_build_node = lower_sandbox_build_with "SandboxInstall" in
   # Self-rootfs, additive-staging builder: the recipe brings its own steps and
@@ -858,10 +478,10 @@ fun pkgs =>
   # into `/stage`.
   let lower_sandbox_stage_rootfs_node = fun node =>
     let staged =
-      record_replace
+      std.record.update
         "tag"
         "SandboxInstall"
-        (record_replace "name" (node.name ++ "-staged") node)
+        (std.record.update "name" (node.name ++ "-staged") node)
     in
     {
       name = node.name,
@@ -879,7 +499,7 @@ fun pkgs =>
   # re-rooted DESTDIR). Recipes using this tag MUST install into `/stage`.
   let lower_sandbox_stage_build_node = fun node =>
     let installed = lower_sandbox_build_with "SandboxInstall" node in
-    let staged = record_replace "name" (node.name ++ "-staged") installed in
+    let staged = std.record.update "name" (node.name ++ "-staged") installed in
     {
       name = node.name,
       tag = "TreeMove",

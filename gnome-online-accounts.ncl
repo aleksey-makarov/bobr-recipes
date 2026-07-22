@@ -1,3 +1,4 @@
+let recipe = import "recipe-lib.ncl" in
 # gnome-online-accounts (goa) -- provides goa-1.0, a hard dependency of
 # gnome-control-center's Online Accounts panel. Meson build against glib, gtk4,
 # libadwaita, libsecret, libsoup 3, libxml2, json-glib, librest (rest-1.0) and
@@ -6,7 +7,7 @@
 # Documentation, man pages and the Vala binding are off.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let series = fun v => std.string.join "." (std.array.slice 0 2 (std.string.split "." v)) in
+  let series = recipe.version_prefix 2 in
 
   let goa_src = fun version =>
     fun hash =>

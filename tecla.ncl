@@ -1,3 +1,4 @@
+let recipe = import "recipe-lib.ncl" in
 # tecla -- GNOME keyboard layout previewer. gnome-control-center's Keyboard
 # panel shells out to the `tecla` application to render a layout preview and
 # looks it up via its (data-only) tecla.pc at build time (meson:
@@ -5,7 +6,7 @@
 # a git subproject, which fails offline). GTK4/libadwaita app; needs xkbcommon.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let series = fun v => std.array.at 0 (std.string.split "." v) in
+  let series = recipe.version_prefix 1 in
 
   let tecla_src = fun version =>
     fun hash =>

@@ -1,14 +1,9 @@
+let recipe = import "recipe-lib.ncl" in
 # libxml2 -- XML parser, needed by shared-mime-info (and later gnome-desktop
 # and other GNOME bits). `version`/`source_object_hash` are node fields (overridable), as
 # in linux.ncl.
 
-let branch = fun version =>
-  let matched = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
-  if matched.index == 0 && std.array.length matched.groups == 1 then
-    std.array.at 0 matched.groups
-  else
-    std.fail_with "libxml2.ncl: version must be MAJOR.MINOR.PATCH"
-in
+let branch = recipe.version_prefix 2 in
 
 fun pkgs =>
   let mk_src = fun version =>

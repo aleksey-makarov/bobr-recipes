@@ -1,10 +1,11 @@
+let recipe = import "recipe-lib.ncl" in
 # GnuTLS -- TLS library. A mandatory dependency of Samba (>= 3.4.7). Autotools
 # build on nettle + GMP, using the system libtasn1 and libunistring rather than
 # the bundled copies, with p11-kit for PKCS#11. IDN (libidn2), the documentation,
 # the test suite and the Guile bindings are off.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let series = fun v => std.string.join "." (std.array.slice 0 2 (std.string.split "." v)) in
+  let series = recipe.version_prefix 2 in
 
   let gnutls_src = fun version =>
     fun hash =>

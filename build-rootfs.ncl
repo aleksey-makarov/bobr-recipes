@@ -4,22 +4,12 @@
 # (synthetic/registry.ncl) and, via recipe-lib's `native_build_rootfs`, by
 # custom multi-step recipes that would otherwise reach for system_rootfs_2.
 #
-# Leaf module: imports nothing from recipe-lib/registry (avoids an import cycle),
-# so it carries its own copies of a few trivial helpers. The exported record uses
-# `include` so its field names take the outer bindings (a plain `x = x` would
-# self-reference in Nickel's recursive records).
-let record_get_or = fun field =>
-  fun fallback =>
-    fun record =>
-      if std.record.has_field field record then
-        std.record.get field record
-      else
-        fallback
-in
-let fail = fun message =>
-  std.record.get message {}
-in
-let pad3 = fun n =>
+# Leaf module: imports nothing, so recipe-lib and synthetic/registry can both
+# import it without a cycle; it is also the single owner of the shared
+# `numbered_inputs` helper. The exported record uses `include` so its field
+# names take the outer bindings (a plain `x = x` would self-reference in
+# Nickel's recursive records).
+let pad3 : Number -> String = fun n =>
   let digits = std.string.from_number n in
   if n < 10 then
     "00" ++ digits
@@ -28,6 +18,8 @@ let pad3 = fun n =>
   else
     digits
 in
+# Number an ordered input list as `n000`, `n001`, ... -- the canonical way
+# request inputs are keyed when a node takes an ordered array of inputs.
 let numbered_inputs = fun inputs =>
   std.record.from_array (
     std.array.map_with_index
@@ -42,17 +34,17 @@ let numbered_inputs = fun inputs =>
   )
 in
 let deps_or_empty = fun node =>
-  record_get_or "deps" { build = [], runtime = [] } node
+  std.record.get_or "deps" { build = [], runtime = [] } node
 in
 let runtime_deps_or_empty = fun node =>
-  record_get_or "runtime" [] (deps_or_empty node)
+  std.record.get_or "runtime" [] (deps_or_empty node)
 in
 let build_deps_or_empty = fun node =>
-  record_get_or "build" [] (deps_or_empty node)
+  std.record.get_or "build" [] (deps_or_empty node)
 in
 let dependency_cycle_error = fun stack =>
   fun name =>
-    fail (
+    std.fail_with (
       "runtime dependency cycle: "
       ++ std.string.join " -> " (stack @ [name])
     )
@@ -130,11 +122,9 @@ let native_build_deps = fun pkgs => [pkgs.linux_headers] @ native_toolchain_deps
 # bootstrap here, one stage below the final toolchain. This is the deps-closure
 # that replaces the curated system-rootfs-1 snapshot: same package set, so the
 # build environment (PATH tools) matches what the snapshot provided.
-let bootstrap_toolchain_deps = fun pkgs => [
-  pkgs.linux_headers_gen1,
-  pkgs.glibc,
-  pkgs.binutils,
-  pkgs.gcc,
+# The gen1 userland shared by both toolchain closures below; they differ only
+# in the three compiler entries layered on top of it.
+let gen1_userland_deps = fun pkgs => [
   pkgs.bash_gen1,
   pkgs.gawk_gen1,
   pkgs.awk_symlink,
@@ -153,6 +143,15 @@ let bootstrap_toolchain_deps = fun pkgs => [
   pkgs.python_gen1,
 ]
 in
+let bootstrap_toolchain_deps = fun pkgs =>
+  [
+    pkgs.linux_headers_gen1,
+    pkgs.glibc,
+    pkgs.binutils,
+    pkgs.gcc,
+  ]
+  @ gen1_userland_deps pkgs
+in
 # The fully-gen1 toolchain that builds the FINAL compiler (glibc, binutils,
 # gcc): the gen1 compiler over the gen1 userland. Differs from
 # bootstrap_toolchain_deps only in the three compiler entries -- gen1 instead of
@@ -160,28 +159,14 @@ in
 # rootfs that already contains themselves). The gen1 nodes declare no runtime
 # deps, so this closure does not expand and reproduces the old system-rootfs-0
 # snapshot exactly. Replaces the curated system-rootfs-0.
-let gen1_toolchain_deps = fun pkgs => [
-  pkgs.linux_headers_gen1,
-  pkgs.glibc_gen1,
-  pkgs.binutils_gen1,
-  pkgs.gcc_gen1,
-  pkgs.bash_gen1,
-  pkgs.gawk_gen1,
-  pkgs.awk_symlink,
-  pkgs.bison_gen1,
-  pkgs.make_gen1,
-  pkgs.coreutils_gen1,
-  pkgs.sed_gen1,
-  pkgs.grep_gen1,
-  pkgs.gzip_gen1,
-  pkgs.xz_gen1,
-  pkgs.tar_gen1,
-  pkgs.patch_gen1,
-  pkgs.findutils_gen1,
-  pkgs.diffutils_gen1,
-  pkgs.m4_gen1,
-  pkgs.python_gen1,
-]
+let gen1_toolchain_deps = fun pkgs =>
+  [
+    pkgs.linux_headers_gen1,
+    pkgs.glibc_gen1,
+    pkgs.binutils_gen1,
+    pkgs.gcc_gen1,
+  ]
+  @ gen1_userland_deps pkgs
 in
 # The default build deps every Meson package needs: the native toolchain plus
 # pkgconf and python. Shared so both the Meson package builder and recipes that
@@ -266,6 +251,7 @@ let build_rootfs_closure_substituting = fun pkgs =>
 in
 {
   include [
+    numbered_inputs,
     build_deps_or_empty,
     runtime_closure_set,
     sorted_closure_nodes,

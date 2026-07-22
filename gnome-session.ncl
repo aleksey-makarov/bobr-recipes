@@ -1,3 +1,4 @@
+let recipe = import "recipe-lib.ncl" in
 # gnome-session -- the GNOME session manager. It registers
 # org.gnome.SessionManager, seeds the D-Bus/systemd activation environment (so
 # D-Bus-activated apps like org.gnome.Settings inherit XDG_CURRENT_DESKTOP), and
@@ -6,7 +7,7 @@
 # `gnome-shell --display-server` launch. Meson build; man pages/docbook off.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let series = fun v => std.array.at 0 (std.string.split "." v) in
+  let series = recipe.version_prefix 1 in
 
   let gnome_session_src = fun version =>
     fun hash =>

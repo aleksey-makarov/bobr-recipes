@@ -1,3 +1,4 @@
+let recipe = import "recipe-lib.ncl" in
 # adwaita-icon-theme -- the default GNOME icon theme. Data (icons), but its
 # meson build requires gtk4-update-icon-cache at configure time (required:true);
 # the actual cache run is skip_if_destdir, so under our DESTDIR install it is
@@ -5,11 +6,7 @@
 # step. Hence gtk4 is a build-only dep. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
 
-let branch = fun version =>
-  let m = std.string.find "^([0-9]+)" version in
-  if m.index == 0 && std.array.length m.groups == 1 then std.array.at 0 m.groups
-  else std.fail_with "adwaita-icon-theme.ncl: version must start with a number"
-in
+let branch = recipe.version_prefix 1 in
 
 fun pkgs =>
   let mk_src = fun version =>

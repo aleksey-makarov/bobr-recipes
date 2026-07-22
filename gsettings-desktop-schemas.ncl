@@ -1,14 +1,11 @@
+let recipe = import "recipe-lib.ncl" in
 # gsettings-desktop-schemas -- the org.gnome.desktop.* GSettings schemas (data)
 # used across GNOME (mutter, gnome-shell, GTK reads e.g. cursor-size). The
 # .gschema.xml install to /usr/share/glib-2.0/schemas and are compiled by the
 # gnome_rootfs finalize step. `version`/`source_object_hash` are node fields (overridable),
 # as in linux.ncl.
 
-let branch = fun version =>
-  let m = std.string.find "^([0-9]+)" version in
-  if m.index == 0 && std.array.length m.groups == 1 then std.array.at 0 m.groups
-  else std.fail_with "gsettings-desktop-schemas.ncl: version must start with a number"
-in
+let branch = recipe.version_prefix 1 in
 
 fun pkgs =>
   let mk_src = fun version =>

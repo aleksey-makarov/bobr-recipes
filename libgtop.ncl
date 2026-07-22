@@ -1,8 +1,9 @@
+let recipe = import "recipe-lib.ncl" in
 # libgtop -- library to obtain system/process information. gnome-control-center's
 # Privacy/Usage panel links against libgtop-2.0. Autotools build against glib.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let series = fun v => std.string.join "." (std.array.slice 0 2 (std.string.split "." v)) in
+  let series = recipe.version_prefix 2 in
 
   let libgtop_src = fun version =>
     fun hash =>

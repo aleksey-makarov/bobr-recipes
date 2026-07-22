@@ -1,3 +1,4 @@
+let recipe = import "recipe-lib.ncl" in
 # gnome-control-center -- the GNOME Settings application. The final leaf of the
 # desktop: it pulls together nearly the whole session stack. Meson build.
 #
@@ -9,7 +10,7 @@
 # (the Keyboard panel). Documentation, tests, Snap and malcontent are off.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let series = fun v => std.array.at 0 (std.string.split "." v) in
+  let series = recipe.version_prefix 1 in
 
   let cc_src = fun version =>
     fun hash =>

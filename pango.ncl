@@ -1,12 +1,9 @@
+let recipe = import "recipe-lib.ncl" in
 # pango -- text layout, used by GTK4. Uses harfbuzz (shaping), fribidi (bidi),
 # cairo (rendering), fontconfig/freetype (fonts). Xft off (no X).
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 
-let branch = fun version =>
-  let m = std.string.find "^([0-9]+[.][0-9]+)[.]" version in
-  if m.index == 0 && std.array.length m.groups == 1 then std.array.at 0 m.groups
-  else std.fail_with "pango.ncl: version must be MAJOR.MINOR.PATCH"
-in
+let branch = recipe.version_prefix 2 in
 
 fun pkgs =>
   let mk_src = fun version =>

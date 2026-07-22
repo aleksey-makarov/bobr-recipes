@@ -1,3 +1,4 @@
+let recipe = import "recipe-lib.ncl" in
 # gjs -- GNOME JavaScript bindings: the JS runtime gnome-shell (and GNOME JS
 # apps) run on. A C/C++ library embedding SpiderMonkey (mozjs-140) and exposing
 # GObject-Introspection to JS. Plain Meson, so the `Meson` synthetic builder
@@ -7,10 +8,7 @@
 # Optional bits are off: readline (console line-editing), the sysprof profiler,
 # installed tests, and the gtk/dbus test suites -- gnome-shell needs libgjs, not
 # those. `version`/`source_object_hash` are node fields (overridable).
-let series = fun v =>
-  let p = std.string.split "." v in
-  "%{std.array.at 0 p}.%{std.array.at 1 p}"
-in
+let series = recipe.version_prefix 2 in
 
 fun pkgs =>
   let gjs_src = fun version =>

@@ -1,3 +1,4 @@
+let recipe = import "../recipe-lib.ncl" in
 # gdm -- GNOME Display Manager. Two roles here: it provides the Gdm-1.0 typelib
 # (from libgdm) that gnome-shell imports at startup (the login/greeter machinery
 # runs inside gnome-shell itself), and it is the login/session launcher we use
@@ -9,7 +10,7 @@
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
   # download.gnome.org groups gdm tarballs by major version ("50" for 50.1).
-  let series = fun v => std.array.at 0 (std.string.split "." v) in
+  let series = recipe.version_prefix 1 in
 
   let gdm_src = fun version =>
     fun hash =>

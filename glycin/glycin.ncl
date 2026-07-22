@@ -1,3 +1,4 @@
+let recipe = import "../recipe-lib.ncl" in
 # glycin -- image loading library. mutter links only libglycin (`glycin-2`), so
 # the runtime loaders (heif/jxl/raw/svg -- heavy codecs), the GTK 4 bindings,
 # the thumbnailer, introspection and tests are all off. Only the C library is
@@ -13,10 +14,7 @@
 # would disagree.
 let cargo = import "../cargo.ncl" in
 
-let series = fun v =>
-  let p = std.string.split "." v in
-  "%{std.array.at 0 p}.%{std.array.at 1 p}"
-in
+let series = recipe.version_prefix 2 in
 
 fun pkgs =>
   let mk_src = fun version =>
