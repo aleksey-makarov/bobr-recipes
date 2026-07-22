@@ -1,7 +1,7 @@
 let recipe = import "recipe-lib.ncl" in
 # evolution-data-server -- GNOME's calendar/addressbook/mail data backends.
 # gnome-shell links libecal-2.0 and libedataserver-1.2 (its calendar and clock).
-# CMake project, built via the Makefile builder with a cmake_configure pre-step.
+# CMake project, built with the Cmake builder.
 # We build the non-GUI data libraries only: the GTK3/GTK4 UI libs, WebKitGTK
 # OAuth2, GNOME Online Accounts, the weather backend (libgweather), Berkeley DB,
 # vala bindings, docs and tests are all off -- dropping those dependencies. TLS
@@ -30,10 +30,9 @@ fun pkgs =>
       | default
       = "df4ec29950f29a76eac6fbe0f814c48d2cef7d3fdb905002a4a883dd761ce93c",
     name = "evolution-data-server-%{version}",
-    tag = "Makefile",
+    tag = "Cmake",
     deps = {
       build = [
-        pkgs.cmake,
         pkgs.glib,
         pkgs.libsoup,
         pkgs.libical,
@@ -78,15 +77,25 @@ fun pkgs =>
       # as.po ("end-of-file within string"). The builder runs `make -j<nproc>
       # <make_args>`; a trailing -j1 wins (GNU make honours the last -j).
       make_args = ["-j1"],
-      pre_build = {
-        name = "cmake_configure",
-        run_as = "build-user",
-        argv = [
-          "/bin/sh",
-          "-ec",
-          "cmake -S . -B . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DENABLE_GTK=OFF -DENABLE_GTK4=OFF -DENABLE_GOA=OFF -DENABLE_WEATHER=OFF -DENABLE_OAUTH2_WEBKITGTK=OFF -DENABLE_OAUTH2_WEBKITGTK4=OFF -DWITH_LIBDB=OFF -DWITH_KRB5=OFF -DWITH_OPENLDAP=OFF -DENABLE_CANBERRA=OFF -DENABLE_EXAMPLES=OFF -DENABLE_TESTS=OFF -DENABLE_INSTALLED_TESTS=OFF -DENABLE_GTK_DOC=OFF -DENABLE_VALA_BINDINGS=OFF -DENABLE_INTROSPECTION=ON",
-        ],
-      },
+      cmake_args = [
+        "-DCMAKE_INSTALL_LIBDIR=lib",
+        "-DENABLE_GTK=OFF",
+        "-DENABLE_GTK4=OFF",
+        "-DENABLE_GOA=OFF",
+        "-DENABLE_WEATHER=OFF",
+        "-DENABLE_OAUTH2_WEBKITGTK=OFF",
+        "-DENABLE_OAUTH2_WEBKITGTK4=OFF",
+        "-DWITH_LIBDB=OFF",
+        "-DWITH_KRB5=OFF",
+        "-DWITH_OPENLDAP=OFF",
+        "-DENABLE_CANBERRA=OFF",
+        "-DENABLE_EXAMPLES=OFF",
+        "-DENABLE_TESTS=OFF",
+        "-DENABLE_INSTALLED_TESTS=OFF",
+        "-DENABLE_GTK_DOC=OFF",
+        "-DENABLE_VALA_BINDINGS=OFF",
+        "-DENABLE_INTROSPECTION=ON",
+      ],
       # Without DESTDIR (the SandboxInstall model installs into the live overlay
       # root), EDS's CMake install runs glib-compile-schemas and ships
       # gschemas.compiled. Packages must not ship that cache: it is a

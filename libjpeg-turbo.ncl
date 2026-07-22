@@ -1,7 +1,7 @@
 # libjpeg-turbo -- JPEG codec, needed by gdk-pixbuf. CMake-only (3.x dropped
-# autotools), so built via the Makefile builder with a cmake `pre_build` step
-# (same pattern as vulkan-loader). SIMD is off to avoid a nasm build dep.
-# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
+# autotools), built with the Cmake builder. SIMD is off to avoid a nasm build
+# dep. `version`/`source_object_hash` are node fields (overridable), as in
+# linux.ncl.
 
 fun pkgs =>
   let mk_src = fun version =>
@@ -21,25 +21,19 @@ fun pkgs =>
     version | default = "3.1.0",
     source_object_hash | default = "9564c72b1dfd1d6fe6274c5f95a8d989b59854575d4bbee44ade7bc17aa9bc93",
     name = "libjpeg-turbo-%{version}",
-    tag = "Makefile",
+    tag = "Cmake",
     deps = {
-      build = [
-        pkgs.cmake,
-      ],
+      build = [],
       runtime = [
         pkgs.glibc_libs,
       ],
     },
     config = {
-      pre_build = {
-        name = "cmake_configure",
-        run_as = "build-user",
-        argv = [
-          "/bin/sh",
-          "-ec",
-          "cmake -S . -B . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DENABLE_STATIC=0 -DWITH_SIMD=0",
-        ],
-      },
+      cmake_args = [
+        "-DCMAKE_INSTALL_LIBDIR=lib",
+        "-DENABLE_STATIC=0",
+        "-DWITH_SIMD=0",
+      ],
     },
     inputs = {
       source = mk_src version source_object_hash,

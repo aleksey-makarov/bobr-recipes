@@ -334,6 +334,15 @@ let CargoConfig = {
   post_install | AutotoolsHook | optional,
 }
 in
+let CmakeConfig = {
+  cmake_args | Array String | optional,
+  make_args | Array String | optional,
+  env | Dyn | optional,
+  source_subdir | String | optional,
+  pre_configure | AutotoolsHook | optional,
+  post_install | AutotoolsHook | optional,
+}
+in
 let TreeSubsetConfig = {
   include | Array String | NonEmptyArray,
 }
@@ -446,6 +455,7 @@ let tag_specs = {
   PythonModule = { config = PythonModuleConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
   Cargo = { config = CargoConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
   CargoRootfs = { config = CargoConfig, inputs = SyntheticRootfsInputsShape, requires_deps = false },
+  Cmake = { config = CmakeConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
   Sandbox = { config = SandboxConfig, inputs = SandboxRootfsInputsShape, requires_deps = false },
   SandboxInstall = { config = SandboxConfig, inputs = SandboxRootfsInputsShape, requires_deps = false },
   SandboxStageRootfs = { config = SandboxConfig, inputs = SandboxRootfsInputsShape, requires_deps = false },
@@ -586,6 +596,9 @@ in
   cargo_config
     | doc "Config contract for synthetic `Cargo` and `CargoRootfs` recipe nodes."
     = CargoConfig,
+  cmake_config
+    | doc "Config contract for synthetic `Cmake` recipe nodes."
+    = CmakeConfig,
   sandbox_config
     | doc "Config contract for the low-level `Sandbox`/`SandboxInstall` builders and their synthetic `*StageRootfs`/`*Build` variants."
     = SandboxConfig,

@@ -52,6 +52,9 @@ fun pkgs =>
   let buildscript_cargo =
     mk_buildscript "cargo" "cargo" (import "cargo.sh.fsobj-hash" as 'Text)
   in
+  let buildscript_cmake =
+    mk_buildscript "cmake" "cmake" (import "cmake.sh.fsobj-hash" as 'Text)
+  in
   let numbered_inputs = br.numbered_inputs in
   let autotools_package_default_build_deps =
     br.native_build_deps pkgs
@@ -64,6 +67,12 @@ fun pkgs =>
   let makefile_package_default_build_deps = br.native_build_deps pkgs
   in
   let meson_package_default_build_deps = br.meson_build_deps pkgs
+  in
+  let cmake_package_default_build_deps =
+    br.native_build_deps pkgs
+    @ [
+      pkgs.cmake,
+    ]
   in
   let perl_module_package_default_build_deps =
     br.native_build_deps pkgs
@@ -235,6 +244,13 @@ fun pkgs =>
       flags = ["no_default_features"],
       extra_step_env = { BOBR_CRATES_DIR = "@{crates}" },
     },
+    cmake = {
+      pre_hook = "pre_configure",
+      phases = configure_build_install_phases,
+      passthrough = ["cmake_args", "make_args", "env", "source_subdir"],
+      flags = [],
+      extra_step_env = {},
+    },
   }
   in
   let lower_synthetic_with = fun family =>
@@ -359,6 +375,11 @@ fun pkgs =>
   let lower_meson_node =
     lower_synthetic_with synthetic_families.meson "SandboxInstall" buildscript_meson "/"
   in
+  # Cmake: a single additive package builder (like Meson). CMake configures,
+  # then the build/install phases drive `make` -- see synthetic/cmake.sh.
+  let lower_cmake_node =
+    lower_synthetic_with synthetic_families.cmake "SandboxInstall" buildscript_cmake "/"
+  in
   let lower_perl_module_node =
     lower_synthetic_with synthetic_families.perl_module "SandboxInstall" buildscript_perl_module "/"
   in
@@ -399,6 +420,21 @@ fun pkgs =>
         "inputs"
         package_inputs
         (std.record.update "tag" "Meson" node)
+    )
+  in
+  let lower_cmake_package_node = fun node =>
+    let build_rootfs = build_rootfs_for cmake_package_default_build_deps node in
+    let package_inputs =
+      std.record.update
+        "_rootfs"
+        build_rootfs
+        node.inputs
+    in
+    lower_cmake_node (
+      std.record.update
+        "inputs"
+        package_inputs
+        node
     )
   in
   let lower_perl_module_package_node = fun node =>
@@ -512,6 +548,7 @@ fun pkgs =>
     "Autotools" = lower_autotools_package_node,
     "Makefile" = lower_makefile_package_node,
     "Meson" = lower_meson_package_node,
+    "Cmake" = lower_cmake_package_node,
     "PerlModule" = lower_perl_module_package_node,
     "PythonModule" = lower_python_module_package_node,
     "SandboxInstallDeps" = lower_sandbox_install_deps_node,

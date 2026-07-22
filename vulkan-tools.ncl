@@ -18,10 +18,9 @@ fun pkgs =>
     version | default = "1.4.350.0",
     source_object_hash | default = "3079796d51b29ce49dc7b7c7e243df93b343d54c3be9d4a8292c3231b9698deb",
     name = "vulkan-tools-%{version}",
-    tag = "Makefile",
+    tag = "Cmake",
     deps = {
       build = [
-        pkgs.cmake,
         pkgs.vulkan_headers,
         pkgs.vulkan_loader,
         pkgs.wayland,
@@ -36,15 +35,13 @@ fun pkgs =>
       ],
     },
     config = {
-      pre_build = {
-        name = "cmake_configure",
-        run_as = "build-user",
-        argv = [
-          "/bin/sh",
-          "-ec",
-          "cmake -S . -B . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_ICD=OFF -DBUILD_TESTS=OFF -DBUILD_WSI_XCB_SUPPORT=OFF -DBUILD_WSI_XLIB_SUPPORT=OFF -DBUILD_WSI_WAYLAND_SUPPORT=ON",
-        ],
-      },
+      cmake_args = [
+        "-DBUILD_ICD=OFF",
+        "-DBUILD_TESTS=OFF",
+        "-DBUILD_WSI_XCB_SUPPORT=OFF",
+        "-DBUILD_WSI_XLIB_SUPPORT=OFF",
+        "-DBUILD_WSI_WAYLAND_SUPPORT=ON",
+      ],
     },
     inputs = {
       source = vulkan_tools_src version source_object_hash,
