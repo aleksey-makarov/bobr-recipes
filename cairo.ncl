@@ -45,7 +45,6 @@ fun pkgs =>
         "-Dtests=disabled",
         "-Dxlib=disabled",
         "-Dxcb=disabled",
-        "-Dglib=disabled",
         "-Dtee=disabled",
         "-Dsymbol-lookup=disabled",
         "-Dspectre=disabled",

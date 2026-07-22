@@ -1,5 +1,3 @@
-let recipe = import "recipe-lib.ncl" in
-
 fun pkgs =>
   let mpfr_src = fun version => fun hash => {
     name = "mpfr-src-%{version}",

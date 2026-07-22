@@ -1,5 +1,3 @@
-let recipe = import "../recipe-lib.ncl" in
-
 fun pkgs =>
   let test_rootfs_script_source = {
     name = "test-rootfs-script-source",

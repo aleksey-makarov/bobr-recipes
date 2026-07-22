@@ -1,5 +1,3 @@
-let recipe = import "recipe-lib.ncl" in
-
 fun _pkgs =>
   let buildpack_deps_image = {
     name = "buildpack-deps-image",

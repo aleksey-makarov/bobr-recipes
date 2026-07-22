@@ -1,5 +1,3 @@
-let recipe = import "recipe-lib.ncl" in
-
 fun pkgs =>
   let man_db_src = fun version => fun hash => {
     name = "man-db-src-%{version}",

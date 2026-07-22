@@ -1,4 +1,3 @@
-let recipe = import "../recipe-lib.ncl" in
 let br = import "../build-rootfs.ncl" in
 
 fun pkgs =>

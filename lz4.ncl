@@ -1,5 +1,3 @@
-let recipe = import "recipe-lib.ncl" in
-
 fun pkgs =>
   let lz4_src = fun version => fun hash => {
     name = "lz4-src-%{version}",

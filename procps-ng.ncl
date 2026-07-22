@@ -1,5 +1,3 @@
-let recipe = import "recipe-lib.ncl" in
-
 fun pkgs =>
   let procps_ng_src = fun version => fun hash => {
     name = "procps-ng-src-%{version}",

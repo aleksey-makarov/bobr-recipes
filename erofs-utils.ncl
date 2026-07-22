@@ -1,5 +1,3 @@
-let recipe = import "recipe-lib.ncl" in
-
 fun pkgs =>
   let erofs_utils_src = fun version =>
     fun hash =>

@@ -1,5 +1,3 @@
-let recipe = import "recipe-lib.ncl" in
-
 fun pkgs =>
   let groff_src = fun version => fun hash => {
     name = "groff-src-%{version}",
