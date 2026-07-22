@@ -159,6 +159,15 @@ fun pkgs =>
       )
   in
 
+  # Shared across all three build steps (configure adds BOBR_LINUX_CONFIG_BASE),
+  # mirroring `headers_env` in mk_linux_headers above.
+  let full_env = {
+    BOBR_LINUX_BUILD_KIND = "full",
+    BOBR_SOURCE_DIR = "@{build}/source",
+    BOBR_INSTALL_DIR = "/",
+  }
+  in
+
   let linux = {
     version | default = "6.18.38",
     source_object_hash | default = "ac26e508abd56e9f8b89872b6e10c49fc823bcc70d8068a5d8504c1a7c4ff045",
@@ -203,34 +212,21 @@ fun pkgs =>
           run_as = "build-user",
           cwd = "@{build}",
           argv = ["@{script}"],
-          env = {
-            BOBR_LINUX_BUILD_KIND = "full",
-            BOBR_LINUX_CONFIG_BASE = if use_tinyconfig then "tinyconfig" else "defconfig",
-            BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "/",
-          },
+          env = full_env & { BOBR_LINUX_CONFIG_BASE = if use_tinyconfig then "tinyconfig" else "defconfig" },
         },
         {
           name = "build",
           run_as = "build-user",
           cwd = "@{build}",
           argv = ["@{script}"],
-          env = {
-            BOBR_LINUX_BUILD_KIND = "full",
-            BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "/",
-          },
+          env = full_env,
         },
         {
           name = "install",
           run_as = "root",
           cwd = "@{build}",
           argv = ["@{script}"],
-          env = {
-            BOBR_LINUX_BUILD_KIND = "full",
-            BOBR_SOURCE_DIR = "@{build}/source",
-            BOBR_INSTALL_DIR = "/",
-          },
+          env = full_env,
         },
       ],
       script_config = {
