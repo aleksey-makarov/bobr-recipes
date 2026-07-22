@@ -27,7 +27,7 @@ fun pkgs =>
     version | default = "1.97.0",
     source_object_hash | default = "1cf17e4905b841d4c8e3f76467ac148d55fb3f54bf213c86f0d287a36471d904",
     name = "rust-bin-%{version}",
-    tag = "SandboxInstallBuild",
+    tag = "SandboxInstallDeps",
     deps = {
       build = [
         pkgs.coreutils,

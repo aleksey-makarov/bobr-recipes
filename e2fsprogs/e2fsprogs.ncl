@@ -27,7 +27,7 @@ fun pkgs =>
     version | default = "1.47.3",
     source_object_hash | default = "2f5164e64dd7d91eadd1e0e8a77d92c06dd7837bb19f1d9189ce1939b363d2b4",
     name = "e2fsprogs-%{version}",
-    tag = "SandboxInstallBuild",
+    tag = "SandboxInstallDeps",
     deps = {
       build = [
         pkgs.linux_headers,

@@ -40,14 +40,14 @@ fun pkgs =>
       | default
       = "1ad541f10da7c58dec01f540ecc44d28cbbc033f741a57473de5a0893d91606d",
     name = "nss-%{version}",
-    # SandboxStageBuild, not a plain additive SandboxInstallBuild: the install
+    # SandboxStageDeps, not a plain additive SandboxInstallDeps: the install
     # ends with `chown -R 0:0 ${out_dir}/usr`, which under a direct install into
     # / would recurse the live /usr and rewrite lower-layer file metadata (an
     # additive violation). Installing into the virgin /stage scopes both the
     # install and the recursive chown to nss's own files; the lowering's
     # TreeMove re-roots /stage -> /. The build rootfs is deps-derived (no
     # hand-rolled _rootfs).
-    tag = "SandboxStageBuild",
+    tag = "SandboxStageDeps",
     deps = {
       build =
         recipe.native_build_deps pkgs

@@ -41,9 +41,9 @@ fun pkgs =>
       | default
       = "85dfb9f6021152b4302b8968ef485d958c8c471cb02415a19853daaad5acce62",
     name = "mozjs-%{version}",
-    tag = "SandboxStageBuild",
+    tag = "SandboxStageDeps",
     deps = {
-      # Deps-derived build rootfs (SandboxStageBuild assembles it, no hand-rolled
+      # Deps-derived build rootfs (SandboxStageDeps assembles it, no hand-rolled
       # _rootfs): the native toolchain plus our prebuilt clang (libclang for
       # bindgen), rust (+rustfmt), cbindgen, nasm, python, pkgconf and system
       # ICU/zlib -- replacing system_rootfs_X.

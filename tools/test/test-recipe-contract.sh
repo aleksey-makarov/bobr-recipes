@@ -72,7 +72,7 @@ run_case "perl-module-package" pass '{"name":"pkg-package","tag":"PerlModule","d
 run_case "python-module-package" pass '{"name":"pkg-package","tag":"PythonModule","deps":{"build":[],"runtime":[]},"config":{"env":{"PYYAML_FORCE_LIBYAML":"0"},"source_subdir":"sub"},"inputs":{"source":'"${source_node}"'}}'
 run_case "sandbox" pass '{"name":"sandbox","tag":"Sandbox","config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "sandbox-stage-rootfs" pass '{"name":"sandbox-stage-rootfs","tag":"SandboxStageRootfs","config":{"steps":[{"name":"install","run_as":"root","cwd":"/stage","argv":["/bin/sh","-c","true"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
-run_case "sandbox-install-build-package" pass '{"name":"sandbox-install-build-package","tag":"SandboxInstallBuild","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
+run_case "sandbox-install-deps-package" pass '{"name":"sandbox-install-deps-package","tag":"SandboxInstallDeps","deps":{"build":[],"runtime":[]},"config":{"steps":[{"name":"install","run_as":"root","cwd":"/","argv":["/bin/sh","-c","true"]}]},"inputs":{"script":'"${script_node}"',"source":{"name":"src-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"src"}]}},"inputs":{}}}}'
 run_case "oci-extract" pass '{"name":"img-rootfs","tag":"OciExtract","config":{},"inputs":{"image":{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","platform":{"os":"linux","architecture":"amd64"}}}}}'
 
 run_case "unknown-tag" fail '{"name":"bad","tag":"Demo","config":{},"inputs":{}}'
@@ -1087,7 +1087,7 @@ let fake_pkgs = {
 } in
 recipe.to_request { recipes_path = "/recipes" } fake_pkgs {
   name = "pkg",
-  tag = "SandboxInstallBuild",
+  tag = "SandboxInstallDeps",
   deps = {
     build = [build_dep_tree],
     runtime = [],
@@ -1114,7 +1114,7 @@ sandbox_install_build_lowering_json="$(
     nickel export check-sandbox-install-build-lowering.ncl --format json
 )"
 
-# SandboxInstallBuild must lower to the low-level additive tag SandboxInstall
+# SandboxInstallDeps must lower to the low-level additive tag SandboxInstall
 # (not the staging Sandbox), with a build rootfs derived from deps.build.
 jq -e '
   .root.tag == "SandboxInstall"

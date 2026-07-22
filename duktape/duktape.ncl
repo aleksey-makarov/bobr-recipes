@@ -40,13 +40,13 @@ fun pkgs =>
       | default
       = "90f8d2fa8b5567c6899830ddef2c03f3c27960b11aca222fa17aa7ac613c2890",
     name = "duktape-%{version}",
-    # Deps-derived additive SandboxInstallBuild: the builder assembles the build
+    # Deps-derived additive SandboxInstallDeps: the builder assembles the build
     # rootfs from deps.build (the native toolchain -- cc + libm are all duktape
     # needs) instead of a hand-rolled _rootfs, and captures the install
     # additively into /. duktape's output (libduktape.so*, the two headers,
     # duktape.pc) does not overlap the toolchain rootfs, so it needs neither the
     # staging Sandbox model nor the /stage + TreeMove of a *StageRootfs.
-    tag = "SandboxInstallBuild",
+    tag = "SandboxInstallDeps",
     deps = {
       build = recipe.native_build_deps pkgs,
       runtime = [

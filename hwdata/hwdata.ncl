@@ -32,7 +32,7 @@ fun pkgs =>
     version | default = "0.395",
     source_object_hash | default = "1166f733c57afa82cfdad56e62ef044835fbc8c99ef65f033e6a5802716b5c66",
     name = "hwdata-%{version}",
-    tag = "SandboxInstallBuild",
+    tag = "SandboxInstallDeps",
     deps = {
       build = [
         pkgs.coreutils,

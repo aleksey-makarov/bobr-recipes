@@ -174,7 +174,7 @@ fun pkgs =>
     config_options | default = {},
     use_tinyconfig | default = false,
     name = "linux%{if use_tinyconfig then "-tiny" else ""}-%{version}",
-    tag = "SandboxInstallBuild",
+    tag = "SandboxInstallDeps",
     deps = {
       build = [
         pkgs.linux_headers_gen1,

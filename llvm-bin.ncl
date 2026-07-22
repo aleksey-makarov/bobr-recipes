@@ -28,7 +28,7 @@ fun pkgs =>
       | default
       = "54ec30358afcc9fb8aa74307db3046f5187f9fb89fb37064cdde906e062ebf36",
     name = "llvm-bin-%{version}",
-    tag = "SandboxInstallBuild",
+    tag = "SandboxInstallDeps",
     deps = {
       build = [
         pkgs.coreutils,

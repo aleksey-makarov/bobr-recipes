@@ -449,8 +449,8 @@ let tag_specs = {
   Sandbox = { config = SandboxConfig, inputs = SandboxRootfsInputsShape, requires_deps = false },
   SandboxInstall = { config = SandboxConfig, inputs = SandboxRootfsInputsShape, requires_deps = false },
   SandboxStageRootfs = { config = SandboxConfig, inputs = SandboxRootfsInputsShape, requires_deps = false },
-  SandboxInstallBuild = { config = SandboxConfig, inputs = SandboxInputsShape, requires_deps = true },
-  SandboxStageBuild = { config = SandboxConfig, inputs = SandboxInputsShape, requires_deps = true },
+  SandboxInstallDeps = { config = SandboxConfig, inputs = SandboxInputsShape, requires_deps = true },
+  SandboxStageDeps = { config = SandboxConfig, inputs = SandboxInputsShape, requires_deps = true },
 }
 in
 let KnownTags = ["Source"] @ std.record.fields tag_specs

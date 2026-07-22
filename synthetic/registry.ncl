@@ -452,7 +452,7 @@ fun pkgs =>
   # Generic sandbox synthetic builders: derive the build rootfs from
   # sandbox_build_default_build_deps + node.deps.build, then lower to the given
   # low-level tag. `Sandbox` (staging, via SandboxBuild) captures @{out};
-  # `SandboxInstall` (additive, via SandboxInstallBuild) installs into the live
+  # `SandboxInstall` (additive, via SandboxInstallDeps) installs into the live
   # overlay root (/) and captures only the additions.
   let lower_sandbox_build_with = fun target_tag =>
     fun node =>
@@ -468,7 +468,7 @@ fun pkgs =>
         package_inputs
         (std.record.update "tag" target_tag node)
   in
-  let lower_sandbox_install_build_node = lower_sandbox_build_with "SandboxInstall" in
+  let lower_sandbox_install_deps_node = lower_sandbox_build_with "SandboxInstall" in
   # Self-rootfs, additive-staging builder: the recipe brings its own steps and
   # `inputs._rootfs` (like the low-level Sandbox) but installs into a virgin
   # `/stage` inside the overlay. It lowers to an additive `SandboxInstall`
@@ -491,13 +491,13 @@ fun pkgs =>
     }
   in
   # Deps-derived additive-staging builder: the deps-derived twin of
-  # SandboxStageRootfs. Like SandboxInstallBuild it assembles the build rootfs
+  # SandboxStageRootfs. Like SandboxInstallDeps it assembles the build rootfs
   # from sandbox_build_default_build_deps + node.deps.build (no hand-rolled
   # `inputs._rootfs`), but installs into a virgin `/stage` and re-roots
   # `/stage` -> `/` via TreeMove -- for bespoke builds whose output overlaps the
   # build rootfs or whose install touches shared paths (a recursive chown, a
   # re-rooted DESTDIR). Recipes using this tag MUST install into `/stage`.
-  let lower_sandbox_stage_build_node = fun node =>
+  let lower_sandbox_stage_deps_node = fun node =>
     let installed = lower_sandbox_build_with "SandboxInstall" node in
     let staged = std.record.update "name" (node.name ++ "-staged") installed in
     {
@@ -514,8 +514,8 @@ fun pkgs =>
     "Meson" = lower_meson_package_node,
     "PerlModule" = lower_perl_module_package_node,
     "PythonModule" = lower_python_module_package_node,
-    "SandboxInstallBuild" = lower_sandbox_install_build_node,
-    "SandboxStageBuild" = lower_sandbox_stage_build_node,
+    "SandboxInstallDeps" = lower_sandbox_install_deps_node,
+    "SandboxStageDeps" = lower_sandbox_stage_deps_node,
     "AutotoolsStageRootfs" = lower_autotools_stage_rootfs_node,
     "MakefileStageRootfs" = lower_makefile_stage_rootfs_node,
     "MesonRootfs" = lower_meson_node,

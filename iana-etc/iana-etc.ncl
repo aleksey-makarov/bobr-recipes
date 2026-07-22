@@ -27,7 +27,7 @@ fun pkgs =>
     version | default = "20250807",
     source_object_hash | default = "4f88470a2cac2a2f9568285aaff9aeaee0ab66c6ba3c12bba51adca915fa92b1",
     name = "iana-etc-%{version}",
-    tag = "SandboxInstallBuild",
+    tag = "SandboxInstallDeps",
     deps = {
       build = [
         pkgs.coreutils,
