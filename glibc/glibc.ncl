@@ -49,32 +49,22 @@ fun pkgs =>
         "--without-selinux",
         "--enable-kernel=5.4",
       ],
-      pre_configure = [
-        {
-          name = "apply_fhs_patch",
-          run_as = "build-user",
-          argv = [
-            "patch",
-            "-Np1",
-            "-i",
-            "@{fhs_patch}",
-          ],
-        },
-        {
-          name = "write_configparms",
-          run_as = "build-user",
-          argv = [
-            "/bin/sh",
-            "-ec",
-            "mkdir -p \"@{build}/build\" && { echo \"rootsbindir=/usr/bin\"; echo \"sbindir=/usr/bin\"; } > \"@{build}/build/configparms\"",
-          ],
-        },
-      ],
+      # The FHS patch is applied declaratively via the patch_fhs input (see
+      # inputs); write_configparms then runs in pre_configure.
+      pre_configure = {
+        name = "write_configparms",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          "mkdir -p \"@{build}/build\" && { echo \"rootsbindir=/usr/bin\"; echo \"sbindir=/usr/bin\"; } > \"@{build}/build/configparms\"",
+        ],
+      },
     },
     inputs = {
       _rootfs = glibc_bootstrap_rootfs,
       source = glibc_src,
-      fhs_patch = glibc_fhs_patch_2_42,
+      patch_fhs = glibc_fhs_patch_2_42,
     },
   }
   in
@@ -92,27 +82,17 @@ fun pkgs =>
         "--disable-nscd",
         "--without-selinux",
       ],
-      pre_configure = [
-        {
-          name = "apply_fhs_patch",
-          run_as = "build-user",
-          argv = [
-            "patch",
-            "-Np1",
-            "-i",
-            "@{fhs_patch}",
-          ],
-        },
-        {
-          name = "write_configparms",
-          run_as = "build-user",
-          argv = [
-            "/bin/sh",
-            "-ec",
-            "mkdir -p \"@{build}/build\" && { echo \"rootsbindir=/usr/bin\"; echo \"sbindir=/usr/bin\"; } > \"@{build}/build/configparms\"",
-          ],
-        },
-      ],
+      # The FHS patch is applied declaratively via the patch_fhs input (see
+      # inputs); write_configparms then runs in pre_configure.
+      pre_configure = {
+        name = "write_configparms",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          "mkdir -p \"@{build}/build\" && { echo \"rootsbindir=/usr/bin\"; echo \"sbindir=/usr/bin\"; } > \"@{build}/build/configparms\"",
+        ],
+      },
       # ld.so.cache is a whole-system derived file: it is regenerated over the
       # complete image at finalize (ldconfig), so glibc must not ship its own
       # partial one -- otherwise it would be a stale cache in every rootfs and,
@@ -131,7 +111,7 @@ fun pkgs =>
     inputs = {
       _rootfs = recipe.gen1_toolchain_rootfs pkgs "glibc-build-rootfs" [],
       source = glibc_src,
-      fhs_patch = glibc_fhs_patch_2_42,
+      patch_fhs = glibc_fhs_patch_2_42,
     },
   }
   in

@@ -41,16 +41,6 @@ fun pkgs =>
       ],
     },
     config = {
-      pre_configure = {
-        name = "apply_gcc15_patch",
-        run_as = "build-user",
-        argv = [
-          "patch",
-          "-Np1",
-          "-i",
-          "@{gcc15_patch}",
-        ],
-      },
       configure_args = [
         "--with-tcl=/usr/lib",
         "--enable-shared",
@@ -71,7 +61,9 @@ fun pkgs =>
     },
     inputs = {
       source = expect_src version source_object_hash,
-      gcc15_patch = expect_gcc15_patch,
+      # input name matches ^patch, so the synthetic builder applies it
+      # (patch -Np1 in the source root) during source preparation.
+      patch_gcc15 = expect_gcc15_patch,
     },
   }
   in

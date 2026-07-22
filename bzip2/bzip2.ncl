@@ -33,8 +33,10 @@ fun pkgs =>
       argv = [
         "/bin/sh",
         "-ec",
+        # The install-docs patch is applied declaratively via the
+        # patch_install_docs input (see inputs); these seds and the shared-lib
+        # build run afterwards in pre_build.
         m%"
-          patch -Np1 -i "@{install_docs_patch}"
           sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' Makefile
           sed -i 's@(PREFIX)/man@(PREFIX)/share/man@g' Makefile
           make -f Makefile-libbz2_so
@@ -106,7 +108,7 @@ fun pkgs =>
       _rootfs =
         br.build_rootfs_closure pkgs "bzip2-gen1-%{version}-build-rootfs" bzip2_gen1_build_deps,
       source = bzip2_src version source_object_hash,
-      install_docs_patch = bzip2_install_docs_patch,
+      patch_install_docs = bzip2_install_docs_patch,
     },
   }
   in
@@ -157,7 +159,7 @@ fun pkgs =>
       _rootfs =
         br.build_rootfs_closure pkgs "bzip2-%{version}-build-rootfs" bzip2_build_deps,
       source = bzip2_src version source_object_hash,
-      install_docs_patch = bzip2_install_docs_patch,
+      patch_install_docs = bzip2_install_docs_patch,
     },
   }
   in

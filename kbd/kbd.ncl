@@ -38,6 +38,8 @@ fun pkgs =>
       ],
     },
     config = {
+      # The backspace patch is applied declaratively via the patch_backspace
+      # input (see inputs); these seds run afterwards in pre_configure.
       pre_configure = {
         name = "prepare_kbd_sources",
         run_as = "build-user",
@@ -45,7 +47,6 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
-            patch -Np1 -i "@{backspace_patch}"
             sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
             sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
           "%,
@@ -69,7 +70,9 @@ fun pkgs =>
     },
     inputs = {
       source = kbd_src version source_object_hash,
-      backspace_patch = kbd_backspace_patch,
+      # input name matches ^patch, so the synthetic builder applies it
+      # (patch -Np1 in the source root) during source preparation.
+      patch_backspace = kbd_backspace_patch,
     },
   }
   in
