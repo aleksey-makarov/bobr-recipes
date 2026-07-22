@@ -286,7 +286,7 @@ let AutotoolsConfig = {
   configure_args | Array String | optional,
   make_args | Array String | optional,
   env | Dyn | optional,
-  "in-tree" | Bool | optional,
+  in-tree | Bool | optional,
   source_subdir | String | optional,
   pre_configure | AutotoolsHook | optional,
   post_install | AutotoolsHook | optional,

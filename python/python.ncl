@@ -20,9 +20,7 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = [
-        "https://www.python.org/ftp/python/%{version}/Python-%{version}.tar.xz",
-      ],
+      url = "https://www.python.org/ftp/python/%{version}/Python-%{version}.tar.xz",
     },
   }
   in

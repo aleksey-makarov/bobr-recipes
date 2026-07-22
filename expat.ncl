@@ -1,7 +1,7 @@
 fun pkgs =>
   let expat_src = fun version =>
     fun hash =>
-    let release_tag = "R_2_8_2" in
+    let release_tag = "R_" ++ std.string.replace "." "_" version in
     {
       name = "expat-src-%{version}",
       tag = "Source",

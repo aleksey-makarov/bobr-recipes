@@ -7,9 +7,7 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = [
-        "https://invisible-mirror.net/archives/ncurses/ncurses-%{version}.tar.gz",
-      ],
+      url = "https://invisible-mirror.net/archives/ncurses/ncurses-%{version}.tar.gz",
     },
   }
   in

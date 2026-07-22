@@ -43,7 +43,7 @@ fun pkgs =>
     config = {
       # CUPS ships its Makefiles in-tree (configure only generates Makedefs);
       # it does not support a separate build directory.
-      "in-tree" = true,
+      in-tree = true,
       configure_args = [
         "--libdir=/usr/lib",
         # merged-usr: /usr/sbin is a symlink to bin, so the daemon binaries must

@@ -59,7 +59,7 @@ fun pkgs =>
     },
     config = {
       # Samba's waf build runs in-tree (bin/).
-      "in-tree" = true,
+      in-tree = true,
       # Some of Samba's private libraries (e.g. libsmbpasswdparser) are linked
       # against other private libs in /usr/lib/samba but the waf build fails to
       # record a RUNPATH for them (a known Samba bug, Debian #1010922), so at

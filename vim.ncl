@@ -7,9 +7,7 @@ fun pkgs =>
       object_hash = hash,
       origin = {
         tag = "Http",
-        url = [
-          "https://github.com/vim/vim/archive/v%{version}/vim-%{version}.tar.gz",
-        ],
+        url = "https://github.com/vim/vim/archive/v%{version}/vim-%{version}.tar.gz",
       },
     }
   in
@@ -30,7 +28,7 @@ fun pkgs =>
       ],
     },
     config = {
-      "in-tree" = true,
+      in-tree = true,
       # Pin the recorded builder; otherwise vim's pathdef.c derives compiled_user
       # from (logname || whoami). logname reads /proc/self/loginuid, which the
       # namespace runtime translates to uid 0 (-> "root") while the host runtime
