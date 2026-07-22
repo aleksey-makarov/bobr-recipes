@@ -57,6 +57,12 @@ run_case "rootfs-closure" pass '{"name":"pkg-rootfs","tag":"RootfsClosure","conf
 run_case "initramfs" pass '{"name":"initrd","tag":"Initramfs","config":{},"inputs":{"tree0":'"${rootfs_tree}"'}}'
 run_case "source-http" pass "${source_node}"
 run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","platform":{"os":"linux","architecture":"amd64"}}}'
+# Bundle is the vendored-crates collector (cargo.ncl vendor_bundle); it was
+# missing from the known-tag list until the tag table became the single
+# source of truth.
+run_case "bundle" pass '{"name":"crates","tag":"Bundle","config":{},"inputs":{"a-crate":'"${source_node}"'}}'
+run_case "bundle-nonempty-config" fail '{"name":"crates","tag":"Bundle","config":{"x":1},"inputs":{"a-crate":'"${source_node}"'}}'
+run_case "bundle-empty-inputs" fail '{"name":"crates","tag":"Bundle","config":{},"inputs":{}}'
 run_case "autotools-stage-rootfs" pass '{"name":"pkg-rootfs","tag":"AutotoolsStageRootfs","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "autotools-package" pass '{"name":"pkg-package","tag":"Autotools","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"configure_args":["--disable-nls"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "makefile-package" pass '{"name":"pkg-package","tag":"Makefile","deps":{"build":[],"runtime":[]},"config":{"make_args":["PREFIX=/usr"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
@@ -1183,6 +1189,45 @@ attr_count="$(
   cd "${tmpdir}" &&
     nickel export list-raw-pkgs.ncl --format json | jq 'length'
 )"
+
+# Shallow-path cases: `shallow_recipe` is a contract (not a plain function),
+# and its forcing is what makes it validate at all -- a lazily discarded
+# result would silently pass everything. Keep negative cases here so a
+# validation-is-a-no-op regression turns the suite red.
+run_shallow_case() {
+  local name="$1"
+  local expect="$2"
+  local json_payload="$3"
+
+  printf '%s\n' "${json_payload}" > "${tmpdir}/shallow-recipe.json"
+  cat > "${tmpdir}/check-shallow.ncl" <<EOF_INNER
+let contracts = import "${contract_file}" in
+let recipe = import "./shallow-recipe.json" in
+let checked = recipe | contracts.shallow_recipe in
+checked.tag
+EOF_INNER
+
+  if (cd "${tmpdir}" && nickel export check-shallow.ncl --format json >/dev/null 2>&1); then
+    if [[ "${expect}" != "pass" ]]; then
+      echo "expected shallow failure for ${name}" >&2
+      return 1
+    fi
+  else
+    if [[ "${expect}" != "fail" ]]; then
+      echo "expected shallow success for ${name}" >&2
+      return 1
+    fi
+  fi
+}
+
+run_shallow_case "shallow-tree" pass "${rootfs_tree}"
+run_shallow_case "shallow-source" pass "${source_node}"
+run_shallow_case "shallow-extra-local-fields" pass '{"name":"pkg","tag":"Group","config":{},"inputs":{"a":1},"version":"1.0"}'
+run_shallow_case "shallow-unknown-tag" fail '{"name":"pkg","tag":"NoSuchBuilder","config":{},"inputs":{}}'
+run_shallow_case "shallow-bad-config" fail '{"name":"staged","tag":"TreeMove","config":{"strip_prefix":["stage"]},"inputs":{"tree":1}}'
+run_shallow_case "shallow-bad-name" fail '{"name":42,"tag":"Group","config":{},"inputs":{"a":1}}'
+run_shallow_case "shallow-bad-source-origin" fail '{"name":"src","tag":"Source","object_hash":"aa","origin":{"tag":"Ftp","url":"x"}}'
+run_shallow_case "shallow-bad-tree-entry" fail '{"name":"t","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"x"}]}},"inputs":{}}'
 
 cat > "${tmpdir}/check-shallow-raw-pkgs.ncl" <<EOF_INNER
 let contracts = import "${contract_file}" in

@@ -1,102 +1,82 @@
-let KnownTags = [
-  "Source",
-  "Group",
-  "Tree",
-  "FsTreeImport",
-  "FsTreeExport",
-  "TreeMerge",
-  "TreeSubset",
-  "TreeMove",
-  "RootfsClosure",
-  "Initramfs",
-  "Autotools",
-  "Makefile",
-  "Meson",
-  "PerlModule",
-  "PythonModule",
-  "SandboxInstallBuild",
-  "SandboxStageBuild",
-  "AutotoolsStageRootfs",
-  "MakefileStageRootfs",
-  "MesonRootfs",
-  "Sandbox",
-  "SandboxStageRootfs",
-  "SandboxInstall",
-  "Cargo",
-  "CargoRootfs",
-  "OciExtract",
-]
+# Recipe-node contracts and validators.
+#
+# The single source of truth is `tag_specs` below: one row per builder tag,
+# holding the tag's config contract, its inputs shape, and whether the tag
+# requires Nickel-level `deps`. `known_tags` and both validators (shallow and
+# deep) derive from that table -- adding a builder tag is one table row, with
+# no parallel lists to keep in sync and no silent fallthrough for a forgotten
+# tag.
+
+# --- small shared contracts --------------------------------------------------
+
+let NonEmptyArray =
+  std.contract.from_predicate (fun value => std.array.length value > 0)
 in
-let KnownTag =
-  std.contract.from_predicate (fun value => std.array.elem value KnownTags)
+let NonEmptyRecord =
+  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) > 0)
 in
-let ArchiveFormat =
-  std.contract.from_predicate (fun value => std.array.elem value ["tar-gz", "tar-xz", "tar-bz2", "zip"]
+let NonEmptyString =
+  std.contract.from_predicate (fun value => std.is_string value && value != "")
+in
+# Shared by every tag whose builder takes no configuration.
+let EmptyConfig =
+  std.contract.from_predicate (fun value =>
+    std.is_record value
+    && std.array.length (std.record.fields value) == 0
   )
 in
+# Dispatch a record contract on a string discriminator field. Delegates to the
+# matching variant via `std.contract.check`, so blame points at the offending
+# field of the variant contract instead of at the whole union.
+let TaggedUnion = fun discriminator =>
+  fun variants =>
+    std.contract.custom (fun label value =>
+      if !std.is_record value then
+        'Error { message = "expected a record" }
+      else if !std.record.has_field discriminator value then
+        'Error { message = "missing discriminator field '%{discriminator}'" }
+      else
+        let tag = std.record.get discriminator value in
+        if !std.is_string tag then
+          'Error { message = "discriminator field '%{discriminator}' must be a string" }
+        else if std.record.has_field tag variants then
+          std.contract.check (std.record.get tag variants) label value
+        else
+          'Error {
+            message = "unknown %{discriminator} '%{tag}'; expected one of: %{std.string.join ", " (std.record.fields variants)}",
+          }
+    )
+in
+
 let RecipeDeps = {
   build | Array Dyn,
   runtime | Array Dyn,
 }
 in
-let UrlField = std.contract.any_of [ String, Array String ] in
-# Raw Nickel recipe records are open on purpose: package modules may carry
-# local parameters such as `version`. `recipe.to_request` is the boundary that
-# serializes only runtime-facing recipe fields.
-let BaseRecipe = {
-  name
-    | String
-    | doc "Publication name of the recipe node.",
-  tag
-    | String
-    | KnownTag
-    | doc "Builder tag selected for this recipe node.",
-  config
-    | Dyn
-    | doc "Builder-specific config payload.",
-  inputs
-    | { .. }
-    | doc "Builder-specific input object.",
-  deps
-    | RecipeDeps
-    | optional
-    | doc "Optional Nickel-level direct build/runtime dependencies for dependency-aware synthetic recipes.",
-  ..
-}
+
+# --- Source origins ----------------------------------------------------------
+
+let ArchiveFormat =
+  std.contract.from_predicate (fun value => std.array.elem value ["tar-gz", "tar-xz", "tar-bz2", "zip"])
 in
-let ShallowBaseRecipe = {
-  name
-    | String
-    | doc "Publication name of the recipe node.",
-  tag
-    | String
-    | KnownTag
-    | doc "Builder tag selected for this recipe node.",
-  config
-    | Dyn
-    | doc "Builder-specific config payload.",
-  inputs
-    | Dyn
-    | doc "Builder-specific input object left unvalidated in shallow mode.",
-  deps
-    | RecipeDeps
-    | optional
-    | doc "Optional Nickel-level direct build/runtime dependencies for dependency-aware synthetic recipes.",
-  ..
-}
+let UrlField =
+  std.contract.any_of [
+    String,
+    std.contract.all_of [Array String, NonEmptyArray],
+  ]
 in
 let is_relative_source_path = fun value =>
-    std.is_string value
-    && value != ""
-    && !std.string.is_match "^/" value
-    && !std.string.is_match "(^|/)\\.\\.($|/)" value
+  std.is_string value
+  && value != ""
+  && !std.string.is_match "^/" value
+  && !std.string.is_match "(^|/)\\.\\.($|/)" value
 in
 let RelativeSourcePath =
   std.contract.from_predicate is_relative_source_path
 in
 let is_absolute_source_path = fun value =>
-    std.is_string value
-    && std.string.is_match "^/" value
+  std.is_string value
+  && std.string.is_match "^/" value
 in
 let AbsoluteSourcePath =
   std.contract.from_predicate is_absolute_source_path
@@ -127,7 +107,7 @@ let SourceHttpOrigin = {
   tag | std.contract.Equal "Http",
   url
     | UrlField
-    | doc "HTTP(S) source URL or list of fallback URLs.",
+    | doc "HTTP(S) source URL or non-empty list of fallback URLs.",
   unpack
     | Bool
     | optional
@@ -140,10 +120,10 @@ let SourceHttpOrigin = {
 in
 let SourceOciPlatform = {
   os
-    | String
+    | NonEmptyString
     | doc "OCI platform operating system, for example `linux`.",
   architecture
-    | String
+    | NonEmptyString
     | doc "OCI platform architecture, for example `amd64`.",
 }
 in
@@ -160,77 +140,15 @@ let SourceOciRegistryOrigin = {
     | doc "OCI platform selected when the pinned digest is an image index or manifest list.",
 }
 in
-let has_field = fun field => fun record => std.record.has_field field record in
-let get_field = fun field => fun record => std.record.get field record in
-let all_fields_allowed = fun allowed =>
-  fun record =>
-    std.array.fold_left
-      (fun acc => fun field => acc && std.array.elem field allowed)
-      true
-      (std.record.fields record)
-in
-let optional_bool_field = fun field =>
-  fun record =>
-    !has_field field record || std.is_bool (get_field field record)
-in
-let optional_archive_format_field = fun field =>
-  fun record =>
-    !has_field field record || std.array.elem (get_field field record) ["tar-gz", "tar-xz", "tar-bz2", "zip"]
-in
-let array_all_strings = fun value =>
-  std.array.fold_left
-    (fun acc => fun item => acc && std.is_string item)
-    true
-    value
-in
-let valid_url_field = fun value =>
-  std.is_string value
-  || (std.is_array value && std.array.length value > 0 && array_all_strings value)
-in
-let valid_oci_platform = fun value =>
-  std.is_record value
-  && all_fields_allowed ["os", "architecture"] value
-  && has_field "os" value
-  && std.is_string value.os
-  && value.os != ""
-  && has_field "architecture" value
-  && std.is_string value.architecture
-  && value.architecture != ""
-in
 let SourceOrigin =
-  std.contract.from_predicate (fun value =>
-    std.is_record value
-    && has_field "tag" value
-    && std.is_string value.tag
-    && (
-      if value.tag == "Path" then
-        all_fields_allowed ["tag", "path", "unpack"] value
-        && has_field "path" value
-        && is_absolute_source_path value.path
-        && optional_bool_field "unpack" value
-      else if value.tag == "RecipePath" then
-        all_fields_allowed ["tag", "path", "unpack"] value
-        && has_field "path" value
-        && is_relative_source_path value.path
-        && optional_bool_field "unpack" value
-      else if value.tag == "Http" then
-        all_fields_allowed ["tag", "url", "unpack", "archive_format"] value
-        && has_field "url" value
-        && valid_url_field value.url
-        && optional_bool_field "unpack" value
-        && optional_archive_format_field "archive_format" value
-      else if value.tag == "OciRegistry" then
-        all_fields_allowed ["tag", "image", "digest", "platform"] value
-        && has_field "image" value
-        && std.is_string value.image
-        && has_field "digest" value
-        && std.is_string value.digest
-        && has_field "platform" value
-        && valid_oci_platform value.platform
-      else
-        false
-    )
-  )
+  TaggedUnion
+    "tag"
+    {
+      Path = SourcePathOrigin,
+      RecipePath = SourceRecipePathOrigin,
+      Http = SourceHttpOrigin,
+      OciRegistry = SourceOciRegistryOrigin,
+    }
 in
 let SourceRecipe = {
   name
@@ -249,27 +167,9 @@ let SourceRecipe = {
   ..
 }
 in
-let InstallAttrs = {
-  uid | Number | optional,
-  gid | Number | optional,
-  directory_mode | Number | optional,
-  regular_file_mode | Number | optional,
-  executable_file_mode | Number | optional,
-}
-in
-let InstallRule = {
-  path | String,
-  attrs
-    | InstallAttrs
-    | doc "Install attributes overridden for matching installed paths.",
-}
-in
-let InstallMeta = {
-  rules
-    | Array InstallRule
-    | doc "Install rules applied when the result is used as an installable object.",
-}
-in
+
+# --- per-tag config contracts ------------------------------------------------
+
 let FsTreeInstallAttrs = {
   uid | Number | optional,
   gid | Number | optional,
@@ -327,18 +227,22 @@ let TreeSymlinkEntry = {
     | doc "Literal symlink target stored in the staged object.",
 }
 in
-let TreePayload = {
-  entries
-    | Array Dyn
-    | doc "Generated tree entries describing text files, explicit directories, and symlinks.",
-}
-in
-let TreeEntryKind =
-  std.contract.from_predicate (fun value => std.array.elem value ["file", "dir", "symlink"])
+let TreeEntry =
+  TaggedUnion
+    "type"
+    {
+      file = TreeFileEntry,
+      dir = TreeDirEntry,
+      symlink = TreeSymlinkEntry,
+    }
 in
 let TreeConfig = {
   tree
-    | TreePayload
+    | {
+      entries
+        | Array TreeEntry
+        | doc "Generated tree entries describing text files, explicit directories, and symlinks.",
+    }
     | doc "Generated tree description staged directly as a plain file or directory.",
 }
 in
@@ -430,18 +334,6 @@ let CargoConfig = {
   post_install | AutotoolsHook | optional,
 }
 in
-let TreeMergeConfig =
-  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
-in
-let GroupConfig =
-  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
-in
-let NonEmptyArray =
-  std.contract.from_predicate (fun value => std.array.length value > 0)
-in
-let NonEmptyRecord =
-  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) > 0)
-in
 let TreeSubsetConfig = {
   include | Array String | NonEmptyArray,
 }
@@ -462,12 +354,9 @@ let FsTreeExportConfig = {
     | doc "Copy commands exporting fs-tree entries into a plain object.",
 }
 in
-let InitramfsConfig =
-  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
-in
-let OciExtractConfig =
-  std.contract.from_predicate (fun value => std.array.length (std.record.fields value) == 0)
-in
+
+# --- per-tag inputs shapes (checked by the deep validator only) --------------
+
 let GroupInputsShape = NonEmptyRecord
 in
 let TreeInputs = {}
@@ -528,150 +417,113 @@ let SyntheticPackageInputsShape = {
 in
 let SandboxInputsShape = { .. }
 in
+
+# --- the tag table -----------------------------------------------------------
+
+# One row per non-`Source` builder tag. `requires_deps` marks the
+# dependency-aware synthetic package tags whose recipes must declare
+# Nickel-level `deps` (the *Rootfs/Stage* variants supply their own `_rootfs`
+# instead).
+let tag_specs = {
+  Group = { config = EmptyConfig, inputs = GroupInputsShape, requires_deps = false },
+  Tree = { config = TreeConfig, inputs = TreeInputs, requires_deps = false },
+  FsTreeImport = { config = FsTreeImportConfig, inputs = FsTreeImportInputsShape, requires_deps = false },
+  FsTreeExport = { config = FsTreeExportConfig, inputs = FsTreeExportInputsShape, requires_deps = false },
+  TreeMerge = { config = EmptyConfig, inputs = TreeMergeInputsShape, requires_deps = false },
+  TreeSubset = { config = TreeSubsetConfig, inputs = TreeSubsetInputsShape, requires_deps = false },
+  TreeMove = { config = TreeMoveConfig, inputs = TreeMoveInputsShape, requires_deps = false },
+  RootfsClosure = { config = EmptyConfig, inputs = RootfsClosureInputsShape, requires_deps = false },
+  Initramfs = { config = EmptyConfig, inputs = InitramfsInputsShape, requires_deps = false },
+  OciExtract = { config = EmptyConfig, inputs = OciExtractInputsShape, requires_deps = false },
+  Bundle = { config = EmptyConfig, inputs = GroupInputsShape, requires_deps = false },
+  Autotools = { config = AutotoolsConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
+  AutotoolsStageRootfs = { config = AutotoolsConfig, inputs = SyntheticRootfsInputsShape, requires_deps = false },
+  Makefile = { config = MakefileConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
+  MakefileStageRootfs = { config = MakefileConfig, inputs = SyntheticRootfsInputsShape, requires_deps = false },
+  Meson = { config = MesonConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
+  MesonRootfs = { config = MesonConfig, inputs = SyntheticRootfsInputsShape, requires_deps = false },
+  PerlModule = { config = PerlModuleConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
+  PythonModule = { config = PythonModuleConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
+  Cargo = { config = CargoConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
+  CargoRootfs = { config = CargoConfig, inputs = SyntheticRootfsInputsShape, requires_deps = false },
+  Sandbox = { config = SandboxConfig, inputs = SandboxRootfsInputsShape, requires_deps = false },
+  SandboxInstall = { config = SandboxConfig, inputs = SandboxRootfsInputsShape, requires_deps = false },
+  SandboxStageRootfs = { config = SandboxConfig, inputs = SandboxRootfsInputsShape, requires_deps = false },
+  SandboxInstallBuild = { config = SandboxConfig, inputs = SandboxInputsShape, requires_deps = true },
+  SandboxStageBuild = { config = SandboxConfig, inputs = SandboxInputsShape, requires_deps = true },
+}
+in
+let KnownTags = ["Source"] @ std.record.fields tag_specs
+in
+let KnownTag =
+  std.contract.from_predicate (fun value => std.array.elem value KnownTags)
+in
+
+# --- top-level recipe shapes -------------------------------------------------
+
+# Raw Nickel recipe records are open on purpose: package modules may carry
+# local parameters such as `version`. `recipe.to_request` is the boundary that
+# serializes only runtime-facing recipe fields.
+let BaseRecipe = {
+  name
+    | String
+    | doc "Publication name of the recipe node.",
+  tag
+    | String
+    | KnownTag
+    | doc "Builder tag selected for this recipe node.",
+  config
+    | Dyn
+    | doc "Builder-specific config payload.",
+  inputs
+    | { .. }
+    | doc "Builder-specific input object.",
+  deps
+    | RecipeDeps
+    | optional
+    | doc "Optional Nickel-level direct build/runtime dependencies for dependency-aware synthetic recipes.",
+  ..
+}
+in
+let ShallowBaseRecipe = {
+  name
+    | String
+    | doc "Publication name of the recipe node.",
+  tag
+    | String
+    | KnownTag
+    | doc "Builder tag selected for this recipe node.",
+  config
+    | Dyn
+    | doc "Builder-specific config payload.",
+  inputs
+    | Dyn
+    | doc "Builder-specific input object left unvalidated in shallow mode.",
+  deps
+    | RecipeDeps
+    | optional
+    | doc "Optional Nickel-level direct build/runtime dependencies for dependency-aware synthetic recipes.",
+  ..
+}
+in
+
+# --- validators --------------------------------------------------------------
+
+# The tag-specific refinement of a base-checked node: validate `config`
+# against the tag's contract and require `deps` where the tag mandates it.
+# Open (`..`): the base contracts already govern the rest of the node.
+let node_spec_contract = fun spec =>
+  if spec.requires_deps then
+    { config | spec.config, deps | RecipeDeps, .. }
+  else
+    { config | spec.config, .. }
+in
 let ValidateRecipeShallow = fun recipe =>
   if recipe.tag == "Source" then
     recipe | SourceRecipe
   else
     let checked = recipe | ShallowBaseRecipe in
-    let validate_tree_entry = fun entry =>
-      let checked = entry | { type | TreeEntryKind, .. } in
-      if checked.type == "file" then
-        checked | TreeFileEntry
-      else if checked.type == "symlink" then
-        checked | TreeSymlinkEntry
-      else
-        checked | TreeDirEntry
-    in
-    let validate_tree_config = fun config =>
-      let checked = config | TreeConfig in
-      checked
-      & {
-        tree =
-          checked.tree
-          & {
-            entries = std.array.map validate_tree_entry checked.tree.entries,
-          },
-      }
-    in
-    if checked.tag == "Group" then
-      checked
-      & {
-        config = checked.config | GroupConfig,
-      }
-    else if checked.tag == "Tree" then
-      checked
-      & {
-        config = validate_tree_config checked.config,
-      }
-    else if checked.tag == "FsTreeImport" then
-      checked
-      & {
-        config = checked.config | FsTreeImportConfig,
-      }
-    else if checked.tag == "FsTreeExport" then
-      checked
-      & {
-        config = checked.config | FsTreeExportConfig,
-      }
-    else if checked.tag == "AutotoolsStageRootfs" then
-      checked
-      & {
-        config = checked.config | AutotoolsConfig,
-      }
-    else if checked.tag == "Autotools" then
-      checked
-      & {
-        config = checked.config | AutotoolsConfig,
-        deps = checked.deps | RecipeDeps,
-      }
-    else if checked.tag == "MakefileStageRootfs" then
-      checked
-      & {
-        config = checked.config | MakefileConfig,
-      }
-    else if checked.tag == "Makefile" then
-      checked
-      & {
-        config = checked.config | MakefileConfig,
-        deps = checked.deps | RecipeDeps,
-      }
-    else if checked.tag == "MesonRootfs" then
-      checked
-      & {
-        config = checked.config | MesonConfig,
-      }
-    else if checked.tag == "Meson" then
-      checked
-      & {
-        config = checked.config | MesonConfig,
-        deps = checked.deps | RecipeDeps,
-      }
-    else if checked.tag == "CargoRootfs" then
-      checked
-      & {
-        config = checked.config | CargoConfig,
-      }
-    else if checked.tag == "Cargo" then
-      checked
-      & {
-        config = checked.config | CargoConfig,
-        deps = checked.deps | RecipeDeps,
-      }
-    else if checked.tag == "PerlModule" then
-      checked
-      & {
-        config = checked.config | PerlModuleConfig,
-        deps = checked.deps | RecipeDeps,
-      }
-    else if checked.tag == "PythonModule" then
-      checked
-      & {
-        config = checked.config | PythonModuleConfig,
-        deps = checked.deps | RecipeDeps,
-      }
-    else if checked.tag == "Sandbox" || checked.tag == "SandboxInstall" || checked.tag == "SandboxStageRootfs" then
-      checked
-      & {
-        config = checked.config | SandboxConfig,
-      }
-    else if checked.tag == "SandboxInstallBuild" || checked.tag == "SandboxStageBuild" then
-      checked
-      & {
-        config = checked.config | SandboxConfig,
-        deps = checked.deps | RecipeDeps,
-      }
-    else if checked.tag == "TreeMerge" then
-      checked
-      & {
-        config = checked.config | TreeMergeConfig,
-      }
-    else if checked.tag == "TreeSubset" then
-      checked
-      & {
-        config = checked.config | TreeSubsetConfig,
-      }
-    else if checked.tag == "TreeMove" then
-      checked
-      & {
-        config = checked.config | TreeMoveConfig,
-      }
-    else if checked.tag == "RootfsClosure" then
-      checked
-      & {
-        config = checked.config | TreeMergeConfig,
-      }
-    else if checked.tag == "Initramfs" then
-      checked
-      & {
-        config = checked.config | InitramfsConfig,
-      }
-    else if checked.tag == "OciExtract" then
-      checked
-      & {
-        config = checked.config | OciExtractConfig,
-      }
-    else
-      checked
+    checked | node_spec_contract (std.record.get checked.tag tag_specs)
 in
 # WARNING:
 # `ValidateRecipe` performs a deep recursive traversal of the entire nested
@@ -682,260 +534,28 @@ let rec ValidateRecipe = fun recipe =>
     recipe | SourceRecipe
   else
     let checked = recipe | BaseRecipe in
-    let validate_tree_entry = fun entry =>
-      let checked = entry | { type | TreeEntryKind, .. } in
-      if checked.type == "file" then
-        checked | TreeFileEntry
-      else if checked.type == "symlink" then
-        checked | TreeSymlinkEntry
-      else
-        checked | TreeDirEntry
-    in
-    let validate_tree_inputs = fun inputs =>
-      inputs | TreeInputs
-    in
-    let validate_group_inputs = fun inputs =>
-      let checked = inputs | GroupInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_fs_tree_import_inputs = fun inputs =>
-      let checked = inputs | FsTreeImportInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_fs_tree_export_inputs = fun inputs =>
-      let checked = inputs | FsTreeExportInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_synthetic_rootfs_inputs = fun inputs =>
-      let checked = inputs | SyntheticRootfsInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_synthetic_package_inputs = fun inputs =>
-      let checked = inputs | SyntheticPackageInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_tree_config = fun config =>
-      let checked = config | TreeConfig in
-      checked
-      & {
-        tree =
-          checked.tree
-          & {
-            entries = std.array.map validate_tree_entry checked.tree.entries,
-          },
-      }
-    in
-    let validate_sandbox_inputs = fun inputs =>
-      let checked = inputs | SandboxRootfsInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_sandbox_build_inputs = fun inputs =>
-      let checked = inputs | SandboxInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_oci_extract_inputs = fun inputs =>
-      let checked = inputs | OciExtractInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_tree_merge_inputs = fun inputs =>
-      let checked = inputs | TreeMergeInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_tree_subset_inputs = fun inputs =>
-      let checked = inputs | TreeSubsetInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_tree_move_inputs = fun inputs =>
-      let checked = inputs | TreeMoveInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_rootfs_closure_inputs = fun inputs =>
-      let checked = inputs | RootfsClosureInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    let validate_initramfs_inputs = fun inputs =>
-      let checked = inputs | InitramfsInputsShape in
-      std.record.map
-        (fun _ input => ValidateRecipe input)
-        checked
-    in
-    if checked.tag == "Group" then
-      checked
-      & {
-        config = checked.config | GroupConfig,
-        inputs = validate_group_inputs checked.inputs,
-      }
-    else if checked.tag == "Tree" then
-      checked
-      & {
-        config = validate_tree_config checked.config,
-        inputs = validate_tree_inputs checked.inputs,
-      }
-    else if checked.tag == "FsTreeImport" then
-      checked
-      & {
-        config = checked.config | FsTreeImportConfig,
-        inputs = validate_fs_tree_import_inputs checked.inputs,
-      }
-    else if checked.tag == "FsTreeExport" then
-      checked
-      & {
-        config = checked.config | FsTreeExportConfig,
-        inputs = validate_fs_tree_export_inputs checked.inputs,
-      }
-    else if checked.tag == "AutotoolsStageRootfs" then
-      checked
-      & {
-        config = checked.config | AutotoolsConfig,
-        inputs = validate_synthetic_rootfs_inputs checked.inputs,
-      }
-    else if checked.tag == "Autotools" then
-      checked
-      & {
-        config = checked.config | AutotoolsConfig,
-        deps = checked.deps | RecipeDeps,
-        inputs = validate_synthetic_package_inputs checked.inputs,
-      }
-    else if checked.tag == "MakefileStageRootfs" then
-      checked
-      & {
-        config = checked.config | MakefileConfig,
-        inputs = validate_synthetic_rootfs_inputs checked.inputs,
-      }
-    else if checked.tag == "Makefile" then
-      checked
-      & {
-        config = checked.config | MakefileConfig,
-        deps = checked.deps | RecipeDeps,
-        inputs = validate_synthetic_package_inputs checked.inputs,
-      }
-    else if checked.tag == "MesonRootfs" then
-      checked
-      & {
-        config = checked.config | MesonConfig,
-        inputs = validate_synthetic_rootfs_inputs checked.inputs,
-      }
-    else if checked.tag == "Meson" then
-      checked
-      & {
-        config = checked.config | MesonConfig,
-        deps = checked.deps | RecipeDeps,
-        inputs = validate_synthetic_package_inputs checked.inputs,
-      }
-    else if checked.tag == "CargoRootfs" then
-      checked
-      & {
-        config = checked.config | CargoConfig,
-        inputs = validate_synthetic_rootfs_inputs checked.inputs,
-      }
-    else if checked.tag == "Cargo" then
-      checked
-      & {
-        config = checked.config | CargoConfig,
-        deps = checked.deps | RecipeDeps,
-        inputs = validate_synthetic_package_inputs checked.inputs,
-      }
-    else if checked.tag == "PerlModule" then
-      checked
-      & {
-        config = checked.config | PerlModuleConfig,
-        deps = checked.deps | RecipeDeps,
-        inputs = validate_synthetic_package_inputs checked.inputs,
-      }
-    else if checked.tag == "PythonModule" then
-      checked
-      & {
-        config = checked.config | PythonModuleConfig,
-        deps = checked.deps | RecipeDeps,
-        inputs = validate_synthetic_package_inputs checked.inputs,
-      }
-    else if checked.tag == "Sandbox" || checked.tag == "SandboxInstall" || checked.tag == "SandboxStageRootfs" then
-      checked
-      & {
-        config = checked.config | SandboxConfig,
-        inputs = validate_sandbox_inputs checked.inputs,
-      }
-    else if checked.tag == "SandboxInstallBuild" || checked.tag == "SandboxStageBuild" then
-      checked
-      & {
-        config = checked.config | SandboxConfig,
-        deps = checked.deps | RecipeDeps,
-        inputs = validate_sandbox_build_inputs checked.inputs,
-      }
-    else if checked.tag == "TreeMerge" then
-      checked
-      & {
-        config = checked.config | TreeMergeConfig,
-        inputs = validate_tree_merge_inputs checked.inputs,
-      }
-    else if checked.tag == "TreeSubset" then
-      checked
-      & {
-        config = checked.config | TreeSubsetConfig,
-        inputs = validate_tree_subset_inputs checked.inputs,
-      }
-    else if checked.tag == "TreeMove" then
-      checked
-      & {
-        config = checked.config | TreeMoveConfig,
-        inputs = validate_tree_move_inputs checked.inputs,
-      }
-    else if checked.tag == "RootfsClosure" then
-      checked
-      & {
-        config = checked.config | TreeMergeConfig,
-        inputs = validate_rootfs_closure_inputs checked.inputs,
-      }
-    else if checked.tag == "Initramfs" then
-      checked
-      & {
-        config = checked.config | InitramfsConfig,
-        inputs = validate_initramfs_inputs checked.inputs,
-      }
-    else if checked.tag == "OciExtract" then
-      checked
-      & {
-        config = checked.config | OciExtractConfig,
-        inputs = validate_oci_extract_inputs checked.inputs,
-      }
-    else
-      checked
+    let spec = std.record.get checked.tag tag_specs in
+    let node_checked = checked | node_spec_contract spec in
+    std.record.update
+      "inputs"
+      (
+        std.record.map
+          (fun _ input => ValidateRecipe input)
+          (node_checked.inputs | spec.inputs)
+      )
+      node_checked
 in
 {
   known_tags
     | Array String
-    | doc "Closed set of currently supported recipe builder tags."
+    | doc "Closed set of currently supported recipe builder tags, derived from the tag table."
     = KnownTags,
   base_recipe
     | doc "Base structural contract shared by all recipe nodes."
     = BaseRecipe,
   group_config
     | doc "Config contract for `Group` recipe nodes."
-    = GroupConfig,
+    = EmptyConfig,
   tree_config
     | doc "Config contract for `Tree` recipe nodes."
     = TreeConfig,
@@ -971,19 +591,46 @@ in
     = SandboxConfig,
   tree_merge_config
     | doc "Config contract for `TreeMerge` recipe nodes."
-    = TreeMergeConfig,
+    = EmptyConfig,
   initramfs_config
     | doc "Config contract for `Initramfs` recipe nodes."
-    = InitramfsConfig,
+    = EmptyConfig,
   oci_extract_config
     | doc "Config contract for `OciExtract` recipe nodes."
-    = OciExtractConfig,
+    = EmptyConfig,
+  bundle_config
+    | doc "Config contract for `Bundle` recipe nodes."
+    = EmptyConfig,
   shallow_recipe
-    | doc "Validate one recipe node shallowly: full top-level shape and tag-specific config, but leave `inputs` as `Dyn`."
+    | doc m%"
+        Validate one recipe node shallowly: full top-level shape and
+        tag-specific config, but leave the graph-carrying fields (`inputs`,
+        `deps`) unvalidated -- they hold whole nested node graphs, and forcing
+        them would unfold the shared recipe DAG into a tree.
+
+        The leaf data (`name`, `tag`, `config`, and `origin` for `Source`
+        nodes) is forced through `std.serialize`, which triggers the delayed
+        record-contract checks. A lazy `let`-binding would NOT run them:
+        an unused binding is never evaluated. (`std.deep_seq` is unusable
+        here twice over: it would force `inputs`, and nickel 1.17 panics on
+        deep_seq of a record with an undefined optional contract field.)
+      "%
     =
       std.contract.from_predicate (fun recipe =>
-        let _ = ValidateRecipeShallow recipe in
-        true
+        let checked = ValidateRecipeShallow recipe in
+        let forced =
+          if recipe.tag == "Source" then
+            { name = checked.name, object_hash = checked.object_hash }
+            & (
+              if std.record.has_field "origin" checked then
+                { origin = checked.origin }
+              else
+                {}
+            )
+          else
+            { name = checked.name, tag = checked.tag, config = checked.config }
+        in
+        std.seq (std.serialize 'Json forced) true
       ),
   validate_recipe
     | doc "WARNING: deep recursive validation. This walks the entire nested recipe graph and is expensive on large raw package sets."
