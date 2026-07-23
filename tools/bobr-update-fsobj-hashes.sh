@@ -11,6 +11,10 @@
 # - `tools/bobr-update-fsobj-hashes.sh --check [<path>]`
 #   verifies existing lock files without rewriting them
 #
+# A directory Source containing an empty subdirectory is rejected with an error
+# (in every mode): git cannot store empty dirs, so its lock would never match a
+# fresh checkout and each build would keep rewriting it.
+#
 # The fsobj-hash binary defaults to the local debug build; override it with
 # `--fsobj-hash=PATH` or the `BOBR_FSOBJ_HASH` environment variable (bobr-build.sh
 # passes the binary it resolved next to `bobr`).
@@ -76,6 +80,24 @@ write_or_check_lock() {
   if [ ! -f "${peer_path}" ] && [ ! -d "${peer_path}" ]; then
     echo "peer path is neither file nor directory: ${peer_path}" >&2
     return 1
+  fi
+
+  # Reject empty directories in a source tree: git does not track empty dirs, so
+  # a lock computed over one never matches a fresh checkout, and every build
+  # rewrites the lock (dirtying the tree). Declare a genuinely-needed empty dir
+  # in the recipe as a Tree `{type="dir"}` entry instead of shipping it here.
+  if [ -d "${peer_path}" ]; then
+    local empty_dirs
+    empty_dirs="$(find "${peer_path}" -type d -empty)"
+    if [ -n "${empty_dirs}" ]; then
+      {
+        echo "empty directories under '${peer_path}' are not reproducible from git"
+        echo "(git does not track them, so the lock would never match a fresh checkout):"
+        printf '%s\n' "${empty_dirs}" | sed 's/^/  /'
+        echo "remove them, or declare a needed empty dir in the recipe (Tree {type=\"dir\"})."
+      } >&2
+      return 1
+    fi
   fi
 
   hash="$(hash_for_path "${peer_path}")"

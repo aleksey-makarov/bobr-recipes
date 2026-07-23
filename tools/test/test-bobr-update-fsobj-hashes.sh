@@ -72,4 +72,10 @@ assert_file_equals "${fixture_repo}/tree.fsobj-hash" "${dir_hash}"
 printf '%s\n' 'orphan' > "${fixture_repo}/missing.fsobj-hash"
 expect_failure run_tool --check
 
+# Empty directories are not reproducible from git; a directory Source that holds
+# one is rejected, even when it also has real files.
+mkdir -p "${fixture_repo}/emptytree/present" "${fixture_repo}/emptytree/hollow"
+printf 'x\n' > "${fixture_repo}/emptytree/present/keep.txt"
+expect_failure run_tool "${fixture_repo}/emptytree"
+
 echo "update-fsobj-hashes smoke tests passed"
