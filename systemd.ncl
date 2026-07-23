@@ -150,9 +150,20 @@ fun pkgs =>
     & {
       deps = {
         build = [],
+        # libsystemd-shared (bundled here, pulled in by libsystemd.so) links the
+        # same libraries as systemd's own binaries, so mirror the package's
+        # runtime libs -- minus linux_pam, which only pam_systemd.so (not shipped
+        # in this split) needs. Under-declaring here leaves a dangling NEEDED
+        # wherever this split is used without the full systemd (e.g. systemd_dev
+        # in build rootfs).
         runtime = [
           pkgs.glibc_libs,
+          pkgs.acl_libs,
           pkgs.libcap_libs,
+          pkgs.libxcrypt_libs,
+          pkgs.openssl_libs,
+          pkgs.util_linux_libs,
+          pkgs.kmod_libs,
         ],
       },
     }
