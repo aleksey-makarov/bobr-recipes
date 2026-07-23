@@ -2,7 +2,7 @@
 
 # Boot the plain (graphics-less) system: pkgs.qemu_image, headless. The serial
 # console (ttyS0 autologin) is on the terminal and there is no window. Shares the
-# network and the ttyS1 diag socket (for guest-exec.py) with the graphical
+# network and the ttyS1 diag socket (for bobr-agent-exec-guest.py) with the graphical
 # launchers -- see bobr-run-qemu-lib.sh for the common core and env knobs.
 
 set -euo pipefail

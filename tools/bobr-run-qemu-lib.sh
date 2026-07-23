@@ -8,7 +8,7 @@
 #   - user networking, guest :22 forwarded to host :2222 (QEMU_SSH_PORT);
 #   - a ttyS0 autologin console multiplexed onto the terminal (mon:stdio);
 #   - a ttyS1 diagnostic root console exposed as a host unix socket, which the
-#     agent drives with guest-exec.py (--sock <that socket>).
+#     agent drives with bobr-agent-exec-guest.py (--sock <that socket>).
 # The graphical variants additionally get a venus virtio-gpu (guest /dev/dri) and
 # an sdl window; the plain variant is headless (-display none).
 #
@@ -39,7 +39,7 @@ Boots pkgs.${VARIANT_IMAGE_ATTR} with pkgs.linux_bzimage and pkgs.initrd.
   QEMU_SSH_PORT   host port forwarded to guest :22 (default 2222).
   QEMU_HOME_IMG   persistent ext4 /home disk (default <recipes>/../${VARIANT_HOME_IMG});
                   auto-created sparse (1 GiB) if missing.
-  QEMU_DIAG_SOCK  ttyS1 diag unix socket for guest-exec.py (default ./${VARIANT_DIAG_SOCK}).
+  QEMU_DIAG_SOCK  ttyS1 diag unix socket for bobr-agent-exec-guest.py (default ./${VARIANT_DIAG_SOCK}).
 EOF
   if [ "${VARIANT_GRAPHICAL}" = 1 ]; then
     cat <<EOF
@@ -125,7 +125,7 @@ qemu_run() {
 
   # Second serial (guest ttyS1) exposed as a host unix socket in the current
   # directory, so the agent can drive the guest's autologin-root diag console
-  # over it (see guest-exec.py). Relative path -> lands where you launch this;
+  # over it (see bobr-agent-exec-guest.py). Relative path -> lands where you launch this;
   # each variant defaults to its own name so several guests can run at once.
   # Remove a stale socket first so qemu can rebind on a rerun.
   diag_sock="${QEMU_DIAG_SOCK:-${VARIANT_DIAG_SOCK}}"
