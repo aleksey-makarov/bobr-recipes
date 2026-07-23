@@ -214,8 +214,7 @@ let base_modules = [
   import "texinfo.ncl",
   import "util-linux.ncl",
   import "e2fsprogs/e2fsprogs.ncl",
-  import "tests/test-rootfs.ncl",
-  import "tests/test-reports.ncl",
+  import "tests/tests.ncl",
   import "vim.ncl",
   import "libdrm.ncl",
   import "mesa.ncl",
@@ -244,7 +243,6 @@ let base_modules = [
   import "weston.ncl",
   import "gnome-session.ncl",
   import "gnome.ncl",
-  import "aggregate.ncl",
 ]
 in
 
