@@ -12,7 +12,7 @@
 # checkout, and bobr-build.sh hard-checks that the binaries exist.
 #
 # Usage: bobr-rebuild-world.sh [--jobs N] [--podman-unshare] [pkgs-attr]
-#   pkgs-attr defaults to all_test_artifacts.
+#   pkgs-attr defaults to test_all (build the artifacts + run the rootfs checks).
 
 set -euo pipefail
 
@@ -153,7 +153,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 [ "$#" -le 1 ] || { usage; exit 2; }
-attr="${1:-all_test_artifacts}"
+attr="${1:-test_all}"
 if [ -n "${jobs}" ] && ! [[ "${jobs}" =~ ^[1-9][0-9]*$ ]]; then
   echo "bobr-rebuild-world.sh: --jobs must be a positive integer" >&2
   exit 2
