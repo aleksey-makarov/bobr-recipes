@@ -216,15 +216,14 @@ status="ok"
   echo "symlinks checked: ${sym_checked}"
   echo "suppressed: ${#supp_fails[@]}"
   echo "infos: ${#infos[@]}"
-  for m in ${infos[@]+"${infos[@]}"}; do
-    echo "INFO  ${m}"
-  done
-  for m in ${supp_fails[@]+"${supp_fails[@]}"}; do
-    echo "INFO  approved: ${m}"
-  done
-  for m in ${real_fails[@]+"${real_fails[@]}"}; do
-    echo "FAIL  ${m}"
-  done
+  # Sort each group so the report depends only on the SET of findings, not on
+  # the order they were discovered in: the scans walk the tree via `find`, which
+  # returns readdir order, and that differs between two builds of the same tree
+  # on different hosts -- which would make the report (and this node's output
+  # hash) non-reproducible even though the findings are identical.
+  [ "${#infos[@]}" -eq 0 ] || printf 'INFO  %s\n' "${infos[@]}" | LC_ALL=C sort
+  [ "${#supp_fails[@]}" -eq 0 ] || printf 'INFO  approved: %s\n' "${supp_fails[@]}" | LC_ALL=C sort
+  [ "${#real_fails[@]}" -eq 0 ] || printf 'FAIL  %s\n' "${real_fails[@]}" | LC_ALL=C sort
   echo "status: ${status}"
   echo "failures: ${#real_fails[@]}"
 } > "${dest}/report-${name}-${status}.txt"
