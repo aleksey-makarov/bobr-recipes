@@ -35,6 +35,12 @@
   CGROUP_FREEZER = 'y,
   CGROUP_SCHED = 'y,
   CPUSETS = 'y,
+  # eBPF attached to cgroups: lets systemd enforce IPAddressAllow/Deny (and
+  # SocketBind*/RestrictNetworkInterfaces) via a cgroup/skb BPF program instead
+  # of skipping them with a "does not support BPF/cgroup firewalling" warning.
+  # BPF_SYSCALL selects BPF; CGROUP_BPF depends on it.
+  BPF_SYSCALL = 'y,
+  CGROUP_BPF = 'y,
   SECCOMP = 'y,
 
   # Filesystems.
