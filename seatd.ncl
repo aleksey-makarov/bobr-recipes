@@ -12,9 +12,9 @@ fun pkgs =>
   in
 
   # libseat + the seatd daemon. The logind backend (libseat over systemd-logind)
-  # is enabled now that a logind session exists, so a compositor can take
-  # devices via logind (LIBSEAT_BACKEND=logind). The seatd and builtin backends
-  # are kept as fallbacks (LIBSEAT_BACKEND=seatd for the weston-start path).
+  # is enabled, so a compositor takes devices via logind (LIBSEAT_BACKEND=logind)
+  # -- which is how weston.service runs in the weston image. The seatd and builtin
+  # backends are kept as fallbacks (LIBSEAT_BACKEND=seatd, no logind needed).
   let seatd = {
     version | default = "0.9.3",
     source_object_hash | default = "302564d54d8e28191fadfd734f2675ecb0c9e0615a58011b89ef15dfa4dbaa96",

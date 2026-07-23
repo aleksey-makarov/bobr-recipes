@@ -22,7 +22,7 @@ fun pkgs =>
     tag = "AutotoolsStageRootfs",
     config = {},
     inputs = {
-      _rootfs = pkgs.buildpack_deps_rootfs,
+      _rootfs = pkgs.oci_buildpack_deps_rootfs,
       source = bison_src version source_object_hash,
     },
   }

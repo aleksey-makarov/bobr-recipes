@@ -133,10 +133,10 @@ in
       let mkfs_script = {
         name = "%{args.name}-mkfs-script",
         tag = "Source",
-        object_hash = import "filesystem/mk-erofs.sh.fsobj-hash" as 'Text,
+        object_hash = import "os/mk-erofs.sh.fsobj-hash" as 'Text,
         origin = {
           tag = "RecipePath",
-          path = "filesystem/mk-erofs.sh",
+          path = "os/mk-erofs.sh",
         },
       }
       in

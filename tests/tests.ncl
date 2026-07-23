@@ -11,7 +11,7 @@
 # rootfs reported errors.
 #
 # Every check runs from OUTSIDE the checked tree: the checker sandbox uses a
-# tool-rich OCI rootfs (`buildpack_deps_rootfs`) as its `_rootfs`, with the tree
+# tool-rich OCI rootfs (`oci_buildpack_deps_rootfs`) as its `_rootfs`, with the tree
 # to check mounted as the `_target` fs-tree input -- so even minimal rootfs (the
 # initramfs) are checkable. The common script is rootfs-check.sh; the shipped
 # images additionally source rootfs-check-image.sh (image-specific checks).
@@ -30,15 +30,16 @@ fun pkgs =>
     inputs =
       recipe.numbered_inputs [
         pkgs.linux,
-        pkgs.erofs_rootfs,
+        pkgs.qemu_image,
         pkgs.initrd,
-        pkgs.gnome_erofs_rootfs,
+        pkgs.qemu_weston_image,
+        pkgs.qemu_gnome_image,
       ],
   }
   in
 
-  let rootfs_check_source = {
-    name = "rootfs-check-source",
+  let check_source = {
+    name = "check-source",
     tag = "Source",
     object_hash = import "rootfs-check.sh.fsobj-hash" as 'Text,
     origin = {
@@ -48,8 +49,8 @@ fun pkgs =>
   }
   in
 
-  let rootfs_check_image_source = {
-    name = "rootfs-check-image-source",
+  let check_image_source = {
+    name = "check-image-source",
     tag = "Source",
     object_hash = import "rootfs-check-image.sh.fsobj-hash" as 'Text,
     origin = {
@@ -59,8 +60,8 @@ fun pkgs =>
   }
   in
 
-  let rootfs_check_gate_source = {
-    name = "rootfs-check-gate-source",
+  let check_gate_source = {
+    name = "check-gate-source",
     tag = "Source",
     object_hash = import "rootfs-check-gate.sh.fsobj-hash" as 'Text,
     origin = {
@@ -83,7 +84,7 @@ fun pkgs =>
     # interactive auth -- never in a build. Those libs aren't in the image, so
     # the plugins have dangling NEEDED, but they are never loaded. Not our
     # recipe. glibc-bootstrap is the same buildpack image plus gawk/bison.
-    "buildpack-deps-rootfs" = ["libsvn_auth_kwallet", "libsvn_auth_gnome_keyring"],
+    "oci-buildpack-deps-rootfs" = ["libsvn_auth_kwallet", "libsvn_auth_gnome_keyring"],
     "glibc-bootstrap-rootfs" = ["libsvn_auth_kwallet", "libsvn_auth_gnome_keyring"],
     # glib's gen1 bootstrap binaries live in the private /usr/lib/glib-gen1
     # prefix and find their libs via LD_LIBRARY_PATH set during glib's build.
@@ -107,7 +108,7 @@ fun pkgs =>
   # plain-object directory holding one report file.
   let mk_rootfs_check = fun check_name =>
     fun rootfs => {
-      name = "rootfs-check-%{check_name}",
+      name = "check-%{check_name}",
       tag = "Sandbox",
       config = {
         script_config = {
@@ -128,9 +129,9 @@ fun pkgs =>
         ],
       },
       inputs = {
-        _rootfs = pkgs.buildpack_deps_rootfs,
+        _rootfs = pkgs.oci_buildpack_deps_rootfs,
         _target = rootfs,
-        script = rootfs_check_source,
+        script = check_source,
       },
     }
   in
@@ -142,7 +143,7 @@ fun pkgs =>
   let mk_image_check = fun check_name =>
     fun image =>
       fun extra_config => {
-        name = "rootfs-check-image-%{check_name}",
+        name = "check-image-%{check_name}",
         tag = "Sandbox",
         config = {
           script_config = { name = check_name } & extra_config,
@@ -156,18 +157,18 @@ fun pkgs =>
           ],
         },
         inputs = {
-          _rootfs = pkgs.buildpack_deps_rootfs,
+          _rootfs = pkgs.oci_buildpack_deps_rootfs,
           _target = image,
-          script = rootfs_check_source,
-          special_image = rootfs_check_image_source,
+          script = check_source,
+          special_image = check_image_source,
         },
       }
   in
 
-  let test_rootfs = mk_image_check "rootfs" pkgs.rootfs {} in
+  let test_rootfs = mk_image_check "qemu" pkgs.qemu_rootfs {} in
 
   let test_gnome_rootfs =
-    mk_image_check "gnome-rootfs" pkgs.gnome_rootfs {
+    mk_image_check "qemu-gnome" pkgs.qemu_gnome_rootfs {
       check_graphics = "true",
       check_gnome = "true",
       # gnome-shell's JS references these GI namespaces, but they are only loaded
@@ -178,6 +179,12 @@ fun pkgs =>
       # typelibs must be present or the shell crashes at startup
       # (misc/dependencies.js). Everything else must have a typelib.
       gnome_optional_typelibs = "GnomeBluetooth Malcontent",
+    }
+  in
+
+  let test_weston_rootfs =
+    mk_image_check "qemu-weston" pkgs.qemu_weston_rootfs {
+      check_graphics = "true",
     }
   in
 
@@ -194,12 +201,13 @@ fun pkgs =>
 
   # The shipped images are packed via `_tree`, not `_rootfs`, so the walk never
   # reaches them -- check them explicitly. initrd_rootfs gets a closure check;
-  # rootfs/gnome_rootfs use the richer image checks (which add the image-specific
+  # rootfs/qemu_gnome_rootfs use the richer image checks (which add the image-specific
   # checks). All produce the same one-file `status:` report, so the gate is
   # uniform.
   let image_checks = [
     mk_rootfs_check pkgs.initrd_rootfs.name pkgs.initrd_rootfs,
     test_rootfs,
+    test_weston_rootfs,
     test_gnome_rootfs,
   ]
   in
@@ -211,7 +219,7 @@ fun pkgs =>
   # were checked. `numbered_inputs` gives valid (`nNNN`) bundle slot keys; the
   # rootfs identity is inside each report (`name:` line).
   let reports_bundle = {
-    name = "rootfs-check-reports",
+    name = "check-reports",
     tag = "Bundle",
     config = {},
     inputs = recipe.numbered_inputs checks,
@@ -232,8 +240,8 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = pkgs.buildpack_deps_rootfs,
-      script = rootfs_check_gate_source,
+      _rootfs = pkgs.oci_buildpack_deps_rootfs,
+      script = check_gate_source,
       reports = reports_bundle,
     },
   }

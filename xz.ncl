@@ -25,7 +25,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      _rootfs = pkgs.buildpack_deps_rootfs,
+      _rootfs = pkgs.oci_buildpack_deps_rootfs,
       source = xz_src version source_object_hash,
     },
   }

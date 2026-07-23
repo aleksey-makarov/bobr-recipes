@@ -24,7 +24,7 @@ fun pkgs =>
       configure_args = ["--disable-nls", "--disable-perl-regexp"],
     },
     inputs = {
-      _rootfs = pkgs.buildpack_deps_rootfs,
+      _rootfs = pkgs.oci_buildpack_deps_rootfs,
       source = grep_src version source_object_hash,
     },
   }

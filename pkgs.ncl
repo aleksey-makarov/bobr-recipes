@@ -21,8 +21,6 @@
 # can exhaust system memory. Use `std.record.fields`, `tools/bobr-list-pkgs.sh`,
 # `request.ncl`, or `tools/bobr-build.sh --dry-run` for targeted inspection.
 let base_modules = [
-  import "images.ncl",
-  import "image-rootfs.ncl",
   import "iana-etc/iana-etc.ncl",
   import "binutils.ncl",
   import "bzip2/bzip2.ncl",
@@ -203,11 +201,7 @@ let base_modules = [
   import "libcap.ncl",
   import "gcc.ncl",
   import "glibc/glibc.ncl",
-  import "filesystem/base-filesystem.ncl",
-  import "filesystem/system-runtime-files.ncl",
-  import "filesystem/system-runtime-files-gnome.ncl",
-  import "filesystem/rootfs.ncl",
-  import "filesystem/initrd.ncl",
+  import "linux/initrd.ncl",
   import "tcl/tcl.ncl",
   import "expect/expect.ncl",
   import "dejagnu/dejagnu.ncl",
@@ -242,7 +236,16 @@ let base_modules = [
   import "bibata-cursors/bibata-cursors.ncl",
   import "weston.ncl",
   import "gnome-session.ncl",
-  import "gnome.ncl",
+
+  # OCI images
+  import "oci/image.ncl",
+  import "oci/rootfs.ncl",
+
+  # OS images
+  import "os/base-filesystem.ncl",
+  import "os/qemu_image.ncl",
+  import "os/qemu_weston_image.ncl",
+  import "os/qemu_gnome_image.ncl",
 ]
 in
 

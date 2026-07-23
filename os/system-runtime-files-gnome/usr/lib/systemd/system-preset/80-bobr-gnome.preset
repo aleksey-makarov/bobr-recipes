@@ -1,0 +1,9 @@
+# gdm is the session launcher: it is wired up (gdm user/group, PAM,
+# custom.conf with WaylandEnable + automatic login of `user`, and a
+# wayland-sessions/gnome.desktop), so let the vendor default enable it. Presets
+# are reapplied on every boot here (volatile /etc, empty machine-id). GNOME does
+# not use the tty1-autologin -> user compositor path (that is the weston image's
+# model, in system-runtime-files-weston); gdm owns seat0 here instead.
+#
+# The diagnostic ttyS1 root console (diag-console.service) is enabled for every
+# image from the base system-runtime-files, so it is not repeated here.

@@ -2,7 +2,7 @@ let recipe = import "recipe-lib.ncl" in
 # gsettings-desktop-schemas -- the org.gnome.desktop.* GSettings schemas (data)
 # used across GNOME (mutter, gnome-shell, GTK reads e.g. cursor-size). The
 # .gschema.xml install to /usr/share/glib-2.0/schemas and are compiled by the
-# gnome_rootfs finalize step. `version`/`source_object_hash` are node fields (overridable),
+# qemu_gnome_rootfs finalize step. `version`/`source_object_hash` are node fields (overridable),
 # as in linux.ncl.
 
 let branch = recipe.version_prefix 1 in

@@ -2,7 +2,7 @@ let recipe = import "recipe-lib.ncl" in
 # adwaita-icon-theme -- the default GNOME icon theme. Data (icons), but its
 # meson build requires gtk4-update-icon-cache at configure time (required:true);
 # the actual cache run is skip_if_destdir, so under our DESTDIR install it is
-# skipped and the icon cache is produced later by the gnome_rootfs finalize
+# skipped and the icon cache is produced later by the qemu_gnome_rootfs finalize
 # step. Hence gtk4 is a build-only dep. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
 

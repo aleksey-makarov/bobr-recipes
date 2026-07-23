@@ -31,7 +31,7 @@ fun pkgs =>
     tag = "TreeMerge",
     config = {},
     inputs = {
-      base = pkgs.buildpack_deps_rootfs,
+      base = pkgs.oci_buildpack_deps_rootfs,
       gawk = pkgs.gawk_gen1,
       bison = pkgs.bison_gen1,
     },

@@ -141,7 +141,7 @@ fun pkgs =>
       }
   in
 
-  let linux_headers_gen1 = mk_linux_headers "-gen1" pkgs.buildpack_deps_rootfs in
+  let linux_headers_gen1 = mk_linux_headers "-gen1" pkgs.oci_buildpack_deps_rootfs in
   # Plain headers build in a deps-derived closure (no system_rootfs_2): the
   # native toolchain plus the gen1 kernel headers. The gen1 headers are needed
   # to compile the build's host tools (glibc's <bits/errno.h> pulls in
@@ -262,7 +262,7 @@ fun pkgs =>
   # All loadable modules + depmod metadata, split out of the linux fs-tree so
   # the running system's rootfs can ship a full `/lib/modules/<release>`
   # without also pulling in `boot/`. The initrd takes only the boot-critical
-  # subset (see filesystem/initrd.ncl); this is everything.
+  # subset (see initrd.ncl); this is everything.
   let linux_modules = {
     name = "linux-modules-%{pkgs.linux.version}",
     tag = "TreeSubset",
