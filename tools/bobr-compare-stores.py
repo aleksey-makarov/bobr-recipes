@@ -5,7 +5,7 @@ the same inputs across two stores.
 Compare two bobr stores built by rebuild-world.sh.
 
 Usage:
-    compare-stores.py STORE_A STORE_B [options]
+    bobr-compare-stores.py STORE_A STORE_B [options]
 
 What it does (never aborts on a mismatch -- it reports and continues):
   1. Compares hashes.txt (mbuild / mbuild-recipes commits).

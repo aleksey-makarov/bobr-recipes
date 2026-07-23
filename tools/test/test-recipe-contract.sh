@@ -7,7 +7,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-contract_file="${repo_root}/contracts/recipe.ncl"
+contract_file="${repo_root}/recipe-contract.ncl"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 

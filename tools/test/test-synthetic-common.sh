@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Smoke-test synthetic/common.sh's bobr_prepare_source on directory and archive
+# sources, including the patch-selection rules (only top-level *.patch files are
+# applied; .diff and nested patches are ignored) and idempotency.
+# Run this when editing synthetic/common.sh or the synthetic source-prep flow.
+
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -61,10 +66,11 @@ EOF_PATCH
 +changed
 EOF_PATCH
 
+  BOBR_BUILD_DIR="$build_dir"
   BOBR_SOURCE_INPUT="$input_dir"
   BOBR_SOURCE_DIR="${build_dir}/source"
   BOBR_PATCH_INPUTS="${patch_file} ${patch_dir}"
-  export BOBR_SOURCE_INPUT BOBR_SOURCE_DIR BOBR_PATCH_INPUTS
+  export BOBR_BUILD_DIR BOBR_SOURCE_INPUT BOBR_SOURCE_DIR BOBR_PATCH_INPUTS
 
   # shellcheck source=/dev/null
   . "$common"
@@ -85,10 +91,11 @@ run_archive_source_case() {
   printf 'from archive\n' > "${archive_root}/pkg/file.txt"
   tar -C "$archive_root" -cf "$archive" pkg
 
+  BOBR_BUILD_DIR="$build_dir"
   BOBR_SOURCE_INPUT="$archive"
   BOBR_SOURCE_DIR="${build_dir}/source"
   BOBR_PATCH_INPUTS=""
-  export BOBR_SOURCE_INPUT BOBR_SOURCE_DIR BOBR_PATCH_INPUTS
+  export BOBR_BUILD_DIR BOBR_SOURCE_INPUT BOBR_SOURCE_DIR BOBR_PATCH_INPUTS
 
   # shellcheck source=/dev/null
   . "$common"
