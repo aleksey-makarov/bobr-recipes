@@ -12,8 +12,8 @@
 # `vendor_bundle name lock` collects those crate sources into one `Bundle`
 # object: a plain directory of `.crate` files (one hardlink each), so a Rust
 # package recipe takes a single input instead of one bind mount per crate. The
-# recipe's `pre_configure` unpacks that directory into a cargo `vendor/` tree
-# with offline source replacement.
+# `Cargo` builder injects that bundle as the `crates` input and a built-in vendor
+# step unpacks it into a cargo `vendor/` tree with offline source replacement.
 let san = fun s =>
   s
   |> std.string.replace "-" "_"
