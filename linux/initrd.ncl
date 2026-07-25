@@ -452,32 +452,63 @@ fun pkgs =>
   }
   in
 
-  let initrd = {
-    name = "initrd",
-    tag = "Initramfs",
-    deps = {
-      build = [],
-      runtime = [],
+  let mk_initramfs_script = {
+    name = "mk-initramfs-script",
+    tag = "Source",
+    object_hash = import "mk-initramfs.sh.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "linux/mk-initramfs.sh",
     },
+  }
+  in
+
+  # Tools to pack the initramfs: the kernel's gen_init_cpio plus the shell and
+  # the find/sort used to generate its spec file.
+  let initrd_build_rootfs = {
+    name = "initrd-build-rootfs",
+    tag = "RootfsClosure",
     config = {},
     inputs = {
+      gen_init_cpio = pkgs.gen_init_cpio,
+      bash = pkgs.bash,
+      coreutils = pkgs.coreutils,
+      findutils = pkgs.findutils,
+    },
+  }
+  in
+
+  # The initramfs image: a plain-object directory holding a single
+  # `initramfs.img` (the cpio archive has no per-file ownership of its own), so
+  # the boot artifact is `<object>/initramfs.img`. Runs as root to read the
+  # packed tree's real ownership; see linux/mk-initramfs.sh.
+  let initrd = {
+    name = "initrd",
+    tag = "Sandbox",
+    config = {
+      steps = [
+        {
+          name = "mk_initramfs",
+          run_as = "root",
+          cwd = "@{out}",
+          argv = ["@{script}"],
+        },
+      ],
+    },
+    inputs = {
+      _rootfs = initrd_build_rootfs,
       _tree = initrd_rootfs,
+      script = mk_initramfs_script,
     },
   }
   in
 
   {
+    # Only the two useful entry points: the packed image, and the tree it packs
+    # (which the rootfs checks in tests/tests.ncl inspect on its own, since it
+    # reaches bobr as a `_tree` input rather than a build rootfs). The per-package
+    # subsets feeding that tree stay local to this module.
     include [
-      initrd_files,
-      initrd_systemd,
-      initrd_kmod,
-      initrd_util_linux,
-      initrd_glibc,
-      initrd_openssl,
-      initrd_xz,
-      initrd_zstd,
-      initrd_zlib,
-      initrd_modules,
       initrd_rootfs,
       initrd,
     ],

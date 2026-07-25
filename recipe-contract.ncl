@@ -411,8 +411,6 @@ let TreeMoveInputsShape = {
 in
 let RootfsClosureInputsShape = { .. }
 in
-let InitramfsInputsShape = { .. }
-in
 let SyntheticRootfsInputsShape = {
   _rootfs | Dyn,
   source | Dyn,
@@ -442,7 +440,6 @@ let tag_specs = {
   TreeSubset = { config = TreeSubsetConfig, inputs = TreeSubsetInputsShape, requires_deps = false },
   TreeMove = { config = TreeMoveConfig, inputs = TreeMoveInputsShape, requires_deps = false },
   RootfsClosure = { config = EmptyConfig, inputs = RootfsClosureInputsShape, requires_deps = false },
-  Initramfs = { config = EmptyConfig, inputs = InitramfsInputsShape, requires_deps = false },
   OciExtract = { config = EmptyConfig, inputs = OciExtractInputsShape, requires_deps = false },
   Bundle = { config = EmptyConfig, inputs = GroupInputsShape, requires_deps = false },
   Autotools = { config = AutotoolsConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
@@ -604,9 +601,6 @@ in
     = SandboxConfig,
   tree_merge_config
     | doc "Config contract for `TreeMerge` recipe nodes."
-    = EmptyConfig,
-  initramfs_config
-    | doc "Config contract for `Initramfs` recipe nodes."
     = EmptyConfig,
   oci_extract_config
     | doc "Config contract for `OciExtract` recipe nodes."

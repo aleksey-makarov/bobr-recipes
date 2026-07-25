@@ -54,7 +54,6 @@ run_case "bad-tree-move-config" fail '{"name":"staged","tag":"TreeMove","config"
 run_case "missing-tree-move-input" fail '{"name":"staged","tag":"TreeMove","config":{"strip_prefix":"stage"},"inputs":{}}'
 run_case "fs-tree-export" pass '{"name":"exported","tag":"FsTreeExport","config":{"copies":[{"from":"boot/bzImage","to":"bzImage"}]},"inputs":{"input":'"${rootfs_tree}"'}}'
 run_case "rootfs-closure" pass '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{},"inputs":{"root":'"${rootfs_tree}"'}}'
-run_case "initramfs" pass '{"name":"initrd","tag":"Initramfs","config":{},"inputs":{"tree0":'"${rootfs_tree}"'}}'
 run_case "source-http" pass "${source_node}"
 run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","platform":{"os":"linux","architecture":"amd64"}}}'
 # Bundle is the vendored-crates collector (cargo.ncl vendor_bundle); it was

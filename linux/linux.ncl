@@ -277,6 +277,49 @@ fun pkgs =>
   }
   in
 
+  # The kernel's own initramfs archiver (`usr/gen_init_cpio.c`), built as an
+  # ordinary host tool. It turns a spec file into a `newc` cpio archive with
+  # synthesized metadata -- inode numbers counted from a constant, fixed link
+  # counts, and one `-t` timestamp for every entry -- so the archive depends only
+  # on the spec, never on the host inodes or mtimes of the packed files. That is
+  # what makes a reproducible initramfs possible (see linux/mk-initramfs.sh);
+  # `cpio(1)` would instead copy the on-disk metadata, which for a materialized
+  # fs-tree varies with how the store happens to share its files. The program is
+  # a self-contained C file needing nothing from the configured kernel tree, so
+  # it is compiled directly here rather than through the kernel build. Version
+  # and source hash follow `pkgs.linux`, so it reuses that tarball.
+  let gen_init_cpio = {
+    name = "gen-init-cpio-%{pkgs.linux.version}",
+    tag = "SandboxInstallDeps",
+    deps = {
+      build = recipe.native_build_deps pkgs,
+      runtime = [pkgs.glibc_libs],
+    },
+    config = {
+      steps = [
+        recipe.prepare_source_step,
+        {
+          name = "build_install",
+          run_as = "root",
+          cwd = "@{build}/source",
+          argv = [
+            "/bin/bash",
+            "-ec",
+            m%"
+              gcc -O2 -Wall -o gen_init_cpio usr/gen_init_cpio.c
+              install -Dm755 gen_init_cpio /usr/bin/gen_init_cpio
+            "%,
+          ],
+        },
+      ],
+      script_config = {},
+    },
+    inputs = {
+      source = linux_source pkgs.linux.version pkgs.linux.source_object_hash,
+    },
+  }
+  in
+
   {
     include [
       linux_headers_gen1,
@@ -284,5 +327,6 @@ fun pkgs =>
       linux_headers,
       linux_bzimage,
       linux_modules,
+      gen_init_cpio,
     ],
   }

@@ -100,7 +100,7 @@ qemu_run() {
   local kernel_path image_path initrd_path
   kernel_path="${store_path}/objects/$(build_object linux_bzimage)/bzImage"
   image_path="${store_path}/objects/$(build_object "${VARIANT_IMAGE_ATTR}")/erofs-rootfs.erofs"
-  initrd_path="${store_path}/objects/$(build_object initrd)"
+  initrd_path="${store_path}/objects/$(build_object initrd)/initramfs.img"
   [ -f "${kernel_path}" ] || die "kernel image not found: ${kernel_path}"
   [ -f "${image_path}" ] || die "EROFS rootfs not found: ${image_path}"
   [ -f "${initrd_path}" ] || die "initrd not found: ${initrd_path}"
