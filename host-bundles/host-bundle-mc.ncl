@@ -25,6 +25,35 @@ fun pkgs =>
       public_tools = {
         mc = {
           path = "usr/bin/mc",
+          environment = {
+            MC_DATADIR = {
+              operation = "replace",
+              paths = [
+                {
+                  source = "payload",
+                  path = "usr/etc/mc",
+                }
+              ],
+            },
+            MC_SHARE_DATADIR = {
+              operation = "replace",
+              paths = [
+                {
+                  source = "payload",
+                  path = "usr/share/mc",
+                }
+              ],
+            },
+            MC_LIBEXECDIR = {
+              operation = "replace",
+              paths = [
+                {
+                  source = "payload",
+                  path = "usr/libexec/mc",
+                }
+              ],
+            },
+          },
         },
       },
       internal_tools = {},

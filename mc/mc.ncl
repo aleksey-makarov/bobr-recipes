@@ -1,7 +1,6 @@
 # GNU Midnight Commander -- text-mode file manager. Autotools; ncurses screen
 # backend, gpm and X11 off (no console-mouse / X deps). Needs glib and ncurses.
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>
@@ -14,6 +13,17 @@ fun pkgs =>
           url = "http://ftp.midnight-commander.org/mc-%{version}.tar.xz",
         },
       }
+  in
+
+  let runtime_paths_patch = {
+    name = "mc-runtime-paths-patch",
+    tag = "Source",
+    object_hash = import "mc-runtime-paths.patch.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "mc/mc-runtime-paths.patch",
+    },
+  }
   in
 
   let mc = {
@@ -44,12 +54,14 @@ fun pkgs =>
     },
     inputs = {
       source = mk_src version source_object_hash,
+      patch_runtime_paths = runtime_paths_patch,
     },
   }
   in
 
   {
     include [
+      runtime_paths_patch,
       mc,
     ],
   }

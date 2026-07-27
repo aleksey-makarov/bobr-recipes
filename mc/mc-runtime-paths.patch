@@ -1,0 +1,132 @@
+diff --git a/lib/global.c b/lib/global.c
+--- a/lib/global.c
++++ b/lib/global.c
+@@ -59,6 +59,8 @@ mc_global_t mc_global =
+ 
+     .sysconfig_dir = NULL,
+     .share_data_dir = NULL,
++    .libexec_dir = NULL,
++    .ext_helpers_dir = NULL,
+ 
+     .profile_name = NULL,
+ 
+diff --git a/lib/global.h b/lib/global.h
+--- a/lib/global.h
++++ b/lib/global.h
+@@ -108,6 +108,10 @@ typedef struct
+     char *sysconfig_dir;
+     /* share_data_dir: Area for default settings from developers */
+     char *share_data_dir;
++    /* libexec_dir: Area for VFS plugins and scripts */
++    char *libexec_dir;
++    /* ext_helpers_dir: Area for file extension handlers */
++    char *ext_helpers_dir;
+ 
+     char *profile_name;
+ 
+diff --git a/lib/mcconfig/paths.c b/lib/mcconfig/paths.c
+--- a/lib/mcconfig/paths.c
++++ b/lib/mcconfig/paths.c
+@@ -205,6 +205,8 @@ mc_config_deinit_config_paths (void)
+ 
+     g_free (mc_global.share_data_dir);
+     g_free (mc_global.sysconfig_dir);
++    g_free (mc_global.libexec_dir);
++    g_free (mc_global.ext_helpers_dir);
+ 
+     xdg_vars_initialized = FALSE;
+ }
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -134,6 +134,8 @@ OS_Setup (void)
+ OS_Setup (void)
+ {
+     const char *datadir_env;
++    const char *share_datadir_env;
++    const char *libexecdir_env;
+ 
+     mc_shell_init ();
+ 
+@@ -145,7 +147,23 @@ OS_Setup (void)
+     else
+         mc_global.sysconfig_dir = g_strdup (SYSCONFDIR);
+ 
+-    mc_global.share_data_dir = g_strdup (DATADIR);
++    share_datadir_env = g_getenv ("MC_SHARE_DATADIR");
++    if (share_datadir_env != NULL)
++        mc_global.share_data_dir = g_strdup (share_datadir_env);
++    else
++        mc_global.share_data_dir = g_strdup (DATADIR);
++
++    libexecdir_env = g_getenv ("MC_LIBEXECDIR");
++    if (libexecdir_env != NULL)
++    {
++        mc_global.libexec_dir = g_strdup (libexecdir_env);
++        mc_global.ext_helpers_dir = g_build_filename (libexecdir_env, "ext.d", (char *) NULL);
++    }
++    else
++    {
++        mc_global.libexec_dir = g_strdup (LIBEXECDIR);
++        mc_global.ext_helpers_dir = g_strdup (EXTHELPERSDIR);
++    }
+ }
+ 
+ /* --------------------------------------------------------------------------------------------- */
+diff --git a/src/textconf.c b/src/textconf.c
+--- a/src/textconf.c
++++ b/src/textconf.c
+@@ -203,8 +203,6 @@ show_version (const gboolean verbose)
+     (void) printf ("    %-17s %s/\n", a, b)
+ #define PRINTF(a, b, c) \
+     (void) printf ("\t%-15s %s/%s\n", a, b, c)
+-#define PRINTF2(a, b, c) \
+-    (void) printf ("\t%-15s %s%s\n", a, b, c)
+ 
+ void
+ show_datadirs_extended (void)
+@@ -218,15 +216,15 @@ show_datadirs_extended (void)
+     PRINTF_SECTION (_("Config directory:"), mc_global.sysconfig_dir);
+     PRINTF_SECTION (_("Data directory:"), mc_global.share_data_dir);
+ 
+-    PRINTF_SECTION (_("File extension handlers:"), EXTHELPERSDIR);
++    PRINTF_SECTION (_("File extension handlers:"), mc_global.ext_helpers_dir);
+ 
+ #if defined ENABLE_VFS_EXTFS || defined ENABLE_VFS_SHELL
+-    PRINTF_SECTION (_("VFS plugins and scripts:"), LIBEXECDIR);
++    PRINTF_SECTION (_("VFS plugins and scripts:"), mc_global.libexec_dir);
+ #ifdef ENABLE_VFS_EXTFS
+-    PRINTF2 ("extfs.d:", LIBEXECDIR, MC_EXTFS_DIR PATH_SEP_STR);
++    PRINTF ("extfs.d:", mc_global.libexec_dir, MC_EXTFS_DIR PATH_SEP_STR);
+ #endif
+ #ifdef ENABLE_VFS_SHELL
+-    PRINTF2 ("shell:", LIBEXECDIR, VFS_SHELL_PREFIX PATH_SEP_STR);
++    PRINTF ("shell:", mc_global.libexec_dir, VFS_SHELL_PREFIX PATH_SEP_STR);
+ #endif
+ #endif /* ENABLE_VFS_EXTFS || defiined ENABLE_VFS_SHELL */
+     (void) puts ("");
+diff --git a/src/vfs/extfs/extfs.c b/src/vfs/extfs/extfs.c
+--- a/src/vfs/extfs/extfs.c
++++ b/src/vfs/extfs/extfs.c
+@@ -1656,7 +1656,7 @@ extfs_init (struct vfs_class *me)
+     /* 1st: scan user directory */
+     d1 = extfs_get_plugins (mc_config_get_data_path (), TRUE);  /* silent about user dir */
+     /* 2nd: scan system dir */
+-    d2 = extfs_get_plugins (LIBEXECDIR, d1);
++    d2 = extfs_get_plugins (mc_global.libexec_dir, d1);
+ 
+     return (d1 || d2 ? 1 : 0);
+ }
+diff --git a/src/vfs/shell/shell.c b/src/vfs/shell/shell.c
+--- a/src/vfs/shell/shell.c
++++ b/src/vfs/shell/shell.c
+@@ -211,7 +211,8 @@ open_archive (struct vfs_s_super *super, const vfs_path_t *vpath,
+     if (scr_content == NULL)
+     {
+         scr_filename =
+-            g_build_path (PATH_SEP_STR, LIBEXECDIR, VFS_SHELL_PREFIX, script_name, (char *) NULL);
++            g_build_path (PATH_SEP_STR, mc_global.libexec_dir, VFS_SHELL_PREFIX, script_name,
++                          (char *) NULL);
+         g_file_get_contents (scr_filename, &scr_content, &scr_len, NULL);
+         g_free (scr_filename);
+     }
