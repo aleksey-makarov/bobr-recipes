@@ -1,0 +1,44 @@
+let bobr_bundle_launcher_host_x86_64 =
+  import "bobr-bundle-launcher.ncl"
+in
+
+fun pkgs =>
+  let host_bundle_mc_payload = {
+    name = "host-bundle-mc-payload",
+    tag = "RootfsClosure",
+    config = {},
+    inputs = {
+      mc = pkgs.mc,
+    },
+  }
+  in
+
+  let host_bundle_mc = {
+    name = "host-bundle-mc",
+    tag = "HostBundle",
+    config = {
+      policy = "strict",
+      library_dirs = [
+        "usr/lib64",
+        "usr/lib",
+      ],
+      public_tools = {
+        mc = {
+          path = "usr/bin/mc",
+        },
+      },
+      internal_tools = {},
+      environment = {},
+    },
+    inputs = {
+      _root = host_bundle_mc_payload,
+      _launcher = bobr_bundle_launcher_host_x86_64,
+    },
+  }
+  in
+
+  {
+    include [
+      host_bundle_mc,
+    ],
+  }

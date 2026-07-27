@@ -363,6 +363,61 @@ let FsTreeExportConfig = {
     | doc "Copy commands exporting fs-tree entries into a plain object.",
 }
 in
+let HostBundlePolicy =
+  std.contract.from_predicate (fun value =>
+    std.array.elem value ["strict", "integrated"]
+  )
+in
+let HostBundleEnvironmentOperation =
+  std.contract.from_predicate (fun value =>
+    std.array.elem value ["replace", "prepend", "append", "unset", "default"]
+  )
+in
+let HostBundlePath =
+  TaggedUnion
+    "source"
+    {
+      payload = {
+        source | std.contract.Equal "payload",
+        path | String,
+      },
+      overrides = {
+        source | std.contract.Equal "overrides",
+        path | String,
+      },
+    }
+in
+let HostBundleEnvironmentRule = {
+  operation | HostBundleEnvironmentOperation,
+  paths | Array HostBundlePath | optional,
+  values | Array String | optional,
+  inherit | Bool | optional,
+  host_default | Array String | optional,
+}
+in
+let HostBundleEnvironment = {
+  _ | HostBundleEnvironmentRule
+}
+in
+let HostBundleTool = {
+  path | String,
+  argv0 | String | optional,
+  environment | HostBundleEnvironment | optional,
+}
+in
+let HostBundleTools = {
+  _ | HostBundleTool
+}
+in
+let HostBundleConfig = {
+  policy | HostBundlePolicy | optional,
+  min_kernel | String | optional,
+  library_dirs | Array String,
+  public_tools | HostBundleTools | NonEmptyRecord,
+  internal_tools | HostBundleTools | optional,
+  environment | HostBundleEnvironment | optional,
+}
+in
 
 # --- per-tag inputs shapes (checked by the deep validator only) --------------
 
@@ -411,6 +466,19 @@ let TreeMoveInputsShape = {
 in
 let RootfsClosureInputsShape = { .. }
 in
+let HostBundleInputsShape = {
+  _root
+    | Dyn
+    | doc "Materialized payload fs-tree.",
+  _launcher
+    | Dyn
+    | doc "Materialized fs-tree containing usr/libexec/bobr-bundle-launcher.",
+  _overrides
+    | Dyn
+    | optional
+    | doc "Optional materialized tree of generated bundle-specific overrides.",
+}
+in
 let SyntheticRootfsInputsShape = {
   _rootfs | Dyn,
   source | Dyn,
@@ -440,6 +508,7 @@ let tag_specs = {
   TreeSubset = { config = TreeSubsetConfig, inputs = TreeSubsetInputsShape, requires_deps = false },
   TreeMove = { config = TreeMoveConfig, inputs = TreeMoveInputsShape, requires_deps = false },
   RootfsClosure = { config = EmptyConfig, inputs = RootfsClosureInputsShape, requires_deps = false },
+  HostBundle = { config = HostBundleConfig, inputs = HostBundleInputsShape, requires_deps = false },
   OciExtract = { config = EmptyConfig, inputs = OciExtractInputsShape, requires_deps = false },
   Bundle = { config = EmptyConfig, inputs = GroupInputsShape, requires_deps = false },
   Autotools = { config = AutotoolsConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
@@ -608,6 +677,9 @@ in
   bundle_config
     | doc "Config contract for `Bundle` recipe nodes."
     = EmptyConfig,
+  host_bundle_config
+    | doc "Config contract for `HostBundle` recipe nodes."
+    = HostBundleConfig,
   shallow_recipe
     | doc m%"
         Validate one recipe node shallowly: full top-level shape and

@@ -246,6 +246,9 @@ let base_modules = [
   import "os/qemu_image.ncl",
   import "os/qemu_weston_image.ncl",
   import "os/qemu_gnome_image.ncl",
+
+  # Host-side application bundles
+  import "host-bundles/host-bundle-mc.ncl",
 ]
 in
 
