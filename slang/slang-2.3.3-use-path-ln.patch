@@ -1,0 +1,17 @@
+From: bobr-recipes
+Subject: [PATCH] Find ln through PATH
+
+Do not assume that the build environment provides /bin/ln.  The build
+dependency already provides ln through PATH.
+
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -75,7 +75,7 @@
+ RM_R		= rm -rf
+ AR_CR 		= ar cr
+ RMDIR 		= rmdir
+-LN 		= /bin/ln -sf
++LN 		= ln -sf
+ CP 		= cp
+ @SET_MAKE@
+ #---------------------------------------------------------------------------

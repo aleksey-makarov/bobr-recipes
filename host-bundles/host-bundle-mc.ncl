@@ -57,7 +57,26 @@ fun pkgs =>
         },
       },
       internal_tools = {},
-      environment = {},
+      environment = {
+        TERMINFO = {
+          operation = "replace",
+          paths = [
+            {
+              source = "payload",
+              path = "usr/share/terminfo",
+            }
+          ],
+        },
+        TERMINFO_DIRS = {
+          operation = "replace",
+          paths = [
+            {
+              source = "payload",
+              path = "usr/share/terminfo",
+            }
+          ],
+        },
+      },
     },
     inputs = {
       _root = host_bundle_mc_payload,

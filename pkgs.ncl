@@ -38,6 +38,7 @@ let base_modules = [
   import "shadow.ncl",
   import "linux-pam.ncl",
   import "ncurses.ncl",
+  import "slang/slang.ncl",
   import "less.ncl",
   import "zlib.ncl",
   import "elfutils.ncl",

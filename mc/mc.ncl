@@ -1,5 +1,5 @@
-# GNU Midnight Commander -- text-mode file manager. Autotools; ncurses screen
-# backend, gpm and X11 off (no console-mouse / X deps). Needs glib and ncurses.
+# GNU Midnight Commander -- text-mode file manager. Autotools; S-Lang screen
+# backend, gpm and X11 off (no console-mouse / X deps). Needs glib and S-Lang.
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 fun pkgs =>
   let mk_src = fun version =>
@@ -37,17 +37,19 @@ fun pkgs =>
         pkgs.ncurses,
         pkgs.pkgconf,
         pkgs.gettext,
+        pkgs.slang,
       ],
       runtime = [
         pkgs.glibc_libs,
         pkgs.glib,
-        pkgs.ncurses,
+        pkgs.ncurses_libs,
+        pkgs.slang_libs,
       ],
     },
     config = {
       configure_args = [
         "--disable-static",
-        "--with-screen=ncurses",
+        "--with-screen=slang",
         "--without-x",
         "--without-gpm-mouse",
       ],
