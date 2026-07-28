@@ -25,13 +25,13 @@ fun pkgs =>
     deps = {
       build = [
         pkgs.libdrm,
-        pkgs.mesa,
+        pkgs.mesa_guest,
       ],
       runtime = [
         pkgs.glibc_libs,
         pkgs.gcc_libs,
         pkgs.libdrm_libs,
-        pkgs.mesa,
+        pkgs.mesa_guest,
       ],
     },
     config = {

@@ -14,7 +14,7 @@ let recipe = import "../recipe-lib.ncl" in
   # keymap data. Their runtime closures pull the rest of the stack automatically.
   graphics_base_roots = fun pkgs => [
     pkgs.qemu_rootfs,
-    pkgs.mesa,
+    pkgs.mesa_guest,
     pkgs.vulkan_loader,
     pkgs.vulkan_tools,
     pkgs.kmscube,

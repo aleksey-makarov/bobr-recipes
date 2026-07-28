@@ -23,11 +23,11 @@ fun pkgs =>
     tag = "Meson",
     deps = {
       build = [
-        pkgs.mesa,
+        pkgs.mesa_guest,
       ],
       runtime = [
         pkgs.glibc_libs,
-        pkgs.mesa,
+        pkgs.mesa_guest,
       ],
     },
     config = {

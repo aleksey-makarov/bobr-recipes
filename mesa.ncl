@@ -22,10 +22,10 @@ fun pkgs =>
   # VK_KHR_wayland_surface (venus) and provide the Wayland EGL platform, so
   # Wayland GL/Vulkan clients (incl. the GNOME session) can create surfaces.
   # Zink/venus need the Vulkan headers at build and the loader at runtime.
-  let mesa = {
+  let mesa_guest = {
     version | default = "26.1.4",
     source_object_hash | default = "072705caa9adf4740f1489194b13e278ad959166863b5271fe423a86353c9ab6",
-    name = "mesa-%{version}",
+    name = "mesa-guest-%{version}",
     tag = "Meson",
     deps = {
       build = [
@@ -80,6 +80,6 @@ fun pkgs =>
 
   {
     include [
-      mesa,
+      mesa_guest,
     ],
   }
