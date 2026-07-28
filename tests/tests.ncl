@@ -3,6 +3,10 @@
 # `test_all_recipes` -- the buildable artifacts group for a normal build; it
 # carries no checks.
 #
+# `test_all_host_bundles` -- all shipped host-side bundles. It is separate from
+# `test_all_recipes` because HostBundle artifacts are not rootfs build
+# environments and must not affect rootfs-check discovery.
+#
 # `test_all_rootfs` -- runtime-closure checks over every rootfs used in the
 # `test_all_recipes` graph. It discovers every node used as a `_rootfs` input of
 # a Sandbox/SandboxInstall (i.e. every build environment), plus the shipped
@@ -35,6 +39,17 @@ fun pkgs =>
         pkgs.initrd,
         pkgs.qemu_weston_image,
         pkgs.qemu_gnome_image,
+      ],
+  }
+  in
+
+  let test_all_host_bundles = {
+    name = "test-all-host-bundles",
+    tag = "Group",
+    config = {},
+    inputs =
+      recipe.numbered_inputs [
+        pkgs.host_bundle_mc,
       ],
   }
   in
@@ -256,6 +271,7 @@ fun pkgs =>
     inputs =
       recipe.numbered_inputs [
         test_all_recipes,
+        test_all_host_bundles,
         test_all_rootfs,
       ],
   }
@@ -264,6 +280,7 @@ fun pkgs =>
   {
     include [
       test_all_recipes,
+      test_all_host_bundles,
       test_all_rootfs,
       test_all,
     ],
