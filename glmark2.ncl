@@ -11,6 +11,18 @@ fun pkgs =>
   }
   in
 
+  let data_path_environment_patch = {
+    name = "glmark2-data-path-environment-patch",
+    tag = "Source",
+    object_hash =
+      import "glmark2/data-path-environment.patch.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "glmark2/data-path-environment.patch",
+    },
+  }
+  in
+
   let glmark2 = {
     version | default = "2023.01",
     source_object_hash
@@ -62,12 +74,14 @@ fun pkgs =>
     },
     inputs = {
       source = glmark2_src version source_object_hash,
+      patch_data_path_environment = data_path_environment_patch,
     },
   }
   in
 
   {
     include [
+      data_path_environment_patch,
       glmark2,
     ],
   }

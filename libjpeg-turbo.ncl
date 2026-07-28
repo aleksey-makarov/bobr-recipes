@@ -31,6 +31,7 @@ fun pkgs =>
     config = {
       cmake_args = [
         "-DCMAKE_INSTALL_LIBDIR=lib",
+        "-DCMAKE_SKIP_INSTALL_RPATH=ON",
         "-DENABLE_STATIC=0",
         "-DWITH_SIMD=0",
       ],

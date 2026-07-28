@@ -263,6 +263,7 @@ let base_modules = [
 
   # Host-side application bundles
   import "host-bundles/host-bundle-mc.ncl",
+  import "host-bundles/host-bundle-test-mesa.ncl",
 ]
 in
 

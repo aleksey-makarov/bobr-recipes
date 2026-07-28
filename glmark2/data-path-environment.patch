@@ -1,0 +1,30 @@
+diff --git a/src/options.cpp b/src/options.cpp
+index 7acd850..9dd13db 100644
+--- a/src/options.cpp
++++ b/src/options.cpp
+@@ -22,5 +22,6 @@
+  */
+ 
++#include <cstdlib>
+ #include <cstring>
+ #include <cstdio>
+ #include <getopt.h>
+@@ -29,10 +30,17 @@
+ #include "options.h"
+ #include "util.h"
+ 
++static std::string
++data_path_from_environment()
++{
++    const char *path = std::getenv("GLMARK2_DATA_PATH");
++    return path && path[0] ? std::string(path) : std::string(GLMARK_DATA_PATH);
++}
++
+ std::vector<std::string> Options::benchmarks;
+ std::vector<std::string> Options::benchmark_files;
+ bool Options::validate = false;
+-std::string Options::data_path = std::string(GLMARK_DATA_PATH);
++std::string Options::data_path = data_path_from_environment();
+ Options::FrameEnd Options::frame_end = Options::FrameEndDefault;
+ Options::SwapMode Options::swap_mode = Options::SwapModeDefault;
+ std::pair<int,int> Options::size(800, 600);

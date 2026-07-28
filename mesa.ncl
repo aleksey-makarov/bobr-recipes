@@ -212,6 +212,25 @@ fun pkgs =>
           "%,
         ],
       },
+      post_install = {
+        name = "relocate_vulkan_manifests",
+        run_as = "root",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
+            for manifest in /usr/share/vulkan/icd.d/*.json
+            do
+              sed -i 's#"library_path": "/usr/lib/#"library_path": "#' \
+                "${manifest}"
+              if grep -q '"library_path": "/' "${manifest}"; then
+                echo "absolute Vulkan ICD library_path in ${manifest}" >&2
+                exit 1
+              fi
+            done
+          "%,
+        ],
+      },
       setup_args = [
         "--buildtype=release",
         "--libdir=/usr/lib",

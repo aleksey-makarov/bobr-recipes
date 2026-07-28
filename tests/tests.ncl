@@ -50,6 +50,8 @@ fun pkgs =>
     inputs =
       recipe.numbered_inputs [
         pkgs.host_bundle_mc,
+        pkgs.host_bundle_test_mesa,
+        pkgs.test_host_bundle_test_mesa,
       ],
   }
   in
