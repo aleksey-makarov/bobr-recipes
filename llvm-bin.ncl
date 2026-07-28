@@ -123,11 +123,13 @@ fun pkgs =>
         pkgs.coreutils,
         pkgs.findutils,
         pkgs.grep,
+        pkgs.sed,
         pkgs.tar,
         # The install step executes the imported tools for validation.
         pkgs.gcc_libs,
         pkgs.zlib,
         pkgs.zstd,
+        pkgs.zstd_static,
         pkgs.ncurses,
         pkgs.libxml2,
       ],
@@ -136,6 +138,7 @@ fun pkgs =>
         pkgs.gcc_libs,
         pkgs.zlib,
         pkgs.zstd,
+        pkgs.zstd_static,
         pkgs.ncurses,
         pkgs.libxml2,
       ],
@@ -153,7 +156,11 @@ fun pkgs =>
             m%"
               source_dir="@{build}/source"
 
-              install -d /usr/bin /usr/include /usr/lib
+              install -d \
+                /usr/bin \
+                /usr/include \
+                /usr/lib \
+                /usr/lib/x86_64-linux-gnu
 
               # Preserve the symlink layout expected by Clang and llvm-ar.
               for tool in \
@@ -168,8 +175,32 @@ fun pkgs =>
               # libLLVM component so llvm-config can resolve arbitrary target
               # sets without depending on how Mesa's component list evolves.
               cp -d --preserve=mode "${source_dir}"/lib/libLLVM*.a /usr/lib/
+              cp -d --preserve=mode "${source_dir}"/lib/libclang*.a /usr/lib/
+              cp -d --preserve=mode "${source_dir}"/lib/libPolly*.a /usr/lib/
+              # The official binary release was configured against Debian's
+              # multiarch path and records it in LLVMConfig.cmake. Supply the
+              # same archive there so static consumers can use the metadata
+              # without host filesystem fallbacks.
+              cp --preserve=mode \
+                /usr/lib/libzstd.a \
+                /usr/lib/x86_64-linux-gnu/libzstd.a
+              # Mesa's Rust bindgen step loads libclang through clang-sys.
+              # This shared library contains its LLVM implementation and does
+              # not require a separate shared libLLVM.
+              cp -d --preserve=mode "${source_dir}"/lib/libclang.so* /usr/lib/
               cp -Rd --preserve=mode "${source_dir}/include/." /usr/include/
               cp -Rd --preserve=mode "${source_dir}/lib/clang" /usr/lib/
+              cp -Rd --preserve=mode "${source_dir}/lib/cmake/llvm" \
+                /usr/lib/cmake/
+
+              # The upstream export describes the complete binary
+              # distribution, while this package intentionally omits large
+              # unrelated command-line tools. Keep all imported library
+              # targets, but remove the generated package-wide existence
+              # assertion for targets no consumer requested.
+              sed -i \
+                '/# Loop over all imported files and verify that they actually exist/,/unset(_cmake_import_check_targets)/d' \
+                /usr/lib/cmake/llvm/LLVMExports.cmake
 
               clang_version=$(/usr/bin/clang --version)
               llvm_version=$(/usr/bin/llvm-config --version)
@@ -183,6 +214,12 @@ fun pkgs =>
               esac
               test "${llvm_version}" = "%{version}"
               test "${llvm_link_mode}" = "static"
+              test -s /usr/lib/libclang.so.22.1.8
+              test -s /usr/lib/libclangBasic.a
+              test -s /usr/lib/libPolly.a
+              test -s /usr/lib/libPollyISL.a
+              test -s /usr/lib/x86_64-linux-gnu/libzstd.a
+              test -s /usr/lib/cmake/llvm/LLVMConfig.cmake
               targets=$(/usr/bin/llvm-config --targets-built)
               printf 'LLVM targets: %s\n' "${targets}"
               for target in X86 AMDGPU SPIRV
