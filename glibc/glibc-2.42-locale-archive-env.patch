@@ -1,0 +1,184 @@
+From: bobr
+Subject: [PATCH] locale: make the locale archive relocatable
+
+HostBundle processes run without a chroot, so the compile-time
+COMPLOCALEDIR path resolves on the host.  Honor LOCALE_ARCHIVE as an
+authoritative archive path.  Unlike the Nix patch this is deliberately
+strict: when the variable is set, failure to open that path must not fall
+back to a host archive.
+
+Use secure_getenv so secure execution retains the normal FHS behavior.
+Teach both locale and localedef about the same path, including archive
+creation and enlargement.
+
+--- a/locale/loadarchive.c
++++ b/locale/loadarchive.c
+@@ -124,6 +124,18 @@
+ }
+ 
+ 
++static int
++open_locale_archive (void)
++{
++  const char *path = secure_getenv ("LOCALE_ARCHIVE");
++
++  if (path == NULL)
++    path = archfname;
++
++  return __open_nocancel (path, O_RDONLY | O_LARGEFILE | O_CLOEXEC);
++}
++
++
+ /* Find the locale *NAMEP in the locale archive, and return the
+    internalized data structure for its CATEGORY data.  If this locale has
+    already been loaded from the archive, just returns the existing data
+@@ -202,7 +214,7 @@
+       archmapped = &headmap;
+ 
+       /* The archive has never been opened.  */
+-      fd = __open_nocancel (archfname, O_RDONLY|O_LARGEFILE|O_CLOEXEC);
++      fd = open_locale_archive ();
+       if (fd < 0)
+ 	/* Cannot open the archive, for whatever reason.  */
+ 	return NULL;
+@@ -397,8 +409,7 @@
+ 	  if (fd == -1)
+ 	    {
+ 	      struct __stat64_t64 st;
+-	      fd = __open_nocancel (archfname,
+-				    O_RDONLY|O_LARGEFILE|O_CLOEXEC);
++	      fd = open_locale_archive ();
+ 	      if (fd == -1)
+ 		/* Cannot open the archive, for whatever reason.  */
+ 		return NULL;
+--- a/locale/programs/locale.c
++++ b/locale/programs/locale.c
+@@ -632,6 +632,18 @@
+ }
+ 
+ 
++static const char *
++locale_archive_name (void)
++{
++  const char *path = secure_getenv ("LOCALE_ARCHIVE");
++
++  if (path == NULL)
++    path = ARCHIVE_NAME;
++
++  return path;
++}
++
++
+ static int
+ write_archive_locales (void **all_datap, char *linebuf)
+ {
+@@ -644,7 +656,7 @@
+   int fd, ret = 0;
+   uint32_t cnt;
+ 
+-  fd = open64 (ARCHIVE_NAME, O_RDONLY);
++  fd = open64 (locale_archive_name (), O_RDONLY);
+   if (fd < 0)
+     return 0;
+ 
+@@ -699,8 +711,8 @@
+ 	  if (cnt)
+ 	    putchar_unlocked ('\n');
+ 
+-	  printf ("locale: %-15.15s archive: " ARCHIVE_NAME "\n%s\n",
+-		  names[cnt].name, linebuf);
++	  printf ("locale: %-15.15s archive: %s\n%s\n",
++		  names[cnt].name, locale_archive_name (), linebuf);
+ 
+ 	  locrec = (struct locrecent *) (addr + names[cnt].locrec_offset);
+ 
+--- a/locale/programs/locarchive.c
++++ b/locale/programs/locarchive.c
+@@ -222,7 +222,6 @@
+ 	     _("cannot change mode of new locale archive"));
+     }
+ 
+-  ah->fname = NULL;
+   ah->fd = fd;
+   ah->mmap_base = mmap_base;
+   ah->mmap_len = mmap_len;
+@@ -339,12 +338,18 @@
+   struct namehashent *oldnamehashtab;
+   struct locarhandle new_ah;
+   size_t prefix_len = output_prefix ? strlen (output_prefix) : 0;
+-  char archivefname[prefix_len + sizeof (ARCHIVE_NAME)];
+-  char fname[prefix_len + sizeof (ARCHIVE_NAME) + sizeof (".XXXXXX") - 1];
++  char default_fname[prefix_len + sizeof (ARCHIVE_NAME)];
++  const char *archivefname = ah->fname;
++
++  if (archivefname == NULL)
++    {
++      if (output_prefix)
++	memcpy (default_fname, output_prefix, prefix_len);
++      strcpy (default_fname + prefix_len, ARCHIVE_NAME);
++      archivefname = default_fname;
++    }
+ 
+-  if (output_prefix)
+-    memcpy (archivefname, output_prefix, prefix_len);
+-  strcpy (archivefname + prefix_len, ARCHIVE_NAME);
++  char fname[strlen (archivefname) + sizeof (".XXXXXX")];
+   strcpy (stpcpy (fname, archivefname), ".XXXXXX");
+ 
+   /* Not all of the old file has to be mapped.  Change this now this
+@@ -460,6 +465,7 @@
+     }
+ 
+   new_ah.mmaped = total;
++  new_ah.fname = ah->fname;
+   new_ah.mmap_base = mmap_base;
+   new_ah.mmap_len = mmap_len;
+   new_ah.addr = p;
+@@ -564,14 +570,28 @@
+   size_t prefix_len = output_prefix ? strlen (output_prefix) : 0;
+   char default_fname[prefix_len + sizeof (ARCHIVE_NAME)];
+   const char *archivefname = ah->fname;
++  const char *environment_archive;
++  bool environment_default = false;
+ 
+-  /* If ah has a non-NULL fname open that otherwise open the default.  */
++  /* An explicit fname takes precedence.  Otherwise LOCALE_ARCHIVE is the
++     authoritative default, falling back to the FHS path only when the
++     variable is absent (or ignored for secure execution).  */
+   if (archivefname == NULL)
+     {
+-      archivefname = default_fname;
+-      if (output_prefix)
+-        memcpy (default_fname, output_prefix, prefix_len);
+-      strcpy (default_fname + prefix_len, ARCHIVE_NAME);
++      environment_archive = secure_getenv ("LOCALE_ARCHIVE");
++      if (environment_archive != NULL)
++	{
++	  ah->fname = environment_archive;
++	  archivefname = environment_archive;
++	  environment_default = true;
++	}
++      else
++	{
++	  archivefname = default_fname;
++	  if (output_prefix)
++	    memcpy (default_fname, output_prefix, prefix_len);
++	  strcpy (default_fname + prefix_len, ARCHIVE_NAME);
++	}
+     }
+ 
+   while (1)
+@@ -583,8 +603,11 @@
+ 	  /* Maybe the file does not yet exist? If we are opening
+ 	     the default locale archive we ignore the failure and
+ 	     list an empty archive, otherwise we print an error
+-	     and exit.  */
+-	  if (errno == ENOENT && archivefname == default_fname)
++	     and exit.  A writable LOCALE_ARCHIVE is also a default and can
++	     therefore be created, but a read-only lookup remains strict.  */
++	  if (errno == ENOENT
++	      && (archivefname == default_fname
++		  || (!readonly && environment_default)))
+ 	    {
+ 	      if (readonly)
+ 		{

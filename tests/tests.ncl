@@ -29,6 +29,7 @@ fun pkgs =>
     config = {},
     inputs =
       recipe.numbered_inputs [
+        pkgs.glibc_locales,
         pkgs.linux,
         pkgs.qemu_image,
         pkgs.initrd,

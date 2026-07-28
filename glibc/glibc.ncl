@@ -12,6 +12,22 @@ fun pkgs =>
   }
   in
 
+  # HostBundle runs without chroot, so the normal absolute locale archive path
+  # would resolve on the host. This final-glibc-only patch makes
+  # LOCALE_ARCHIVE authoritative while preserving the FHS default when the
+  # variable is absent. glibc_gen1 remains an unmodified bootstrap libc.
+  let glibc_locale_archive_patch_2_42 = {
+    name = "glibc-locale-archive-env-patch-2.42",
+    tag = "Source",
+    object_hash =
+      import "glibc-2.42-locale-archive-env.patch.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "glibc/glibc-2.42-locale-archive-env.patch",
+    },
+  }
+  in
+
   let glibc_src = {
     name = "glibc-src-2.42",
     tag = "Source",
@@ -99,12 +115,23 @@ fun pkgs =>
       # for the additive SandboxInstall finalize, an existing file the finalize
       # ldconfig would have to modify rather than add.
       post_install = {
-        name = "drop_ld_so_cache",
+        name = "finalize_glibc_install",
         run_as = "root",
         argv = [
           "/bin/sh",
           "-ec",
-          "rm -f /stage/etc/ld.so.cache",
+          m%"
+            rm -f /stage/etc/ld.so.cache
+
+            # Upstream installs the locale sources and charmaps used by
+            # localedef but omits localedata/SUPPORTED. Keep the matching list
+            # with the final glibc so glibc_locales can validate an explicit
+            # selection and implement all_locales without duplicating source
+            # metadata in a second recipe.
+            install -Dm644 \
+              "@{build}/source/localedata/SUPPORTED" \
+              /stage/usr/share/i18n/SUPPORTED
+          "%,
         ],
       },
     },
@@ -112,6 +139,7 @@ fun pkgs =>
       _rootfs = recipe.gen1_toolchain_rootfs pkgs "glibc-build-rootfs" [],
       source = glibc_src,
       patch_fhs = glibc_fhs_patch_2_42,
+      patch_locale_archive = glibc_locale_archive_patch_2_42,
     },
   }
   in
@@ -130,6 +158,7 @@ fun pkgs =>
     include [
       glibc_bootstrap_rootfs,
       glibc_gen1,
+      glibc_locale_archive_patch_2_42,
       glibc,
       glibc_libs,
     ],

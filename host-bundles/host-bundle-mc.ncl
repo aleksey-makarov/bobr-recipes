@@ -9,6 +9,7 @@ fun pkgs =>
     config = {},
     inputs = {
       mc = pkgs.mc,
+      locales = pkgs.glibc_locales,
     },
   }
   in
@@ -58,6 +59,15 @@ fun pkgs =>
       },
       internal_tools = {},
       environment = {
+        LOCALE_ARCHIVE = {
+          operation = "replace",
+          paths = [
+            {
+              source = "payload",
+              path = "usr/lib/locale/locale-archive",
+            }
+          ],
+        },
         TERMINFO = {
           operation = "replace",
           paths = [

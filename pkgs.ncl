@@ -202,6 +202,7 @@ let base_modules = [
   import "libcap.ncl",
   import "gcc.ncl",
   import "glibc/glibc.ncl",
+  import "glibc/glibc-locales.ncl",
   import "linux/initrd.ncl",
   import "tcl/tcl.ncl",
   import "expect/expect.ncl",
