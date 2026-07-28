@@ -1,6 +1,7 @@
 let commit = "f60e50e887d3c49e91ac9b06d8199b36152632fa" in
 # kmscube has no releases; pin a git commit. The version carries the commit
-# date so the package attribute resolves to `kmscube`.
+# date. The guest and host variants intentionally share the same source but
+# link against different Mesa stacks.
 
 fun pkgs =>
   let kmscube_src = fun version => fun hash => {
@@ -17,10 +18,10 @@ fun pkgs =>
   # Minimal DRM/KMS + GBM + EGL/GLES smoke test: `kmscube -D /dev/dri/card0`
   # does an atomic modeset and renders a spinning cube straight to the virtio
   # scanout -- no Wayland/X compositor. First real userspace-graphics check.
-  let kmscube = {
+  let kmscube_guest = {
     version | default = "20251024-f60e50e",
     source_object_hash | default = "e676b733d351d345b9cbf919dfaf84a5ef16e71f328c542f5614027bd4ca2e05",
-    name = "kmscube-%{version}",
+    name = "kmscube-guest-%{version}",
     tag = "Meson",
     deps = {
       build = [
@@ -47,8 +48,40 @@ fun pkgs =>
   }
   in
 
+  let kmscube = {
+    version | default = "20251024-f60e50e",
+    source_object_hash | default = "e676b733d351d345b9cbf919dfaf84a5ef16e71f328c542f5614027bd4ca2e05",
+    name = "kmscube-%{version}",
+    tag = "Meson",
+    deps = {
+      build = [
+        pkgs.libdrm,
+        pkgs.mesa,
+        pkgs.libglvnd,
+      ],
+      runtime = [
+        pkgs.glibc_libs,
+        pkgs.gcc_libs,
+        pkgs.libdrm_libs,
+        pkgs.mesa,
+        pkgs.libglvnd,
+      ],
+    },
+    config = {
+      setup_args = [
+        "--buildtype=release",
+        "-Dgstreamer=disabled",
+      ],
+    },
+    inputs = {
+      source = kmscube_src version source_object_hash,
+    },
+  }
+  in
+
   {
     include [
+      kmscube_guest,
       kmscube,
     ],
   }

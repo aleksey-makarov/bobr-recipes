@@ -17,7 +17,7 @@ let recipe = import "../recipe-lib.ncl" in
     pkgs.mesa_guest,
     pkgs.vulkan_loader,
     pkgs.vulkan_tools,
-    pkgs.kmscube,
+    pkgs.kmscube_guest,
     pkgs.dejavu,
     pkgs.bibata_cursors,
     pkgs.xkeyboard_config,

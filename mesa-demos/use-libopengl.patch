@@ -1,0 +1,14 @@
+diff --git a/meson.build b/meson.build
+index c76ad4e..983f602 100644
+--- a/meson.build
++++ b/meson.build
+@@ -39,7 +39,9 @@ dep_m = cc.find_library('m', required : false)
+ dep_winmm = cc.find_library('winmm', required : false)
+ 
+-dep_gl = dependency('gl')
++# This Wayland-only package intentionally has no GLX compatibility library.
++# Link desktop OpenGL through GLVND's platform-neutral libOpenGL instead.
++dep_gl = dependency('opengl')
+ 
+ dep_epoll = dependency('epoll-shim', required : false)
+ dep_gles1 = dependency('glesv1_cm', required : get_option('gles1'))
