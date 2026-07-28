@@ -1,9 +1,11 @@
-# Prebuilt clang/LLVM toolchain, used as a BUILD tool only (mozjs/SpiderMonkey
-# needs clang to compile and libclang for bindgen; building LLVM from source is a
-# huge detour). Same rationale as rust-bin.ncl: the official release targets an
-# old glibc (ubuntu-18.04), so it runs forward-compatibly on our newer glibc, and
-# clang is relocatable, so installing the tree under /usr works. Never ships in a
-# runtime rootfs -- only appears in build rootfs closures.
+# Legacy prebuilt clang/LLVM 18 toolchain, used as a BUILD tool only by
+# mozjs/SpiderMonkey (clang supplies libclang for bindgen; SpiderMonkey itself
+# is compiled with GCC). The explicit llvm_bin_18 attribute keeps this known
+# working toolchain separate from the current llvm_bin used by new recipes.
+# Same rationale as rust-bin.ncl: the official release targets an old glibc
+# (ubuntu-18.04), so it runs forward-compatibly on our newer glibc, and clang is
+# relocatable, so installing the tree under /usr works. Never ships in a runtime
+# rootfs -- only appears in build rootfs closures.
 #
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 let recipe = import "recipe-lib.ncl" in
@@ -22,7 +24,7 @@ fun pkgs =>
       }
   in
 
-  let llvm_bin = {
+  let llvm_bin_18 = {
     version | default = "18.1.8",
     source_object_hash
       | default
@@ -92,6 +94,6 @@ fun pkgs =>
 
   {
     include [
-      llvm_bin,
+      llvm_bin_18,
     ],
   }

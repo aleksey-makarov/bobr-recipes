@@ -50,7 +50,7 @@ fun pkgs =>
       build =
         recipe.native_build_deps pkgs
         @ [
-          pkgs.llvm_bin,
+          pkgs.llvm_bin_18,
           pkgs.rust_bin,
           pkgs.cbindgen,
           pkgs.nasm,
