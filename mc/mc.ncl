@@ -26,6 +26,17 @@ fun pkgs =>
   }
   in
 
+  let mc_defaults = {
+    name = "mc-defaults",
+    tag = "Source",
+    object_hash = import "mc.ini.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "mc/mc.ini",
+    },
+  }
+  in
+
   let mc = {
     version | default = "4.8.33",
     source_object_hash | default = "cae149d42f844e5185d8c81d7db3913a8fa214c65f852200a9d896b468af164c",
@@ -53,16 +64,28 @@ fun pkgs =>
         "--without-x",
         "--without-gpm-mouse",
       ],
+      post_install = {
+        name = "install_system_defaults",
+        run_as = "root",
+        argv = [
+          "install",
+          "-Dm644",
+          "@{defaults}",
+          "/usr/etc/mc/mc.ini",
+        ],
+      },
     },
     inputs = {
       source = mk_src version source_object_hash,
       patch_runtime_paths = runtime_paths_patch,
+      defaults = mc_defaults,
     },
   }
   in
 
   {
     include [
+      mc_defaults,
       runtime_paths_patch,
       mc,
     ],
