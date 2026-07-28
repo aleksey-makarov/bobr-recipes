@@ -28,3 +28,20 @@ index 7acd850..9dd13db 100644
  Options::FrameEnd Options::frame_end = Options::FrameEndDefault;
  Options::SwapMode Options::swap_mode = Options::SwapModeDefault;
  std::pair<int,int> Options::size(800, 600);
+diff --git a/src/gl-state-egl.cpp b/src/gl-state-egl.cpp
+index 5d9d88f..acb57e3 100644
+--- a/src/gl-state-egl.cpp
++++ b/src/gl-state-egl.cpp
+@@ -572,7 +572,11 @@ GLStateEGL::gotValidDisplay()
+ #endif
+ #elif GLMARK2_USE_GL
+     EGLenum apiType(EGL_OPENGL_API);
+-    std::initializer_list<const char *> libNames = { "libGL.so", "libGL.so.1" };
++#if defined(WIN32)
++    std::initializer_list<const char *> libNames = { "opengl32.dll" };
++#else
++    std::initializer_list<const char *> libNames = { "libOpenGL.so.0", "libOpenGL.so" };
++#endif
+     if (!GLAD_EGL_VERSION_1_4) {
+         Log::error("EGL version %d.%d does not support the OpenGL API\n",
+                    egl_major, egl_minor);

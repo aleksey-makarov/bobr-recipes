@@ -1,6 +1,7 @@
 let bobr_bundle_launcher_host_x86_64 =
   import "bobr-bundle-launcher.ncl"
 in
+let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
   let payload_path = fun relative => {
@@ -16,6 +17,16 @@ fun pkgs =>
   let replace_value = fun value => {
     operation = "replace",
     values = [value],
+  }
+  in
+  let override_path = fun relative => {
+    source = "overrides",
+    path = relative,
+  }
+  in
+  let replace_override_paths = fun entries => {
+    operation = "replace",
+    paths = std.array.map override_path entries,
   }
   in
   let software_opengl_environment = {
@@ -34,7 +45,36 @@ fun pkgs =>
       glmark2 = pkgs.glmark2,
       vulkan_tools = pkgs.vulkan_tools,
       kmscube = pkgs.kmscube,
+      fonts = pkgs.dejavu,
       locales = pkgs.glibc_locales,
+    },
+  }
+  in
+
+  let overrides_source = {
+    name = "host-bundle-test-mesa-overrides-source",
+    tag = "Source",
+    object_hash =
+      import "host-bundle-test-mesa-overrides.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "host-bundles/host-bundle-test-mesa-overrides",
+    },
+  }
+  in
+
+  let host_bundle_test_mesa_overrides = {
+    name = "host-bundle-test-mesa-overrides",
+    tag = "FsTreeImport",
+    config = {
+      install = {
+        rules = [
+          recipe.install.fs_tree_root_default_rule,
+        ],
+      },
+    },
+    inputs = {
+      input = overrides_source,
     },
   }
   in
@@ -107,7 +147,11 @@ fun pkgs =>
           path = "usr/bin/kmscube",
         },
       },
-      internal_tools = {},
+      internal_tools = {
+        "fc-match" = {
+          path = "usr/bin/fc-match",
+        },
+      },
       environment = {
         LOCALE_ARCHIVE =
           replace_paths [
@@ -120,6 +164,14 @@ fun pkgs =>
         GBM_BACKENDS_PATH =
           replace_paths [
             "usr/lib/gbm",
+          ],
+        LIBDECOR_PLUGIN_DIR =
+          replace_paths [
+            "usr/lib/libdecor/plugins-1",
+          ],
+        FONTCONFIG_FILE =
+          replace_override_paths [
+            "fontconfig/fonts.conf",
           ],
         __EGL_VENDOR_LIBRARY_FILENAMES =
           replace_paths [
@@ -142,6 +194,7 @@ fun pkgs =>
     inputs = {
       _root = host_bundle_test_mesa_payload,
       _launcher = bobr_bundle_launcher_host_x86_64,
+      _overrides = host_bundle_test_mesa_overrides,
     },
   }
   in

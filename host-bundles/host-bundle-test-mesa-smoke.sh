@@ -26,7 +26,30 @@ require_executable "${bundle}/bin/eglinfo-software"
 require_executable "${bundle}/bin/vulkaninfo-software"
 require_file "${root}/usr/share/glvnd/egl_vendor.d/50_mesa.json"
 require_file "${root}/usr/lib/gbm/dri_gbm.so"
+require_file "${root}/usr/lib/libdecor/plugins-1/libdecor-cairo.so"
+require_file "${root}/usr/lib/libOpenGL.so.0"
+require_file "${root}/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf"
 require_file "${root}/usr/share/glmark2/models/cat.3ds"
+require_file "${bundle}/overrides/fontconfig/fonts.conf"
+grep -aFq "libOpenGL.so.0" "${root}/usr/bin/glmark2-wayland" ||
+  fail "desktop glmark2 does not use the X11-free GLVND OpenGL frontend"
+
+font_cache="${work}/font-cache"
+mkdir -p "$font_cache"
+for family in sans-serif sans; do
+  font_path="$(
+    XDG_CACHE_HOME="$font_cache" \
+      "${bundle}/libexec/wrapped-bin/fc-match" \
+      --format '%{file}\n' ":family=${family}"
+  )"
+  case "$font_path" in
+    "${root}"/usr/share/fonts/dejavu/DejaVuSans.ttf) ;;
+    *)
+      fail \
+        "fontconfig did not select bundled DejaVu Sans for ${family}: ${font_path:-<empty>}"
+      ;;
+  esac
+done
 
 shopt -s nullglob
 gallium=("${root}"/usr/lib/libgallium-*.so)
