@@ -47,6 +47,7 @@ fun pkgs =>
       ],
       runtime = [
         pkgs.glibc_libs,
+        pkgs.util_linux_libs,
       ],
     },
     config = {

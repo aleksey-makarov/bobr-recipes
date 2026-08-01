@@ -404,9 +404,16 @@ let HostBundleEnvironment = {
   _ | HostBundleEnvironmentRule
 }
 in
+let HostBundleArgument =
+  std.contract.any_of [
+    { value | String },
+    HostBundlePath,
+  ]
+in
 let HostBundleTool = {
   path | String,
   argv0 | String | optional,
+  argument_prefix | Array HostBundleArgument | optional,
   environment | HostBundleEnvironment | optional,
 }
 in

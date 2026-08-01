@@ -97,6 +97,11 @@ let base_modules = [
   import "harfbuzz.ncl",
   import "pango.ncl",
   import "libepoxy.ncl",
+  import "sdl3.ncl",
+  import "sdl2-compat.ncl",
+  import "libslirp.ncl",
+  import "virglrenderer.ncl",
+  import "qemu.ncl",
   import "shared-mime-info.ncl",
   import "gdk-pixbuf.ncl",
   import "gtk4.ncl",
@@ -264,6 +269,7 @@ let base_modules = [
   # Host-side application bundles
   import "host-bundles/host-bundle-mc.ncl",
   import "host-bundles/host-bundle-test-mesa.ncl",
+  import "host-bundles/host-bundle-qemu.ncl",
 ]
 in
 

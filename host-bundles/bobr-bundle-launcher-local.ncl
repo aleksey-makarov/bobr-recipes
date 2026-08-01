@@ -5,5 +5,5 @@
 # where the staged directory exists with the declared content hash.
 {
   source_path = "/home/amakarov/home/mbuild/bobr/target/x86_64-unknown-linux-musl/debug/bobr-bundle-launcher-tree",
-  source_object_hash = "dc365d4786dfc056d09c15ff8f7ac11fa3369b08a8a44e34996506a0c7e7e34d",
+  source_object_hash = "ec5c35026ffc8935c7382be1506798e038324290a7b5b4daf57c7c20f4212a91",
 }
