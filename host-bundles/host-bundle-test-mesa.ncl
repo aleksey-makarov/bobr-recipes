@@ -65,6 +65,7 @@ fun pkgs =>
     name = "host-bundle-test-mesa",
     tag = "HostBundle",
     config = {
+      arch = "x86_64",
       policy = "strict",
       library_dirs = [
         "usr/lib64",

@@ -18,7 +18,7 @@ fsobj_hash="${bobr_root}/target/debug/fsobj-hash"
 
 (
   cd "${bobr_root}"
-  cargo build-bundle-launcher
+  cargo build-bundle-launcher-x86_64
   cargo build -p fsobj-hash
 )
 

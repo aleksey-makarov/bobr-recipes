@@ -363,6 +363,11 @@ let FsTreeExportConfig = {
     | doc "Copy commands exporting fs-tree entries into a plain object.",
 }
 in
+let HostBundleArch =
+  std.contract.from_predicate (fun value =>
+    std.array.elem value ["x86_64", "aarch64"]
+  )
+in
 let HostBundlePolicy =
   std.contract.from_predicate (fun value =>
     std.array.elem value ["strict", "integrated"]
@@ -410,6 +415,7 @@ let HostBundleTools = {
 }
 in
 let HostBundleConfig = {
+  arch | HostBundleArch,
   policy | HostBundlePolicy | optional,
   min_kernel | String | optional,
   library_dirs | Array String,

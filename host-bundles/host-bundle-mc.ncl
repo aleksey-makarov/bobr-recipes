@@ -18,6 +18,7 @@ fun pkgs =>
     name = "host-bundle-mc",
     tag = "HostBundle",
     config = {
+      arch = "x86_64",
       policy = "strict",
       library_dirs = [
         "usr/lib64",

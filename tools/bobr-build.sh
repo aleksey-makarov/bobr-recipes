@@ -176,9 +176,14 @@ if [ "${dry_run}" -eq 0 ]; then
     require_cmd podman
   fi
   if [ "${bobr_from_dev}" -eq 1 ]; then
-    launcher="${workspace_root}/bobr/target/x86_64-unknown-linux-musl/${bobr_profile}/bobr-sandbox-launcher"
+    case "$(uname -m)" in
+      x86_64) host_musl_target="x86_64-unknown-linux-musl" ;;
+      aarch64) host_musl_target="aarch64-unknown-linux-musl" ;;
+      *) die "unsupported host architecture for the sandbox launcher: $(uname -m)" ;;
+    esac
+    launcher="${workspace_root}/bobr/target/${host_musl_target}/${bobr_profile}/bobr-sandbox-launcher"
     [ -x "${launcher}" ] || die "sandbox launcher not built: ${launcher}
-build it with: (cd ${workspace_root}/bobr && cargo build-sandbox-launcher)"
+build it with: (cd ${workspace_root}/bobr && cargo build-sandbox-launcher-${host_musl_target%%-*})"
   fi
 fi
 
