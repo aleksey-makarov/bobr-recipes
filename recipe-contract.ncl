@@ -473,10 +473,10 @@ let HostBundleInputsShape = {
   _launcher
     | Dyn
     | doc "Materialized fs-tree containing usr/libexec/bobr-bundle-launcher.",
-  _overrides
+  overrides
     | Dyn
     | optional
-    | doc "Optional materialized tree of generated bundle-specific overrides.",
+    | doc "Optional ordinary directory object of bundle-specific overrides.",
 }
 in
 let SyntheticRootfsInputsShape = {

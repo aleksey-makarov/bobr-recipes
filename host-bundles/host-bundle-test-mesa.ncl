@@ -1,8 +1,6 @@
 let bobr_bundle_launcher_host_x86_64 =
   import "bobr-bundle-launcher.ncl"
 in
-let recipe = import "../recipe-lib.ncl" in
-
 fun pkgs =>
   let payload_path = fun relative => {
     source = "payload",
@@ -59,22 +57,6 @@ fun pkgs =>
     origin = {
       tag = "RecipePath",
       path = "host-bundles/host-bundle-test-mesa-overrides",
-    },
-  }
-  in
-
-  let host_bundle_test_mesa_overrides = {
-    name = "host-bundle-test-mesa-overrides",
-    tag = "FsTreeImport",
-    config = {
-      install = {
-        rules = [
-          recipe.install.fs_tree_root_default_rule,
-        ],
-      },
-    },
-    inputs = {
-      input = overrides_source,
     },
   }
   in
@@ -194,7 +176,7 @@ fun pkgs =>
     inputs = {
       _root = host_bundle_test_mesa_payload,
       _launcher = bobr_bundle_launcher_host_x86_64,
-      _overrides = host_bundle_test_mesa_overrides,
+      overrides = overrides_source,
     },
   }
   in
