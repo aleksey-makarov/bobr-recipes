@@ -14,10 +14,10 @@ fun pkgs =>
   let use_libopengl_patch = {
     name = "mesa-demos-use-libopengl-patch",
     tag = "Source",
-    object_hash = import "mesa-demos/use-libopengl.patch.fsobj-hash" as 'Text,
+    object_hash = import "use-libopengl.patch.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "mesa-demos/use-libopengl.patch",
+      path = "mesa/use-libopengl.patch",
     },
   }
   in
