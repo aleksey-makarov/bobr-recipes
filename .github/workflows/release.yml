@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Publish recipes snapshot prerelease
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          name: bobr-recipes ${{ github.ref_name }}
+          prerelease: true
+          generate_release_notes: true
+          body: |
+            Development snapshot of the bobr recipes.
+
+            HostBundle recipes in this release still use a machine-local
+            development source for bobr-bundle-launcher. A portable production
+            launcher recipe will be included in a later release.
