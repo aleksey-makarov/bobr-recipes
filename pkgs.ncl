@@ -244,6 +244,7 @@ let base_modules = [
   import "mtdev.ncl",
   import "libinput.ncl",
   import "xkeyboard-config.ncl",
+  import "xcompose-data.ncl",
   import "libxkbcommon.ncl",
   import "seatd.ncl",
   import "cmake.ncl",

@@ -57,6 +57,10 @@ fun pkgs =>
         pkgs.test_host_bundle_test_mesa,
         pkgs.host_bundle_qemu,
         pkgs.test_host_bundle_qemu,
+        pkgs.host_bundle_qemu_weston,
+        pkgs.test_host_bundle_qemu_weston,
+        pkgs.host_bundle_qemu_gnome,
+        pkgs.test_host_bundle_qemu_gnome,
       ],
   }
   in

@@ -1,0 +1,20 @@
+Allow RENDER_SERVER_EXEC_PATH to name a command in PATH
+
+HostBundle exposes internal executables through a managed PATH.  Keep the
+installed absolute default, but let an explicit development/runtime override
+use a bare command name so the render server can pass through that wrapper.
+
+--- a/src/proxy/proxy_server.c
++++ b/src/proxy/proxy_server.c
+@@ -74,7 +74,10 @@ proxy_server_fork(struct proxy_server *srv)
+          fd_str,
+          NULL,
+       };
+-      execv(argv[0], argv);
++      if (server_path && !strchr(server_path, '/'))
++         execvp(server_path, argv);
++      else
++         execv(argv[0], argv);
+ 
+       proxy_log("failed to exec %s: %s", argv[0], strerror(errno));
+       close(remote_fd);

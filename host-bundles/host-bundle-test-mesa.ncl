@@ -47,13 +47,13 @@ fun pkgs =>
   in
 
   let overrides_source = {
-    name = "host-bundle-test-mesa-overrides-source",
+    name = "host-bundle-common-overrides-source",
     tag = "Source",
     object_hash =
-      import "host-bundle-test-mesa-overrides.fsobj-hash" as 'Text,
+      import "host-bundle-common-overrides.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "host-bundles/host-bundle-test-mesa-overrides",
+      path = "host-bundles/host-bundle-common-overrides",
     },
   }
   in

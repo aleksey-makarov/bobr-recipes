@@ -11,6 +11,18 @@ fun pkgs =>
   }
   in
 
+  let render_server_path_patch = {
+    name = "virglrenderer-render-server-path-patch",
+    tag = "Source",
+    object_hash =
+      import "virglrenderer/virglrenderer-render-server-path.patch.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "virglrenderer/virglrenderer-render-server-path.patch",
+    },
+  }
+  in
+
   let virglrenderer = {
     version | default = "1.3.0",
     source_object_hash | default = "065bc56e89e6f631f96101cd62eba0748e48eb888b434edc86e89d05395e76f3",
@@ -56,10 +68,14 @@ fun pkgs =>
     },
     inputs = {
       source = virglrenderer_src version source_object_hash,
+      patch_render_server_path = render_server_path_patch,
     },
   }
   in
 
   {
-    include [virglrenderer],
+    include [
+      render_server_path_patch,
+      virglrenderer,
+    ],
   }
