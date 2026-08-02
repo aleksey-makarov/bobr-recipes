@@ -3,9 +3,10 @@
 # `test_all_recipes` -- the buildable artifacts group for a normal build; it
 # carries no checks.
 #
-# `test_all_host_bundles` -- all shipped host-side bundles. It is separate from
-# `test_all_recipes` because HostBundle artifacts are not rootfs build
-# environments and must not affect rootfs-check discovery.
+# `test_all_host_bundles` -- all shipped host-side bundles and both release
+# launcher packages. It is separate from `test_all_recipes` because these
+# artifacts are not rootfs build environments and must not affect rootfs-check
+# discovery.
 #
 # `test_all_rootfs` -- runtime-closure checks over every rootfs used in the
 # `test_all_recipes` graph. It discovers every node used as a `_rootfs` input of
@@ -49,6 +50,8 @@ fun pkgs =>
     config = {},
     inputs =
       recipe.numbered_inputs [
+        pkgs.bobr_bundle_launcher_host_x86_64,
+        pkgs.bobr_bundle_launcher_host_aarch64,
         pkgs.host_bundle_mc,
         pkgs.host_bundle_test_mesa,
         pkgs.test_host_bundle_test_mesa,

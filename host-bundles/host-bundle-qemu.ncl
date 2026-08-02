@@ -1,8 +1,4 @@
 let recipe = import "../recipe-lib.ncl" in
-let bobr_bundle_launcher_host_x86_64 =
-  import "bobr-bundle-launcher.ncl"
-in
-
 fun pkgs =>
   let payload_path = fun relative => {
     source = "payload",
@@ -188,7 +184,7 @@ fun pkgs =>
     },
     inputs = {
       _root = payload,
-      _launcher = bobr_bundle_launcher_host_x86_64,
+      _launcher = pkgs.bobr_bundle_launcher_host_x86_64,
       overrides = overrides_object,
     },
   }

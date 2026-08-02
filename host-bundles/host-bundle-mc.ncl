@@ -1,7 +1,3 @@
-let bobr_bundle_launcher_host_x86_64 =
-  import "bobr-bundle-launcher.ncl"
-in
-
 fun pkgs =>
   let host_bundle_mc_payload = {
     name = "host-bundle-mc-payload",
@@ -91,7 +87,7 @@ fun pkgs =>
     },
     inputs = {
       _root = host_bundle_mc_payload,
-      _launcher = bobr_bundle_launcher_host_x86_64,
+      _launcher = pkgs.bobr_bundle_launcher_host_x86_64,
     },
   }
   in
