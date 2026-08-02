@@ -169,7 +169,6 @@ require_cmd nickel
 
 if [ "${dry_run}" -eq 0 ]; then
   { [ -n "${bobr_bin}" ] && [ -x "${bobr_bin}" ]; } || die "bobr binary not found; build it or pass --bobr"
-  require_cmd mkfs.erofs
   require_cmd newuidmap
   require_cmd newgidmap
   if [ "${podman_unshare}" -eq 1 ]; then
