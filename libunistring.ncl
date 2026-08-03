@@ -10,7 +10,10 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "https://ftp.gnu.org/gnu/libunistring/libunistring-%{version}.tar.xz",
+          url = [
+            "https://ftp.gnu.org/gnu/libunistring/libunistring-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/libunistring/libunistring-%{version}.tar.xz",
+          ],
         },
       }
   in
