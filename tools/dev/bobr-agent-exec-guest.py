@@ -20,10 +20,10 @@ to recover from a stuck line and quiet the console.
 
 A bare --sock name resolves against the workspace root (where the launchers
 create the sockets), so this works from any directory:
-    python3 bobr-recipes/tools/bobr-agent-exec-guest.py 'journalctl -b | tail'
-    python3 bobr-recipes/tools/bobr-agent-exec-guest.py --timeout 60 \
+    python3 bobr-recipes/tools/dev/bobr-agent-exec-guest.py 'journalctl -b | tail'
+    python3 bobr-recipes/tools/dev/bobr-agent-exec-guest.py --timeout 60 \
         'systemctl --user status weston.service'
-    python3 bobr-recipes/tools/bobr-agent-exec-guest.py --sock diag-weston.sock \
+    python3 bobr-recipes/tools/dev/bobr-agent-exec-guest.py --sock diag-weston.sock \
         'ls /dev/dri'
 
 Exit code mirrors the guest command's exit code; 3 = connection problem,
@@ -40,13 +40,17 @@ import socket
 import sys
 import time
 
-# The launchers create the diag socket in the directory they are started from --
-# the workspace root (this script lives at <root>/bobr-recipes/tools/). Resolve
-# the default and any relative --sock against that root, so the tool works from
-# any working directory; an absolute --sock is used as-is.
-SOCK_DIR = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-)
+# The launchers create the diag socket under a relative path, so it lands in the
+# directory they were started from: the workspace root. Resolve the default and
+# any relative --sock against that root, so the tool works from any working
+# directory; an absolute --sock is used as-is.
+#
+# Derived in named steps rather than by counting dirname() calls: moving this
+# script from tools/ into tools/dev/ silently repointed the old three-dirname
+# form at the recipes checkout, where a socket never appears.
+TOOL_DIR = os.path.dirname(os.path.realpath(__file__))          # .../tools/dev
+RECIPES_DIR = os.path.dirname(os.path.dirname(TOOL_DIR))        # .../bobr-recipes
+SOCK_DIR = os.path.dirname(RECIPES_DIR)                         # the workspace root
 DEFAULT_SOCK = "diag.sock"
 
 
