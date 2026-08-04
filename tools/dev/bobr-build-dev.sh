@@ -11,7 +11,7 @@
 #
 # It installs into <workspace>/bobr-bin/bin (override with BOBR_DEV_BIN), which
 # a developer keeps on PATH. Everything downstream -- bin/bobr-build.sh, the QEMU
-# runners, rebuild-world.sh -- then finds the binaries the same way a user finds
+# runners, bobr-rebuild-world.sh -- then finds the binaries the same way a user finds
 # an unpacked release, so there is nothing special about the development path
 # beyond which binaries are on PATH.
 #

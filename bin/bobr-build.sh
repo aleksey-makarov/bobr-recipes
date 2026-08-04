@@ -221,7 +221,7 @@ request_expr="(import \"${recipes_path}/request.ncl\") {
 
 # Print the wall time of one build phase ("nickel recipes -> json request" or
 # "bobr build") to stderr. When BOBR_BUILD_TIMING_LOG names a file, append the
-# same line there too -- that lets callers such as rebuild-world.sh record the
+# same line there too -- that lets callers such as bobr-rebuild-world.sh record the
 # split without teeing bobr's live progress UI off stderr.
 report_phase_time() {
   local label="$1" start="$2" end="$3" line

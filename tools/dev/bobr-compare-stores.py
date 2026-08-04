@@ -2,7 +2,7 @@
 """Catch reproducibility issues: find builds that produced different output from
 the same inputs across two stores.
 
-Compare two bobr stores built by rebuild-world.sh.
+Compare two bobr stores built by bobr-rebuild-world.sh.
 
 Usage:
     bobr-compare-stores.py STORE_A STORE_B [options]
