@@ -82,6 +82,19 @@
   VETH = 'm,
   TUN = 'm,
   NETFILTER = 'y,
+  # Wireless, modular the way a distribution ships it. `make defconfig` builds
+  # the stack in, which on a machine with no wireless hardware means carrying it
+  # in the kernel image and requesting the regulatory database at every boot,
+  # for a subsystem nothing will ever open. As modules it is loaded when a
+  # driver asks for it and is simply absent otherwise. MAC80211 depends on
+  # CFG80211 and would be demoted anyway; it is stated so the pair reads as one
+  # decision.
+  CFG80211 = 'm,
+  MAC80211 = 'm,
+  # CRDA was the userspace helper that fed regulatory rules to the kernel before
+  # the kernel learned to read regulatory.db itself. Distributions stopped
+  # shipping it long ago, and `make defconfig` still leaves the fallback on.
+  CFG80211_CRDA_SUPPORT = 'n,
 
   # Firmware / boot.
   EFI = 'y,
