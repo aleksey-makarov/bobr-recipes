@@ -24,7 +24,6 @@ let base_modules = [
   import "iana-etc/iana-etc.ncl",
   import "binutils.ncl",
   import "bzip2/bzip2.ncl",
-  import "linux/linux.ncl",
   import "xz.ncl",
   import "rsync.ncl",
   import "lz4.ncl",
@@ -217,14 +216,12 @@ let base_modules = [
   import "gcc.ncl",
   import "glibc/glibc.ncl",
   import "glibc/glibc-locales.ncl",
-  import "linux/initrd.ncl",
   import "tcl/tcl.ncl",
   import "expect/expect.ncl",
   import "dejagnu/dejagnu.ncl",
   import "texinfo.ncl",
   import "util-linux.ncl",
   import "e2fsprogs/e2fsprogs.ncl",
-  import "tests/tests.ncl",
   import "vim.ncl",
   import "libdrm.ncl",
   import "mesa/mesa.ncl",
@@ -256,6 +253,13 @@ let base_modules = [
   import "bibata-cursors/bibata-cursors.ncl",
   import "weston.ncl",
   import "gnome-session.ncl",
+
+  # Tests
+  import "tests/tests.ncl",
+
+  # Linux
+  import "linux/linux.ncl",
+  import "linux/initrd.ncl",
 
   # OCI images
   import "oci/image.ncl",
