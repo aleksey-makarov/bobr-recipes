@@ -5,7 +5,7 @@ let system_runtime_files_gnome = import "system-runtime-files-gnome.ncl" in
 # The GNOME graphical QEMU guest: the shared graphics foundation (see
 # qemu-graphics-base.ncl) plus the GNOME session -- gnome-shell/mutter as the
 # Wayland compositor, launched by gdm, with settings-daemon and control-center.
-# Boot it with tools/bobr-run-qemu-gnome.sh. The plain (qemu_image) and weston
+# Boot it from the host_bundle_qemu_gnome bundle. The plain (qemu_image) and weston
 # (qemu_weston_image) systems stay untouched. See 0629_gnome.md for direction.
 fun pkgs =>
   # The image contents as a runtime closure: the graphics foundation roots plus

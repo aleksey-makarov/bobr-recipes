@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 """bobr-agent-exec-guest -- run a command on the QEMU guest over its ttyS1 diag serial.
 
-The qemu runner wires the guest's second serial port (ttyS1) to a host unix
-socket in the working directory (server=on,wait=off), and every image runs an
-autologin-root diag console on ttyS1 (diag-console.service, in the base
-system-runtime-files). Each launcher names its socket per variant so several
-guests can run at once: bobr-run-qemu.sh -> diag.sock, bobr-run-qemu-weston.sh
--> diag-weston.sock, bobr-run-qemu-gnome.sh -> diag-gnome.sock; pass the right
-one with --sock. This script connects to that socket, runs one command in the
-guest's root shell, and prints its output -- turning the serial console into a
-clean request/response the agent can drive from its Bash without any MCP
-(unix-socket connect needs no privilege, and the working dir is local ext4 on
-the same kernel).
+The bundled qemu runner wires the guest's second serial port (ttyS1) to a host
+unix socket in the working directory (server=on,wait=off), and every image runs
+an autologin-root diag console on ttyS1 (diag-console.service, in the base
+system-runtime-files). Each bundle defaults its socket to its own name so
+several guests can run at once: host_bundle_qemu -> diag.sock,
+host_bundle_qemu_weston -> diag-weston.sock, host_bundle_qemu_gnome ->
+diag-gnome.sock; pass the right one with --sock. This script connects to that
+socket, runs one command in the guest's root shell, and prints its output --
+turning the serial console into a clean request/response the agent can drive
+from its Bash without any MCP (unix-socket connect needs no privilege, and the
+working dir is local ext4 on the same kernel).
 
 Robustness: output is delimited by nonce markers emitted by the guest shell, so
 login banners, the prompt, and input echo are all ignored -- only the bytes the
 command actually produced are returned. A Ctrl-C and `stty -echo` are sent first
 to recover from a stuck line and quiet the console.
 
-A bare --sock name resolves against the workspace root (where the launchers
-create the sockets), so this works from any directory:
+A bare --sock name resolves against the workspace root, which is where a bundle
+started there creates its socket, so this works from any directory:
     python3 bobr-recipes/tools/dev/bobr-agent-exec-guest.py 'journalctl -b | tail'
     python3 bobr-recipes/tools/dev/bobr-agent-exec-guest.py --timeout 60 \
         'systemctl --user status weston.service'

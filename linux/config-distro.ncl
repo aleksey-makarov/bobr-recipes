@@ -82,6 +82,7 @@
   VETH = 'm,
   TUN = 'm,
   NETFILTER = 'y,
+
   # Wireless, modular the way a distribution ships it. `make defconfig` builds
   # the stack in, which on a machine with no wireless hardware means carrying it
   # in the kernel image and requesting the regulatory database at every boot,
@@ -100,8 +101,8 @@
   EFI = 'y,
   EFI_STUB = 'y,
 
-  # Graphics: DRM/KMS + virtio-gpu, so a QEMU guest gets /dev/dri/card0 (see
-  # tools/bobr-run-qemu-gnome.sh). Pinned explicitly rather than inherited from
+  # Graphics: DRM/KMS + virtio-gpu, so a QEMU guest gets /dev/dri/card0, which
+  # the graphical images need. Pinned explicitly rather than inherited from
   # `make defconfig`, so the graphics foundation is reproducible and does not
   # drift when the kernel version or base config changes. DRM_FBDEV_EMULATION +
   # FRAMEBUFFER_CONSOLE put the console on the DRM framebuffer; INPUT_EVDEV

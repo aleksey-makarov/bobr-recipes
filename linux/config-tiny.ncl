@@ -4,8 +4,8 @@
 #
 # Everything is built in (`'y`) and modules are off: the initrd ships no .ko
 # and we do not build modules, so anything needed to boot must be in-kernel.
-# This is a best-effort starting set to bring up the current `bobr-run-qemu.sh`
-# path (direct -kernel/-initrd boot, root=/dev/vda rootfstype=erofs,
+# This is a best-effort starting set to bring up the QEMU boot path used by the
+# host_bundle_qemu runner (direct -kernel/-initrd boot, root=/dev/vda rootfstype=erofs,
 # console=ttyS0, systemd.volatile=overlay, virtio-net); it is NOT yet debugged.
 {
   # Monolithic: no loadable modules.
