@@ -15,8 +15,8 @@
 #   on the store's filesystem)
 # - `run_id`: name of this run, recorded in the objects it produces
 # - `recipes_path`: absolute path to the bobr-recipes checkout root
-# - `target_name`: package attribute name from `pkgs.ncl`
-# - `overlays`: optional array of `pkgs.ncl` overlays
+# - `target_name`: recipe attribute name from `recipe-set.ncl`
+# - `overlays`: optional array of `recipe-set.ncl` overlays
 #
 # `bobr` neither names the run nor creates its directories: whoever invokes it
 # does both (see tools/bobr-build.sh).
@@ -25,7 +25,7 @@
 # - `schema = "bobr-request-v2"`
 # - `store = store_path`, `logs = logs_path`, `work = work_path`, `run_id`
 # - `nodes = recipe.to_request { recipes_path } raw (...)`
-let mkPkgs = import "pkgs.ncl" in
+let mkPkgs = import "recipe-set.ncl" in
 let recipe = import "recipe-lib.ncl" in
 let RequestArgs = {
   store_path | String,

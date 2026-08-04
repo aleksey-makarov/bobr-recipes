@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Smoke-test the recipe contract and selected recipe-lib lowering behavior,
-# then shallow-validate every raw recipe from pkgs.ncl.
+# then shallow-validate every raw recipe from the package set.
 # Run this when editing recipe contracts, pkgs wiring, or recipe shapes.
 
 set -euo pipefail
@@ -1197,7 +1197,7 @@ jq -e '
 ' <<<"${sandbox_stage_rootfs_lowering_json}" >/dev/null
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER
-let raw_pkgs = (import "${repo_root}/pkgs.ncl") [] in
+let raw_pkgs = (import "${repo_root}/recipe-set.ncl") [] in
 std.record.fields raw_pkgs
 EOF_INNER
 attr_count="$(
@@ -1246,7 +1246,7 @@ run_shallow_case "shallow-bad-tree-entry" fail '{"name":"t","tag":"Tree","config
 
 cat > "${tmpdir}/check-shallow-raw-pkgs.ncl" <<EOF_INNER
 let contracts = import "${contract_file}" in
-let raw_pkgs = (import "${repo_root}/pkgs.ncl") [] in
+let raw_pkgs = (import "${repo_root}/recipe-set.ncl") [] in
 std.record.map
   (fun _ recipe => let checked = recipe | contracts.shallow_recipe in checked.tag)
   raw_pkgs

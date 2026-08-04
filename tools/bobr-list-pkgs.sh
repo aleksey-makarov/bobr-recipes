@@ -2,21 +2,21 @@
 
 # List attribute names, package names and the original (pre-lowering) recipe tag
 # exported by the default package set
-# in `pkgs.ncl` — use it to pick a build target for `bobr-build.sh`. By default
-# it reads `bobr-recipes/pkgs.ncl`, but you may pass an explicit path to another
-# `pkgs.ncl`-compatible file:
+# in the package set — use it to pick a build target for `bobr-build.sh`. By
+# default it reads `bobr-recipes/recipe-set.ncl`, but you may pass an explicit
+# path to another recipe-set-compatible file:
 #
 #   tools/bobr-list-pkgs.sh
-#   tools/bobr-list-pkgs.sh ./pkgs.ncl
+#   tools/bobr-list-pkgs.sh ./recipe-set.ncl
 
 set -euo pipefail
 
 script_path="$(readlink -f "${BASH_SOURCE[0]}")"
 recipes_root="$(cd "$(dirname "${script_path}")/.." && pwd)"
-default_pkgs="${recipes_root}/pkgs.ncl"
+default_pkgs="${recipes_root}/recipe-set.ncl"
 
 if [ "$#" -gt 1 ]; then
-  echo "usage: $(basename "$0") [pkgs.ncl]" >&2
+  echo "usage: $(basename "$0") [recipe-set.ncl]" >&2
   exit 2
 fi
 

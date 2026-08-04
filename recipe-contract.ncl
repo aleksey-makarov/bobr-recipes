@@ -617,7 +617,7 @@ in
 # WARNING:
 # `ValidateRecipe` performs a deep recursive traversal of the entire nested
 # raw recipe graph. It is intentionally expensive and should only be used for
-# small smoke cases, not for full-package-set validation.
+# small smoke cases, not for full recipe-set validation.
 let rec ValidateRecipe = fun recipe =>
   if recipe.tag == "Source" then
     recipe | SourceRecipe

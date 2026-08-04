@@ -3,7 +3,7 @@
 # Build one bobr-recipes package attribute and run it through `bobr`.
 #
 # The driver refreshes local `*.fsobj-hash` locks, builds the JSON request for
-# one `pkgs.ncl` attribute through `request.ncl` (with optional overlays and
+# one `recipe-set.ncl` attribute through `request.ncl` (with optional overlays and
 # quiet/jobs), and pipes it into `bobr`.
 #
 # Usage:
