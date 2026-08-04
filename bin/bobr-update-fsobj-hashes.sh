@@ -15,9 +15,8 @@
 # (in every mode): git cannot store empty dirs, so its lock would never match a
 # fresh checkout and each build would keep rewriting it.
 #
-# The fsobj-hash binary defaults to the local debug build; override it with
-# `--fsobj-hash=PATH` or the `BOBR_FSOBJ_HASH` environment variable (bobr-build.sh
-# passes the binary it resolved next to `bobr`).
+# `fsobj-hash` is taken from PATH, like every other bobr binary; override it with
+# `--fsobj-hash=PATH` or the `BOBR_FSOBJ_HASH` environment variable.
 
 set -euo pipefail
 
@@ -52,12 +51,12 @@ for arg in "$@"; do
 done
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-workspace_root="$(cd "${repo_root}/.." && pwd)"
-fsobj_hash_bin="${fsobj_hash_override:-${BOBR_FSOBJ_HASH:-${workspace_root}/bobr/target/debug/fsobj-hash}}"
+fsobj_hash_bin="${fsobj_hash_override:-${BOBR_FSOBJ_HASH:-fsobj-hash}}"
 
-if [ ! -x "${fsobj_hash_bin}" ]; then
-  echo "missing fsobj-hash binary: ${fsobj_hash_bin}" >&2
-  echo "build it first with: cargo build -p fsobj-hash" >&2
+if ! command -v "${fsobj_hash_bin}" >/dev/null 2>&1; then
+  echo "fsobj-hash not found: ${fsobj_hash_bin}" >&2
+  echo "install a bobr release and put its bin/ on PATH, or point at one with" >&2
+  echo "--fsobj-hash=PATH or BOBR_FSOBJ_HASH" >&2
   exit 1
 fi
 

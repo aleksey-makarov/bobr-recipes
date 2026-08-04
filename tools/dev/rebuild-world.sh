@@ -5,7 +5,8 @@
 # Usage: rebuild-world.sh [--no-pull] [--jobs N] [TARGET]
 #   TARGET defaults to test_all (the shipped artifacts plus the rootfs checks).
 #
-# Pulls both repositories, builds the bobr binaries, then builds TARGET into
+# Pulls both repositories, installs the bobr binaries through
+# tools/dev/bobr-build-dev.sh, then builds TARGET into
 # <workspace>/bobr-store.<YYMMDDhhmmss>. Source objects are seeded from the
 # previous store by hardlink, so tarballs are not fetched again, and only after
 # the build succeeds is the `bobr-store` symlink repointed at the new store. The
@@ -43,12 +44,6 @@ bobr_repo="${workspace_root}/bobr"
 [ -d "${bobr_repo}/.git" ] || die "missing git repository: ${bobr_repo}"
 [ -d "${recipes_repo}/.git" ] || die "missing git repository: ${recipes_repo}"
 
-case "$(uname -m)" in
-  x86_64) sandbox_launcher_alias="build-sandbox-launcher-x86_64" ;;
-  aarch64) sandbox_launcher_alias="build-sandbox-launcher-aarch64" ;;
-  *) die "unsupported host architecture: $(uname -m)" ;;
-esac
-
 if [ "${pull}" -eq 1 ]; then
   echo "==> pull bobr" >&2
   git -C "${bobr_repo}" pull --ff-only
@@ -56,13 +51,10 @@ if [ "${pull}" -eq 1 ]; then
   git -C "${recipes_repo}" pull --ff-only
 fi
 
-echo "==> build bobr binaries" >&2
-(
-  cd "${bobr_repo}"
-  cargo build --release
-  cargo "${sandbox_launcher_alias}" --release
-)
-bin_dir="${bobr_repo}/target/release"
+# One place builds and installs the binaries; this just calls it.
+echo "==> build and install bobr binaries" >&2
+"${recipes_repo}/tools/dev/bobr-build-dev.sh" --quick
+bin_dir="${BOBR_DEV_BIN:-${workspace_root}/bobr-bin/bin}"
 
 timetag="$(date '+%y%m%d%H%M%S')"
 store_root="${workspace_root}/bobr-store.${timetag}"
@@ -129,10 +121,12 @@ bobr_build=("${recipes_repo}/bin/bobr-build.sh" "${profile_path}")
 # bobr-build.sh prints its per-phase timings to stderr; pointing it at the run
 # log records them there too, for both the export and the build passes below.
 export BOBR_BUILD_TIMING_LOG="${script_log}"
+# The binaries were just installed; make sure they are the ones used even if the
+# caller has not put the directory on PATH.
 export PATH="${bin_dir}:${PATH}"
 
 # Refresh the locks once, up front: the user-facing driver only checks them.
-"${recipes_repo}/bin/bobr-update-fsobj-hashes.sh" --fsobj-hash="${bin_dir}/fsobj-hash"
+"${recipes_repo}/bin/bobr-update-fsobj-hashes.sh"
 
 # Export the request once to learn which source objects to seed. It doubles as an
 # early failure if the recipes do not lower.
