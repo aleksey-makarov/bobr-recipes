@@ -107,9 +107,22 @@ rm -f "$diag_sock"
 
 append="root=/dev/vda ro rootfstype=erofs systemd.volatile=overlay console=ttyS0 net.ifnames=0"
 
+# q35 is the modern emulated chipset: it has a PCI Express root complex and
+# publishes the ACPI MCFG table, so the guest can reach extended PCI config
+# space. QEMU still defaults to "pc" -- i440FX, a chipset that predates PCIe --
+# where the kernel reports at every boot that it cannot.
+#
+# Venus blob resources additionally need the machine's memory to be shareable,
+# hence the memory-backend property on the graphical variant.
+machine="q35"
+if [ "$graphical" = 1 ]; then
+  machine="q35,memory-backend=mem"
+fi
+
 launch_args=(
   -enable-kvm
   -cpu host
+  -machine "$machine"
   -m "$memory"
   -smp "$smp"
   -kernel "$kernel"
@@ -123,11 +136,10 @@ launch_args=(
 )
 
 if [ "$graphical" = 1 ]; then
-  # Venus blob resources need shared guest memory. The SDL/Wayland window and
-  # virtio input devices match the graphical development runners.
+  # The SDL/Wayland window and virtio input devices match the graphical
+  # development runners; the shared memory backend is named by -machine above.
   launch_args=(
     -object "memory-backend-memfd,id=mem,size=${memory}M,share=on"
-    -machine memory-backend=mem
     "${launch_args[@]}"
     -vga none
     -device "virtio-gpu-gl,blob=true,hostmem=4G,venus=true"
