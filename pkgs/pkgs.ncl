@@ -231,6 +231,7 @@
   import "wayland-protocols.ncl",
   import "wayland.ncl",
   import "weston.ncl",
+  import "wireless-regdb/wireless-regdb.ncl",
   import "xcompose-data.ncl",
   import "xkeyboard-config.ncl",
   import "xz.ncl",

@@ -9,6 +9,9 @@ fun pkgs =>
     pkgs.tzdata,
     pkgs.linux_headers,
     pkgs.linux_modules,
+    # Firmware, so it sits with the modules: cfg80211 reads the regulatory
+    # database at init, on any machine this image is put on.
+    pkgs.wireless_regdb,
     pkgs.glibc,
     pkgs.zlib,
     pkgs.bzip2,
