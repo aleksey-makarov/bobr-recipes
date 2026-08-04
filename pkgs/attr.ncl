@@ -7,14 +7,17 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://download.savannah.gnu.org/releases/attr/attr-%{version}.tar.gz",
+      url = [
+        "https://download.savannah.gnu.org/releases/attr/attr-%{version}.tar.xz",
+        "https://deb.debian.org/debian/pool/main/a/attr/attr_%{version}.orig.tar.xz",
+      ],
     },
   }
   in
 
   let attr = {
     version | default = "2.5.2",
-    source_object_hash | default = "39bf67452fa41d0948c2197601053f48b3d78a029389734332a6309a680c6c87",
+    source_object_hash | default = "f2e97b0ab7ce293681ab701915766190d607a1dba7fae8a718138150b700a70b",
     name = "attr-%{version}",
     tag = "Autotools",
     deps = {

@@ -5,7 +5,11 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://download.savannah.gnu.org/releases/man-db/man-db-%{version}.tar.xz",
+      url = [
+        "https://download.savannah.gnu.org/releases/man-db/man-db-%{version}.tar.xz",
+        "https://deb.debian.org/debian/pool/main/m/man-db/man-db_%{version}.orig.tar.xz",
+        "https://tarballs.nixos.org/sha256/%{hash}",
+      ],
     },
   }
   in
