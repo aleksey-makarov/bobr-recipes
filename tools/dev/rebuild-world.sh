@@ -1,54 +1,60 @@
 #!/usr/bin/env bash
 
-# Pull both bobr repositories, (re)build the bobr binaries, then rebuild the
-# world into a fresh store via bobr-recipes/tools/bobr-rebuild-world.sh.
+# Rebuilds everything from scratch into a fresh store, from the current source.
 #
-# All arguments are forwarded to bobr-rebuild-world.sh.
-# Usage: rebuild-world.sh [--jobs N] [--podman-unshare] [pkgs-attr]
+# Usage: rebuild-world.sh [--no-pull] [--jobs N] [TARGET]
+#   TARGET defaults to test_all (the shipped artifacts plus the rootfs checks).
+#
+# Pulls both repositories, builds the bobr binaries, then builds TARGET into
+# <workspace>/bobr-store.<YYMMDDhhmmss>. Source objects are seeded from the
+# previous store by hardlink, so tarballs are not fetched again, and only after
+# the build succeeds is the `bobr-store` symlink repointed at the new store. The
+# bobr and bobr-recipes commits are recorded beside it.
+#
+# The build goes through bin/bobr-build.sh with a generated profile, so this
+# shares one build path with everyday use.
 
 set -euo pipefail
 
-workspace_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bobr_repo="${workspace_root}/bobr"
-recipes_repo="${workspace_root}/bobr-recipes"
-rebuild_world="${recipes_repo}/tools/bobr-rebuild-world.sh"
-
-case "${1:-}" in
-  -h | --help)
-    echo "usage: $0 [--jobs N] [--podman-unshare] [pkgs-attr]" >&2
-    echo "Pulls both repos, rebuilds bobr, then runs bobr-rebuild-world.sh." >&2
-    exit 0
-    ;;
-esac
-
-for repo in "${bobr_repo}" "${recipes_repo}"; do
-  if [ ! -d "${repo}/.git" ]; then
-    echo "rebuild-world.sh: missing git repository: ${repo}" >&2
-    exit 2
-  fi
-done
-if [ ! -x "${rebuild_world}" ]; then
-  echo "rebuild-world.sh: missing bobr-rebuild-world.sh: ${rebuild_world}" >&2
+die() {
+  echo "rebuild-world.sh: $*" >&2
   exit 2
-fi
+}
+
+pull=1
+jobs=""
+target=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --no-pull) pull=0; shift ;;
+    --jobs | -j) [ "$#" -ge 2 ] || die "$1 requires a value"; jobs="$2"; shift 2 ;;
+    -h | --help) sed -n '3,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2; exit 0 ;;
+    --*) die "unknown option: $1" ;;
+    *) [ -z "${target}" ] || die "unexpected argument: $1"; target="$1"; shift ;;
+  esac
+done
+[ -n "${target}" ] || target="test_all"
+
+script_path="$(readlink -f "${BASH_SOURCE[0]}")"
+recipes_repo="$(cd "$(dirname "${script_path}")/../.." && pwd)"
+workspace_root="$(cd "${recipes_repo}/.." && pwd)"
+bobr_repo="${workspace_root}/bobr"
+
+[ -d "${bobr_repo}/.git" ] || die "missing git repository: ${bobr_repo}"
+[ -d "${recipes_repo}/.git" ] || die "missing git repository: ${recipes_repo}"
+
 case "$(uname -m)" in
-  x86_64)
-    sandbox_launcher_alias="build-sandbox-launcher-x86_64"
-    ;;
-  aarch64)
-    sandbox_launcher_alias="build-sandbox-launcher-aarch64"
-    ;;
-  *)
-    echo "rebuild-world.sh: unsupported host architecture: $(uname -m)" >&2
-    exit 2
-    ;;
+  x86_64) sandbox_launcher_alias="build-sandbox-launcher-x86_64" ;;
+  aarch64) sandbox_launcher_alias="build-sandbox-launcher-aarch64" ;;
+  *) die "unsupported host architecture: $(uname -m)" ;;
 esac
 
-echo "==> pull bobr" >&2
-git -C "${bobr_repo}" pull --ff-only
-
-echo "==> pull bobr-recipes" >&2
-git -C "${recipes_repo}" pull --ff-only
+if [ "${pull}" -eq 1 ]; then
+  echo "==> pull bobr" >&2
+  git -C "${bobr_repo}" pull --ff-only
+  echo "==> pull bobr-recipes" >&2
+  git -C "${recipes_repo}" pull --ff-only
+fi
 
 echo "==> build bobr binaries" >&2
 (
@@ -56,6 +62,196 @@ echo "==> build bobr binaries" >&2
   cargo build --release
   cargo "${sandbox_launcher_alias}" --release
 )
+bin_dir="${bobr_repo}/target/release"
 
-echo "==> rebuild world" >&2
-exec "${rebuild_world}" "$@"
+timetag="$(date '+%y%m%d%H%M%S')"
+store_root="${workspace_root}/bobr-store.${timetag}"
+store_link="${workspace_root}/bobr-store"
+hashes_file="${store_root}/hashes.txt"
+request_json="${store_root}/request.json"
+script_log="${store_root}/rebuild-world.log"
+host_stats_log="${store_root}/host-stats.log"
+profile_path="${store_root}/bobr.ncl"
+
+echo "==> create store ${store_root}" >&2
+mkdir "${store_root}"
+touch "${script_log}" "${host_stats_log}"
+
+log() {
+  local ts
+  ts="$(date '+%y%m%d%H%M%S')"
+  printf '%s %s\n' "${ts}" "$1" >&2
+  printf '%s %s\n' "${ts}" "$1" >> "${script_log}"
+}
+
+log_host_snapshot() {
+  local label="$1"
+  {
+    printf '==> %s %s\n' "${label}" "$(date '+%y%m%d%H%M%S')"
+    printf 'loadavg '
+    cat /proc/loadavg
+    printf 'nproc %s\n' "$(nproc)"
+    awk '
+      /^(MemTotal|MemFree|MemAvailable|Buffers|Cached|Dirty|Writeback):/ {
+        print "meminfo " $0
+      }
+    ' /proc/meminfo
+    [ -r /proc/pressure/cpu ] && sed 's/^/pressure_cpu /' /proc/pressure/cpu
+    [ -r /proc/pressure/io ] && sed 's/^/pressure_io /' /proc/pressure/io
+    df -h "${store_root}" | sed 's/^/df /'
+    printf '\n'
+  } >> "${host_stats_log}"
+}
+
+# The build profile for this run: the fresh store, and what to build in it.
+cat > "${profile_path}" <<EOF_PROFILE
+# Generated by rebuild-world.sh for the store beside it.
+{
+  target = "${target}",
+  store = "${store_root}",
+}
+EOF_PROFILE
+
+git_head() { git -C "$1" rev-parse HEAD 2>/dev/null || echo unknown; }
+{
+  printf 'bobr %s\n' "$(git_head "${bobr_repo}")"
+  printf 'bobr-recipes %s\n' "$(git_head "${recipes_repo}")"
+} > "${hashes_file}"
+
+log "store=${store_root}"
+log "target=${target}"
+log "cli_jobs=${jobs:-default}"
+log_host_snapshot "after-store-create"
+
+bobr_build=("${recipes_repo}/bin/bobr-build.sh" "${profile_path}")
+[ -n "${jobs}" ] && bobr_build+=(--jobs "${jobs}")
+
+# bobr-build.sh prints its per-phase timings to stderr; pointing it at the run
+# log records them there too, for both the export and the build passes below.
+export BOBR_BUILD_TIMING_LOG="${script_log}"
+export PATH="${bin_dir}:${PATH}"
+
+# Refresh the locks once, up front: the user-facing driver only checks them.
+"${recipes_repo}/bin/bobr-update-fsobj-hashes.sh" --fsobj-hash="${bin_dir}/fsobj-hash"
+
+# Export the request once to learn which source objects to seed. It doubles as an
+# early failure if the recipes do not lower.
+echo "==> export request for ${target}" >&2
+"${bobr_build[@]}" --dry-run > "${request_json}" 2>>"${script_log}"
+
+# Hardlink one object (file or directory) into the new store, atomically and only
+# if absent. `cp -al` recurses, so directory objects (e.g. OCI layouts) work too.
+copy_seed_object() {
+  local source_object="$1" target_object="$2"
+  local temp_object="${target_object}.seed.$$"
+  if [ -e "${target_object}" ] || [ -L "${target_object}" ]; then
+    return 0
+  fi
+  rm -rf "${temp_object}"
+  if ! cp -al -- "${source_object}" "${temp_object}"; then
+    rm -rf "${temp_object}"
+    return 1
+  fi
+  if ! mv -T -- "${temp_object}" "${target_object}"; then
+    rm -rf "${temp_object}"
+    return 1
+  fi
+}
+
+# Latest timestamped store other than the current one (lexicographic order works
+# for the zero-padded timestamps).
+find_previous_store() {
+  local candidate previous=""
+  shopt -s nullglob
+  for candidate in "${workspace_root}"/bobr-store.*; do
+    [ -d "${candidate}" ] || continue
+    [ "${candidate}" = "${store_root}" ] && continue
+    [[ "$(basename "${candidate}")" =~ ^bobr-store\.[0-9]{12}$ ]] || continue
+    if [ -z "${previous}" ] \
+      || [[ "$(basename "${candidate}")" > "$(basename "${previous}")" ]]; then
+      previous="${candidate}"
+    fi
+  done
+  shopt -u nullglob
+  printf '%s\n' "${previous}"
+}
+
+seed_source_objects() {
+  local previous_store="$1"
+  local object_hash source_object target_object
+  local total=0 linked=0 already=0 missing=0
+
+  if [ -z "${previous_store}" ]; then
+    log "seed: no previous store found"
+    return 0
+  fi
+  if ! command -v jq >/dev/null 2>&1; then
+    log "seed: skipped (jq not found)"
+    return 0
+  fi
+
+  log "seed source objects from ${previous_store}"
+  mkdir -p "${store_root}/objects"
+  while IFS= read -r object_hash; do
+    [ -n "${object_hash}" ] || continue
+    total=$((total + 1))
+    source_object="${previous_store}/objects/${object_hash}"
+    target_object="${store_root}/objects/${object_hash}"
+    if [ -e "${target_object}" ] || [ -L "${target_object}" ]; then
+      already=$((already + 1))
+      continue
+    fi
+    if [ ! -e "${source_object}" ] && [ ! -L "${source_object}" ]; then
+      missing=$((missing + 1))
+      continue
+    fi
+    copy_seed_object "${source_object}" "${target_object}"
+    linked=$((linked + 1))
+  done < <(
+    jq -r '.nodes[] | select(.tag == "Source") | .object_hash' "${request_json}" | sort -u
+  )
+  log "seed: total=${total} linked=${linked} already=${already} missing=${missing}"
+}
+
+previous_store="$(find_previous_store)"
+log "previous_store=${previous_store:-none}"
+log_host_snapshot "before-seed"
+seed_started_at="$(date '+%s')"
+seed_source_objects "${previous_store}"
+log "seed_seconds=$(( $(date '+%s') - seed_started_at ))"
+log_host_snapshot "after-seed"
+
+echo "==> build ${target}" >&2
+log_host_snapshot "before-build"
+build_started_at="$(date '+%s')"
+time_bin="$(type -P time || true)"
+time_report="$(mktemp)"
+build_status=0
+if [ -n "${time_bin}" ]; then
+  "${time_bin}" -o "${time_report}" \
+    -f '==> build time: real %e s, user %U s, sys %S s, maxrss %M KB' \
+    "${bobr_build[@]}" || build_status=$?
+else
+  "${bobr_build[@]}" || build_status=$?
+fi
+if [ -s "${time_report}" ]; then
+  tee -a "${script_log}" < "${time_report}" >&2
+fi
+rm -f "${time_report}"
+log "build_seconds=$(( $(date '+%s') - build_started_at ))"
+[ "${build_status}" -eq 0 ] || exit "${build_status}"
+log_host_snapshot "after-build"
+
+# The build succeeded: repoint the convenience symlink at the new store.
+# Overwrite an existing symlink; leave any non-symlink of that name untouched.
+if [ -L "${store_link}" ] || [ ! -e "${store_link}" ]; then
+  ln -sfnT "$(basename "${store_root}")" "${store_link}"
+  echo "==> link: ${store_link} -> $(basename "${store_root}")" >&2
+fi
+
+echo "==> store: ${store_root}" >&2
+echo "==> profile: ${profile_path}" >&2
+echo "==> hashes: ${hashes_file}" >&2
+echo "==> request: ${request_json}" >&2
+echo "==> script log: ${script_log}" >&2
+echo "==> host stats: ${host_stats_log}" >&2

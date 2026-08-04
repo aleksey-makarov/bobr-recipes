@@ -94,7 +94,7 @@ qemu_run() {
   # stdout (progress goes to stderr). `set -e` aborts if a build fails.
   build_object() {
     echo "building ${1} ..." >&2
-    "${recipes_path}/tools/bobr-build.sh" --store "${store_path}" "$1"
+    "${recipes_path}/bin/bobr-build.sh" --target "$1"
   }
 
   local kernel_path image_path initrd_path

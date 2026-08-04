@@ -8,7 +8,7 @@ set -euo pipefail
 
 workspace_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 recipes_root="${workspace_root}/bobr-recipes"
-source_tool="${recipes_root}/tools/bobr-update-fsobj-hashes.sh"
+source_tool="${recipes_root}/bin/bobr-update-fsobj-hashes.sh"
 fsobj_hash_bin="${workspace_root}/bobr/target/debug/fsobj-hash"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
@@ -19,8 +19,8 @@ trap 'rm -rf "${tmpdir}"' EXIT
 )
 
 fixture_repo="${tmpdir}/fixture-recipes"
-mkdir -p "${fixture_repo}/tools"
-tool="${fixture_repo}/tools/bobr-update-fsobj-hashes.sh"
+mkdir -p "${fixture_repo}/bin"
+tool="${fixture_repo}/bin/bobr-update-fsobj-hashes.sh"
 cp "${source_tool}" "${tool}"
 chmod +x "${tool}"
 

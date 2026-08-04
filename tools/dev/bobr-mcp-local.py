@@ -8,7 +8,7 @@ cannot run real package builds itself -- and neither could any process it spawns
 (NoNewPrivs=0), so it CAN build. The agent reaches it over localhost HTTP; since
 the server is not a child of the agent, the restriction never applies to it.
 
-It exposes one capability: run `tools/bobr-build.sh <target>` in the user's store
+It exposes one capability: run `bin/bobr-build.sh --target <target>` in the user's store
 and stream the result back. The single `bobr_build` tool keeps the request open
 and streams notable build lines as progress while the build runs (the open call
 is the push channel, so even multi-minute builds never time out), then returns a
@@ -25,8 +25,8 @@ Point Claude Code at it (streamable-http endpoint is /mcp):
 
     claude mcp add --transport http bobr-local http://127.0.0.1:8765/mcp
 
-Scope: it only ever runs `bobr-build.sh [--dry-run] <target>` (target validated
-against [A-Za-z0-9_]+) in the store bobr-build.sh defaults to. It never deletes
+Scope: it only ever runs `bobr-build.sh [--dry-run] --target <target>` (target
+validated against [A-Za-z0-9_]+) in the store the build profile names. It never deletes
 or cleans anything, and it serialises builds so two never run at once.
 """
 
@@ -39,9 +39,9 @@ from pathlib import Path
 
 from mcp.server.fastmcp import Context, FastMCP
 
-# tools/bobr-mcp-local.py -> the recipes dir is the parent of tools/.
-RECIPES_DIR = Path(__file__).resolve().parent.parent
-BUILD_SH = RECIPES_DIR / "tools" / "bobr-build.sh"
+# tools/dev/bobr-mcp-local.py -> the recipes dir is two levels up.
+RECIPES_DIR = Path(__file__).resolve().parent.parent.parent
+BUILD_SH = RECIPES_DIR / "bin" / "bobr-build.sh"
 
 TARGET_RE = re.compile(r"^[A-Za-z0-9_]+$")
 HASH_RE = re.compile(r"unexpected object hash:.*got ([0-9a-f]{64})")
@@ -62,7 +62,7 @@ _build_lock = asyncio.Lock()
 
 @mcp.tool()
 async def bobr_build(target: str, ctx: Context, dry_run: bool = False) -> dict:
-    """Run `bobr-build.sh <target>` in the user's bobr-store and return the outcome.
+    """Run `bobr-build.sh --target <target>` in the user's bobr-store and return the outcome.
 
     Streams notable build lines as progress while it runs (long builds never time
     out), then returns a structured result. On a placeholder-hash first build,
@@ -81,7 +81,7 @@ async def bobr_build(target: str, ctx: Context, dry_run: bool = False) -> dict:
     argv = [str(BUILD_SH)]
     if dry_run:
         argv.append("--dry-run")
-    argv.append(target)
+    argv += ["--target", target]
 
     async with _build_lock:
         await ctx.info(f"$ {' '.join(argv)}")

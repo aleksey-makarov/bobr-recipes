@@ -22,10 +22,11 @@
 # does both (see tools/bobr-build.sh).
 #
 # The returned value has this outer shape:
-# - `schema = "bobr-request-v2"`
+# - `schema` from `request-schema.ncl`
 # - `store = store_path`, `logs = logs_path`, `work = work_path`, `run_id`
 # - `nodes = recipe.to_request { recipes_path } raw (...)`
 let mkPkgs = import "recipe-set.ncl" in
+let request_schema = import "request-schema.ncl" in
 let recipe = import "recipe-lib.ncl" in
 let RequestArgs = {
   store_path | String,
@@ -62,8 +63,12 @@ let request | RequestArgs -> Dyn = fun args =>
       "request.ncl: run_id must start with a letter or digit and may contain only letters, digits, '.', '_', and '-'"
   else
     let raw = mkPkgs args.overlays in
+    if !std.record.has_field target_name raw then
+      std.fail_with
+        "request.ncl: no recipe named '%{target_name}'; list what there is with bin/bobr-list-pkgs.sh"
+    else
     {
-      schema = "bobr-request-v2",
+      schema = request_schema,
       store = store_path,
       logs = logs_path,
       work = work_path,

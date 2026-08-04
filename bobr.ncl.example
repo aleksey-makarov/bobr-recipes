@@ -1,0 +1,41 @@
+# A bobr build profile. Copy it next to where you want to build:
+#
+#     cp <recipes>/bobr.ncl.example ./bobr.ncl
+#     mkdir bobr-store
+#     <recipes>/bin/bobr-build.sh
+#
+# It describes one installation -- where the store is, what to build, which
+# overlays to apply -- and nothing about a single run: the run's name and its log
+# and work directories are minted per invocation by the driver.
+#
+# Every field is optional; the values below are the defaults. Relative paths are
+# resolved against this file, so it means the same thing wherever you invoke the
+# driver from.
+{
+  # What to build when the command line does not say (`--target NAME`).
+  target = "test_all",
+
+  # The store. Create it yourself -- the driver will not, so that a mistyped
+  # path fails at once instead of starting a from-scratch rebuild somewhere
+  # unexpected.
+  store = "bobr-store",
+
+  # Where per-run directories are made. Default to <store>/logs and <store>/work.
+  # The work directory has to be on the store's filesystem.
+  # logs = "bobr-store/logs",
+  # work = "bobr-store/work",
+
+  # Files layered over the recipe set, in order. Each evaluates to one overlay
+  # or to an array of them.
+  # overlays = ["./my-overlay.ncl"],
+
+  # Builders to run at once; 0 lets bobr use the available parallelism.
+  # jobs = 0,
+
+  # Keep only warnings and errors on screen.
+  # quiet = false,
+
+  # Run bobr under `podman unshare`, for hosts without unprivileged user
+  # namespaces.
+  # podman_unshare = false,
+}

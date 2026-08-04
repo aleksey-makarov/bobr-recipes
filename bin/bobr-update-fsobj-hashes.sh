@@ -3,12 +3,12 @@
 # Refresh adjacent `*.fsobj-hash` lock files for local Source inputs.
 #
 # Usage:
-# - `tools/bobr-update-fsobj-hashes.sh`
+# - `bin/bobr-update-fsobj-hashes.sh`
 #   recursively updates every `*.fsobj-hash` file under `bobr-recipes`
 #   whose sibling path without the suffix exists as a file or directory
-# - `tools/bobr-update-fsobj-hashes.sh <path>`
+# - `bin/bobr-update-fsobj-hashes.sh <path>`
 #   writes or updates the sibling `<path>.fsobj-hash` for one file or directory
-# - `tools/bobr-update-fsobj-hashes.sh --check [<path>]`
+# - `bin/bobr-update-fsobj-hashes.sh --check [<path>]`
 #   verifies existing lock files without rewriting them
 #
 # A directory Source containing an empty subdirectory is rejected with an error
