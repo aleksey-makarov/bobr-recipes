@@ -21,7 +21,7 @@ The build profile names the store, so it decides where everything is built; it
 is passed explicitly rather than left to the working directory. The bobr
 binaries come from the development bin directory, which is put at the front of
 the child's PATH -- so whichever `bobr` was last installed by
-tools/dev/bobr-build-dev.sh is the one that builds, whatever PATH the shell
+the engine's tools/build-dev.sh is the one that builds, whatever PATH the shell
 that started this server happened to have.
 
 Run it (in a normal, non-no_new_privs shell on the machine that owns the store):
@@ -183,7 +183,7 @@ async def bobr_build(
     if _resolve_bobr() is None:
         raise FileNotFoundError(
             f"no 'bobr' on PATH, and none in {_bin_dir}; build one with "
-            f"tools/dev/bobr-build-dev.sh"
+            f"the engine's tools/build-dev.sh"
         )
 
     # The profile is passed explicitly: relying on the working directory would

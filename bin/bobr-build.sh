@@ -16,7 +16,7 @@
 #
 # The profile says where to build and what; this run's name and its log and work
 # directories are minted here, per invocation. `bobr` and `fsobj-hash` come from
-# PATH -- install a release, or use tools/dev/bobr-build-dev.sh to build them
+# PATH -- install a release, or use the engine's tools/build-dev.sh to build them
 # from a source checkout first.
 
 set -euo pipefail
@@ -163,7 +163,7 @@ fi
 
 # Local sources are pinned by a lock file next to them. A stale lock would build
 # the old content silently, so refuse rather than write into the recipes tree --
-# the caller edited it and should say so. tools/dev/bobr-build-dev.sh refreshes
+# the caller edited it and should say so. bin/bobr-update-fsobj-hashes.sh refreshes
 # them for recipe work.
 "${recipes_path}/bin/bobr-update-fsobj-hashes.sh" --check \
   || die "recipe hash locks are stale; refresh them: ${recipes_path}/bin/bobr-update-fsobj-hashes.sh"

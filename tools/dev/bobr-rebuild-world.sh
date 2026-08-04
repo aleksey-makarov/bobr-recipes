@@ -6,7 +6,7 @@
 #   TARGET defaults to test_all (the shipped artifacts plus the rootfs checks).
 #
 # Pulls both repositories, installs the bobr binaries through
-# tools/dev/bobr-build-dev.sh, then builds TARGET into
+# the engine's tools/build-dev.sh, then builds TARGET into
 # <workspace>/bobr-store.<YYMMDDhhmmss>. Source objects are seeded from the
 # previous store by hardlink, so tarballs are not fetched again, and only after
 # the build succeeds is the `bobr-store` symlink repointed at the new store. The
@@ -53,7 +53,7 @@ fi
 
 # One place builds and installs the binaries; this just calls it.
 echo "==> build and install bobr binaries" >&2
-"${recipes_repo}/tools/dev/bobr-build-dev.sh" --quick
+"${workspace_root}/bobr/tools/build-dev.sh" --quick
 bin_dir="${BOBR_DEV_BIN:-${workspace_root}/bobr-bin/bin}"
 
 timetag="$(date '+%y%m%d%H%M%S')"
