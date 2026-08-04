@@ -11,7 +11,8 @@ the server is not a child of the agent, the restriction never applies to it.
 It exposes one capability: run `bin/bobr-build.sh <profile> --target <target>`
 and stream the result back. The single `bobr_build` tool keeps the request open
 and streams notable build lines as progress while the build runs (the open call
-is the push channel, so even multi-minute builds never time out), then returns a
+is the push channel, and a heartbeat keeps it alive through the long silent
+stretches of a compile, so even multi-hour builds never time out), then returns a
 structured outcome: the exit code, the `done: X built · Y failed` line, the
 source hash reported by a placeholder-hash mismatch, any build error, and the
 path of the failing sandbox log (which the agent reads itself from the store).
@@ -47,6 +48,7 @@ import os
 import re
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
 from mcp.server.fastmcp import Context, FastMCP
@@ -69,6 +71,9 @@ SUMMARY_RE = re.compile(r"\d+ built.*?\d+ failed")
 ERROR_RE = re.compile(r"error\[build-failed\]:.*")
 LOGPATH_RE = re.compile(r"stdout=(\S+\.log)")
 NINJA_RE = re.compile(r"\[(\d+)/(\d+)\]")
+# How often to speak up when the build is otherwise silent. Comfortably under
+# the MCP client's idle timeout, which aborts a call that says nothing.
+HEARTBEAT_SECONDS = 30.0
 # Lines worth forwarding as progress; the rest is buffered but not streamed, so
 # compile spam does not drown the useful markers.
 INTERESTING_RE = re.compile(
@@ -101,12 +106,13 @@ def _resolve_bobr() -> str | None:
 
 
 async def _stream_stderr(
-    stream: asyncio.StreamReader, ctx: Context, tail: list[str]
+    stream: asyncio.StreamReader, ctx: Context, tail: list[str], seen: dict
 ) -> None:
     """Buffers the build's diagnostic stream and forwards notable lines."""
     async for raw in stream:
         line = raw.decode("utf-8", "replace").rstrip("\n")
         tail.append(line)
+        seen["last"] = line
         # Keep only the recent lines: the summary/hash/error land at the end.
         if len(tail) > 800:
             del tail[:400]
@@ -115,8 +121,31 @@ async def _stream_stderr(
             done, total = int(ninja.group(1)), int(ninja.group(2))
             if total and (done == total or done % 25 == 0):
                 await ctx.report_progress(done, total)
+                seen["sent"] = time.monotonic()
         elif INTERESTING_RE.search(line):
             await ctx.info(line)
+            seen["sent"] = time.monotonic()
+
+
+async def _heartbeat(ctx: Context, seen: dict) -> None:
+    """Keeps the open call alive while the build is quiet.
+
+    Only notable lines are forwarded, and a single long compile produces none
+    of them for many minutes; the client then sees an idle channel and aborts
+    the call, even though the build is healthy and still running. So say
+    something on a timer -- what the build last printed, and for how long it has
+    been going -- whenever nothing notable has gone out recently.
+    """
+    started = time.monotonic()
+    while True:
+        await asyncio.sleep(HEARTBEAT_SECONDS)
+        if time.monotonic() - seen["sent"] < HEARTBEAT_SECONDS:
+            continue
+        minutes = (time.monotonic() - started) / 60
+        await ctx.info(
+            f"[{minutes:.0f}m] building; last output: {seen['last'] or '(none yet)'}"
+        )
+        seen["sent"] = time.monotonic()
 
 
 async def _read_stdout(stream: asyncio.StreamReader) -> str:
@@ -181,11 +210,16 @@ async def bobr_build(
         # object hash, or the lowered request under --dry-run), stderr carries
         # the diagnostics worth streaming and parsing. Merging them, as this
         # once did, buried the diagnostics under a dump of request JSON.
-        stdout_text, _ = await asyncio.gather(
-            _read_stdout(proc.stdout),
-            _stream_stderr(proc.stderr, ctx, tail),
-        )
-        exit_code = await proc.wait()
+        seen = {"last": "", "sent": time.monotonic()}
+        beat = asyncio.create_task(_heartbeat(ctx, seen))
+        try:
+            stdout_text, _ = await asyncio.gather(
+                _read_stdout(proc.stdout),
+                _stream_stderr(proc.stderr, ctx, tail, seen),
+            )
+            exit_code = await proc.wait()
+        finally:
+            beat.cancel()
 
     text = "\n".join(tail)
     hash_m = HASH_RE.search(text)
