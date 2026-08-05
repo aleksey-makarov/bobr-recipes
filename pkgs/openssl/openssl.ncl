@@ -61,6 +61,9 @@ fun pkgs =>
           env = {
             BOBR_SOURCE_DIR = "@{build}/source",
             BOBR_INSTALL_DIR = "/",
+            # The documentation directory is named after the version, and the
+            # script must not have to be edited whenever the version moves.
+            OPENSSL_VERSION = version,
           },
         },
       ],
