@@ -41,7 +41,27 @@ import hashlib
 import json
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+
+# A store is often reached over sshfs, where every open costs a network
+# round trip -- measured at 104 ms against one remote store versus 3 ms
+# against a local mount. Reading 1803 build handles one after another put
+# three minutes of waiting in front of a comparison that needs one second of
+# CPU. The work is pure I/O, so threads overlap it even under the GIL; the
+# number is a latency-hiding factor, not a parallelism one.
+DEFAULT_READERS = 48
+
+
+def _read_many(paths, read_one, readers: int):
+    """Applies `read_one` to every path at once, keeping the input order."""
+    if not paths:
+        return []
+    if readers <= 1 or len(paths) == 1:
+        return [read_one(path) for path in paths]
+    with ThreadPoolExecutor(max_workers=min(readers, len(paths))) as pool:
+        return list(pool.map(read_one, paths))
 
 
 # -----------------------------------------------------------------------------
@@ -61,27 +81,46 @@ def load_hashes(store: Path) -> dict[str, str]:
     return result
 
 
-def load_handles(store: Path) -> dict[str, dict]:
-    """Read builds/<build_key> -> {"object_hash":..., "inputs":[...]}."""
-    handles: dict[str, dict] = {}
+def load_build_keys(store: Path) -> set[str]:
+    """The build keys a store holds, from one directory listing.
+
+    Names alone answer which keys the stores share and which are unique to
+    one, and a listing is a single round trip -- the contents behind them are
+    only worth fetching for the keys both stores have.
+    """
     builds = store / "builds"
     if not builds.is_dir():
-        return handles
-    for entry in builds.iterdir():
-        if not entry.is_file():
-            continue
+        return set()
+    try:
+        with os.scandir(builds) as it:
+            return {entry.name for entry in it if entry.is_file()}
+    except OSError:
+        return set()
+
+
+def load_handles(store: Path, keys, readers: int) -> dict[str, dict]:
+    """Read builds/<build_key> -> {"object_hash":..., "inputs":[...]}."""
+    builds = store / "builds"
+    ordered = sorted(keys)
+
+    def read_one(key: str):
         try:
-            data = json.loads(entry.read_text())
+            return json.loads((builds / key).read_text())
         except (OSError, json.JSONDecodeError):
+            return None
+
+    handles: dict[str, dict] = {}
+    for key, data in zip(ordered, _read_many(ordered, read_one, readers)):
+        if data is None:
             continue
-        handles[entry.name] = {
+        handles[key] = {
             "object_hash": data.get("object_hash"),
             "inputs": data.get("inputs", []),
         }
     return handles
 
 
-def load_oh_to_name(store: Path) -> dict[str, str]:
+def load_oh_to_name(store: Path, readers: int) -> dict[str, str]:
     """object_hash -> recipe name, from object-refs/<name> symlinks.
 
     Each ref is a symlink to ``../objects/<object_hash>``, so the object hash
@@ -92,15 +131,30 @@ def load_oh_to_name(store: Path) -> dict[str, str]:
     refs = store / "object-refs"
     if not refs.is_dir():
         return mapping
-    for entry in refs.iterdir():
+    try:
+        with os.scandir(refs) as it:
+            names = sorted(entry.name for entry in it)
+    except OSError:
+        return mapping
+
+    def read_one(name: str):
         try:
-            target = os.readlink(entry)
+            return os.readlink(refs / name)
         except OSError:
+            return None
+
+    for name, target in zip(names, _read_many(names, read_one, readers)):
+        if target is None:
             continue
         oh = os.path.basename(target.rstrip("/"))
         if oh:
-            # First writer wins; names are effectively unique per object here.
-            mapping.setdefault(oh, entry.name)
+            # Several refs can point at one object -- a name and its dated
+            # generations (`initrd`, `initrd.260804183238`), or two targets
+            # built from the same inputs. Reading in sorted order makes the
+            # winner the lexicographically first, which is the plain name: a
+            # generation only ever adds a suffix. The old readdir order picked
+            # whichever the filesystem happened to hand over first.
+            mapping.setdefault(oh, name)
     return mapping
 
 
@@ -131,7 +185,7 @@ def _sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def _manifest_from_directory(root: Path) -> dict[str, tuple]:
+def _manifest_from_directory(root: Path, readers: int) -> dict[str, tuple]:
     """path -> signature tuple, walking a plain-object directory on disk.
 
     Symlinks are never followed (checked first), so directory-symlink loops are
@@ -139,6 +193,10 @@ def _manifest_from_directory(root: Path) -> dict[str, tuple]:
     carry their content hash, symlinks their target.
     """
     entries: dict[str, tuple] = {}
+    # Hashing reads every byte of every file, which is the slow part on a
+    # remote store; the walk only lists directories. Collect first, hash after,
+    # so the reads overlap.
+    to_hash: list[tuple[str, str]] = []
 
     def walk(directory: str, prefix: str) -> None:
         with os.scandir(directory) as it:
@@ -150,15 +208,22 @@ def _manifest_from_directory(root: Path) -> dict[str, tuple]:
                     entries[rel] = ("d",)
                     walk(entry.path, rel + "/")
                 elif entry.is_file(follow_symlinks=False):
-                    entries[rel] = ("f", _sha256_file(Path(entry.path)))
+                    to_hash.append((rel, entry.path))
                 else:
                     entries[rel] = ("?",)
 
     walk(str(root), "")
+    digests = _read_many(
+        [path for _, path in to_hash],
+        lambda path: _sha256_file(Path(path)),
+        readers,
+    )
+    for (rel, _), digest in zip(to_hash, digests):
+        entries[rel] = ("f", digest)
     return entries
 
 
-def load_manifest(store: Path, object_hash: str) -> dict[str, tuple] | None:
+def load_manifest(store: Path, object_hash: str, readers: int) -> dict[str, tuple] | None:
     """path -> signature tuple, for every entry in the object.
 
     Returns None if the object is missing.
@@ -180,7 +245,7 @@ def load_manifest(store: Path, object_hash: str) -> dict[str, tuple] | None:
     """
     path = store / "objects" / object_hash
     if path.is_dir():
-        return _manifest_from_directory(path)
+        return _manifest_from_directory(path, readers)
     if not path.is_file():
         return None
     entries: dict[str, tuple] = {}
@@ -230,13 +295,38 @@ class Resolver:
 
 
 class StoreView:
-    def __init__(self, path: Path):
+    """One store, read as late as possible.
+
+    Only `hashes` and the set of build keys are read up front. Handles follow
+    once both stores are known, for the keys they share. The name and tag maps
+    exist solely to label divergences in the report, so a run that finds none
+    never pays for the thousand-odd readlinks behind them.
+    """
+
+    def __init__(self, path: Path, readers: int):
         self.path = path
         self.label = path.name
+        self.readers = readers
         self.hashes = load_hashes(path)
-        self.handles = load_handles(path)
-        self.oh_to_name = load_oh_to_name(path)
-        self.name_to_tag = load_name_to_tag(path)
+        self.build_keys = load_build_keys(path)
+        self.handles: dict[str, dict] = {}
+        self._oh_to_name: dict[str, str] | None = None
+        self._name_to_tag: dict[str, str] | None = None
+
+    def read_handles(self, keys) -> None:
+        self.handles = load_handles(self.path, keys, self.readers)
+
+    @property
+    def oh_to_name(self) -> dict[str, str]:
+        if self._oh_to_name is None:
+            self._oh_to_name = load_oh_to_name(self.path, self.readers)
+        return self._oh_to_name
+
+    @property
+    def name_to_tag(self) -> dict[str, str]:
+        if self._name_to_tag is None:
+            self._name_to_tag = load_name_to_tag(self.path)
+        return self._name_to_tag
 
 
 # -----------------------------------------------------------------------------
@@ -277,7 +367,7 @@ def compare_hashes(a: StoreView, b: StoreView) -> None:
 
 def compare_build_keys(a: StoreView, b: StoreView) -> set[str]:
     section("build keys")
-    ka, kb = set(a.handles), set(b.handles)
+    ka, kb = a.build_keys, b.build_keys
     common = ka & kb
     only_a, only_b = ka - kb, kb - ka
     print(f"  A: {len(ka)}   B: {len(kb)}   common: {len(common)}")
@@ -294,8 +384,13 @@ def compare_build_keys(a: StoreView, b: StoreView) -> set[str]:
 
 def diff_files(a: StoreView, b: StoreView, oh_a: str, oh_b: str,
                max_files: int) -> None:
-    ma = load_manifest(a.path, oh_a)
-    mb = load_manifest(b.path, oh_b)
+    # Two independent trees on two different stores: no reason to wait for one
+    # before starting the other.
+    ma, mb = _read_many(
+        [(a, oh_a), (b, oh_b)],
+        lambda pair: load_manifest(pair[0].path, pair[1], pair[0].readers),
+        2,
+    )
     if ma is None or mb is None:
         missing = a.label if ma is None else b.label
         print(f"        (manifest unavailable in {missing}; skipping file diff)")
@@ -384,6 +479,9 @@ def main() -> int:
                         help="max differing files to print per root (default 40)")
     parser.add_argument("--inherited", action="store_true",
                         help="list inherited divergences one per line")
+    parser.add_argument("--readers", type=int, default=DEFAULT_READERS,
+                        help=f"reads to keep in flight per store "
+                             f"(default {DEFAULT_READERS}; 1 disables threading)")
     args = parser.parse_args()
 
     for store in (args.store_a, args.store_b):
@@ -391,13 +489,18 @@ def main() -> int:
             print(f"warning: {store} has no builds/ dir -- is it a store?",
                   file=sys.stderr)
 
-    a = StoreView(args.store_a)
-    b = StoreView(args.store_b)
+    readers = max(1, args.readers)
+    a = StoreView(args.store_a, readers)
+    b = StoreView(args.store_b, readers)
 
     print(f"A = {a.path}")
     print(f"B = {b.path}")
 
     compare_hashes(a, b)
+    # Every key of each store is read: the ones they share carry the comparison,
+    # and the ones they do not are still named in the report.
+    a.read_handles(a.build_keys)
+    b.read_handles(b.build_keys)
     common = compare_build_keys(a, b)
     rc = compare_objects(a, b, common,
                          show_files=not args.no_files,
