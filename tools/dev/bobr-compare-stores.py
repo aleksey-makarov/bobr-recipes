@@ -254,6 +254,15 @@ def compare_hashes(a: StoreView, b: StoreView) -> None:
     if not keys:
         print("  (no hashes.txt in either store)")
         return
+    # Only bobr-rebuild-world.sh writes this file; a store built straight from
+    # bobr-build.sh has none. Comparing against what it does not record would
+    # report every commit as differing, which reads like a finding and is not
+    # one -- the store is still perfectly comparable, see below.
+    for label, view, other in (("A", a, b), ("B", b, a)):
+        if not view.hashes and other.hashes:
+            print(f"  store {label} records no commits (no hashes.txt);"
+                  f" nothing to compare here.")
+            return
     all_match = True
     for key in keys:
         va, vb = a.hashes.get(key), b.hashes.get(key)
