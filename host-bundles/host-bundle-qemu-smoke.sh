@@ -68,7 +68,13 @@ grep -Fq "environment.XLOCALEDIR=${bundle}/root/usr/share/X11/locale [tool:repla
 grep -Fq "environment.FONTCONFIG_FILE=${bundle}/overrides/fontconfig/fonts.conf [tool:replace]" \
   <<<"$qemu_diagnose" \
   || fail "QEMU fontconfig path is absent"
-font_file="$(env -i XDG_CACHE_HOME="${out}/cache" \
+# fc-match builds a fontconfig cache as it goes, and that cache is scratch, not
+# a result: its header carries the mtime of the font directory it read, which is
+# whenever this build materialized its inputs. Pointed at $out it made the
+# bundle differ between two otherwise identical builds; keep it out of the way.
+font_cache="${BOBR_BUILD_DIR:?BOBR_BUILD_DIR is required}/qemu-smoke-font-cache"
+mkdir -p "${font_cache}"
+font_file="$(env -i XDG_CACHE_HOME="${font_cache}" \
   "${bundle}/libexec/bobr-bundle-launcher" \
   --run fc-match -- -f '%{file}\n' sans-serif)"
 case "$font_file" in
