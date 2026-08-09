@@ -77,5 +77,20 @@
         where unprivileged user namespaces are unavailable.
       "%
       | default = false,
+
+    fetch
+      | {
+        per_host_default | Number | default = 0,
+        per_host | { _ : Number } | default = {},
+        max_connections | Number | default = 0,
+      }
+      | doc m%"
+        Connection limits for `bin/bobr-fetch.sh`. `per_host_default` caps
+        downloads per host (0 leaves the fetcher's default of 6), `per_host`
+        overrides it for named hosts, `max_connections` caps downloads in
+        flight overall (0 derives it from the file-descriptor limit). Ignored
+        by `bin/bobr-build.sh`.
+      "%
+      | default = {},
   },
 }

@@ -2,6 +2,7 @@
 #
 #     cp <recipes>/bobr.ncl.example ./bobr.ncl
 #     mkdir bobr-store
+#     <recipes>/bin/bobr-fetch.sh     # optional: download the sources first
 #     <recipes>/bin/bobr-build.sh
 #
 # It describes one installation -- where the store is, what to build, which
@@ -38,4 +39,14 @@
   # Run bobr under `podman unshare`, for hosts without unprivileged user
   # namespaces.
   # podman_unshare = false,
+
+  # Connection limits for bin/bobr-fetch.sh; bin/bobr-build.sh ignores them.
+  # Downloads per host default to 6 (what servers expect of one client), and
+  # the overall cap is derived from the file-descriptor limit. 0 means "let
+  # the fetcher decide".
+  # fetch = {
+  #   per_host_default = 6,
+  #   per_host = { "ftp.gnu.org" = 4 },
+  #   max_connections = 64,
+  # },
 }

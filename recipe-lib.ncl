@@ -61,6 +61,40 @@ let lower_source_origin = fun ctx =>
     else
       origin
 in
+# Every node reachable from `root_node`, lowered, keyed by name. The recursion
+# validates inputs the same way for every lowering built on top of it, so a
+# malformed input is reported identically whether the caller wants the whole
+# graph (`to_request`) or just its sources (`to_fetch_sources`).
+let collect_unique_nodes = fun pkgs =>
+  fun root_node =>
+    let lower = lower_node pkgs in
+    let rec collect = fun seen =>
+      fun node =>
+        let lowered_node = lower node in
+        if std.record.has_field lowered_node.name seen then
+          seen
+        else
+          let seen_with_node = std.record.insert lowered_node.name lowered_node seen in
+          let inputs = node_inputs lowered_node in
+          std.array.fold_left
+            (fun acc =>
+              fun slot_name =>
+                let input = std.record.get slot_name inputs in
+                let validated_input =
+                  if input == null then
+                    old_style_input_error lowered_node.name slot_name "null"
+                  else if std.is_array input then
+                    old_style_input_error lowered_node.name slot_name "array"
+                  else
+                    input
+                in
+                collect acc validated_input
+            )
+            seen_with_node
+            (std.record.fields inputs)
+    in
+    collect {} root_node
+in
 let default_install_attrs = {
   uid = 0,
   gid = 0,
@@ -242,39 +276,43 @@ in
       in
       (go { visited = {}, rootfs = {} } root_node).rootfs,
 
+  # The sources reachable from `root_node`, as the flat list a fetch request
+  # wants: name, declared hash, lowered origin. RecipePath origins are included
+  # (lowered to absolute Path, like `to_request` does) -- what to do with them
+  # is the fetcher's decision, not the lowering's.
+  to_fetch_sources = fun raw_ctx =>
+    fun pkgs =>
+    fun root_node =>
+      let ctx = raw_ctx | { recipes_path | String } in
+      let lower_origin = lower_source_origin ctx in
+      let unique_nodes = collect_unique_nodes pkgs root_node in
+      let source_names =
+        std.array.filter
+          (fun name => (std.record.get name unique_nodes).tag == "Source")
+          (std.record.fields unique_nodes)
+      in
+      std.array.map
+        (fun name =>
+          let node = std.record.get name unique_nodes in
+          {
+            name = node.name,
+            object_hash = node.object_hash,
+          }
+          & (
+            if std.record.has_field "origin" node then
+              { origin = lower_origin node.origin }
+            else
+              {}
+          )
+        )
+        source_names,
+
   to_request = fun raw_ctx =>
     fun pkgs =>
     fun root_node =>
     let ctx = raw_ctx | { recipes_path | String } in
-    let lower = lower_node pkgs in
     let lower_origin = lower_source_origin ctx in
-    let rec collect = fun seen =>
-      fun node =>
-        let lowered_node = lower node in
-        if std.record.has_field lowered_node.name seen then
-          seen
-        else
-          let seen_with_node = std.record.insert lowered_node.name lowered_node seen in
-          let inputs = node_inputs lowered_node in
-          std.array.fold_left
-            (fun acc =>
-              fun slot_name =>
-                let input = std.record.get slot_name inputs in
-                let validated_input =
-                  if input == null then
-                    old_style_input_error lowered_node.name slot_name "null"
-                  else if std.is_array input then
-                    old_style_input_error lowered_node.name slot_name "array"
-                  else
-                    input
-                in
-                collect acc validated_input
-            )
-            seen_with_node
-            (std.record.fields inputs)
-    in
-
-    let unique_nodes = collect {} root_node in
+    let unique_nodes = collect_unique_nodes pkgs root_node in
     let root_name = root_node.name in
     let other_names =
       # `std.record.fields` already returns names in sorted order, so no explicit
