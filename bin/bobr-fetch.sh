@@ -16,9 +16,9 @@
 #   -h | --help              show this help
 #
 # The profile says where the store is and what to fetch; this run's name and
-# its log and work directories are minted here, per invocation. `bobr-fetch`
-# comes from PATH -- install a release, or use the engine's tools/build-dev.sh
-# to build it from a source checkout first.
+# its log and work directories are minted here, per invocation. `bobr-fetch` and
+# `fsobj-hash` come from PATH -- install a release, or use the engine's
+# tools/build-dev.sh to build them from a source checkout first.
 
 set -euo pipefail
 
@@ -78,6 +78,7 @@ fi
 
 require_cmd nickel
 require_cmd bobr-fetch
+require_cmd fsobj-hash
 
 resolve_profile "${profile_path}"
 
@@ -93,17 +94,24 @@ overlays_expr="${profile_overlays}"
 [ -d "${store_path}" ] \
   || die "store does not exist: ${store_path} (create it: mkdir -p '${store_path}')"
 
-# Two things the build wrapper does and this one deliberately does not:
-#
-# * the recipe hash-lock check. A stale lock misdeclares a RecipePath source,
-#   and those are left to the build. When they move here this needs revisiting
-#   -- and the answer will not be to copy the check over: the fetcher skips a
-#   source whose declared hash is already an object in the store, which a stale
-#   lock's usually is, so the staleness would pass unseen. Hash the local file
-#   every run instead, and let the mismatch report the real value.
-# * `podman unshare`. The fetcher creates no namespaces: it downloads, and
-#   imports by renaming and hardlinking files it made itself.
+# What the build wrapper does and this one deliberately does not: `podman
+# unshare`. The fetcher creates no namespaces -- it downloads, and imports by
+# renaming and hardlinking files it made itself.
 check_request_schema "${recipes_path}/fetch-request-schema.ncl" bobr-fetch
+
+# Local sources are pinned by a lock file next to them, and this is the phase
+# that puts them in the store, so this is where a stale lock has to be caught.
+#
+# Not by the fetcher itself: which side of a disagreement is wrong -- the lock
+# or the edited file -- is not something it can know, and the declared hash is
+# the object's identity while the origin is only a way to obtain it. The check
+# also belongs to the whole recipes tree rather than to one target's closure,
+# which is exactly what this script covers and the fetcher would not.
+#
+# Refuse rather than write into the recipes tree: the caller edited it and
+# should say so. bin/bobr-update-fsobj-hashes.sh refreshes them for recipe work.
+"${recipes_path}/bin/bobr-update-fsobj-hashes.sh" --check \
+  || die "recipe hash locks are stale; refresh them: ${recipes_path}/bin/bobr-update-fsobj-hashes.sh"
 
 
 if [ "${dry_run}" -eq 1 ]; then

@@ -15,9 +15,9 @@
 #   -h | --help              show this help
 #
 # The profile says where to build and what; this run's name and its log and work
-# directories are minted here, per invocation. `bobr` and `fsobj-hash` come from
-# PATH -- install a release, or use the engine's tools/build-dev.sh to build them
-# from a source checkout first.
+# directories are minted here, per invocation. `bobr` comes from PATH -- install
+# a release, or use the engine's tools/build-dev.sh to build it from a source
+# checkout first.
 
 set -euo pipefail
 
@@ -86,7 +86,6 @@ fi
 
 require_cmd nickel
 require_cmd bobr
-require_cmd fsobj-hash
 
 resolve_profile "${profile_path}"
 
@@ -106,12 +105,9 @@ podman_unshare="${profile_podman_unshare}"
 
 check_request_schema "${recipes_path}/request-schema.ncl" bobr
 
-# Local sources are pinned by a lock file next to them. A stale lock would build
-# the old content silently, so refuse rather than write into the recipes tree --
-# the caller edited it and should say so. bin/bobr-update-fsobj-hashes.sh refreshes
-# them for recipe work.
-"${recipes_path}/bin/bobr-update-fsobj-hashes.sh" --check \
-  || die "recipe hash locks are stale; refresh them: ${recipes_path}/bin/bobr-update-fsobj-hashes.sh"
+# No hash-lock check here. The build is moving towards working only with
+# sources already in the store, so the phase that puts them there -- the
+# fetcher, bin/bobr-fetch.sh -- is where a stale lock is caught.
 
 
 if [ "${dry_run}" -eq 1 ]; then
