@@ -27,7 +27,7 @@ that started this server happened to have.
 Run it (in a normal, non-no_new_privs shell on the machine that owns the store):
 
     pip install mcp                                        # one-time
-    python3 bobr-recipes/tools/dev/bobr-mcp-local.py       # binds 127.0.0.1:8765
+    python3 bobr-recipes/tools/bobr-mcp-local.py       # binds 127.0.0.1:8765
 
 Point Claude Code at it (streamable-http endpoint is /mcp):
 
@@ -53,8 +53,8 @@ from pathlib import Path
 
 from mcp.server.fastmcp import Context, FastMCP
 
-# tools/dev/bobr-mcp-local.py -> up through dev/ and tools/ to the recipes root.
-RECIPES_DIR = Path(__file__).resolve().parent.parent.parent
+# tools/bobr-mcp-local.py -> up through tools/ to the recipes root.
+RECIPES_DIR = Path(__file__).resolve().parent.parent
 WORKSPACE_DIR = RECIPES_DIR.parent
 BUILD_SH = RECIPES_DIR / "bin" / "bobr-build.sh"
 DEFAULT_PROFILE = WORKSPACE_DIR / "bobr.ncl"

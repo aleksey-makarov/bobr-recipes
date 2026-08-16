@@ -39,7 +39,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 script_path="$(readlink -f "${BASH_SOURCE[0]}")"
-recipes_repo="$(cd "$(dirname "${script_path}")/../.." && pwd)"
+recipes_repo="$(cd "$(dirname "${script_path}")/.." && pwd)"
 workspace_root="$(cd "${recipes_repo}/.." && pwd)"
 bobr_repo="${workspace_root}/bobr"
 bin_dir="${BOBR_DEV_BIN:-${workspace_root}/bobr-bin/bin}"
