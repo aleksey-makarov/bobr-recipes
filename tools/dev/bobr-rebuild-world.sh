@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
 
-# Rebuilds everything from scratch into a fresh store, from the current source.
+# Rebuilds everything from scratch into a fresh store.
 #
-# Usage: bobr-rebuild-world.sh [--no-pull] [--jobs N] [TARGET]
-#   TARGET defaults to test_all (the shipped artifacts plus the rootfs checks).
+# Usage: bobr-rebuild-world.sh [--local]
 #
-# Pulls both repositories, installs the bobr binaries through
-# the engine's tools/build-dev.sh, then builds TARGET into
+#   --local   build the bobr binaries from source in this workspace, cloning
+#             them from potato if they are not here yet. Without it the run
+#             takes the latest published release instead, which is what the
+#             Hetzner builder does.
+#
+# Either way the recipes are pulled first, the sources are fetched with
+# bin/bobr-fetch.sh and the target built with bin/bobr-build.sh -- the same two
+# drivers everyday use goes through -- into
 # <workspace>/bobr-store.<YYMMDDhhmmss>. Source objects are seeded from the
-# previous store by hardlink, so tarballs are not fetched again, and only after
-# the build succeeds is the `bobr-store` symlink repointed at the new store. The
-# bobr and bobr-recipes commits are recorded beside it.
-#
-# The build goes through bin/bobr-build.sh with a generated profile, so this
-# shares one build path with everyday use.
+# previous store by hardlink, so what was already downloaded is not downloaded
+# again, and only after the build succeeds is the `bobr-store` symlink repointed
+# at the new store. What was built from, and how the host was doing while it
+# built, are recorded beside it.
 
 set -euo pipefail
 
@@ -22,39 +25,180 @@ die() {
   exit 2
 }
 
-pull=1
-jobs=""
-target=""
+require_cmd() {
+  command -v "$1" >/dev/null 2>&1 || die "required tool not found on PATH: $1"
+}
+
+local_mode=0
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --no-pull) pull=0; shift ;;
-    --jobs | -j) [ "$#" -ge 2 ] || die "$1 requires a value"; jobs="$2"; shift 2 ;;
-    -h | --help) sed -n '3,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2; exit 0 ;;
-    --*) die "unknown option: $1" ;;
-    *) [ -z "${target}" ] || die "unexpected argument: $1"; target="$1"; shift ;;
+    --local) local_mode=1; shift ;;
+    -h | --help) sed -n '3,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2; exit 0 ;;
+    *) die "unexpected argument: $1" ;;
   esac
 done
-[ -n "${target}" ] || target="test_all"
 
 script_path="$(readlink -f "${BASH_SOURCE[0]}")"
 recipes_repo="$(cd "$(dirname "${script_path}")/../.." && pwd)"
 workspace_root="$(cd "${recipes_repo}/.." && pwd)"
 bobr_repo="${workspace_root}/bobr"
+bin_dir="${BOBR_DEV_BIN:-${workspace_root}/bobr-bin/bin}"
 
-[ -d "${bobr_repo}/.git" ] || die "missing git repository: ${bobr_repo}"
+# The engine's git URL, used only when this workspace has no checkout yet.
+bobr_clone_url="potato:/mnt/git/bobr.git"
+bobr_github_api="https://api.github.com/repos/aleksey-makarov/bobr"
+
 [ -d "${recipes_repo}/.git" ] || die "missing git repository: ${recipes_repo}"
 
-if [ "${pull}" -eq 1 ]; then
-  echo "==> pull bobr" >&2
-  git -C "${bobr_repo}" pull --ff-only
-  echo "==> pull bobr-recipes" >&2
-  git -C "${recipes_repo}" pull --ff-only
+require_cmd git
+require_cmd jq
+
+echo "==> pull bobr-recipes" >&2
+git -C "${recipes_repo}" pull --ff-only
+
+# ---------------------------------------------------------------------------
+# the binaries
+# ---------------------------------------------------------------------------
+
+# Whatever a run of bobr needs on PATH. Checked explicitly after installing a
+# release so a release older than one of them fails here, by name, rather than
+# three steps later as "required tool not found".
+required_binaries=(bobr bobr-fetch fsobj-hash bobr-sandbox-launcher)
+
+# What the binaries were built from, for hashes.txt: a commit either way, so
+# that two stores built on different machines can be compared without their
+# provenance lines disagreeing over notation.
+bobr_revision=""
+
+installed_version() {
+  [ -x "${bin_dir}/bobr" ] || return 1
+  "${bin_dir}/bobr" --version 2>/dev/null | awk '{print $2}'
+}
+
+have_all_binaries() {
+  local binary
+  for binary in "${required_binaries[@]}"; do
+    [ -x "${bin_dir}/${binary}" ] || return 1
+  done
+}
+
+# Installs one file under its final name only once it is complete, so an
+# interrupted run cannot leave a half-written binary behind.
+install_binary() {
+  local source="$1" name="$2" temp
+  temp="${bin_dir}/.${name}.new.$$"
+  install -m755 "${source}" "${temp}"
+  mv -f "${temp}" "${bin_dir}/${name}"
+}
+
+obtain_bobr_from_source() {
+  if [ -d "${bobr_repo}/.git" ]; then
+    echo "==> pull bobr" >&2
+    git -C "${bobr_repo}" pull --ff-only
+  else
+    echo "==> clone bobr from ${bobr_clone_url}" >&2
+    git clone "${bobr_clone_url}" "${bobr_repo}"
+  fi
+
+  echo "==> build and install bobr binaries" >&2
+  "${bobr_repo}/tools/build-dev.sh" --quick
+  bobr_revision="$(git -C "${bobr_repo}" rev-parse HEAD)"
+}
+
+obtain_bobr_from_release() {
+  require_cmd curl
+  require_cmd tar
+  require_cmd sha256sum
+
+  local host_target
+  case "$(uname -m)" in
+    x86_64) host_target="x86_64-unknown-linux-musl" ;;
+    *) die "no published bobr archive for $(uname -m); build from source with --local" ;;
+  esac
+
+  local latest tag
+  latest="$(curl -fsSL "${bobr_github_api}/releases/latest")" \
+    || die "cannot reach the GitHub release API"
+  tag="$(printf '%s' "${latest}" | jq -r '.tag_name')"
+  [ -n "${tag}" ] && [ "${tag}" != "null" ] || die "the latest release has no tag"
+
+  # The commit the tag names. Tags here are annotated, so the ref points at a
+  # tag object and has to be dereferenced -- otherwise what lands in hashes.txt
+  # is the hash of the tag rather than of the commit it marks.
+  local ref object_type object_sha
+  ref="$(curl -fsSL "${bobr_github_api}/git/ref/tags/${tag}")" \
+    || die "cannot resolve the tag ${tag}"
+  object_type="$(printf '%s' "${ref}" | jq -r '.object.type')"
+  object_sha="$(printf '%s' "${ref}" | jq -r '.object.sha')"
+  if [ "${object_type}" = "tag" ]; then
+    object_sha="$(
+      curl -fsSL "${bobr_github_api}/git/tags/${object_sha}" | jq -r '.object.sha'
+    )" || die "cannot dereference the annotated tag ${tag}"
+  fi
+  bobr_revision="${object_sha}"
+
+  # Already on it: the point of a release build is the release, and downloading
+  # the same one again would only risk replacing working binaries.
+  if [ "$(installed_version || true)" = "${tag#v}" ] && have_all_binaries; then
+    echo "==> bobr ${tag} is already installed" >&2
+    return 0
+  fi
+
+  local archive="bobr-${tag}-${host_target}.tar.xz"
+  local download="${bobr_github_api%/repos/*}"
+  download="https://github.com/aleksey-makarov/bobr/releases/download/${tag}"
+  local temp
+  temp="$(mktemp -d)"
+  # shellcheck disable=SC2064  # the path is fixed at trap time on purpose
+  trap "rm -rf '${temp}'" RETURN
+
+  echo "==> download bobr ${tag}" >&2
+  curl -fsSL -o "${temp}/${archive}" "${download}/${archive}" \
+    || die "cannot download ${archive}"
+  curl -fsSL -o "${temp}/SHA256SUMS" "${download}/SHA256SUMS" \
+    || die "cannot download SHA256SUMS for ${tag}"
+  # Only our own archive's line: the file covers every asset, and the others
+  # were not downloaded.
+  ( cd "${temp}" && grep -F "${archive}" SHA256SUMS | sha256sum -c --quiet - ) \
+    || die "checksum mismatch for ${archive}"
+
+  tar -C "${temp}" -xf "${temp}/${archive}"
+  local unpacked="${temp}/bobr-${tag}-${host_target}"
+  [ -d "${unpacked}/bin" ] || die "unexpected archive layout in ${archive}"
+
+  # The release replaces whatever was here: mixing binaries from two builds is
+  # never wanted, and `bobr` looks for its sandbox launcher beside itself, so
+  # the pair has to travel together. Only the default location is cleared --
+  # BOBR_DEV_BIN may point at a directory that is not ours to empty.
+  if [ -z "${BOBR_DEV_BIN:-}" ]; then
+    rm -rf "${workspace_root}/bobr-bin"
+  fi
+  mkdir -p "${bin_dir}"
+  local binary
+  for binary in "${unpacked}/bin"/*; do
+    install_binary "${binary}" "$(basename "${binary}")"
+  done
+
+  for binary in "${required_binaries[@]}"; do
+    [ -x "${bin_dir}/${binary}" ] \
+      || die "release ${tag} has no ${binary}; publish a newer release or use --local"
+  done
+  echo "==> installed bobr ${tag} into ${bin_dir}" >&2
+}
+
+if [ "${local_mode}" -eq 1 ]; then
+  obtain_bobr_from_source
+else
+  obtain_bobr_from_release
 fi
 
-# One place builds and installs the binaries; this just calls it.
-echo "==> build and install bobr binaries" >&2
-"${workspace_root}/bobr/tools/build-dev.sh" --quick
-bin_dir="${BOBR_DEV_BIN:-${workspace_root}/bobr-bin/bin}"
+# The binaries were just installed; make sure they are the ones used even if the
+# caller has not put the directory on PATH.
+export PATH="${bin_dir}:${PATH}"
+
+# ---------------------------------------------------------------------------
+# the store
+# ---------------------------------------------------------------------------
 
 timetag="$(date '+%y%m%d%H%M%S')"
 store_root="${workspace_root}/bobr-store.${timetag}"
@@ -95,43 +239,38 @@ log_host_snapshot() {
   } >> "${host_stats_log}"
 }
 
-# The build profile for this run: the fresh store, and what to build in it.
-cat > "${profile_path}" <<EOF_PROFILE
-# Generated by bobr-rebuild-world.sh for the store beside it.
-{
-  target = "${target}",
-  store = "${store_root}",
-}
-EOF_PROFILE
+# The profile is the shipped example with its store pointed at the one just
+# made: a rebuild should go through the same settings a reader of the recipes
+# would get, not through a private two-line file that could drift from them.
+cp "${recipes_repo}/bobr.ncl.example" "${profile_path}"
+sed -i "s|^  store = \".*\",\$|  store = \"${store_root}\",|" "${profile_path}"
+grep -Fq "  store = \"${store_root}\"," "${profile_path}" \
+  || die "could not point the profile at the store; has bobr.ncl.example changed shape?"
 
 git_head() { git -C "$1" rev-parse HEAD 2>/dev/null || echo unknown; }
 {
-  printf 'bobr %s\n' "$(git_head "${bobr_repo}")"
+  printf 'bobr %s\n' "${bobr_revision:-unknown}"
   printf 'bobr-recipes %s\n' "$(git_head "${recipes_repo}")"
 } > "${hashes_file}"
 
 log "store=${store_root}"
-log "target=${target}"
-log "cli_jobs=${jobs:-default}"
+log "mode=$([ "${local_mode}" -eq 1 ] && echo local || echo release)"
+log "bobr=${bobr_revision:-unknown}"
 log_host_snapshot "after-store-create"
 
-bobr_build=("${recipes_repo}/bin/bobr-build.sh" "${profile_path}")
-[ -n "${jobs}" ] && bobr_build+=(--jobs "${jobs}")
-
-# bobr-build.sh prints its per-phase timings to stderr; pointing it at the run
-# log records them there too, for both the export and the build passes below.
+# bobr-fetch.sh and bobr-build.sh print their per-phase timings to stderr;
+# pointing them at the run log records them there too.
 export BOBR_BUILD_TIMING_LOG="${script_log}"
-# The binaries were just installed; make sure they are the ones used even if the
-# caller has not put the directory on PATH.
-export PATH="${bin_dir}:${PATH}"
 
-# Refresh the locks once, up front: the user-facing driver only checks them.
-"${recipes_repo}/bin/bobr-update-fsobj-hashes.sh"
+# ---------------------------------------------------------------------------
+# seeding
+# ---------------------------------------------------------------------------
 
-# Export the request once to learn which source objects to seed. It doubles as an
-# early failure if the recipes do not lower.
-echo "==> export request for ${target}" >&2
-"${bobr_build[@]}" --dry-run > "${request_json}" 2>>"${script_log}"
+# Export the fetch request once to learn which source objects to seed. It
+# doubles as an early failure if the recipes do not lower.
+echo "==> export fetch request" >&2
+"${recipes_repo}/bin/bobr-fetch.sh" "${profile_path}" --dry-run \
+  > "${request_json}" 2>>"${script_log}"
 
 # Hardlink one object (file or directory) into the new store, atomically and only
 # if absent. `cp -al` recurses, so directory objects (e.g. OCI layouts) work too.
@@ -170,6 +309,8 @@ find_previous_store() {
   printf '%s\n' "${previous}"
 }
 
+# Temporary: once a store can name another as a read-only source, this is
+# bobr-fetch's job and the hardlinking goes away.
 seed_source_objects() {
   local previous_store="$1"
   local object_hash source_object target_object
@@ -177,10 +318,6 @@ seed_source_objects() {
 
   if [ -z "${previous_store}" ]; then
     log "seed: no previous store found"
-    return 0
-  fi
-  if ! command -v jq >/dev/null 2>&1; then
-    log "seed: skipped (jq not found)"
     return 0
   fi
 
@@ -202,7 +339,10 @@ seed_source_objects() {
     copy_seed_object "${source_object}" "${target_object}"
     linked=$((linked + 1))
   done < <(
-    jq -r '.nodes[] | select(.tag == "Source") | .object_hash' "${request_json}" | sort -u
+    # Trimmed in jq rather than after it: a RecipePath source declares its hash
+    # from a lock file imported as text, so the value carries the file's
+    # trailing newline and would otherwise arrive as two lines.
+    jq -r '.sources[].object_hash | gsub("\\s"; "")' "${request_json}" | sort -u
   )
   log "seed: total=${total} linked=${linked} already=${already} missing=${missing}"
 }
@@ -215,23 +355,49 @@ seed_source_objects "${previous_store}"
 log "seed_seconds=$(( $(date '+%s') - seed_started_at ))"
 log_host_snapshot "after-seed"
 
-echo "==> build ${target}" >&2
+# ---------------------------------------------------------------------------
+# fetch, then build
+# ---------------------------------------------------------------------------
+
+# Runs one phase under `time` when it is available, recording its resource use
+# next to the timings the drivers report themselves.
+run_phase() {
+  local label="$1"
+  shift
+  local time_bin time_report status=0
+  time_bin="$(type -P time || true)"
+  time_report="$(mktemp)"
+  if [ -n "${time_bin}" ]; then
+    "${time_bin}" -o "${time_report}" \
+      -f "==> ${label} time: real %e s, user %U s, sys %S s, maxrss %M KB" \
+      "$@" || status=$?
+  else
+    "$@" || status=$?
+  fi
+  if [ -s "${time_report}" ]; then
+    tee -a "${script_log}" < "${time_report}" >&2
+  fi
+  rm -f "${time_report}"
+  return "${status}"
+}
+
+echo "==> fetch sources" >&2
+log_host_snapshot "before-fetch"
+fetch_started_at="$(date '+%s')"
+fetch_status=0
+run_phase fetch "${recipes_repo}/bin/bobr-fetch.sh" "${profile_path}" || fetch_status=$?
+log "fetch_seconds=$(( $(date '+%s') - fetch_started_at ))"
+# A fetch that ends unhappy means a source is missing or its content does not
+# match what the recipes declare; building on top of that would bury the
+# question under a build failure somewhere else.
+[ "${fetch_status}" -eq 0 ] || die "fetch failed (${fetch_status}); not building"
+log_host_snapshot "after-fetch"
+
+echo "==> build" >&2
 log_host_snapshot "before-build"
 build_started_at="$(date '+%s')"
-time_bin="$(type -P time || true)"
-time_report="$(mktemp)"
 build_status=0
-if [ -n "${time_bin}" ]; then
-  "${time_bin}" -o "${time_report}" \
-    -f '==> build time: real %e s, user %U s, sys %S s, maxrss %M KB' \
-    "${bobr_build[@]}" || build_status=$?
-else
-  "${bobr_build[@]}" || build_status=$?
-fi
-if [ -s "${time_report}" ]; then
-  tee -a "${script_log}" < "${time_report}" >&2
-fi
-rm -f "${time_report}"
+run_phase build "${recipes_repo}/bin/bobr-build.sh" "${profile_path}" || build_status=$?
 log "build_seconds=$(( $(date '+%s') - build_started_at ))"
 [ "${build_status}" -eq 0 ] || exit "${build_status}"
 log_host_snapshot "after-build"
