@@ -256,7 +256,8 @@ jq -e '
   and ($s.inputs | has("_rootfs"))
   and ($s.inputs | has("script"))
   and ($s.inputs | has("synthetic_common"))
-  and ([.[] | select(.name == "buildscript-autotools-stage-install" and .origin.tag == "Path" and .origin.path == "/recipes/synthetic/autotools-stage-install.sh")] | length == 1)
+  and ([.[] | select(.name == "buildscript-autotools-stage-install")] | length == 1)
+  and ([.[] | select(.tag == "Source" and has("origin"))] | length == 0)
 ' <<<"${synthetic_lowering_json}" >/dev/null
 
 cat > "${tmpdir}/check-autotools-package-lowering.ncl" <<EOF_INNER
@@ -1243,6 +1244,51 @@ run_shallow_case "shallow-bad-config" fail '{"name":"staged","tag":"TreeMove","c
 run_shallow_case "shallow-bad-name" fail '{"name":42,"tag":"Group","config":{},"inputs":{"a":1}}'
 run_shallow_case "shallow-bad-source-origin" fail '{"name":"src","tag":"Source","object_hash":"aa","origin":{"tag":"Ftp","url":"x"}}'
 run_shallow_case "shallow-bad-tree-entry" fail '{"name":"t","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"x"}]}},"inputs":{}}'
+
+# The two lowerings, side by side. They walk the same graph from the same node,
+# so they must name the same sources -- that is what lets a build request carry
+# no origins at all: whatever it needs, the fetch request was asked to obtain.
+# The origins live on the fetch side alone, with `RecipePath` resolved against
+# the checkout.
+cat > "${tmpdir}/check-two-lowerings.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let tarball = {
+  name = "src",
+  tag = "Source",
+  object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  origin = { tag = "Http", url = "https://example.invalid/src.tar.xz" },
+} in
+let script = {
+  name = "script",
+  tag = "Source",
+  object_hash = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  origin = { tag = "RecipePath", path = "synthetic/autotools-stage-install.sh" },
+} in
+let tree = {
+  name = "t",
+  tag = "Tree",
+  config = {},
+  inputs = { a = tarball, b = script },
+} in
+{
+  build = recipe.to_request { recipes_path = "/recipes" } {} tree,
+  fetch = recipe.to_fetch_sources { recipes_path = "/recipes" } {} tree,
+}
+EOF_INNER
+
+two_lowerings_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-two-lowerings.ncl --format json
+)"
+
+jq -e '
+  ([.build[] | select(.tag == "Source") | .name] | sort) as $build_sources
+  | ([.fetch[] | .name] | sort) as $fetch_sources
+  | $build_sources == $fetch_sources
+  and ([.build[] | select(has("origin"))] | length == 0)
+  and ([.fetch[] | select(has("origin"))] | length == 2)
+  and ([.fetch[] | select(.name == "script" and .origin.tag == "Path" and .origin.path == "/recipes/synthetic/autotools-stage-install.sh")] | length == 1)
+' <<<"${two_lowerings_json}" >/dev/null
 
 cat > "${tmpdir}/check-shallow-raw-pkgs.ncl" <<EOF_INNER
 let contracts = import "${contract_file}" in
