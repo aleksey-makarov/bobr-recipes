@@ -44,9 +44,17 @@
   # Downloads per host default to 6 (what servers expect of one client), and
   # the overall cap is derived from the file-descriptor limit. 0 means "let
   # the fetcher decide".
-  # fetch = {
-  #   per_host_default = 6,
-  #   per_host = { "ftp.gnu.org" = 4 },
-  #   max_connections = 64,
-  # },
+  #
+  # The one host that needs less than the default is gitlab.freedesktop.org,
+  # and not because it is fragile: its `/-/archive/<commit>/` URLs are not
+  # files but a tarball built from the repository per request. Six of those at
+  # once is more than it will do -- a from-scratch fetch of test_all drew HTTP
+  # 502 from nearly every one of its 14 sources, 26 retries between them,
+  # spread over the whole first minute rather than one bad moment. Nothing
+  # failed, since the retries covered it, but it is waste on both sides.
+  fetch = {
+    per_host = { "gitlab.freedesktop.org" = 2 },
+    # per_host_default = 6,
+    # max_connections = 64,
+  },
 }
