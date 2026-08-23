@@ -59,6 +59,7 @@ fun pkgs =>
         "-Dvapi=false",
         "-Dqt=false",
         "-Dcompose=false",
+        "-Dbash-completion=false",
         "-Dapt-support=false",
         "-Dgir=false",
         "-Dzstd-support=false",
