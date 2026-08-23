@@ -5,7 +5,10 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://archive.mesa3d.org/glu/glu-%{version}.tar.xz",
+      url = [
+        "https://archive.mesa3d.org/glu/glu-%{version}.tar.xz",
+        "https://sources.buildroot.net/libglu/glu-%{version}.tar.xz",
+      ],
     },
   }
   in

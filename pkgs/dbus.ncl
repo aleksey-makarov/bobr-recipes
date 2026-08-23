@@ -5,7 +5,10 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://dbus.freedesktop.org/releases/dbus/dbus-%{version}.tar.xz",
+      url = [
+        "https://dbus.freedesktop.org/releases/dbus/dbus-%{version}.tar.xz",
+        "https://sources.buildroot.net/dbus/dbus-%{version}.tar.xz",
+      ],
     },
   }
   in

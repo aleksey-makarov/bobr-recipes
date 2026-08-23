@@ -11,7 +11,10 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "https://icon-theme.freedesktop.org/releases/hicolor-icon-theme-%{version}.tar.xz",
+          url = [
+            "https://icon-theme.freedesktop.org/releases/hicolor-icon-theme-%{version}.tar.xz",
+            "https://sources.buildroot.net/hicolor-icon-theme/hicolor-icon-theme-%{version}.tar.xz",
+          ],
         },
       }
   in

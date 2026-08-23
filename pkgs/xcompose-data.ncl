@@ -7,8 +7,10 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url =
+      url = [
         "https://www.x.org/releases/individual/lib/libX11-%{version}.tar.xz",
+        "https://downloads.yoctoproject.org/mirror/sources/libX11-%{version}.tar.xz",
+      ],
     },
   }
   in

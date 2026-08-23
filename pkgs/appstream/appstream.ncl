@@ -1,10 +1,9 @@
 # AppStream -- library for reading software metainfo (the libappstream C API).
 # libadwaita links it (AdwAboutDialog can populate itself from a component's
-# metainfo), and gnome-control-center uses it too. The 0.16 line is used because
-# it needs only libyaml (not libfyaml) while still parsing YAML/XML catalogs.
-# Meson build against glib, libxml2, libyaml, libxmlb and libcurl. The Qt
-# bindings, systemd/journal, Vala, gir, apt support, SVG rendering, the Snowball
-# stemmer, the compose tool and all docs are off.
+# metainfo), and gnome-control-center uses it too. Meson build against glib,
+# libxml2, libfyaml, libxmlb and libcurl. Qt bindings, systemd/journal, Vala,
+# gir, apt support, display detection, optional compression/hashing, SVG
+# rendering, the Snowball stemmer, the compose tool and all docs are off.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
   let appstream_src = fun version =>
@@ -15,28 +14,29 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "https://www.freedesktop.org/software/appstream/releases/AppStream-%{version}.tar.xz",
+          url = [
+            "https://www.freedesktop.org/software/appstream/releases/AppStream-%{version}.tar.xz",
+            "https://deb.debian.org/debian/pool/main/a/appstream/appstream_%{version}.orig.tar.xz",
+          ],
         },
       }
   in
 
   let appstream = {
-    version | default = "0.16.4",
+    version | default = "1.1.6",
     source_object_hash
       | default
-      = "d4f722d79c6a2f29d9dc5c6f464927469543353f386581c778c9bed7c60a54ed",
+      = "e298929f39729e84a70f6be6941f3e7f3fc2ee3c83cb3ea1b1b5b280a8fe3a24",
     name = "appstream-%{version}",
     tag = "Meson",
     deps = {
       build = [
         pkgs.glib,
         pkgs.libxml2,
-        pkgs.libyaml,
+        pkgs.libfyaml,
         pkgs.libxmlb,
         pkgs.curl,
         pkgs.gperf,
-        pkgs.gobject_introspection,
-        pkgs.python,
         pkgs.gettext,
         pkgs.pkgconf,
       ],
@@ -45,7 +45,7 @@ fun pkgs =>
         pkgs.gcc_libs,
         pkgs.glib,
         pkgs.libxml2,
-        pkgs.libyaml,
+        pkgs.libfyaml,
         pkgs.libxmlb,
         pkgs.curl,
       ],
@@ -61,10 +61,14 @@ fun pkgs =>
         "-Dcompose=false",
         "-Dapt-support=false",
         "-Dgir=false",
+        "-Dzstd-support=false",
+        "-Dblake3-support=false",
+        "-Ddisplay-detection=none",
         "-Dsvg-support=false",
         "-Ddocs=false",
         "-Dapidocs=false",
         "-Dinstall-docs=false",
+        "-Dman=false",
       ],
     },
     inputs = {

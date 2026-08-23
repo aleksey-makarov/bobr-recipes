@@ -14,7 +14,10 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "https://www.freedesktop.org/software/accountsservice/accountsservice-%{version}.tar.xz",
+          url = [
+            "https://www.freedesktop.org/software/accountsservice/accountsservice-%{version}.tar.xz",
+            "https://deb.debian.org/debian/pool/main/a/accountsservice/accountsservice_%{version}.orig.tar.xz",
+          ],
         },
       }
   in

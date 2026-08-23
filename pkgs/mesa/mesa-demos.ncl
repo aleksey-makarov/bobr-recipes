@@ -5,8 +5,10 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url =
+      url = [
         "https://archive.mesa3d.org/demos/mesa-demos-%{version}.tar.xz",
+        "https://downloads.yoctoproject.org/mirror/sources/mesa-demos-%{version}.tar.xz",
+      ],
     },
   }
   in

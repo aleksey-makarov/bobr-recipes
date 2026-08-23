@@ -13,7 +13,10 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "https://www.x.org/releases/individual/lib/libxcvt-%{version}.tar.xz",
+          url = [
+            "https://www.x.org/releases/individual/lib/libxcvt-%{version}.tar.xz",
+            "https://deb.debian.org/debian/pool/main/libx/libxcvt/libxcvt_%{version}.orig.tar.xz",
+          ],
         },
       }
   in

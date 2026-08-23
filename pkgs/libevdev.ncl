@@ -6,7 +6,10 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://www.freedesktop.org/software/libevdev/libevdev-%{version}.tar.xz",
+      url = [
+        "https://www.freedesktop.org/software/libevdev/libevdev-%{version}.tar.xz",
+        "https://downloads.yoctoproject.org/mirror/sources/libevdev-%{version}.tar.xz",
+      ],
     },
   }
   in

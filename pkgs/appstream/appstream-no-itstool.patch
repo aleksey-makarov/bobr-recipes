@@ -1,26 +1,14 @@
-Build without itstool/xsltproc (docs).
+Build without itstool.
 
-Two unconditional bits of the build need tools we do not ship: data/meson.build
-runs the appstreamcli metainfo through itstool (which needs python libxml2
-bindings), and the docs subdir renders man pages from DocBook via xsltproc,
-which then tries to fetch the DocBook XSL stylesheet over the network. Neither
-the metainfo nor the man pages matter to our consumers (libadwaita /
-gnome-control-center link libappstream), so install the untranslated metainfo
-and drop the docs subdir. Mirrors the man/docs-off choice used across the tree.
+data/meson.build runs the appstreamcli metainfo through itstool, which needs
+python libxml2 bindings we do not ship. The translated metainfo does not matter
+to our consumers (libadwaita / gnome-control-center link libappstream), so
+install the generated untranslated file. Documentation and man pages are
+disabled through upstream Meson options.
 
---- a/meson.build
-+++ b/meson.build
-@@ -207,7 +207,6 @@
- subdir('po/')
- subdir('data/')
- subdir('contrib/')
--subdir('docs/')
- subdir('tests/')
- if get_option('qt')
-     subdir('qt/')
 --- a/data/meson.build
 +++ b/data/meson.build
-@@ -17,11 +17,12 @@
+@@ -26,11 +26,12 @@ metainfo_with_relinfo = custom_target('gen-output',
      command : [ascli_exe, 'news-to-metainfo', '--limit=6', '@INPUT0@', '@INPUT1@', '@OUTPUT@']
  )
  

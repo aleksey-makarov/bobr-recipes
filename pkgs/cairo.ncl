@@ -6,7 +6,10 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://www.cairographics.org/releases/cairo-%{version}.tar.xz",
+      url = [
+        "https://www.cairographics.org/releases/cairo-%{version}.tar.xz",
+        "https://sources.buildroot.net/cairo/cairo-%{version}.tar.xz",
+      ],
     },
   }
   in

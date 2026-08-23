@@ -13,7 +13,10 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "https://www.freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz",
+          url = [
+            "https://www.freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz",
+            "https://sources.buildroot.net/pulseaudio/pulseaudio-%{version}.tar.xz",
+          ],
         },
       }
   in

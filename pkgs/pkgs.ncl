@@ -113,6 +113,7 @@
   import "libepoxy.ncl",
   import "libevdev.ncl",
   import "libffi.ncl",
+  import "libfyaml.ncl",
   import "libgcrypt.ncl",
   import "libglvnd.ncl",
   import "libgpg-error.ncl",

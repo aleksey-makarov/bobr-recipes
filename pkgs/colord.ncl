@@ -12,7 +12,10 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "https://www.freedesktop.org/software/colord/releases/colord-%{version}.tar.xz",
+          url = [
+            "https://www.freedesktop.org/software/colord/releases/colord-%{version}.tar.xz",
+            "https://downloads.yoctoproject.org/mirror/sources/colord-%{version}.tar.xz",
+          ],
         },
       }
   in

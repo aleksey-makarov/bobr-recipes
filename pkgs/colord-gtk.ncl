@@ -12,7 +12,10 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "https://www.freedesktop.org/software/colord/releases/colord-gtk-%{version}.tar.xz",
+          url = [
+            "https://www.freedesktop.org/software/colord/releases/colord-gtk-%{version}.tar.xz",
+            "https://deb.debian.org/debian/pool/main/c/colord-gtk/colord-gtk_%{version}.orig.tar.xz",
+          ],
         },
       }
   in

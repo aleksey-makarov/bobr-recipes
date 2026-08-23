@@ -6,7 +6,10 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://www.cairographics.org/releases/pixman-%{version}.tar.gz",
+      url = [
+        "https://www.cairographics.org/releases/pixman-%{version}.tar.gz",
+        "https://downloads.yoctoproject.org/mirror/sources/pixman-%{version}.tar.gz",
+      ],
     },
   }
   in

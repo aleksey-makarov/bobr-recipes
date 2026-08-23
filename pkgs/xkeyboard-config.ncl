@@ -6,7 +6,10 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://www.x.org/releases/individual/data/xkeyboard-config/xkeyboard-config-%{version}.tar.xz",
+      url = [
+        "https://www.x.org/releases/individual/data/xkeyboard-config/xkeyboard-config-%{version}.tar.xz",
+        "https://downloads.yoctoproject.org/mirror/sources/xkeyboard-config-%{version}.tar.xz",
+      ],
     },
   }
   in

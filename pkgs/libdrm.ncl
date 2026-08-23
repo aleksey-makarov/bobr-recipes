@@ -7,7 +7,10 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://dri.freedesktop.org/libdrm/libdrm-%{version}.tar.xz",
+      url = [
+        "https://dri.freedesktop.org/libdrm/libdrm-%{version}.tar.xz",
+        "https://sources.buildroot.net/libdrm/libdrm-%{version}.tar.xz",
+      ],
     },
   }
   in

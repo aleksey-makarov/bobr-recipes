@@ -6,7 +6,10 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://archive.mesa3d.org/mesa-%{version}.tar.xz",
+      url = [
+        "https://archive.mesa3d.org/mesa-%{version}.tar.xz",
+        "https://sources.buildroot.net/mesa3d/mesa-%{version}.tar.xz",
+      ],
     },
   }
   in
