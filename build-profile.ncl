@@ -83,13 +83,31 @@
         per_host_default | Number | default = 0,
         per_host | { _ : Number } | default = {},
         max_connections | Number | default = 0,
+        max_local_jobs | Number | default = 0,
       }
       | doc m%"
-        Connection limits for `bin/bobr-fetch.sh`. `per_host_default` caps
+        Acquisition limits for `bobr`. `per_host_default` caps
         downloads per host (0 leaves the fetcher's default of 6), `per_host`
         overrides it for named hosts, `max_connections` caps downloads in
-        flight overall (0 derives it from the file-descriptor limit). Ignored
-        by `bin/bobr-build.sh`.
+        flight overall (0 derives it from the file-descriptor limit), and
+        `max_local_jobs` caps local Source acquisition/materialization.
+      "%
+      | default = {},
+
+    secondaries
+      | {
+        trusted_indexes
+          | Array { name | String, store | String }
+          | default = [],
+        content_sources
+          | Array { name | String, store | String }
+          | default = [],
+      }
+      | doc m%"
+        Ordered local secondary capabilities. Paths are resolved relative to
+        this profile. A store may appear in both arrays under the same name;
+        trusted mapping lookup and hardlink content acquisition remain
+        independent capabilities.
       "%
       | default = {},
   },

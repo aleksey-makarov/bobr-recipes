@@ -37,6 +37,7 @@ let RequestArgs = {
       per_host_default | Number | default = 0,
       per_host | { _ : Number } | default = {},
       max_connections | Number | default = 0,
+      max_local_jobs | Number | default = 0,
     }
     | default = {},
 }
@@ -80,6 +81,12 @@ let request | RequestArgs -> Dyn = fun args =>
         & (
           if args.fetch.max_connections > 0 then
             { max_connections = args.fetch.max_connections }
+          else
+            {}
+        )
+        & (
+          if args.fetch.max_local_jobs > 0 then
+            { max_local_jobs = args.fetch.max_local_jobs }
           else
             {}
         )

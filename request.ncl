@@ -19,11 +19,12 @@
 # - `overlays`: optional array of `recipe-set.ncl` overlays
 #
 # `bobr` neither names the run nor creates its directories: whoever invokes it
-# does both (see tools/bobr-build.sh).
+# does both (see bin/bobr-build.sh).
 #
 # The returned value has this outer shape:
 # - `schema` from `request-schema.ncl`
 # - `store = store_path`, `logs = logs_path`, `work = work_path`, `run_id`
+# - ordered `goals`, acquisition `limits`, local `secondaries`
 # - `nodes = recipe.to_request { recipes_path } raw (...)`
 let mkPkgs = import "recipe-set.ncl" in
 let request_schema = import "request-schema.ncl" in
@@ -36,6 +37,20 @@ let RequestArgs = {
   recipes_path | String,
   target_name | String,
   overlays | Array Dyn | default = [],
+  limits
+    | {
+      per_host_default | Number | default = 0,
+      per_host | { _ : Number } | default = {},
+      max_connections | Number | default = 0,
+      max_local_jobs | Number | default = 0,
+    }
+    | default = {},
+  secondaries
+    | {
+      trusted_indexes | Array Dyn | default = [],
+      content_sources | Array Dyn | default = [],
+    }
+    | default = {},
 }
 in
 let request | RequestArgs -> Dyn = fun args =>
@@ -67,12 +82,41 @@ let request | RequestArgs -> Dyn = fun args =>
       std.fail_with
         "request.ncl: no recipe named '%{target_name}'; list what there is with bin/bobr-list-pkgs.sh"
     else
+    let request_limits =
+      (
+        if args.limits.per_host_default > 0 then
+          { per_host_default = args.limits.per_host_default }
+        else
+          {}
+      )
+      & (
+        if args.limits.max_connections > 0 then
+          { max_connections = args.limits.max_connections }
+        else
+          {}
+      )
+      & (
+        if args.limits.max_local_jobs > 0 then
+          { max_local_jobs = args.limits.max_local_jobs }
+        else
+          {}
+      )
+      & (
+        if args.limits.per_host == {} then
+          {}
+        else
+          { per_host = args.limits.per_host }
+      )
+    in
     {
       schema = request_schema,
       store = store_path,
       logs = logs_path,
       work = work_path,
       run_id = run_name,
+      goals = ["root"],
+      limits = request_limits,
+      secondaries = args.secondaries,
       nodes = recipe.to_request { include recipes_path } raw (std.record.get target_name raw),
     }
 in

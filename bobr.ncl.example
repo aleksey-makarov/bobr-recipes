@@ -2,7 +2,6 @@
 #
 #     cp <recipes>/bobr.ncl.example ./bobr.ncl
 #     mkdir bobr-store
-#     <recipes>/bin/bobr-fetch.sh     # optional: download the sources first
 #     <recipes>/bin/bobr-build.sh
 #
 # It describes one installation -- where the store is, what to build, which
@@ -40,7 +39,7 @@
   # namespaces.
   # podman_unshare = false,
 
-  # Connection limits for bin/bobr-fetch.sh; bin/bobr-build.sh ignores them.
+  # Acquisition limits used by bobr during the normal build.
   # Downloads per host default to 6 (what servers expect of one client), and
   # the overall cap is derived from the file-descriptor limit. 0 means "let
   # the fetcher decide".
@@ -56,5 +55,13 @@
     per_host = { "gitlab.freedesktop.org" = 2 },
     # per_host_default = 6,
     # max_connections = 64,
+    # max_local_jobs = 4,
   },
+
+  # Optional local secondary capabilities. A store may be listed in either or
+  # both arrays; content sources must share a filesystem with the working store.
+  # secondaries = {
+  #   trusted_indexes = [{ name = "previous", store = "../old-store" }],
+  #   content_sources = [{ name = "previous", store = "../old-store" }],
+  # },
 }

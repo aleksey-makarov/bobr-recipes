@@ -55,7 +55,7 @@ let overlays =
 in
 # Rebuilt as Nickel source rather than passed by re-importing the profile: one
 # reading of the profile, and the value is printable, so --dry-run can show the
-# limits a fetch run is about to use.
+# acquisition limits a run is about to use.
 let per_host =
   std.string.join ", " (
     std.array.map
@@ -66,7 +66,20 @@ in
 let fetch =
   "{ per_host_default = " ++ std.string.from_number profile.fetch.per_host_default
   ++ ", max_connections = " ++ std.string.from_number profile.fetch.max_connections
+  ++ ", max_local_jobs = " ++ std.string.from_number profile.fetch.max_local_jobs
   ++ ", per_host = { " ++ per_host ++ " } }"
+in
+let capability = fun entry =>
+  "{ name = " ++ std.serialize 'Json entry.name
+  ++ ", store = " ++ std.serialize 'Json (absolute entry.store) ++ " }"
+in
+let capability_array = fun entries =>
+  "[" ++ std.string.join ", " (std.array.map capability entries) ++ "]"
+in
+let secondaries =
+  "{ trusted_indexes = " ++ capability_array profile.secondaries.trusted_indexes
+  ++ ", content_sources = " ++ capability_array profile.secondaries.content_sources
+  ++ " }"
 in
 std.string.join "\n" [
   "profile_target=" ++ quote profile.target,
@@ -78,6 +91,7 @@ std.string.join "\n" [
   "profile_podman_unshare=" ++ quote (if profile.podman_unshare then "1" else "0"),
   "profile_overlays=" ++ quote overlays,
   "profile_fetch=" ++ quote fetch,
+  "profile_secondaries=" ++ quote secondaries,
 ]
 EOF_PROFILE
   )"

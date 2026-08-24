@@ -310,12 +310,8 @@ in
   to_request = fun raw_ctx =>
     fun pkgs =>
     fun root_node =>
-    # `recipes_path` is still required of the caller, and still unused here: it
-    # exists to lower a `RecipePath` origin against the checkout, and a build
-    # request carries no origins. Kept in the signature because both lowerings
-    # take the same context, and dropping it from one of them would be a trap
-    # for whoever wires them up next.
-    let _ctx = raw_ctx | { recipes_path | String } in
+    let ctx = raw_ctx | { recipes_path | String } in
+    let lower_origin = lower_source_origin ctx in
     let unique_nodes = collect_unique_nodes pkgs root_node in
     let root_name = root_node.name in
     let other_names =
@@ -359,24 +355,17 @@ in
           let node = std.record.get name unique_nodes in
           let node_value =
             if node.tag == "Source" then
-              # No origin, deliberately -- a build request states which objects
-              # a build needs, not where to get them. Filling the store is
-              # `bobr-fetch`'s job (and will grow beyond downloading: pulling
-              # objects from other stores, including remote ones), while the
-              # build only builds. `bobr` reads a Source without an origin the
-              # way the contract says: the object must already be there, or the
-              # build stops and names it.
-              #
-              # This is what makes the split real rather than a convention. With
-              # origins in the request, a fetch that missed something -- a
-              # different target, different overlays, a failure nobody read --
-              # was quietly covered by the build downloading it itself, and the
-              # break went unnoticed. Now it is a stop.
               {
                 name = node.name,
                 tag = node.tag,
                 object_hash = node.object_hash,
               }
+              & (
+                if std.record.has_field "origin" node then
+                  { origin = lower_origin node.origin }
+                else
+                  {}
+              )
             else
               {
                 name = node.name,

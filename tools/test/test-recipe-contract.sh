@@ -1245,11 +1245,9 @@ run_shallow_case "shallow-bad-name" fail '{"name":42,"tag":"Group","config":{},"
 run_shallow_case "shallow-bad-source-origin" fail '{"name":"src","tag":"Source","object_hash":"aa","origin":{"tag":"Ftp","url":"x"}}'
 run_shallow_case "shallow-bad-tree-entry" fail '{"name":"t","tag":"Tree","config":{"tree":{"entries":[{"type":"file","path":"x"}]}},"inputs":{}}'
 
-# The two lowerings, side by side. They walk the same graph from the same node,
-# so they must name the same sources -- that is what lets a build request carry
-# no origins at all: whatever it needs, the fetch request was asked to obtain.
-# The origins live on the fetch side alone, with `RecipePath` resolved against
-# the checkout.
+# The legacy flat fetch lowering and unified graph lowering walk the same graph
+# and preserve the same Source origins. `RecipePath` is resolved against the
+# checkout in both representations.
 cat > "${tmpdir}/check-two-lowerings.ncl" <<EOF_INNER
 let recipe = import "${repo_root}/recipe-lib.ncl" in
 let tarball = {
@@ -1285,8 +1283,9 @@ jq -e '
   ([.build[] | select(.tag == "Source") | .name] | sort) as $build_sources
   | ([.fetch[] | .name] | sort) as $fetch_sources
   | $build_sources == $fetch_sources
-  and ([.build[] | select(has("origin"))] | length == 0)
+  and ([.build[] | select(has("origin"))] | length == 2)
   and ([.fetch[] | select(has("origin"))] | length == 2)
+  and ([.build[] | select(.name == "script" and .origin.tag == "Path" and .origin.path == "/recipes/synthetic/autotools-stage-install.sh")] | length == 1)
   and ([.fetch[] | select(.name == "script" and .origin.tag == "Path" and .origin.path == "/recipes/synthetic/autotools-stage-install.sh")] | length == 1)
 ' <<<"${two_lowerings_json}" >/dev/null
 

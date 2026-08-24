@@ -93,6 +93,8 @@ store_path="${profile_store}"
 logs_root="${profile_logs}"
 work_root="${profile_work}"
 overlays_expr="${profile_overlays}"
+limits_expr="${profile_fetch}"
+secondaries_expr="${profile_secondaries}"
 [ -n "${target}" ] || target="${profile_target}"
 [ -n "${jobs}" ] || { [ "${profile_jobs}" = "0" ] || jobs="${profile_jobs}"; }
 [ -n "${quiet}" ] || quiet="${profile_quiet}"
@@ -104,11 +106,6 @@ podman_unshare="${profile_podman_unshare}"
   || die "store does not exist: ${store_path} (create it: mkdir -p '${store_path}')"
 
 check_request_schema "${recipes_path}/request-schema.ncl" bobr
-
-# No hash-lock check here. The build is moving towards working only with
-# sources already in the store, so the phase that puts them there -- the
-# fetcher, bin/bobr-fetch.sh -- is where a stale lock is caught.
-
 
 if [ "${dry_run}" -eq 1 ]; then
   # A dry run creates nothing: it names the directories a real build would have
@@ -137,6 +134,8 @@ request_expr="(import \"${recipes_path}/request.ncl\") {
   recipes_path = \"${recipes_path}\",
   target_name = \"${target}\",
   overlays = ${overlays_expr},
+  limits = ${limits_expr},
+  secondaries = ${secondaries_expr},
 }${merge_expr}"
 
 
