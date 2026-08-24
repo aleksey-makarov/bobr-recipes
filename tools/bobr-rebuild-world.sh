@@ -9,14 +9,15 @@
 #             takes the latest published release instead, which is what the
 #             Hetzner builder does.
 #
-# Either way the recipes are pulled first, the sources are fetched with
-# bin/bobr-fetch.sh and the target built with bin/bobr-build.sh -- the same two
-# drivers everyday use goes through -- into
-# <workspace>/bobr-store.<YYMMDDhhmmss>. Source objects are seeded from the
-# previous store by hardlink, so what was already downloaded is not downloaded
-# again, and only after the build succeeds is the `bobr-store` symlink repointed
-# at the new store. What was built from, and how the host was doing while it
-# built, are recorded beside it.
+# Either way the recipes are pulled first, then the target is realized by one
+# real bin/bobr-build.sh invocation into <workspace>/bobr-store.<YYMMDDhhmmss>.
+# A preceding dry run of the same driver lowers the unified request used for
+# Source seeding and records it for diagnostics.
+# Source objects are seeded from the previous store by hardlink, so unchanged
+# archives are not downloaded again; all build and reuse mappings start empty.
+# Only after the build succeeds is the `bobr-store` symlink repointed at the new
+# store. What was built from, and how the host was doing while it built, are
+# recorded beside it.
 
 set -euo pipefail
 
@@ -63,7 +64,7 @@ git -C "${recipes_repo}" pull --ff-only
 # Whatever a run of bobr needs on PATH. Checked explicitly after installing a
 # release so a release older than one of them fails here, by name, rather than
 # three steps later as "required tool not found".
-required_binaries=(bobr bobr-fetch fsobj-hash bobr-sandbox-launcher)
+required_binaries=(bobr fsobj-hash bobr-sandbox-launcher)
 
 # What the binaries were built from, for hashes.txt: a commit either way, so
 # that two stores built on different machines can be compared without their
@@ -258,18 +259,18 @@ log "mode=$([ "${local_mode}" -eq 1 ] && echo local || echo release)"
 log "bobr=${bobr_revision:-unknown}"
 log_host_snapshot "after-store-create"
 
-# bobr-fetch.sh and bobr-build.sh print their per-phase timings to stderr;
-# pointing them at the run log records them there too.
+# bobr-build.sh prints its lowering and realization timings to stderr; pointing
+# it at the run log records them there too.
 export BOBR_BUILD_TIMING_LOG="${script_log}"
 
 # ---------------------------------------------------------------------------
 # seeding
 # ---------------------------------------------------------------------------
 
-# Export the fetch request once to learn which source objects to seed. It
+# Export the unified request once to learn which Source objects to seed. It
 # doubles as an early failure if the recipes do not lower.
-echo "==> export fetch request" >&2
-"${recipes_repo}/bin/bobr-fetch.sh" "${profile_path}" --dry-run \
+echo "==> export build request" >&2
+"${recipes_repo}/bin/bobr-build.sh" "${profile_path}" --dry-run \
   > "${request_json}" 2>>"${script_log}"
 
 # Hardlink one object (file or directory) into the new store, atomically and only
@@ -309,8 +310,9 @@ find_previous_store() {
   printf '%s\n' "${previous}"
 }
 
-# Temporary: once a store can name another as a read-only source, this is
-# bobr-fetch's job and the hardlinking goes away.
+# This deliberately seeds Source content only. Configuring the previous store
+# as a general secondary would also reuse its build results and the rebuild
+# would no longer be cold.
 seed_source_objects() {
   local previous_store="$1"
   local object_hash source_object target_object
@@ -342,7 +344,9 @@ seed_source_objects() {
     # Trimmed in jq rather than after it: a RecipePath source declares its hash
     # from a lock file imported as text, so the value carries the file's
     # trailing newline and would otherwise arrive as two lines.
-    jq -r '.sources[].object_hash | gsub("\\s"; "")' "${request_json}" | sort -u
+    jq -r \
+      '.nodes[] | select(.tag == "Source") | .object_hash | gsub("\\s"; "")' \
+      "${request_json}" | sort -u
   )
   log "seed: total=${total} linked=${linked} already=${already} missing=${missing}"
 }
@@ -356,7 +360,7 @@ log "seed_seconds=$(( $(date '+%s') - seed_started_at ))"
 log_host_snapshot "after-seed"
 
 # ---------------------------------------------------------------------------
-# fetch, then build
+# realization
 # ---------------------------------------------------------------------------
 
 # Runs one phase under `time` when it is available, recording its resource use
@@ -381,26 +385,15 @@ run_phase() {
   return "${status}"
 }
 
-echo "==> fetch sources" >&2
-log_host_snapshot "before-fetch"
-fetch_started_at="$(date '+%s')"
-fetch_status=0
-run_phase fetch "${recipes_repo}/bin/bobr-fetch.sh" "${profile_path}" || fetch_status=$?
-log "fetch_seconds=$(( $(date '+%s') - fetch_started_at ))"
-# A fetch that ends unhappy means a source is missing or its content does not
-# match what the recipes declare; building on top of that would bury the
-# question under a build failure somewhere else.
-[ "${fetch_status}" -eq 0 ] || die "fetch failed (${fetch_status}); not building"
-log_host_snapshot "after-fetch"
-
-echo "==> build" >&2
-log_host_snapshot "before-build"
-build_started_at="$(date '+%s')"
-build_status=0
-run_phase build "${recipes_repo}/bin/bobr-build.sh" "${profile_path}" || build_status=$?
-log "build_seconds=$(( $(date '+%s') - build_started_at ))"
-[ "${build_status}" -eq 0 ] || exit "${build_status}"
-log_host_snapshot "after-build"
+echo "==> realize world" >&2
+log_host_snapshot "before-realize"
+realize_started_at="$(date '+%s')"
+realize_status=0
+run_phase realize \
+  "${recipes_repo}/bin/bobr-build.sh" "${profile_path}" || realize_status=$?
+log "realize_seconds=$(( $(date '+%s') - realize_started_at ))"
+[ "${realize_status}" -eq 0 ] || exit "${realize_status}"
+log_host_snapshot "after-realize"
 
 # The build succeeded: repoint the convenience symlink at the new store.
 # Overwrite an existing symlink; leave any non-symlink of that name untouched.
