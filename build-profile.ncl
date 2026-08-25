@@ -13,7 +13,43 @@
 # of being silently ignored. Relative paths are resolved against the profile file itself, never the
 # current directory, so the same profile means the same thing wherever it is
 # invoked from.
+let FixedProgressLines =
+  std.contract.all_of [
+    Number,
+    std.contract.from_predicate (fun value => value >= 4),
+  ]
+in
+let TaggedUnion = fun discriminator =>
+  fun variants =>
+    std.contract.custom (fun label value =>
+      if !std.is_record value then
+        'Error { message = "expected a record" }
+      else if !std.record.has_field discriminator value then
+        'Error { message = "missing discriminator field '%{discriminator}'" }
+      else
+        let tag = std.record.get discriminator value in
+        if !std.is_string tag then
+          'Error { message = "discriminator field '%{discriminator}' must be a string" }
+        else if std.record.has_field tag variants then
+          std.contract.check (std.record.get tag variants) label value
+        else
+          'Error {
+            message = "unknown %{discriminator} '%{tag}'; expected one of: %{std.string.join ", " (std.record.fields variants)}",
+          }
+    )
+in
+let ProgressPolicyContract =
+  TaggedUnion "mode" {
+    auto = { mode | std.contract.Equal "auto" },
+    summary = { mode | std.contract.Equal "summary" },
+    fixed = {
+      mode | std.contract.Equal "fixed",
+      max_lines | FixedProgressLines,
+    },
+  }
+in
 {
+  ProgressPolicy = ProgressPolicyContract,
   Profile = {
     target
       | String
@@ -69,6 +105,16 @@
       | Bool
       | doc "Suppress the live progress log, leaving warnings and errors."
       | default = false,
+
+    progress
+      | ProgressPolicyContract
+      | doc m%"
+        Terminal presentation policy. `auto` derives a line budget from the
+        current TTY, `fixed` caps the complete live block at `max_lines`, and
+        `summary` hides individual builder rows. It never affects build
+        identity and is ignored for non-terminal output.
+      "%
+      | default = { mode = "auto" },
 
     podman_unshare
       | Bool

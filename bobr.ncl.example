@@ -35,6 +35,12 @@
   # Keep only warnings and errors on screen.
   # quiet = false,
 
+  # Terminal presentation. `fixed.max_lines` caps the complete live block;
+  # `summary` hides individual builder rows. Non-TTY output stays plain.
+  # progress = { mode = "auto" },
+  # progress = { mode = "fixed", max_lines = 8 },
+  # progress = { mode = "summary" },
+
   # Run bobr under `podman unshare`, for hosts without unprivileged user
   # namespaces.
   # podman_unshare = false,

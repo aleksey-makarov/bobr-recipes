@@ -95,6 +95,7 @@ work_root="${profile_work}"
 overlays_expr="${profile_overlays}"
 limits_expr="${profile_fetch}"
 secondaries_expr="${profile_secondaries}"
+progress_expr="${profile_progress}"
 [ -n "${target}" ] || target="${profile_target}"
 [ -n "${jobs}" ] || { [ "${profile_jobs}" = "0" ] || jobs="${profile_jobs}"; }
 [ -n "${quiet}" ] || quiet="${profile_quiet}"
@@ -134,6 +135,7 @@ request_expr="(import \"${recipes_path}/request.ncl\") {
   recipes_path = \"${recipes_path}\",
   target_name = \"${target}\",
   overlays = ${overlays_expr},
+  progress = ${progress_expr},
   limits = ${limits_expr},
   secondaries = ${secondaries_expr},
 }${merge_expr}"

@@ -29,6 +29,7 @@
 let mkPkgs = import "recipe-set.ncl" in
 let request_schema = import "request-schema.ncl" in
 let recipe = import "recipe-lib.ncl" in
+let profile_contracts = import "build-profile.ncl" in
 let RequestArgs = {
   store_path | String,
   logs_path | String,
@@ -37,6 +38,7 @@ let RequestArgs = {
   recipes_path | String,
   target_name | String,
   overlays | Array Dyn | default = [],
+  progress | profile_contracts.ProgressPolicy | default = { mode = "auto" },
   limits
     | {
       per_host_default | Number | default = 0,
@@ -115,6 +117,7 @@ let request | RequestArgs -> Dyn = fun args =>
       work = work_path,
       run_id = run_name,
       goals = ["root"],
+      progress = args.progress,
       limits = request_limits,
       secondaries = args.secondaries,
       nodes = recipe.to_request { include recipes_path } raw (std.record.get target_name raw),

@@ -69,6 +69,13 @@ let fetch =
   ++ ", max_local_jobs = " ++ std.string.from_number profile.fetch.max_local_jobs
   ++ ", per_host = { " ++ per_host ++ " } }"
 in
+let progress =
+  if profile.progress.mode == "fixed" then
+    "{ mode = \"fixed\", max_lines = "
+    ++ std.string.from_number profile.progress.max_lines ++ " }"
+  else
+    "{ mode = \"" ++ profile.progress.mode ++ "\" }"
+in
 let capability = fun entry =>
   "{ name = " ++ std.serialize 'Json entry.name
   ++ ", store = " ++ std.serialize 'Json (absolute entry.store) ++ " }"
@@ -88,6 +95,7 @@ std.string.join "\n" [
   "profile_work=" ++ quote (if profile.work == "" then store ++ "/work" else absolute profile.work),
   "profile_jobs=" ++ quote (std.string.from_number profile.jobs),
   "profile_quiet=" ++ quote (if profile.quiet then "1" else "0"),
+  "profile_progress=" ++ quote progress,
   "profile_podman_unshare=" ++ quote (if profile.podman_unshare then "1" else "0"),
   "profile_overlays=" ++ quote overlays,
   "profile_fetch=" ++ quote fetch,
