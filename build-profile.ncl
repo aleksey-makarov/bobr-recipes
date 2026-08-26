@@ -133,7 +133,7 @@ in
       }
       | doc m%"
         Acquisition limits for `bobr`. `per_host_default` caps
-        downloads per host (0 leaves the fetcher's default of 6), `per_host`
+        downloads per host (0 leaves bobr's default of 6), `per_host`
         overrides it for named hosts, `max_connections` caps downloads in
         flight overall (0 derives it from the file-descriptor limit), and
         `max_local_jobs` caps local Source acquisition/materialization.

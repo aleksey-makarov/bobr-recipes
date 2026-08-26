@@ -9,7 +9,7 @@ fun pkgs =>
       # SourceForge is freetype's other upstream home. Use the canonical project
       # path, as the other SF-hosted recipes do: the short
       # downloads.sourceforge.net/freetype/ form serves an HTML interstitial the
-      # fetcher stores by mistake.
+      # downloader can save by mistake.
       url = [
         "https://download.savannah.gnu.org/releases/freetype/freetype-%{version}.tar.xz",
         "https://downloads.sourceforge.net/project/freetype/freetype2/%{version}/freetype-%{version}.tar.xz",

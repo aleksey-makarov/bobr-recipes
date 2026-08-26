@@ -1,15 +1,11 @@
-# Shared by bin/bobr-build.sh and bin/bobr-fetch.sh: everything the two do
-# identically -- resolving a build profile, claiming a run, checking that the
-# recipes and the binary agree on a request format, and timing the phases.
+# Shared shell support for `bobr-build.sh`: resolving a build profile, checking
+# that the recipes and binary agree on a request format, and timing phases.
 #
 # Not executable on its own; source it after setting `tool` to the calling
 # script's name (used in messages) and `recipes_path` to this checkout's root.
 #
-# The profile block lives here rather than in each script for a reason worth
-# stating: it was copied once, and the copy quietly fell behind -- the fetch
-# side stopped exporting `quiet`, so a profile asking for silence was obeyed by
-# one tool and ignored by the other. One place to add a field is one place to
-# forget it.
+# Keeping profile lowering separate from orchestration also makes every profile
+# field pass through one auditable boundary.
 
 die() {
   echo "${tool}: $*" >&2

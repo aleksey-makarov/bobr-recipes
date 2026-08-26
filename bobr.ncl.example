@@ -48,7 +48,7 @@
   # Acquisition limits used by bobr during the normal build.
   # Downloads per host default to 6 (what servers expect of one client), and
   # the overall cap is derived from the file-descriptor limit. 0 means "let
-  # the fetcher decide".
+  # bobr choose its default".
   #
   # The one host that needs less than the default is gitlab.freedesktop.org,
   # and not because it is fragile: its `/-/archive/<commit>/` URLs are not

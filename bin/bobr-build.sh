@@ -108,6 +108,12 @@ podman_unshare="${profile_podman_unshare}"
 
 check_request_schema "${recipes_path}/request-schema.ncl" bobr
 
+# Local Source paths are content-addressed by adjacent lock files. Check the
+# whole recipes tree before relying on cached Source objects: a warm store must
+# not hide a local edit whose lock was not refreshed.
+"${recipes_path}/bin/bobr-update-fsobj-hashes.sh" --check \
+  || die "recipe hash locks are stale; refresh them: ${recipes_path}/bin/bobr-update-fsobj-hashes.sh"
+
 if [ "${dry_run}" -eq 1 ]; then
   # A dry run creates nothing: it names the directories a real build would have
   # made and stops after lowering.

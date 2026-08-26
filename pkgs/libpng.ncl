@@ -8,7 +8,7 @@ fun pkgs =>
       tag = "Http",
       # Canonical SourceForge project path (+ /download fallback), matching the
       # other SF-hosted recipes. The short download.sourceforge.net/libpng/ form
-      # goes through an extra HTML redirect the fetcher can capture by mistake.
+      # goes through an extra HTML redirect the downloader can save by mistake.
       url = [
         "https://downloads.sourceforge.net/project/libpng/libpng16/%{version}/libpng-%{version}.tar.xz",
         "https://sourceforge.net/projects/libpng/files/libpng16/%{version}/libpng-%{version}.tar.xz/download",
