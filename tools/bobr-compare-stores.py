@@ -8,7 +8,7 @@ Usage:
     bobr-compare-stores.py STORE_A STORE_B [options]
 
 What it does (never aborts on a mismatch -- it reports and continues):
-  1. Compares hashes.txt (mbuild / mbuild-recipes commits).
+  1. Compares hashes.txt (bobr / bobr-recipes commits).
   2. Compares the set of Build Keys (builds/<key>); reports keys present in
      only one store.
   3. On the build keys present in BOTH, compares the produced object hash.
@@ -17,14 +17,20 @@ What it does (never aborts on a mismatch -- it reports and continues):
                     both stores, yet the output differs -> the build step
                     itself is non-deterministic here.
        - inherited: the inputs already differ -> divergence comes from upstream.
+       - unknown  : at least one object record is not valid provenance for the
+                    mapping, so the two cases cannot be distinguished safely.
      Root divergences are the actionable ones and are reported in detail,
      including which files inside the object differ.
 
-Exit code: 0 if no object-hash divergences among common build keys, else 1.
+Exit code: 0 if no object-hash divergences or unreadable mappings are found
+among common build keys, else 1.
 
 Store layout used:
-  hashes.txt                      "mbuild <sha>" / "mbuild-recipes <sha>"
-  builds/<build_key>              {"inputs":[obj_hash...], "object_hash":...}
+  hashes.txt                      "bobr <sha>" / "bobr-recipes <sha>"
+  builds/<build_key>              symlink -> ../objects/<object_hash>
+  object-records/<object_hash>.json
+                                  optional build provenance used to classify
+                                  output divergences
   object-refs/<name>              symlink -> ../objects/<object_hash>
   objects/<obj_hash>              either an fs-tree manifest (newline-delimited
                                   JSON file: schema header then one entry per
@@ -40,6 +46,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -47,11 +54,13 @@ from pathlib import Path
 
 # A store is often reached over sshfs, where every open costs a network
 # round trip -- measured at 104 ms against one remote store versus 3 ms
-# against a local mount. Reading 1803 build handles one after another put
+# against a local mount. Reading 1803 build mappings one after another put
 # three minutes of waiting in front of a comparison that needs one second of
 # CPU. The work is pure I/O, so threads overlap it even under the GIL; the
 # number is a latency-hiding factor, not a parallelism one.
 DEFAULT_READERS = 48
+HEX64 = re.compile(r"[0-9a-f]{64}")
+OBJECT_TARGET = re.compile(r"\.\./objects/([0-9a-f]{64})")
 
 
 def _read_many(paths, read_one, readers: int):
@@ -93,31 +102,85 @@ def load_build_keys(store: Path) -> set[str]:
         return set()
     try:
         with os.scandir(builds) as it:
-            return {entry.name for entry in it if entry.is_file()}
+            # Do not use is_file(): it follows the symlink, so mappings to
+            # directory objects would disappear from the comparison.
+            return {entry.name for entry in it}
     except OSError:
         return set()
 
 
-def load_handles(store: Path, keys, readers: int) -> dict[str, dict]:
-    """Read builds/<build_key> -> {"object_hash":..., "inputs":[...]}."""
+def load_mappings(
+    store: Path,
+    keys,
+    readers: int,
+) -> tuple[dict[str, dict], dict[str, str]]:
+    """Read build mappings and optional matching object records.
+
+    ``object_hash`` comes only from the canonical mapping symlink. ``inputs``
+    is populated only when the object record names both this hash and this
+    build key. Object records describe the first writer of an object, so a
+    neutral or shared record is not valid provenance for every mapping that
+    happens to reach the same object.
+    """
     builds = store / "builds"
+    records = store / "object-records"
     ordered = sorted(keys)
 
     def read_one(key: str):
         try:
-            return json.loads((builds / key).read_text())
-        except (OSError, json.JSONDecodeError):
-            return None
+            target = os.readlink(builds / key)
+        except OSError as error:
+            return None, f"cannot read mapping symlink: {error}"
+        match = OBJECT_TARGET.fullmatch(target)
+        if match is None:
+            return None, f"non-canonical mapping target {target!r}"
 
-    handles: dict[str, dict] = {}
-    for key, data in zip(ordered, _read_many(ordered, read_one, readers)):
-        if data is None:
-            continue
-        handles[key] = {
-            "object_hash": data.get("object_hash"),
-            "inputs": data.get("inputs", []),
+        object_hash = match.group(1)
+        mapping = {
+            "object_hash": object_hash,
+            "inputs": None,
+            "provenance_error": None,
         }
-    return handles
+        record_path = records / f"{object_hash}.json"
+        try:
+            record = json.loads(record_path.read_text())
+        except OSError as error:
+            mapping["provenance_error"] = f"cannot read object record: {error}"
+            return mapping, None
+        except json.JSONDecodeError as error:
+            mapping["provenance_error"] = f"invalid object record JSON: {error}"
+            return mapping, None
+
+        if not isinstance(record, dict):
+            mapping["provenance_error"] = "object record is not a JSON object"
+        elif record.get("schema") != "bobr-object-record-v4":
+            mapping["provenance_error"] = "object record has an unknown schema"
+        elif record.get("object_hash") != object_hash:
+            mapping["provenance_error"] = "object record names a different object hash"
+        elif record.get("build_key") != key:
+            mapping["provenance_error"] = (
+                "object record belongs to a different build key"
+            )
+        else:
+            inputs = record.get("inputs")
+            if not isinstance(inputs, list) or not all(
+                isinstance(value, str) and HEX64.fullmatch(value)
+                for value in inputs
+            ):
+                mapping["provenance_error"] = "object record has invalid inputs"
+            else:
+                mapping["inputs"] = inputs
+        return mapping, None
+
+    mappings: dict[str, dict] = {}
+    errors: dict[str, str] = {}
+    for key, result in zip(ordered, _read_many(ordered, read_one, readers)):
+        mapping, error = result
+        if mapping is not None:
+            mappings[key] = mapping
+        if error is not None:
+            errors[key] = error
+    return mappings, errors
 
 
 def load_oh_to_name(store: Path, readers: int) -> dict[str, str]:
@@ -282,9 +345,9 @@ class Resolver:
 
     def name(self, build_key: str) -> str:
         for sv in self.stores:
-            handle = sv.handles.get(build_key)
-            if handle and handle["object_hash"] in sv.oh_to_name:
-                return sv.oh_to_name[handle["object_hash"]]
+            mapping = sv.mappings.get(build_key)
+            if mapping and mapping["object_hash"] in sv.oh_to_name:
+                return sv.oh_to_name[mapping["object_hash"]]
         return f"(unnamed {build_key[:12]})"
 
     def tag(self, name: str) -> str:
@@ -309,12 +372,14 @@ class StoreView:
         self.readers = readers
         self.hashes = load_hashes(path)
         self.build_keys = load_build_keys(path)
-        self.handles: dict[str, dict] = {}
+        self.mappings: dict[str, dict] = {}
+        self.mapping_errors: dict[str, str] = {}
         self._oh_to_name: dict[str, str] | None = None
         self._name_to_tag: dict[str, str] | None = None
 
-    def read_handles(self, keys) -> None:
-        self.handles = load_handles(self.path, keys, self.readers)
+    def read_mappings(self, keys) -> None:
+        self.mappings, self.mapping_errors = load_mappings(
+            self.path, keys, self.readers)
 
     @property
     def oh_to_name(self) -> dict[str, str]:
@@ -377,6 +442,8 @@ def compare_build_keys(a: StoreView, b: StoreView) -> set[str]:
             print(f"  {label}: {len(keys)}")
             for bk in sorted(keys, key=lambda k: resolver.name(k)):
                 print(f"      {resolver.name(bk):40s} {bk[:12]}")
+                if bk in owner.mapping_errors:
+                    print(f"          invalid mapping: {owner.mapping_errors[bk]}")
     if not only_a and not only_b:
         print("  build-key sets are identical.")
     return common
@@ -417,21 +484,32 @@ def compare_objects(a: StoreView, b: StoreView, common: set[str],
                     show_inherited: bool) -> int:
     section("object hashes (common build keys)")
     resolver = Resolver([a, b])
-    roots, inherited = [], []
+    roots, inherited, unknown = [], [], []
+    unreadable = []
     for bk in common:
-        ha, hb = a.handles[bk], b.handles[bk]
+        if bk not in a.mappings or bk not in b.mappings:
+            unreadable.append(bk)
+            continue
+        ha, hb = a.mappings[bk], b.mappings[bk]
         if ha["object_hash"] == hb["object_hash"]:
             continue
-        same_inputs = sorted(ha["inputs"]) == sorted(hb["inputs"])
-        (roots if same_inputs else inherited).append(bk)
+        if ha["inputs"] is None or hb["inputs"] is None:
+            unknown.append(bk)
+        elif ha["inputs"] == hb["inputs"]:
+            roots.append(bk)
+        else:
+            inherited.append(bk)
 
-    total = len(roots) + len(inherited)
-    if total == 0:
+    total = len(roots) + len(inherited) + len(unknown)
+    if total == 0 and not unreadable:
         print(f"  no divergences: all {len(common)} common build keys match.")
         return 0
 
     print(f"  divergent: {total} of {len(common)}  "
-          f"(roots={len(roots)}, inherited={len(inherited)})")
+          f"(roots={len(roots)}, inherited={len(inherited)}, "
+          f"unknown={len(unknown)})")
+    if unreadable:
+        print(f"  unreadable mappings: {len(unreadable)}")
 
     def describe(bk: str) -> tuple[str, str]:
         name = resolver.name(bk)
@@ -439,16 +517,16 @@ def compare_objects(a: StoreView, b: StoreView, common: set[str],
 
     section(f"ROOT divergences ({len(roots)})  [same inputs, different output]")
     if not roots:
-        print("  none -- every divergence is inherited from upstream.")
+        print("  none.")
     for bk in sorted(roots, key=lambda k: describe(k)[0]):
         name, tag = describe(bk)
         print(f"  * {name}  [{tag}]")
         print(f"      build_key: {bk}")
-        print(f"      A: {a.handles[bk]['object_hash']}")
-        print(f"      B: {b.handles[bk]['object_hash']}")
+        print(f"      A: {a.mappings[bk]['object_hash']}")
+        print(f"      B: {b.mappings[bk]['object_hash']}")
         if show_files:
-            diff_files(a, b, a.handles[bk]["object_hash"],
-                       b.handles[bk]["object_hash"], max_files)
+            diff_files(a, b, a.mappings[bk]["object_hash"],
+                       b.mappings[bk]["object_hash"], max_files)
 
     if show_inherited and inherited:
         section(f"inherited divergences ({len(inherited)})")
@@ -461,6 +539,31 @@ def compare_objects(a: StoreView, b: StoreView, common: set[str],
         names = sorted(describe(bk)[0] for bk in inherited)
         print("  " + ", ".join(names))
 
+    if unknown:
+        section(f"unknown-provenance divergences ({len(unknown)})")
+        for bk in sorted(unknown, key=lambda k: describe(k)[0]):
+            name, tag = describe(bk)
+            print(f"  ? {name}  [{tag}]")
+            print(f"      build_key: {bk}")
+            print(f"      A: {a.mappings[bk]['object_hash']}")
+            print("         " + (a.mappings[bk]["provenance_error"]
+                                  or "matching object record"))
+            print(f"      B: {b.mappings[bk]['object_hash']}")
+            print("         " + (b.mappings[bk]["provenance_error"]
+                                  or "matching object record"))
+            if show_files:
+                diff_files(a, b, a.mappings[bk]["object_hash"],
+                           b.mappings[bk]["object_hash"], max_files)
+
+    if unreadable:
+        section(f"unreadable build mappings ({len(unreadable)})")
+        for bk in sorted(unreadable):
+            print(f"  ! {bk}")
+            if bk in a.mapping_errors:
+                print(f"      A: {a.mapping_errors[bk]}")
+            if bk in b.mapping_errors:
+                print(f"      B: {b.mapping_errors[bk]}")
+
     return 1
 
 
@@ -470,7 +573,7 @@ def compare_objects(a: StoreView, b: StoreView, common: set[str],
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Compare two mbuild stores for reproducibility.")
+        description="Compare two bobr stores for reproducibility.")
     parser.add_argument("store_a", type=Path)
     parser.add_argument("store_b", type=Path)
     parser.add_argument("--no-files", action="store_true",
@@ -499,8 +602,8 @@ def main() -> int:
     compare_hashes(a, b)
     # Every key of each store is read: the ones they share carry the comparison,
     # and the ones they do not are still named in the report.
-    a.read_handles(a.build_keys)
-    b.read_handles(b.build_keys)
+    a.read_mappings(a.build_keys)
+    b.read_mappings(b.build_keys)
     common = compare_build_keys(a, b)
     rc = compare_objects(a, b, common,
                          show_files=not args.no_files,
