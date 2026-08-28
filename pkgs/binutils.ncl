@@ -22,6 +22,7 @@ fun pkgs =>
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
+        "--libdir=/usr/lib",
         "--disable-nls",
         "--without-zstd",
         "--enable-gprofng=no",

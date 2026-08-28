@@ -59,7 +59,7 @@ fun pkgs =>
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
-        "libc_cv_slibdir=/usr/lib64",
+        "libc_cv_slibdir=/usr/lib",
         "--sbindir=/usr/bin",
         "--disable-nscd",
         "--without-selinux",

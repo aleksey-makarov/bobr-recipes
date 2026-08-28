@@ -15,6 +15,17 @@ fun pkgs =>
   }
   in
 
+  let gcc_x86_64_libdir_patch = {
+    name = "gcc-15.2.0-use-lib-patch",
+    tag = "Source",
+    object_hash = import "gcc-15.2.0-use-lib.patch.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "pkgs/gcc-15.2.0-use-lib.patch",
+    },
+  }
+  in
+
   let gcc_prereqs_pre_configure = {
     name = "prepare_gcc_prereqs",
     run_as = "build-user",
@@ -53,6 +64,7 @@ fun pkgs =>
     config = {
       pre_configure = gcc_prereqs_pre_configure,
       configure_args = [
+        "--libdir=/usr/lib",
         "--enable-languages=c,c++",
         "--disable-multilib",
         "--disable-bootstrap",
@@ -67,6 +79,7 @@ fun pkgs =>
       gmp = pkgs.gmp.inputs.source,
       mpfr = pkgs.mpfr.inputs.source,
       mpc = pkgs.mpc.inputs.source,
+      patch_x86_64_libdir = gcc_x86_64_libdir_patch,
     },
   }
   in
