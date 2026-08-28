@@ -49,7 +49,7 @@ fun pkgs =>
         "--without-pcre",
         "--without-x",
         "--with-png=/usr",
-        "--with-zlib=/usr/lib64",
+        "--with-zlib=/usr/lib",
         "--with-zinc=/usr/include",
         "--with-readline=slang",
         "--with-pkgconfigdir=/usr/lib/pkgconfig",

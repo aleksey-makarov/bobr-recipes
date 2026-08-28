@@ -21,7 +21,7 @@ fun pkgs =>
       configure_args = [
         "--disable-debuginfod",
         "--disable-libdebuginfod",
-        "--libdir=/usr/lib64",
+        "--libdir=/usr/lib",
         "--with-zlib",
         "--without-bzlib",
         "--without-lzma",

@@ -25,7 +25,7 @@ fun pkgs =>
     },
     config = {
       configure_args = [
-        "--libdir=/usr/lib64",
+        "--libdir=/usr/lib",
       ],
       # zlib's hand-written Makefile runs a bare `ldconfig` ($(LDCONFIG) in
       # install-libs), which writes the live /etc/ld.so.cache -- outside the

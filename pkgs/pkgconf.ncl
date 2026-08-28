@@ -16,12 +16,11 @@ fun pkgs =>
     configure_args = [
       "--disable-static",
       "--docdir=/usr/share/doc/pkgconf-%{version}",
-      # Search both /usr/lib and /usr/lib64 pkgconfig dirs: some packages (zlib,
-      # glibc) install to /usr/lib64, and their .pc files (e.g. zlib.pc) must be
-      # discoverable, or `Requires: zlib` resolution fails for dependents like
-      # libpng -> and pkg-config reports them missing.
-      "--with-pkg-config-dir=/usr/lib/pkgconfig:/usr/lib64/pkgconfig:/usr/share/pkgconfig",
-      "--with-system-libdir=/usr/lib:/usr/lib64",
+      # The native system has one physical library directory. Keep pkgconf's
+      # built-in defaults aligned with it, so a package cannot accidentally
+      # discover metadata or a library through the compatibility lib64 alias.
+      "--with-pkg-config-dir=/usr/lib/pkgconfig:/usr/share/pkgconfig",
+      "--with-system-libdir=/usr/lib",
       "--with-system-includedir=/usr/include",
     ],
     post_install = [
