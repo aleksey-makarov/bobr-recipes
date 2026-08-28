@@ -65,6 +65,50 @@ fun pkgs =>
   }
   in
 
+  # The final compiler packages are built by the gen1 compiler, so their own
+  # builds do not prove that they form a usable native toolchain together.
+  # Exercise the assembled final glibc/binutils/GCC rootfs directly: compile
+  # and run one small program, while asserting the merged-/usr library layout
+  # and the stable x86_64 ELF interpreter ABI.
+  let test_final_toolchain = {
+    name = "test-final-toolchain",
+    tag = "Sandbox",
+    config = {
+      steps = [
+        {
+          name = "compile_and_run",
+          run_as = "root",
+          cwd = "@{out}",
+          argv = [
+            "/bin/sh",
+            "-ec",
+            m%"
+              cat > probe.c <<'EOF'
+              int main(void) { return 0; }
+              EOF
+
+              gcc -Wall -Werror -o probe probe.c
+              test "$(gcc -print-multi-os-directory)" = "../lib"
+              test "$(gcc -print-multi-directory)" = "."
+              readelf -l probe | grep -F \
+                'Requesting program interpreter: /lib64/ld-linux-x86-64.so.2'
+              LD_TRACE_LOADED_OBJECTS=1 ./probe \
+                | grep -F 'libc.so.6 => /usr/lib/libc.so.6'
+              ./probe
+
+              rm -f probe probe.c
+              printf 'final toolchain smoke: ok\n' > status
+            "%,
+          ],
+        },
+      ],
+    },
+    inputs = {
+      _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "test-final-toolchain-rootfs" [],
+    },
+  }
+  in
+
   let check_source = {
     name = "check-source",
     tag = "Source",
@@ -274,7 +318,7 @@ fun pkgs =>
   }
   in
 
-  # Build the artifacts and run the rootfs checks in one go.
+  # Build the artifacts, run rootfs checks, and exercise the final compiler.
   let test_all = {
     name = "test-all",
     tag = "Group",
@@ -284,6 +328,7 @@ fun pkgs =>
         test_all_recipes,
         test_all_host_bundles,
         test_all_rootfs,
+        test_final_toolchain,
       ],
   }
   in
@@ -292,6 +337,7 @@ fun pkgs =>
     include [
       test_all_recipes,
       test_all_host_bundles,
+      test_final_toolchain,
       test_all_rootfs,
       test_all,
     ],

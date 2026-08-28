@@ -90,7 +90,7 @@ fun pkgs =>
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
-        "libc_cv_slibdir=/usr/lib64",
+        "libc_cv_slibdir=/usr/lib",
         "--sbindir=/usr/bin",
         "--disable-werror",
         "--enable-kernel=4.19",
@@ -145,7 +145,7 @@ fun pkgs =>
   in
 
   let glibc_libs =
-    recipe.split.libs glibc "usr/lib64/*.so*"
+    recipe.split.libs glibc "usr/lib/*.so*"
     & {
       deps = {
         build = [],

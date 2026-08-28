@@ -92,6 +92,7 @@ fun pkgs =>
     config = {
       pre_configure = gcc_prereqs_pre_configure,
       configure_args = [
+        "--libdir=/usr/lib",
         "--enable-languages=c,c++",
         "--enable-default-pie",
         "--enable-default-ssp",
@@ -118,6 +119,7 @@ fun pkgs =>
       gmp = pkgs.gmp.inputs.source,
       mpfr = pkgs.mpfr.inputs.source,
       mpc = pkgs.mpc.inputs.source,
+      patch_x86_64_libdir = gcc_x86_64_libdir_patch,
     },
   }
   in
@@ -126,11 +128,11 @@ fun pkgs =>
     recipe.split.libs
       gcc
       [
-        "usr/lib64/libgcc_s.so.1",
-        "usr/lib64/libgomp.so.1",
-        "usr/lib64/libgomp.so.1.0.0",
-        "usr/lib64/libstdc++.so.6",
-        "usr/lib64/libstdc++.so.6.0.34",
+        "usr/lib/libgcc_s.so.1",
+        "usr/lib/libgomp.so.1",
+        "usr/lib/libgomp.so.1.0.0",
+        "usr/lib/libstdc++.so.6",
+        "usr/lib/libstdc++.so.6.0.34",
       ]
     & {
       deps = {

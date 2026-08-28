@@ -46,7 +46,7 @@ fun pkgs =>
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
-        "--libdir=/usr/lib64",
+        "--libdir=/usr/lib",
         "--enable-shared",
         "--enable-64-bit-bfd",
         "--enable-new-dtags",
