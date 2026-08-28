@@ -40,7 +40,6 @@ fun _pkgs =>
           { type = "dir", path = "tmp" },
           { type = "dir", path = "usr/bin" },
           { type = "dir", path = "usr/include" },
-          { type = "dir", path = "usr/lib64" },
           { type = "dir", path = "usr/libexec" },
           { type = "dir", path = "usr/share" },
           { type = "dir", path = "var/log" },
