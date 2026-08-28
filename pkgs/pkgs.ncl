@@ -49,7 +49,7 @@
   import "freetype.ncl",
   import "fribidi.ncl",
   import "gawk.ncl",
-  import "gcc.ncl",
+  import "gcc/gcc.ncl",
   import "gcr.ncl",
   import "gdbm.ncl",
   import "gdk-pixbuf.ncl",

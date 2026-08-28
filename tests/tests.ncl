@@ -90,10 +90,16 @@ fun pkgs =>
               gcc -Wall -Werror -o probe probe.c
               test "$(gcc -print-multi-os-directory)" = "../lib"
               test "$(gcc -print-multi-directory)" = "."
-              readelf -l probe | grep -F \
-                'Requesting program interpreter: /lib64/ld-linux-x86-64.so.2'
-              LD_TRACE_LOADED_OBJECTS=1 ./probe \
-                | grep -F 'libc.so.6 => /usr/lib/libc.so.6'
+              program_headers="$(readelf -l probe)"
+              case "$program_headers" in
+                *'Requesting program interpreter: /lib64/ld-linux-x86-64.so.2'*) ;;
+                *) exit 1 ;;
+              esac
+              loader_trace="$(LD_TRACE_LOADED_OBJECTS=1 ./probe)"
+              case "$loader_trace" in
+                *'libc.so.6 => /usr/lib/libc.so.6'*) ;;
+                *) exit 1 ;;
+              esac
               ./probe
 
               rm -f probe probe.c

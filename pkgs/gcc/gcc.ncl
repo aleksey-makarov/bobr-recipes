@@ -1,4 +1,4 @@
-let recipe = import "../recipe-lib.ncl" in
+let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
   let gcc_src = fun version => fun hash => {
@@ -21,7 +21,7 @@ fun pkgs =>
     object_hash = import "gcc-15.2.0-use-lib.patch.fsobj-hash" as 'Text,
     origin = {
       tag = "RecipePath",
-      path = "pkgs/gcc-15.2.0-use-lib.patch",
+      path = "pkgs/gcc/gcc-15.2.0-use-lib.patch",
     },
   }
   in
