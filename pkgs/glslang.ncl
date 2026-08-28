@@ -39,6 +39,7 @@ fun pkgs =>
         "-DENABLE_OPT=ON",
         "-DENABLE_HLSL=OFF",
         "-DBUILD_SHARED_LIBS=OFF",
+        "-DCMAKE_INSTALL_LIBDIR=lib",
       ],
       post_install = {
         name = "check_install",
@@ -48,7 +49,7 @@ fun pkgs =>
           "-ec",
           m%"
             /usr/bin/glslangValidator --version
-            test -s /usr/lib64/libglslang.a
+            test -s /usr/lib/libglslang.a
           "%,
         ],
       },

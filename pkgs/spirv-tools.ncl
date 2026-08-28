@@ -35,6 +35,7 @@ fun pkgs =>
         "-DSPIRV_SKIP_TESTS=ON",
         "-DSPIRV_WERROR=OFF",
         "-DBUILD_SHARED_LIBS=OFF",
+        "-DCMAKE_INSTALL_LIBDIR=lib",
       ],
       post_install = {
         name = "check_install",
@@ -44,8 +45,8 @@ fun pkgs =>
           "-ec",
           m%"
             /usr/bin/spirv-link --version
-            test -s /usr/lib64/libSPIRV-Tools.a
-            test -s /usr/lib64/pkgconfig/SPIRV-Tools.pc
+            test -s /usr/lib/libSPIRV-Tools.a
+            test -s /usr/lib/pkgconfig/SPIRV-Tools.pc
           "%,
         ],
       },
