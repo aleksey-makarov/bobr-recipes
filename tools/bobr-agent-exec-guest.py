@@ -13,10 +13,14 @@ turning the serial console into a clean request/response the agent can drive
 from its Bash without any MCP (unix-socket connect needs no privilege, and the
 working dir is local ext4 on the same kernel).
 
-Robustness: output is delimited by nonce markers emitted by the guest shell, so
-login banners, the prompt, and input echo are all ignored -- only the bytes the
-command actually produced are returned. A Ctrl-C and `stty -echo` are sent first
-to recover from a stuck line and quiet the console.
+Robustness: a per-socket advisory lock serializes callers, because ttyS1 is one
+shared console rather than a request-per-connection transport. Output is
+delimited by nonce markers emitted by the guest shell, so login banners, the
+prompt, and input echo are ignored. A Ctrl-C and `stty -echo` are sent first to
+recover from a stuck line and quiet the console. `--timeout` is enforced in the
+guest: each command gets a separate session and a small watchdog kills that
+entire process group when its deadline expires. A timed-out command therefore
+cannot keep writing into the next request.
 
 A bare --sock name resolves against the workspace root, which is where a bundle
 started there creates its socket, so this works from any directory:
@@ -26,18 +30,22 @@ started there creates its socket, so this works from any directory:
     python3 bobr-recipes/tools/bobr-agent-exec-guest.py --sock diag-weston.sock \
         'ls /dev/dri'
 
-Exit code mirrors the guest command's exit code; 3 = connection problem,
-4 = timed out waiting for the guest to finish.
+Exit code mirrors the guest command's exit code (including 124 on timeout);
+3 = local connection or locking problem, 4 = no complete response after the
+guest timeout plus a small transport grace period.
 """
 
 from __future__ import annotations
 
 import argparse
 import base64
+import fcntl
+import hashlib
 import os
 import secrets
 import socket
 import sys
+import tempfile
 import time
 
 # The launchers create the diag socket under a relative path, so it lands in the
@@ -53,35 +61,56 @@ TOOL_DIR = os.path.dirname(os.path.realpath(__file__))          # .../tools
 RECIPES_DIR = os.path.dirname(TOOL_DIR)                         # .../bobr-recipes
 SOCK_DIR = os.path.dirname(RECIPES_DIR)                         # the workspace root
 DEFAULT_SOCK = "diag.sock"
+TRANSPORT_GRACE_SECONDS = 5.0
+COMMAND_KILL_GRACE_SECONDS = 2.0
 
 
 def resolve_sock(sock: str) -> str:
     return sock if os.path.isabs(sock) else os.path.join(SOCK_DIR, sock)
 
 
-def run(sock_path: str, command: str, timeout: float) -> tuple[int, str]:
+def lock_path(sock_path: str) -> str:
+    """Return the host-local advisory-lock path for one guest console."""
+    digest = hashlib.sha256(os.fsencode(sock_path)).hexdigest()
+    return os.path.join(tempfile.gettempdir(), f"bobr-agent-exec-guest-{digest}.lock")
+
+
+def run_locked(sock_path: str, command: str, timeout: float) -> tuple[int, str]:
     nonce = secrets.token_hex(8)
     begin = f"{nonce}BEGIN"
     end = f"{nonce}END:"
 
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    s.settimeout(timeout)
+    s.settimeout(timeout + TRANSPORT_GRACE_SECONDS)
     try:
         s.connect(sock_path)
     except (FileNotFoundError, ConnectionRefusedError, OSError) as e:
         return 3, f"bobr-agent-exec-guest: cannot connect to {sock_path}: {e}"
 
     # Clear any half-typed line, quiet echo/prompt, then run the command wrapped
-    # in nonce markers. The command is base64-encoded and decoded+run by a fresh
-    # bash on the guest, so it is a single line over the serial regardless of
-    # newlines/quotes, and the (possibly echoed) wrapper never itself contains the
-    # expanded markers -- they only appear once printf expands "$M" in real output.
+    # in nonce markers. The command is base64-encoded and decoded by a fresh bash
+    # on the guest, so it is a single line over the serial regardless of
+    # newlines/quotes. `timeout bash` is insufficient here: it can terminate the
+    # shell while leaving its child alive. Run the command in a separate session
+    # and have a watchdog terminate its complete process group instead.
     b64 = base64.b64encode(command.encode()).decode()
+    watchdog = (
+        'setsid bash "$1" & P=$!; '
+        '(sleep "$3"; if kill -0 -- "-$P" 2>/dev/null; then '
+        ': > "$2"; kill -TERM -- "-$P" 2>/dev/null || true; '
+        'sleep "$4"; kill -KILL -- "-$P" 2>/dev/null || true; fi) & W=$!; '
+        'wait "$P"; S=$?; kill "$W" 2>/dev/null || true; '
+        'wait "$W" 2>/dev/null || true; test -e "$2" && exit 124; exit "$S"'
+    )
     wrapper = (
         f"M={nonce}; stty -echo 2>/dev/null; export PS1=''; "
         f'printf "\\n%sBEGIN\\n" "$M"; '
-        f"printf '%s' '{b64}' | base64 -d | bash 2>&1; "
-        f'printf "\\n%sEND:%s\\n" "$M" "$?"\n'
+        'C="/tmp/bobr-agent-exec-guest-$M.command"; '
+        'F="$C.timeout"; umask 077; '
+        f"printf '%s' '{b64}' | base64 -d > \"$C\"; "
+        f"bash -c '{watchdog}' bash \"$C\" \"$F\" {timeout} "
+        f"{COMMAND_KILL_GRACE_SECONDS}; S=$?; rm -f \"$C\" \"$F\"; "
+        'printf "\\n%sEND:%s\\n" "$M" "$S"\n'
     )
     try:
         s.sendall(b"\x03")           # Ctrl-C: drop any partial input line
@@ -92,7 +121,12 @@ def run(sock_path: str, command: str, timeout: float) -> tuple[int, str]:
         return 3, f"bobr-agent-exec-guest: send failed: {e}"
 
     buf = ""
-    deadline = time.monotonic() + timeout
+    deadline = (
+        time.monotonic()
+        + timeout
+        + COMMAND_KILL_GRACE_SECONDS
+        + TRANSPORT_GRACE_SECONDS
+    )
     try:
         while time.monotonic() < deadline:
             s.settimeout(max(0.1, deadline - time.monotonic()))
@@ -109,7 +143,10 @@ def run(sock_path: str, command: str, timeout: float) -> tuple[int, str]:
         s.close()
 
     if begin not in buf or end not in buf:
-        return 4, f"bobr-agent-exec-guest: timed out after {timeout}s; raw tail:\n{buf[-2000:]}"
+        return 4, (
+            "bobr-agent-exec-guest: no complete response after guest timeout "
+            f"({timeout}s), kill grace, and transport grace; raw tail:\n{buf[-2000:]}"
+        )
 
     body = buf.split(begin, 1)[1]
     body, rest = body.split(end, 1)
@@ -122,6 +159,16 @@ def run(sock_path: str, command: str, timeout: float) -> tuple[int, str]:
     return code, body.strip("\r\n")
 
 
+def run(sock_path: str, command: str, timeout: float) -> tuple[int, str]:
+    """Serialize requests to one ttyS1 console and run one bounded command."""
+    try:
+        with open(lock_path(sock_path), "a", encoding="utf-8") as lock_file:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            return run_locked(sock_path, command, timeout)
+    except OSError as e:
+        return 3, f"bobr-agent-exec-guest: cannot lock or use {sock_path}: {e}"
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="run a command on the QEMU guest via ttyS1")
     ap.add_argument("command", help="shell command to run in the guest (root)")
@@ -131,8 +178,15 @@ def main() -> None:
         help=f"diag socket; a relative name resolves against {SOCK_DIR} "
         f"(default {DEFAULT_SOCK})",
     )
-    ap.add_argument("--timeout", type=float, default=30.0, help="seconds (default 30)")
+    ap.add_argument(
+        "--timeout",
+        type=float,
+        default=30.0,
+        help="maximum command runtime in the guest, in seconds (default 30)",
+    )
     args = ap.parse_args()
+    if args.timeout <= 0:
+        ap.error("--timeout must be positive")
     code, out = run(resolve_sock(args.sock), args.command, args.timeout)
     sys.stdout.write(out + ("\n" if out and not out.endswith("\n") else ""))
     sys.exit(code)
