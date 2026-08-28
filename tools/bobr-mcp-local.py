@@ -8,14 +8,14 @@ cannot run real package builds itself -- and neither could any process it spawns
 (NoNewPrivs=0), so it CAN build. The agent reaches it over localhost HTTP; since
 the server is not a child of the agent, the restriction never applies to it.
 
-It exposes one capability: run `bin/bobr-build.sh <profile> --target <target>`
-and stream the result back. The single `bobr_build` tool keeps the request open
-and streams notable build lines as progress while the build runs (the open call
-is the push channel, and a heartbeat keeps it alive through the long silent
-stretches of a compile, so even multi-hour builds never time out), then returns a
-structured outcome: the exit code, the `done: X built · Y failed` line, the
-source hash reported by a placeholder-hash mismatch, any build error, and the
-path of the failing sandbox log (which the agent reads itself from the store).
+It exposes two capabilities: start
+`bin/bobr-build.sh <profile> --target <target>` as an in-memory background job,
+and inspect that job's status. No MCP tool call remains open for the lifetime of
+a build, so a client-side request deadline cannot interrupt a multi-hour build.
+The final status includes the exit code, the `done: X built · Y failed` line,
+the source hash reported by a placeholder-hash mismatch, any build error, and
+the path of the failing sandbox log (which the agent reads itself from the
+store).
 
 The build profile names the store, so it decides where everything is built; it
 is passed explicitly rather than left to the working directory. The bobr
@@ -36,7 +36,8 @@ Point Claude Code at it (streamable-http endpoint is /mcp):
 Scope: it only ever runs `bobr-build.sh <profile> [--dry-run] [--jobs N]
 --target <target>` (target validated against [A-Za-z0-9_]+) in the store the
 profile names. It never deletes or cleans anything, and it serialises builds so
-two never run at once.
+two never run at once. Job status is deliberately kept only in memory: restart
+the server and the old job ids cease to exist.
 """
 
 from __future__ import annotations
@@ -44,14 +45,17 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import logging
 import os
 import re
 import shutil
 import subprocess
 import time
+import uuid
+from dataclasses import dataclass, field
 from pathlib import Path
 
-from mcp.server.fastmcp import Context, FastMCP
+from mcp.server.fastmcp import FastMCP
 
 # tools/bobr-mcp-local.py -> up through tools/ to the recipes root.
 RECIPES_DIR = Path(__file__).resolve().parent.parent
@@ -71,11 +75,9 @@ SUMMARY_RE = re.compile(r"\d+ built.*?\d+ failed")
 ERROR_RE = re.compile(r"error\[build-failed\]:.*")
 LOGPATH_RE = re.compile(r"stdout=(\S+\.log)")
 NINJA_RE = re.compile(r"\[(\d+)/(\d+)\]")
-# How often to speak up when the build is otherwise silent. Comfortably under
-# the MCP client's idle timeout, which aborts a call that says nothing.
-HEARTBEAT_SECONDS = 30.0
-# Lines worth forwarding as progress; the rest is buffered but not streamed, so
-# compile spam does not drown the useful markers.
+MAX_WAIT_SECONDS = 240
+# Lines worth retaining as notable status; the complete recent tail is kept
+# separately for final diagnostics.
 INTERESTING_RE = re.compile(
     r"(==>|done:|error|ERROR|FAILED|warning:|unexpected object hash|"
     r"Sandbox |Did not find|not found|ERROR:)"
@@ -83,6 +85,31 @@ INTERESTING_RE = re.compile(
 
 mcp = FastMCP("bobr-local")
 _build_lock = asyncio.Lock()
+
+
+@dataclass
+class BuildJob:
+    """In-memory state for one build started by an MCP call."""
+
+    job_id: str
+    target: str
+    dry_run: bool
+    jobs: int | None
+    argv: list[str]
+    state: str = "queued"
+    created_at: float = field(default_factory=time.time)
+    started_at: float | None = None
+    finished_at: float | None = None
+    last_output: str = ""
+    tail: list[str] = field(default_factory=list)
+    notable: list[str] = field(default_factory=list)
+    progress_done: int | None = None
+    progress_total: int | None = None
+    result: dict | None = None
+    task: asyncio.Task[None] | None = field(default=None, repr=False)
+
+
+_jobs: dict[str, BuildJob] = {}
 
 # Set by main() before the server starts serving.
 _profile_path: Path = DEFAULT_PROFILE
@@ -105,69 +132,31 @@ def _resolve_bobr() -> str | None:
     return shutil.which("bobr", path=_child_env()["PATH"])
 
 
-async def _stream_stderr(
-    stream: asyncio.StreamReader, ctx: Context, tail: list[str], seen: dict
-) -> None:
-    """Buffers the build's diagnostic stream and forwards notable lines."""
+async def _stream_stderr(stream: asyncio.StreamReader, job: BuildJob) -> None:
+    """Buffer diagnostics and update the status visible to polling clients."""
     async for raw in stream:
         line = raw.decode("utf-8", "replace").rstrip("\n")
-        tail.append(line)
-        seen["last"] = line
+        job.tail.append(line)
+        job.last_output = line
         # Keep only the recent lines: the summary/hash/error land at the end.
-        if len(tail) > 800:
-            del tail[:400]
+        if len(job.tail) > 800:
+            del job.tail[:400]
         ninja = NINJA_RE.search(line)
         if ninja:
-            done, total = int(ninja.group(1)), int(ninja.group(2))
-            if total and (done == total or done % 25 == 0):
-                await ctx.report_progress(done, total)
-                seen["sent"] = time.monotonic()
-        elif INTERESTING_RE.search(line):
-            await ctx.info(line)
-            seen["sent"] = time.monotonic()
-
-
-async def _heartbeat(ctx: Context, seen: dict) -> None:
-    """Keeps the open call alive while the build is quiet.
-
-    Only notable lines are forwarded, and a single long compile produces none
-    of them for many minutes; the client then sees an idle channel and aborts
-    the call, even though the build is healthy and still running. So say
-    something on a timer -- what the build last printed, and for how long it has
-    been going -- whenever nothing notable has gone out recently.
-    """
-    started = time.monotonic()
-    while True:
-        await asyncio.sleep(HEARTBEAT_SECONDS)
-        if time.monotonic() - seen["sent"] < HEARTBEAT_SECONDS:
-            continue
-        minutes = (time.monotonic() - started) / 60
-        await ctx.info(
-            f"[{minutes:.0f}m] building; last output: {seen['last'] or '(none yet)'}"
-        )
-        seen["sent"] = time.monotonic()
+            job.progress_done = int(ninja.group(1))
+            job.progress_total = int(ninja.group(2))
+        if ninja or INTERESTING_RE.search(line):
+            job.notable.append(line)
+            if len(job.notable) > 100:
+                del job.notable[:50]
 
 
 async def _read_stdout(stream: asyncio.StreamReader) -> str:
     return (await stream.read()).decode("utf-8", "replace")
 
 
-@mcp.tool()
-async def bobr_build(
-    target: str, ctx: Context, dry_run: bool = False, jobs: int | None = None
-) -> dict:
-    """Run `bobr-build.sh --target <target>` against the configured profile.
-
-    Streams notable build lines as progress while it runs (long builds never time
-    out), then returns a structured result. On a placeholder-hash first build,
-    `source_hash` carries the real hash to paste into the recipe.
-
-    Args:
-        target: bobr recipe attribute, e.g. "gnome_settings_daemon" or
-            "test_gnome_rootfs". Must match [A-Za-z0-9_]+.
-        dry_run: pass --dry-run (validate and lower the request only, no build).
-        jobs: cap concurrent builds; the default is one per core.
-    """
+def _build_argv(target: str, dry_run: bool, jobs: int | None) -> list[str]:
+    """Validate a build request and return its fixed command line."""
     if not TARGET_RE.match(target):
         raise ValueError(f"invalid target {target!r}: expected [A-Za-z0-9_]+")
     if jobs is not None and jobs < 1:
@@ -194,44 +183,22 @@ async def bobr_build(
     if jobs is not None:
         argv += ["--jobs", str(jobs)]
     argv += ["--target", target]
+    return argv
 
-    async with _build_lock:
-        await ctx.info(f"$ {' '.join(argv)}")
-        proc = await asyncio.create_subprocess_exec(
-            *argv,
-            cwd=str(RECIPES_DIR),
-            env=_child_env(),
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        assert proc.stdout is not None and proc.stderr is not None
-        tail: list[str] = []
-        # The two streams are kept apart: stdout carries the payload (the root
-        # object hash, or the lowered request under --dry-run), stderr carries
-        # the diagnostics worth streaming and parsing. Merging them, as this
-        # once did, buried the diagnostics under a dump of request JSON.
-        seen = {"last": "", "sent": time.monotonic()}
-        beat = asyncio.create_task(_heartbeat(ctx, seen))
-        try:
-            stdout_text, _ = await asyncio.gather(
-                _read_stdout(proc.stdout),
-                _stream_stderr(proc.stderr, ctx, tail, seen),
-            )
-            exit_code = await proc.wait()
-        finally:
-            beat.cancel()
 
-    text = "\n".join(tail)
+def _parse_result(job: BuildJob, exit_code: int, stdout_text: str) -> dict:
+    """Turn buffered process output into the public final result."""
+    text = "\n".join(job.tail)
     hash_m = HASH_RE.search(text)
     summary_m = SUMMARY_RE.search(text)
     error_m = ERROR_RE.search(text)
     logpath_m = LOGPATH_RE.search(text)
 
     result = {
-        "target": target,
+        "target": job.target,
         "profile": str(_profile_path),
-        "dry_run": dry_run,
-        "jobs": jobs,
+        "dry_run": job.dry_run,
+        "jobs": job.jobs,
         "exit_code": exit_code,
         "ok": exit_code == 0,
         "summary": summary_m.group(0) if summary_m else None,
@@ -240,10 +207,10 @@ async def bobr_build(
         "error": error_m.group(0) if error_m else None,
         # Path of the failing sandbox step log; the agent reads it from the store.
         "failed_log": logpath_m.group(1) if logpath_m else None,
-        "tail": tail[-40:],
+        "tail": job.tail[-40:],
     }
 
-    if dry_run:
+    if job.dry_run:
         # Report the shape of the lowered request rather than its megabytes; the
         # agent can lower it again itself if it wants the whole thing.
         try:
@@ -258,6 +225,160 @@ async def bobr_build(
             result["object_hash"] = last[-1].strip()
 
     return result
+
+
+async def _run_job(job: BuildJob) -> None:
+    """Run one queued build and retain all status needed by later MCP calls."""
+    try:
+        async with _build_lock:
+            job.state = "running"
+            job.started_at = time.time()
+            proc = await asyncio.create_subprocess_exec(
+                *job.argv,
+                cwd=str(RECIPES_DIR),
+                env=_child_env(),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            assert proc.stdout is not None and proc.stderr is not None
+            stdout_text, _ = await asyncio.gather(
+                _read_stdout(proc.stdout),
+                _stream_stderr(proc.stderr, job),
+            )
+            exit_code = await proc.wait()
+            job.result = _parse_result(job, exit_code, stdout_text)
+            job.state = "succeeded" if exit_code == 0 else "failed"
+    except asyncio.CancelledError:
+        job.state = "failed"
+        job.result = {
+            "target": job.target,
+            "ok": False,
+            "error": "MCP server stopped while the build job was active",
+            "tail": job.tail[-40:],
+        }
+        raise
+    except Exception as error:
+        job.state = "failed"
+        job.result = {
+            "target": job.target,
+            "profile": str(_profile_path),
+            "dry_run": job.dry_run,
+            "jobs": job.jobs,
+            "ok": False,
+            "error": f"could not run build: {error}",
+            "tail": job.tail[-40:],
+        }
+    finally:
+        job.finished_at = time.time()
+
+
+@mcp.tool()
+async def bobr_build_start(
+    target: str,
+    dry_run: bool = False,
+    jobs: int | None = None,
+    wait_seconds: int = 0,
+) -> dict:
+    """Start a serialized bobr build and optionally wait for its result.
+
+    With the default zero wait the call returns immediately. A positive wait
+    returns as soon as the build finishes, or returns its current status when
+    the wait expires. Expiry never cancels the background build.
+
+    Args:
+        target: bobr recipe attribute. Must match [A-Za-z0-9_]+.
+        dry_run: pass --dry-run (validate and lower the request only, no build).
+        jobs: cap concurrent builders; the default is one per core.
+        wait_seconds: wait up to this many seconds for completion; 0 returns
+            immediately, and the maximum is 240 seconds.
+    """
+    _validate_wait_seconds(wait_seconds)
+    argv = _build_argv(target, dry_run, jobs)
+    job_id = (
+        f"{time.strftime('%Y%m%d-%H%M%S')}-{target}-{uuid.uuid4().hex[:8]}"
+    )
+    job = BuildJob(
+        job_id=job_id,
+        target=target,
+        dry_run=dry_run,
+        jobs=jobs,
+        argv=argv,
+    )
+    _jobs[job_id] = job
+    job.task = asyncio.create_task(_run_job(job), name=f"bobr-build:{job_id}")
+    print(
+        "bobr-mcp-local: build start: "
+        f"target={target} dry_run={str(dry_run).lower()} "
+        f"jobs={jobs if jobs is not None else 'default'} "
+        f"wait={wait_seconds}s job={job_id}",
+        flush=True,
+    )
+    return await _wait_for_job(job, wait_seconds)
+
+
+@mcp.tool()
+async def bobr_build_status(job_id: str, wait_seconds: int = 0) -> dict:
+    """Return build status, optionally waiting for the final result.
+
+    Args:
+        job_id: id returned by `bobr_build_start`.
+        wait_seconds: wait up to this many seconds for completion; 0 returns
+            immediately, and the maximum is 240 seconds. Expiry does not cancel
+            the build.
+    """
+    _validate_wait_seconds(wait_seconds)
+    job = _jobs.get(job_id)
+    if job is None:
+        raise ValueError(
+            f"unknown build job {job_id!r}; the server may have been restarted"
+        )
+    return await _wait_for_job(job, wait_seconds)
+
+
+def _validate_wait_seconds(wait_seconds: int) -> None:
+    if not 0 <= wait_seconds <= MAX_WAIT_SECONDS:
+        raise ValueError(
+            f"invalid wait_seconds {wait_seconds!r}: expected an integer "
+            f"from 0 through {MAX_WAIT_SECONDS}"
+        )
+
+
+async def _wait_for_job(job: BuildJob, wait_seconds: int) -> dict:
+    """Wait without transferring cancellation to the background build."""
+    if wait_seconds > 0 and job.task is not None and not job.task.done():
+        try:
+            await asyncio.wait_for(
+                asyncio.shield(job.task), timeout=wait_seconds
+            )
+        except TimeoutError:
+            pass
+    return _job_status(job)
+
+
+def _job_status(job: BuildJob) -> dict:
+    """Take one consistent, serializable snapshot of an in-memory job."""
+
+    now = job.finished_at or time.time()
+    status = {
+        "job_id": job.job_id,
+        "state": job.state,
+        "target": job.target,
+        "dry_run": job.dry_run,
+        "jobs": job.jobs,
+        "elapsed_seconds": round(now - (job.started_at or job.created_at), 1),
+        "last_output": job.last_output or None,
+        "notable": job.notable[-20:],
+    }
+    if job.started_at is None:
+        status["queued_seconds"] = round(now - job.created_at, 1)
+    if job.progress_total is not None:
+        status["progress"] = {
+            "done": job.progress_done,
+            "total": job.progress_total,
+        }
+    if job.result is not None:
+        status.update(job.result)
+    return status
 
 
 def _report_setup() -> None:
@@ -328,6 +449,9 @@ def main() -> None:
         flush=True,
     )
     _report_setup()
+    # The low-level server otherwise prints the same generic line for every
+    # tool call. Build starts have a concise, useful line of their own above.
+    logging.getLogger("mcp.server.lowlevel.server").setLevel(logging.WARNING)
     mcp.run(transport="streamable-http")
 
 
