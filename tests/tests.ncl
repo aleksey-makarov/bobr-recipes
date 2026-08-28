@@ -88,6 +88,13 @@ fun pkgs =>
               EOF
 
               gcc -Wall -Werror -o probe probe.c
+              test -d /usr/lib
+              test -L /usr/lib64
+              test "$(readlink /usr/lib64)" = "lib"
+              test -L /lib
+              test "$(readlink /lib)" = "usr/lib"
+              test -L /lib64
+              test "$(readlink /lib64)" = "usr/lib64"
               test "$(gcc -print-multi-os-directory)" = "../lib"
               test "$(gcc -print-multi-directory)" = "."
               program_headers="$(readelf -l probe)"

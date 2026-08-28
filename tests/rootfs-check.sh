@@ -45,7 +45,7 @@ command -v readelf >/dev/null 2>&1 || {
   exit 1
 }
 
-default_libdirs=(/lib /lib64 /usr/lib /usr/lib64)
+default_libdirs=(/lib /lib64 /usr/lib)
 runtime_prefixes=(/dev /proc /sys /run /var /tmp)
 
 # Extra library dirs from the target's own /etc/ld.so.conf(.d) -- this is what

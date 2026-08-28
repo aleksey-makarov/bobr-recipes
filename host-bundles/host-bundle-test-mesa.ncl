@@ -64,10 +64,7 @@ fun pkgs =>
     config = {
       arch = "x86_64",
       policy = "strict",
-      library_dirs = [
-        "usr/lib64",
-        "usr/lib",
-      ],
+      library_dirs = ["usr/lib"],
       public_tools = {
         eglinfo = {
           path = "usr/bin/eglinfo",

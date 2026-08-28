@@ -96,8 +96,10 @@ egl_library="$(json_library_path "$egl_manifest")"
   fail "unexpected EGL vendor library_path: ${egl_library:-<empty>}"
 require_file "${root}/usr/lib/${egl_library}"
 
-# Check every ELF in the payload statically. The bundle deliberately has only
-# these two library directories, matching bundle.toml. Scanning libraries as
+# Check every ELF in the payload statically. The bundle deliberately has one
+# native library directory, matching bundle.toml. A direct dependency may also
+# use a relative $ORIGIN RUNPATH (glibc gconv modules do), so resolve that
+# standard ELF search path before the native directory. Scanning libraries as
 # well as executables makes the DT_NEEDED check transitive.
 is_elf() {
   [ "$(dd if="$1" bs=4 count=1 2>/dev/null |
@@ -106,36 +108,64 @@ is_elf() {
 
 resolve_needed() {
   local name="$1"
-  [ -e "${root}/usr/lib/${name}" ] ||
-    [ -e "${root}/usr/lib64/${name}" ]
+  local elf="$2"
+  local search_path="$3"
+  local elf_dir="/${elf#"${root}/"}"
+  elf_dir="${elf_dir%/*}"
+  local entry
+
+  if [[ "$name" == */* ]]; then
+    [ -e "${root}/${name#/}" ]
+    return
+  fi
+
+  IFS=: read -r -a entries <<<"$search_path"
+  for entry in "${entries[@]}"; do
+    [ -n "$entry" ] || continue
+    entry="${entry//\$\{ORIGIN\}/$elf_dir}"
+    entry="${entry//\$ORIGIN/$elf_dir}"
+    case "$entry" in
+      /*)
+        [ -e "${root}${entry}/${name}" ] && return 0
+        ;;
+    esac
+  done
+
+  [ -e "${root}/usr/lib/${name}" ]
 }
 
 while IFS= read -r -d '' elf; do
   is_elf "$elf" || continue
 
+  dynamic="$(readelf -d "$elf")"
+  search_path="$(
+    sed -n 's/.*(RUNPATH).*Library runpath: \[\([^]]*\)\].*/\1/p' \
+      <<<"$dynamic"
+  )"
+  if [ -z "$search_path" ]; then
+    search_path="$(
+      sed -n 's/.*(RPATH).*Library rpath: \[\([^]]*\)\].*/\1/p' \
+        <<<"$dynamic"
+    )"
+  fi
+
   while IFS= read -r needed; do
     [ -n "$needed" ] || continue
-    resolve_needed "$needed" ||
+    resolve_needed "$needed" "$elf" "$search_path" ||
       fail "unresolved DT_NEEDED ${needed} from ${elf#"$bundle"/}"
   done < <(
-    readelf -d "$elf" 2>/dev/null |
-      sed -n 's/.*(NEEDED).*Shared library: \[\([^]]*\)\].*/\1/p'
+    sed -n 's/.*(NEEDED).*Shared library: \[\([^]]*\)\].*/\1/p' \
+      <<<"$dynamic"
   )
 
-  while IFS= read -r search_path; do
-    [ -n "$search_path" ] || continue
-    IFS=: read -r -a entries <<<"$search_path"
-    for entry in "${entries[@]}"; do
-      case "$entry" in
-        /*)
-          fail "absolute ELF search path ${entry} in ${elf#"$bundle"/}"
-          ;;
-      esac
-    done
-  done < <(
-    readelf -d "$elf" 2>/dev/null |
-      sed -n 's/.*(\(RPATH\|RUNPATH\)).*Library \(rpath\|runpath\): \[\([^]]*\)\].*/\3/p'
-  )
+  IFS=: read -r -a entries <<<"$search_path"
+  for entry in "${entries[@]}"; do
+    case "$entry" in
+      /*)
+        fail "absolute ELF search path ${entry} in ${elf#"$bundle"/}"
+        ;;
+    esac
+  done
 done < <(find "$root" -type f -print0)
 
 egl_log="${work}/eglinfo.txt"

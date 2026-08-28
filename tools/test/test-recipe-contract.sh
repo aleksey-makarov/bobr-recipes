@@ -48,13 +48,13 @@ run_case "tree-file" pass '{"name":"hello-tree","tag":"Tree","config":{"tree":{"
 run_case "tree-dir" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"dev"},{"type":"file","path":"etc/hostname","text":"bobr\n","executable":false}]}},"inputs":{}}'
 run_case "tree-symlink" pass '{"name":"runtime-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"usr/bin"},{"type":"symlink","path":"bin","target":"usr/bin"}]}},"inputs":{}}'
 run_case "tree-merge" pass '{"name":"merged-tree","tag":"TreeMerge","config":{},"inputs":{"left":{"name":"left-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"bin"}]}},"inputs":{}},"right":{"name":"right-tree","tag":"Tree","config":{"tree":{"entries":[{"type":"dir","path":"etc"}]}},"inputs":{}}}}'
-run_case "tree-subset" pass '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib64/libfoo.so*"]},"inputs":{"tree":'"${rootfs_tree}"'}}'
+run_case "tree-subset" pass '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib/libfoo.so*"]},"inputs":{"tree":'"${rootfs_tree}"'}}'
 run_case "tree-move" pass '{"name":"staged","tag":"TreeMove","config":{"strip_prefix":"stage"},"inputs":{"tree":'"${rootfs_tree}"'}}'
 run_case "bad-tree-move-config" fail '{"name":"staged","tag":"TreeMove","config":{"strip_prefix":["stage"]},"inputs":{"tree":'"${rootfs_tree}"'}}'
 run_case "missing-tree-move-input" fail '{"name":"staged","tag":"TreeMove","config":{"strip_prefix":"stage"},"inputs":{}}'
 run_case "fs-tree-export" pass '{"name":"exported","tag":"FsTreeExport","config":{"copies":[{"from":"boot/bzImage","to":"bzImage"}]},"inputs":{"input":'"${rootfs_tree}"'}}'
 run_case "rootfs-closure" pass '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{},"inputs":{"root":'"${rootfs_tree}"'}}'
-run_case "host-bundle" pass '{"name":"host-bundle","tag":"HostBundle","config":{"arch":"x86_64","policy":"strict","min_kernel":"4.19","library_dirs":["usr/lib64","usr/lib"],"public_tools":{"demo":{"path":"usr/bin/demo","argv0":"demo","argument_prefix":[{"value":"-L"},{"source":"payload","path":"usr/share/demo"},{"source":"overrides","path":"data"}],"environment":{"TERMINFO_DIRS":{"operation":"replace","paths":[{"source":"payload","path":"usr/share/terminfo"}]}}}},"internal_tools":{"helper":{"path":"usr/libexec/helper"}},"environment":{"QEMU_AUDIO_DRV":{"operation":"default","values":["none"]},"XDG_DATA_DIRS":{"operation":"prepend","paths":[{"source":"payload","path":"usr/share"},{"source":"overrides","path":"share"}],"inherit":true,"host_default":["/usr/share"]}}},"inputs":{"_root":'"${rootfs_tree}"',"_launcher":'"${rootfs_tree}"',"overrides":'"${rootfs_tree}"'}}'
+run_case "host-bundle" pass '{"name":"host-bundle","tag":"HostBundle","config":{"arch":"x86_64","policy":"strict","min_kernel":"4.19","library_dirs":["usr/lib"],"public_tools":{"demo":{"path":"usr/bin/demo","argv0":"demo","argument_prefix":[{"value":"-L"},{"source":"payload","path":"usr/share/demo"},{"source":"overrides","path":"data"}],"environment":{"TERMINFO_DIRS":{"operation":"replace","paths":[{"source":"payload","path":"usr/share/terminfo"}]}}}},"internal_tools":{"helper":{"path":"usr/libexec/helper"}},"environment":{"QEMU_AUDIO_DRV":{"operation":"default","values":["none"]},"XDG_DATA_DIRS":{"operation":"prepend","paths":[{"source":"payload","path":"usr/share"},{"source":"overrides","path":"share"}],"inherit":true,"host_default":["/usr/share"]}}},"inputs":{"_root":'"${rootfs_tree}"',"_launcher":'"${rootfs_tree}"',"overrides":'"${rootfs_tree}"'}}'
 run_case "host-bundle-minimal" pass '{"name":"host-bundle","tag":"HostBundle","config":{"arch":"aarch64","library_dirs":[],"public_tools":{"demo":{"path":"usr/bin/demo"}}},"inputs":{"_root":'"${rootfs_tree}"',"_launcher":'"${rootfs_tree}"'}}'
 run_case "host-bundle-missing-arch" fail '{"name":"host-bundle","tag":"HostBundle","config":{"library_dirs":[],"public_tools":{"demo":{"path":"usr/bin/demo"}}},"inputs":{"_root":'"${rootfs_tree}"',"_launcher":'"${rootfs_tree}"'}}'
 run_case "host-bundle-invalid-arch" fail '{"name":"host-bundle","tag":"HostBundle","config":{"arch":"riscv64","library_dirs":[],"public_tools":{"demo":{"path":"usr/bin/demo"}}},"inputs":{"_root":'"${rootfs_tree}"',"_launcher":'"${rootfs_tree}"'}}'
@@ -124,10 +124,10 @@ run_case "empty-group-inputs" fail '{"name":"all","tag":"Group","config":{},"inp
 run_case "bad-source-http-archive-format" fail '{"name":"src","tag":"Source","object_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","origin":{"tag":"Http","url":"https://example.invalid/src.tar.xz","archive_format":"tar-zst"}}'
 run_case "bad-source-oci-registry-missing-platform" fail '{"name":"img","tag":"Source","object_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","origin":{"tag":"OciRegistry","image":"docker.io/library/alpine:latest","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}'
 run_case "bad-tree-merge-config" fail '{"name":"merged-tree","tag":"TreeMerge","config":{"base":true},"inputs":{}}'
-run_case "bad-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":"usr/lib64/libfoo.so*"},"inputs":{"tree":'"${rootfs_tree}"'}}'
+run_case "bad-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":"usr/lib/libfoo.so*"},"inputs":{"tree":'"${rootfs_tree}"'}}'
 run_case "empty-tree-subset-config" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":[]},"inputs":{"tree":'"${rootfs_tree}"'}}'
 run_case "empty-fs-tree-export-copies" fail '{"name":"exported","tag":"FsTreeExport","config":{"copies":[]},"inputs":{"input":'"${rootfs_tree}"'}}'
-run_case "missing-tree-subset-input" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib64/libfoo.so*"]},"inputs":{}}'
+run_case "missing-tree-subset-input" fail '{"name":"runtime-subset","tag":"TreeSubset","config":{"include":["usr/lib/libfoo.so*"]},"inputs":{}}'
 run_case "bad-rootfs-closure-config" fail '{"name":"pkg-rootfs","tag":"RootfsClosure","config":{"base":true},"inputs":{"root":'"${rootfs_tree}"'}}'
 
 cat > "${tmpdir}/check-private-top-level-fields.ncl" <<EOF_INNER
@@ -769,7 +769,7 @@ let input_tree = {
   tag = "Tree",
   config = {
     tree = {
-      entries = [{ type = "dir", path = "usr/lib64" }],
+      entries = [{ type = "dir", path = "usr/lib" }],
     },
   },
   inputs = {},
@@ -778,7 +778,7 @@ recipe.to_request { recipes_path = "/recipes" } { system_rootfs_0 = rootfs_tree 
   name = "pkg-subset",
   tag = "TreeSubset",
   config = {
-    include = ["usr/lib64/libfoo.so*"],
+    include = ["usr/lib/libfoo.so*"],
   },
   inputs = {
     tree = input_tree,
@@ -794,7 +794,7 @@ tree_subset_lowering_json="$(
 jq -e '
   .root.tag == "TreeSubset"
   and .root.name == "pkg-subset"
-  and .root.config.include[0] == "usr/lib64/libfoo.so*"
+  and .root.config.include[0] == "usr/lib/libfoo.so*"
   and (.root.inputs | has("tree"))
   and (.root.inputs | has("_rootfs") | not)
   and (.root.inputs | has("script") | not)

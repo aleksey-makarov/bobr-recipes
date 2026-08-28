@@ -101,8 +101,9 @@ fun pkgs =>
             path = "usr/lib",
           },
           {
-            type = "dir",
+            type = "symlink",
             path = "usr/lib64",
+            target = "lib",
           },
           {
             type = "dir",
@@ -321,9 +322,9 @@ fun pkgs =>
     },
     config = {
       include = [
-        "usr/lib64/ld-linux-x86-64.so.2",
-        "usr/lib64/libc.so.6",
-        "usr/lib64/libm.so.6",
+        "usr/lib/ld-linux-x86-64.so.2",
+        "usr/lib/libc.so.6",
+        "usr/lib/libm.so.6",
       ],
     },
     inputs = {
@@ -403,7 +404,7 @@ fun pkgs =>
     },
     config = {
       include = [
-        "usr/lib64/libz.so*",
+        "usr/lib/libz.so*",
       ],
     },
     inputs = {
