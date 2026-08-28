@@ -86,6 +86,14 @@ fun pkgs =>
               # toolchain's files too -> a non-additive copy-up, rejected by the
               # additive validator). Existing lower dirs (/usr/bin, /usr/lib, ...)
               # keep their metadata; only the new files/dirs are added.
+              #
+              # LLVM ships libgomp.so as a compatibility alias to libomp.so.
+              # The native GCC runtime owns the canonical libgomp.so name in
+              # /usr/lib, so do not import LLVM's conflicting alias. Clang's
+              # own OpenMP runtime remains available as libomp.so (and
+              # libiomp5.so), while consumers that request libgomp get GCC's
+              # implementation.
+              rm -f "@{build}/source/lib/libgomp.so"
               cp -Rd --preserve=mode "@{build}/source/." "/usr/"
               # The ubuntu-18.04 prebuilt clang links libtinfo.so.5 (a separate
               # terminfo lib in that era). Our ncurses is built
