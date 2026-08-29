@@ -64,10 +64,14 @@
     # max_local_jobs = 4,
   },
 
-  # Optional local secondary capabilities. A store may be listed in either or
-  # both arrays; content sources must share a filesystem with the working store.
+  # Optional local read-only stores. `trusted` permits build/reuse lookups;
+  # `hardlink` requires the repository and working store to share a filesystem.
   # secondaries = {
-  #   trusted_indexes = [{ name = "previous", store = "../old-store" }],
-  #   content_sources = [{ name = "previous", store = "../old-store" }],
+  #   local_repositories = [{
+  #     name = "previous",
+  #     store = "../old-store",
+  #     trusted = true,
+  #     transfer = "hardlink",
+  #   }],
   # },
 }

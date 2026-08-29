@@ -48,8 +48,23 @@ let ProgressPolicyContract =
     },
   }
 in
+let LocalTransferPolicyContract =
+  std.contract.all_of [
+    String,
+    std.contract.from_predicate
+      (fun value => value == "hardlink" || value == "copy"),
+  ]
+in
+let LocalRepositoryContract = {
+  name | String,
+  store | String,
+  trusted | Bool,
+  transfer | LocalTransferPolicyContract,
+}
+in
 {
   ProgressPolicy = ProgressPolicyContract,
+  LocalRepository = LocalRepositoryContract,
   Profile = {
     target
       | String
@@ -142,18 +157,14 @@ in
 
     secondaries
       | {
-        trusted_indexes
-          | Array { name | String, store | String }
-          | default = [],
-        content_sources
-          | Array { name | String, store | String }
+        local_repositories
+          | Array LocalRepositoryContract
           | default = [],
       }
       | doc m%"
-        Ordered local secondary capabilities. Paths are resolved relative to
-        this profile. A store may appear in both arrays under the same name;
-        trusted mapping lookup and hardlink content acquisition remain
-        independent capabilities.
+        Ordered local read-only bobr stores. Paths are resolved relative to
+        this profile. `trusted` permits build/reuse mapping lookup;
+        `transfer` explicitly selects `hardlink` or `copy` content import.
       "%
       | default = {},
   },

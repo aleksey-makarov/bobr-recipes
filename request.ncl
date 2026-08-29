@@ -49,8 +49,9 @@ let RequestArgs = {
     | default = {},
   secondaries
     | {
-      trusted_indexes | Array Dyn | default = [],
-      content_sources | Array Dyn | default = [],
+      local_repositories
+        | Array profile_contracts.LocalRepository
+        | default = [],
     }
     | default = {},
 }

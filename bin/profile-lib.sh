@@ -72,17 +72,18 @@ let progress =
   else
     "{ mode = \"" ++ profile.progress.mode ++ "\" }"
 in
-let capability = fun entry =>
+let repository = fun entry =>
   "{ name = " ++ std.serialize 'Json entry.name
-  ++ ", store = " ++ std.serialize 'Json (absolute entry.store) ++ " }"
+  ++ ", store = " ++ std.serialize 'Json (absolute entry.store)
+  ++ ", trusted = " ++ std.serialize 'Json entry.trusted
+  ++ ", transfer = " ++ std.serialize 'Json entry.transfer ++ " }"
 in
-let capability_array = fun entries =>
-  "[" ++ std.string.join ", " (std.array.map capability entries) ++ "]"
+let repository_array = fun entries =>
+  "[" ++ std.string.join ", " (std.array.map repository entries) ++ "]"
 in
 let secondaries =
-  "{ trusted_indexes = " ++ capability_array profile.secondaries.trusted_indexes
-  ++ ", content_sources = " ++ capability_array profile.secondaries.content_sources
-  ++ " }"
+  "{ local_repositories = "
+  ++ repository_array profile.secondaries.local_repositories ++ " }"
 in
 std.string.join "\n" [
   "profile_target=" ++ quote profile.target,
