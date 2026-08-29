@@ -64,8 +64,10 @@
     # max_local_jobs = 4,
   },
 
-  # Optional local read-only stores. `trusted` permits build/reuse lookups;
-  # `hardlink` requires the repository and working store to share a filesystem.
+  # Optional local read-only stores. Every entry supplies verified content;
+  # `trusted` additionally permits build/reuse lookups. `hardlink` requires
+  # matching store filesystems and shares regular-file inodes; `copy` works
+  # across filesystems and always creates independent regular-file inodes.
   # secondaries = {
   #   local_repositories = [{
   #     name = "previous",

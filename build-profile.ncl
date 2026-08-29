@@ -56,10 +56,18 @@ let LocalTransferPolicyContract =
   ]
 in
 let LocalRepositoryContract = {
-  name | String,
-  store | String,
-  trusted | Bool,
-  transfer | LocalTransferPolicyContract,
+  name
+    | String
+    | doc "Unique diagnostic name; also identifies mapping and content providers in logs.",
+  store
+    | String
+    | doc "Read-only bobr store path, resolved relative to this profile.",
+  trusted
+    | Bool
+    | doc "Allow BuildKey and ReuseKey lookup; content is verified regardless of this value.",
+  transfer
+    | LocalTransferPolicyContract
+    | doc "Use `hardlink` on matching filesystems or `copy` for independent inodes.",
 }
 in
 {
@@ -151,7 +159,9 @@ in
         downloads per host (0 leaves bobr's default of 6), `per_host`
         overrides it for named hosts, `max_connections` caps downloads in
         flight overall (0 derives it from the file-descriptor limit), and
-        `max_local_jobs` caps local Source acquisition/materialization.
+        `max_local_jobs` is one shared limit for local Source work,
+        repository content transfer and verification, and builder input
+        preparation.
       "%
       | default = {},
 
@@ -162,9 +172,12 @@ in
           | default = [],
       }
       | doc m%"
-        Ordered local read-only bobr stores. Paths are resolved relative to
-        this profile. `trusted` permits build/reuse mapping lookup;
-        `transfer` explicitly selects `hardlink` or `copy` content import.
+        Ordered local read-only bobr stores. Every entry supplies verified
+        content; `trusted` additionally permits build/reuse mapping lookup.
+        `hardlink` requires matching `objects/` and `fs-files/` filesystems
+        and shares regular-file inodes. `copy` works across filesystems and
+        always creates independent regular-file inodes. No mode falls back to
+        the other. Paths are resolved relative to this profile.
       "%
       | default = {},
   },
