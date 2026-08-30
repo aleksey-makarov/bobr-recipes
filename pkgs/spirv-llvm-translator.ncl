@@ -30,8 +30,6 @@ fun pkgs =>
         pkgs.c_runtime,
         pkgs.gcc_libstdcxx,
         pkgs.zlib,
-        pkgs.zstd,
-        pkgs.libxml2,
       ],
     },
     config = {

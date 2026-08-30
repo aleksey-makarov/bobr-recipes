@@ -37,8 +37,8 @@ fun pkgs =>
         # setupterm, ...) into a separate libtinfo, as the big distros do. The
         # "=tinfo" argument forces the name libtinfo (not libtinfow) even though
         # this is a wide-character build, so consumers get a real libtinfo.so.6:
-        # readline links it directly (self-contained libreadline.so) and the
-        # prebuilt clang's libtinfo.so.N resolves to it instead of a symlink hack.
+        # readline links it directly, keeping libreadline.so self-contained and
+        # providing a real libtinfo.so.6 to other consumers.
         "--with-termlib=tinfo",
       ],
       post_install = [

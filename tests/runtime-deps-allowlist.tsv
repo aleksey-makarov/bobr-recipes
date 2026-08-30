@@ -9,6 +9,7 @@
 autoconf-2.73	grep-3.12	autom4te probes the external M4 executable through grep
 autoconf-2.73	m4-1.4.20	autom4te and autoupdate execute GNU M4
 automake-1.18.1	autoconf-2.73	aclocal executes autom4te and automake executes autoconf
+bindgen-0.72.1	llvm-bin-22.1.8	bindgen loads libclang dynamically through clang-sys
 bison-3.8.2	m4-1.4.20	bison executes GNU M4 to expand its parser skeletons
 blueprint-compiler-v0.22.2	glib-2.88.2	blueprintcompiler imports the GLib GI namespace
 blueprint-compiler-v0.22.2	gobject-introspection-1.86.0	blueprintcompiler loads the GIRepository typelib
@@ -32,6 +33,9 @@ libtool-2.5.4	m4-1.4.20	libtoolize executes GNU M4
 libtool-2.5.4	sed-4.9	libtool and libtoolize execute sed
 libxkbcommon-1.13.2	xcompose-data-1.8.13	libxkbcommon reads X11 locale and Compose data
 libxkbcommon-1.13.2	xkeyboard-config-2.44	libxkbcommon reads the XKB rules and symbols database
+llvm-bin-22.1.8	libxml2-2.15.3	LLVM static link metadata exposes LibXml2 for LLVMWindowsManifest
+llvm-bin-22.1.8	zstd-1.5.7	LLVMConfig resolves the zstd package for static consumers
+llvm-bin-22.1.8	zstd-static-1.5.7	LLVM static link metadata requires libzstd.a
 man-db-2.13.1	groff-1.23.0	man executes groff or nroff to format manual pages
 mesa-26.1.4	libglvnd-1.7.0	Mesa installs a GLVND vendor library and its registration metadata
 mesa-26.1.4	vulkan-loader-1.4.350.0	Mesa Zink dlopens libvulkan.so.1

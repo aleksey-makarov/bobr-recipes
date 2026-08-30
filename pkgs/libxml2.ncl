@@ -27,20 +27,17 @@ fun pkgs =>
     deps = {
       build = [
         pkgs.zlib,
-        pkgs.xz,
         pkgs.pkgconf,
       ],
       runtime = [
         pkgs.c_runtime,
         pkgs.zlib,
-        pkgs.xz,
       ],
     },
     config = {
       configure_args = [
         "--without-python",
         "--with-zlib",
-        "--with-lzma",
         "--disable-static",
       ],
     },

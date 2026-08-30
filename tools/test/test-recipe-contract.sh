@@ -1515,6 +1515,9 @@ let pkgs = (import "${repo_root}/recipe-set.ncl") [] in
 let runtime_names = fun package =>
   std.array.map (fun dependency => dependency.name) package.deps.runtime
 in
+let build_names = fun package =>
+  std.array.map (fun dependency => dependency.name) package.deps.build
+in
 {
   has_legacy_gcc_libs = std.record.has_field "gcc_libs" pkgs,
   c_runtime = {
@@ -1545,6 +1548,14 @@ in
   dejagnu_runtime = runtime_names pkgs.dejagnu,
   gsettings_desktop_schemas_runtime =
     runtime_names pkgs.gsettings_desktop_schemas,
+  bindgen_runtime = runtime_names pkgs.bindgen,
+  llvm_bin_build = build_names pkgs.llvm_bin,
+  llvm_bin_runtime = runtime_names pkgs.llvm_bin,
+  spirv_llvm_translator_runtime =
+    runtime_names pkgs.spirv_llvm_translator,
+  libxml2_build = build_names pkgs.libxml2,
+  libxml2_runtime = runtime_names pkgs.libxml2,
+  libxml2_configure_args = pkgs.libxml2.config.configure_args,
 }
 EOF_INNER
 
@@ -1584,6 +1595,24 @@ jq -e '
   and .gweather_locations_runtime == []
   and (.dejagnu_runtime | index($c_runtime)) == null
   and (.gsettings_desktop_schemas_runtime | index($c_runtime)) == null
+  and .bindgen_runtime == [$c_runtime, "llvm-bin-22.1.8"]
+  and (.llvm_bin_build | index("ncurses-6.6")) == null
+  and .llvm_bin_runtime == [
+    $c_runtime,
+    "gcc-libstdcxx-15.2.0",
+    "zlib-1.3.1",
+    "zstd-1.5.7",
+    "zstd-static-1.5.7",
+    "libxml2-2.15.3"
+  ]
+  and .spirv_llvm_translator_runtime == [
+    $c_runtime,
+    "gcc-libstdcxx-15.2.0",
+    "zlib-1.3.1"
+  ]
+  and .libxml2_build == ["zlib-1.3.1", "pkgconf-2.5.1"]
+  and .libxml2_runtime == [$c_runtime, "zlib-1.3.1"]
+  and (.libxml2_configure_args | index("--with-lzma")) == null
 ' <<<"${gcc_runtime_split_json}" >/dev/null
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER

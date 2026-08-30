@@ -1,6 +1,7 @@
 # Prebuilt LLVM/Clang toolchain used by packages that need LLVM development
-# libraries, libclang, or selected LLVM command-line tools. It is a build-only
-# package and never enters runtime rootfs closures.
+# libraries, libclang, or selected LLVM command-line tools. It is primarily a
+# build package, but tools such as bindgen include it in their runtime closure
+# because they load libclang dynamically.
 #
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 let recipe = import "../recipe-lib.ncl" in
@@ -43,7 +44,6 @@ fun pkgs =>
         pkgs.zlib,
         pkgs.zstd,
         pkgs.zstd_static,
-        pkgs.ncurses,
         pkgs.libxml2,
       ],
       runtime = [
@@ -52,7 +52,6 @@ fun pkgs =>
         pkgs.zlib,
         pkgs.zstd,
         pkgs.zstd_static,
-        pkgs.ncurses,
         pkgs.libxml2,
       ],
     },
