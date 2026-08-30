@@ -34,7 +34,6 @@ fun pkgs =>
         pkgs.glib,
         pkgs.gnome_desktop,
         pkgs.systemd_dev,
-        pkgs.json_glib,
         pkgs.gettext,
         pkgs.pkgconf,
       ],
@@ -43,7 +42,6 @@ fun pkgs =>
         pkgs.glib,
         pkgs.gnome_desktop,
         pkgs.systemd_libs,
-        pkgs.json_glib,
       ],
     },
     config = {

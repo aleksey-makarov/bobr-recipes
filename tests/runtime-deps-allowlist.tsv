@@ -19,12 +19,24 @@ dconf-0.40.0	dbus-1.16.2	dconf-service is activated and contacted through D-Bus
 dejagnu-1.6.3	expect-5.45.4	runtest executes Expect to interpret the test suite
 flex-2.6.4	m4-1.4.20	flex executes GNU M4 to expand its scanner skeleton
 gdk-pixbuf-2.44.7	shared-mime-info-2.5.1	GIO MIME sniffing reads the shared MIME database
+gdm-50.1	dconf-0.40.0	GDM uses dconf as its GSettings backend and session launcher
 glmark2-2023.01	libglvnd-1.7.0	glmark2 loads the GLVND EGL and OpenGL dispatch libraries
 glmark2-2023.01	mesa-26.1.4	glmark2 needs Mesa as its EGL and OpenGL vendor implementation
 gdm-50.1	dbus-1.16.2	GDM coordinates login services over the system D-Bus
+gjs-1.88.1	gobject-introspection-1.86.0	GJS loads the base GIRepository typelib at run time
+gnome-control-center-50.3	gnome-settings-daemon-50.1	settings panels consume GNOME Settings Daemon services
+gnome-control-center-50.3	gsettings-desktop-schemas-50.1	settings panels read org.gnome.desktop schemas
+gnome-control-center-50.3	tecla-50.0	the keyboard panel executes Tecla as its layout previewer
+gnome-desktop-44.5	fontconfig-2.16.0	the thumbnail sandbox exposes the fontconfig cache
 gnome-desktop-44.5	gsettings-desktop-schemas-50.1	libgnome-desktop reads org.gnome.desktop GSettings schemas
 gnome-desktop-44.5	iso-codes-4.20.1	libgnome-desktop reads ISO language and territory data
 gnome-settings-daemon-50.1	dbus-1.16.2	GNOME settings plugins expose and consume D-Bus services
+gnome-settings-daemon-50.1	gsettings-desktop-schemas-50.1	settings plugins read org.gnome.desktop schemas
+gnome-shell-50.3	adwaita-icon-theme-50.0	GNOME Shell renders the default Adwaita icon theme
+gnome-shell-50.3	gsettings-desktop-schemas-50.1	GNOME Shell reads org.gnome.desktop schemas
+gnome-shell-50.3	hicolor-icon-theme-0.18	GNOME Shell needs the freedesktop fallback icon theme
+gnome-shell-50.3	libnma-1.10.6	the network indicator loads the NMA4 GI namespace
+gnome-shell-50.3	librsvg-2.57.1	GNOME Shell loads the Rsvg GI namespace and SVG pixbuf loader
 gnutls-3.8.13	zlib-1.3.1	GnuTLS dlopens libz.so.1 for certificate compression
 ibus-1.5.34	dbus-1.16.2	IBus brokers engines and clients over the session D-Bus
 ibus-1.5.34	iso-codes-4.20.1	IBus reads ISO 639 language data and translations

@@ -1591,6 +1591,18 @@ in
   samba_runtime = runtime_names pkgs.samba,
   udisks_runtime = runtime_names pkgs.udisks,
   weston_runtime = runtime_names pkgs.weston,
+  gjs_runtime = runtime_names pkgs.gjs,
+  gnome_control_center_runtime =
+    runtime_names pkgs.gnome_control_center,
+  gnome_desktop_runtime = runtime_names pkgs.gnome_desktop,
+  gnome_online_accounts_build =
+    build_names pkgs.gnome_online_accounts,
+  gnome_online_accounts_runtime =
+    runtime_names pkgs.gnome_online_accounts,
+  gnome_session_build = build_names pkgs.gnome_session,
+  gnome_session_runtime = runtime_names pkgs.gnome_session,
+  gnome_shell_build = build_names pkgs.gnome_shell,
+  gnome_shell_runtime = runtime_names pkgs.gnome_shell,
 }
 EOF_INNER
 
@@ -1720,6 +1732,27 @@ jq -e '
   and (.udisks_runtime | index("libgudev-238")) == null
   and (.weston_runtime | index("freetype-2.14.3")) == null
   and (.weston_runtime | index("fontconfig-2.16.0")) == null
+  and (.gjs_runtime | index("gobject-introspection-1.86.0")) != null
+  and (.gnome_control_center_runtime |
+    index("gnome-settings-daemon-50.1")) != null
+  and (.gnome_control_center_runtime | index("tecla-50.0")) != null
+  and (.gnome_control_center_runtime |
+    index("gsettings-desktop-schemas-50.1")) != null
+  and (.gnome_desktop_runtime | index("fontconfig-2.16.0")) != null
+  and (.gnome_online_accounts_build | index("gcr-4.4.0.1")) == null
+  and (.gnome_online_accounts_runtime | index("gcr-4.4.0.1")) == null
+  and (.gnome_session_build | index("json-glib-1.10.8")) == null
+  and (.gnome_session_runtime | index("json-glib-1.10.8")) == null
+  and (.gnome_shell_build | index("json-glib-1.10.8")) == null
+  and (.gnome_shell_build | index("libxml2-2.15.3")) != null
+  and (.gnome_shell_runtime | index("json-glib-1.10.8")) == null
+  and (.gnome_shell_runtime | index("libxml2-2.15.3")) == null
+  and (.gnome_shell_runtime |
+    index("gsettings-desktop-schemas-50.1")) != null
+  and (.gnome_shell_runtime | index("libnma-1.10.6")) != null
+  and (.gnome_shell_runtime | index("librsvg-2.57.1")) != null
+  and (.gnome_shell_runtime | index("adwaita-icon-theme-50.0")) != null
+  and (.gnome_shell_runtime | index("hicolor-icon-theme-0.18")) != null
 ' <<<"${gcc_runtime_split_json}" >/dev/null
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER

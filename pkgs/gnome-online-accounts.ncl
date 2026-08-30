@@ -1,9 +1,9 @@
 let recipe = import "../recipe-lib.ncl" in
 # gnome-online-accounts (goa) -- provides goa-1.0, a hard dependency of
 # gnome-control-center's Online Accounts panel. Meson build against glib, gtk4,
-# libadwaita, libsecret, libsoup 3, libxml2, json-glib, librest (rest-1.0) and
-# gcr-4. The kerberos provider is disabled (`if enable_goabackend and
-# enable_kerberos` at meson.build:189 gates it), so it needs no krb5/keyutils.
+# libadwaita, libsecret, libsoup 3, libxml2, json-glib and librest (rest-1.0).
+# The Fedora and Kerberos providers are disabled, so the conditional GCR,
+# krb5, and keyutils dependencies are not part of this build.
 # Documentation, man pages and the Vala binding are off.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
@@ -39,7 +39,6 @@ fun pkgs =>
         pkgs.libxml2,
         pkgs.json_glib,
         pkgs.librest,
-        pkgs.gcr,
         pkgs.dbus,
         pkgs.systemd_dev,
         pkgs.gobject_introspection,
@@ -57,7 +56,6 @@ fun pkgs =>
         pkgs.libxml2,
         pkgs.json_glib,
         pkgs.librest,
-        pkgs.gcr,
       ],
     },
     config = {
