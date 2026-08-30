@@ -241,40 +241,6 @@ in
     ],
   },
 
-  # Walk the (lowered) graph of `root_node` and collect every node used as the
-  # `_rootfs` input of a `Sandbox`/`SandboxInstall` node -- i.e. every build
-  # environment in the graph. Nodes are lowered the same way `to_request` lowers
-  # them (so synthetic package tags get their derived `_rootfs`), and dedup is by
-  # node name. Returns a record `name -> rootfs node`. Used by the rootfs-closure
-  # check target to discover what to check without hardcoding a list.
-  collect_rootfs_inputs = fun pkgs =>
-    fun root_node =>
-      let lower = lower_node pkgs in
-      let rec go = fun acc =>
-        fun node =>
-          let ln = lower node in
-          if std.record.has_field ln.name acc.visited then
-            acc
-          else
-            let acc = {
-              visited = std.record.insert ln.name true acc.visited,
-              rootfs =
-                if (ln.tag == "Sandbox" || ln.tag == "SandboxInstall")
-                && std.record.has_field "_rootfs" ln.inputs
-                && !std.record.has_field ln.inputs._rootfs.name acc.rootfs then
-                  std.record.insert ln.inputs._rootfs.name ln.inputs._rootfs acc.rootfs
-                else
-                  acc.rootfs,
-            }
-            in
-            let inputs = node_inputs ln in
-            std.array.fold_left
-              (fun a => fun slot => go a (std.record.get slot inputs))
-              acc
-              (std.record.fields inputs)
-      in
-      (go { visited = {}, rootfs = {} } root_node).rootfs,
-
   # Walk the graph reachable from `root_node` and collect every raw recipe node
   # that declares `deps`. Such a node is a self-contained runtime-bearing
   # fs-tree package: its `deps.runtime` describes the closure in which its

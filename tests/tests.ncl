@@ -7,12 +7,12 @@
 # the package, its transitive `deps.runtime`, and `base_filesystem`, so unrelated
 # packages cannot mask a missing runtime dependency.
 #
-# `test_all_rootfs` -- runtime-closure checks over every rootfs used in the
-# `world` graph. It discovers every node used as a `_rootfs` input of
-# a Sandbox/SandboxInstall (i.e. every build environment), plus the shipped
-# images (packed via `_tree`, not `_rootfs`, so the walk misses them), runs a
-# check over each, bundles the reports, and a gate step fails the build if any
-# rootfs reported errors.
+# `test_bootstrap_rootfs` -- checks the small set of canonical external and
+# bootstrap toolchain environments whose gen1 members do not yet have package
+# runtime contracts of their own.
+#
+# `test_image_rootfs` -- checks the initrd and the three shipped OS rootfs trees.
+# The OS checks add image-specific assertions for graphics and GNOME content.
 #
 # Every check runs from OUTSIDE the checked tree: the checker sandbox uses a
 # tool-rich OCI rootfs (`oci_buildpack_deps_rootfs`) as its `_rootfs`, with the tree
@@ -285,6 +285,35 @@ fun pkgs =>
       runtime_closure_checks
   in
 
+  # Gen1 recipes intentionally predate the ordinary package dependency model:
+  # many provide an explicit `_rootfs` and have no `deps` field, so they cannot
+  # yet be checked as isolated package runtime closures. Check only the four
+  # canonical bootstrap environments instead of every derived package build
+  # rootfs. Ordinary build rootfs trees are unions of package runtime closures
+  # and are therefore covered more strictly by `test_runtime_closures`.
+  let bootstrap_checks = [
+    mk_rootfs_check
+      pkgs.oci_buildpack_deps_rootfs.name
+      pkgs.oci_buildpack_deps_rootfs,
+    mk_rootfs_check
+      pkgs.glibc_bootstrap_rootfs.name
+      pkgs.glibc_bootstrap_rootfs,
+    mk_rootfs_check
+      "gen1-toolchain-rootfs"
+      (recipe.gen1_toolchain_rootfs pkgs "gen1-toolchain-rootfs" []),
+    mk_rootfs_check
+      "bootstrap-toolchain-rootfs"
+      (recipe.bootstrap_toolchain_rootfs pkgs "bootstrap-toolchain-rootfs" []),
+  ]
+  in
+
+  let test_bootstrap_rootfs =
+    mk_check_gate
+      "test-bootstrap-rootfs"
+      "bootstrap-rootfs-check-reports"
+      bootstrap_checks
+  in
+
   let test_rootfs = mk_image_check "qemu" pkgs.qemu_rootfs {} in
 
   let test_gnome_rootfs =
@@ -308,36 +337,23 @@ fun pkgs =>
     }
   in
 
-  # Closure checks over exactly the `_rootfs` inputs of every Sandbox/
-  # SandboxInstall in the world graph -- i.e. every build environment used to
-  # produce either the guest-side OS artifacts or the host-side bundles.
-  # This is precisely what the walk returns; nothing is added to or removed from
-  # it here.
-  let build_rootfs_checks =
-    let targets = recipe.collect_rootfs_inputs pkgs pkgs.world in
-    std.array.map
-      (fun rname => mk_rootfs_check rname (std.record.get rname targets))
-      (std.record.fields targets)
+  let test_initrd_rootfs =
+    mk_rootfs_check pkgs.initrd_rootfs.name pkgs.initrd_rootfs
   in
 
-  # The shipped images are packed via `_tree`, not `_rootfs`, so the walk never
-  # reaches them -- check them explicitly. initrd_rootfs gets a closure check;
-  # rootfs/qemu_gnome_rootfs use the richer image checks (which add the image-specific
-  # checks). All produce the same one-file `status:` report, so the gate is
-  # uniform.
   let image_checks = [
-    mk_rootfs_check pkgs.initrd_rootfs.name pkgs.initrd_rootfs,
+    test_initrd_rootfs,
     test_rootfs,
     test_weston_rootfs,
     test_gnome_rootfs,
   ]
   in
 
-  let test_all_rootfs =
+  let test_image_rootfs =
     mk_check_gate
-      "test-all-rootfs"
-      "check-reports"
-      (build_rootfs_checks @ image_checks)
+      "test-image-rootfs"
+      "image-rootfs-check-reports"
+      image_checks
   in
 
   # Run every explicit check. The artifact-only world is a separate target.
@@ -349,7 +365,8 @@ fun pkgs =>
       recipe.numbered_inputs [
         test_host_bundles,
         test_runtime_closures,
-        test_all_rootfs,
+        test_bootstrap_rootfs,
+        test_image_rootfs,
         test_final_toolchain,
       ],
   }
@@ -360,7 +377,12 @@ fun pkgs =>
       test_host_bundles,
       test_final_toolchain,
       test_runtime_closures,
-      test_all_rootfs,
+      test_bootstrap_rootfs,
+      test_initrd_rootfs,
+      test_rootfs,
+      test_weston_rootfs,
+      test_gnome_rootfs,
+      test_image_rootfs,
       test_all,
     ],
   }
