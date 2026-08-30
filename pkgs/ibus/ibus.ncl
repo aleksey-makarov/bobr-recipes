@@ -59,7 +59,6 @@ fun pkgs =>
         pkgs.dbus,
         pkgs.iso_codes,
         pkgs.libevdev,
-        pkgs.systemd_libs,
         pkgs.wayland,
         pkgs.libxkbcommon,
       ],

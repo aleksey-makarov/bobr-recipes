@@ -1571,6 +1571,15 @@ in
   procps_ng_runtime = runtime_names pkgs.procps_ng,
   slang_build = build_names pkgs.slang,
   slang_runtime = runtime_names pkgs.slang,
+  accountsservice_runtime = runtime_names pkgs.accountsservice,
+  dconf_runtime = runtime_names pkgs.dconf,
+  gdm_runtime = runtime_names pkgs.gdm,
+  gnome_settings_daemon_runtime =
+    runtime_names pkgs.gnome_settings_daemon,
+  ibus_runtime = runtime_names pkgs.ibus,
+  networkmanager_runtime = runtime_names pkgs.networkmanager,
+  polkit_runtime = runtime_names pkgs.polkit,
+  upower_runtime = runtime_names pkgs.upower,
 }
 EOF_INNER
 
@@ -1650,8 +1659,7 @@ jq -e '
   and .at_spi2_core_runtime == [
     $c_runtime,
     "glib-2.88.2",
-    "dbus-1.16.2",
-    "systemd-libs-260.1"
+    "dbus-1.16.2"
   ]
   and .expect_build == ["tcl-8.6.16"]
   and .expect_runtime == [$c_runtime, "tcl-8.6.16"]
@@ -1672,6 +1680,16 @@ jq -e '
     "ncurses-libs-6.6",
     "zlib-1.3.1"
   ]
+  and (.accountsservice_runtime | index("dbus-1.16.2")) != null
+  and .dconf_runtime == [$c_runtime, "glib-2.88.2", "dbus-1.16.2"]
+  and (.gdm_runtime | index("dbus-1.16.2")) != null
+  and (.gnome_settings_daemon_runtime | index("dbus-1.16.2")) != null
+  and (.ibus_runtime | index("dbus-1.16.2")) != null
+  and (.ibus_runtime | index("systemd-libs-260.1")) == null
+  and (.networkmanager_runtime | index("dbus-1.16.2")) != null
+  and (.networkmanager_runtime | index("polkit-126")) != null
+  and (.polkit_runtime | index("dbus-1.16.2")) != null
+  and (.upower_runtime | index("systemd-libs-260.1")) == null
 ' <<<"${gcc_runtime_split_json}" >/dev/null
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER

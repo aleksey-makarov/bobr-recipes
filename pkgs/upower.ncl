@@ -41,7 +41,6 @@ fun pkgs =>
         pkgs.c_runtime,
         pkgs.glib,
         pkgs.libgudev,
-        pkgs.systemd_libs,
         pkgs.polkit,
       ],
     },

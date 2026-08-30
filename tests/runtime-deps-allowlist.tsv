@@ -8,20 +8,25 @@
 # a content-redundant edge when its non-static direct use is documented.
 autoconf-2.73	grep-3.12	autom4te probes the external M4 executable through grep
 autoconf-2.73	m4-1.4.20	autom4te and autoupdate execute GNU M4
+accountsservice-23.13.9	dbus-1.16.2	AccountsService provides a service on the system D-Bus
 automake-1.18.1	autoconf-2.73	aclocal executes autom4te and automake executes autoconf
 bindgen-0.72.1	llvm-bin-22.1.8	bindgen loads libclang dynamically through clang-sys
 bison-3.8.2	m4-1.4.20	bison executes GNU M4 to expand its parser skeletons
 blueprint-compiler-v0.22.2	glib-2.88.2	blueprintcompiler imports the GLib GI namespace
 blueprint-compiler-v0.22.2	gobject-introspection-1.86.0	blueprintcompiler loads the GIRepository typelib
 blueprint-compiler-v0.22.2	pygobject-3.56.3	blueprintcompiler imports the gi Python module
+dconf-0.40.0	dbus-1.16.2	dconf-service is activated and contacted through D-Bus
 dejagnu-1.6.3	expect-5.45.4	runtest executes Expect to interpret the test suite
 flex-2.6.4	m4-1.4.20	flex executes GNU M4 to expand its scanner skeleton
 gdk-pixbuf-2.44.7	shared-mime-info-2.5.1	GIO MIME sniffing reads the shared MIME database
 glmark2-2023.01	libglvnd-1.7.0	glmark2 loads the GLVND EGL and OpenGL dispatch libraries
 glmark2-2023.01	mesa-26.1.4	glmark2 needs Mesa as its EGL and OpenGL vendor implementation
+gdm-50.1	dbus-1.16.2	GDM coordinates login services over the system D-Bus
 gnome-desktop-44.5	gsettings-desktop-schemas-50.1	libgnome-desktop reads org.gnome.desktop GSettings schemas
 gnome-desktop-44.5	iso-codes-4.20.1	libgnome-desktop reads ISO language and territory data
+gnome-settings-daemon-50.1	dbus-1.16.2	GNOME settings plugins expose and consume D-Bus services
 gnutls-3.8.13	zlib-1.3.1	GnuTLS dlopens libz.so.1 for certificate compression
+ibus-1.5.34	dbus-1.16.2	IBus brokers engines and clients over the session D-Bus
 ibus-1.5.34	iso-codes-4.20.1	IBus reads ISO 639 language data and translations
 intltool-0.51.0	perl-xml-parser-2.47	intltool loads XML::Parser at run time
 libepoxy-1.5.10	mesa-guest-26.1.4	libepoxy dlopens Mesa-provided EGL, OpenGL, and GLES libraries
@@ -44,7 +49,10 @@ mesa-demos-9.0.0	mesa-26.1.4	Mesa demos need Mesa as their EGL and OpenGL vendor
 mesa-guest-26.1.4	vulkan-loader-1.4.350.0	Mesa Zink dlopens libvulkan.so.1
 meson-1.8.3	ninja-1.13.1	Meson detects and executes Ninja
 mutter-50.3	gsettings-desktop-schemas-50.1	Mutter reads org.gnome.desktop GSettings schemas
+networkmanager-1.56.1	dbus-1.16.2	NetworkManager exposes its public service on the system D-Bus
+networkmanager-1.56.1	polkit-126	NetworkManager delegates privileged authorization to polkit
 perl-xml-parser-2.47	perl-5.42.2	XML::Parser is loaded by the Perl interpreter
+polkit-126	dbus-1.16.2	polkitd provides its authorization service over D-Bus
 pygobject-3.56.3	python-3.13.7	PyGObject is loaded by the Python interpreter
 python-flit-core-3.12.0	python-3.13.7	flit_core is loaded by the Python interpreter
 python-jinja2-3.1.6	python-3.13.7	Jinja is loaded by the Python interpreter

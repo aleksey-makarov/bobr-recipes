@@ -38,7 +38,6 @@ fun pkgs =>
         pkgs.c_runtime,
         pkgs.glib,
         pkgs.dbus,
-        pkgs.systemd_libs,
       ],
     },
     config = {
