@@ -102,9 +102,18 @@ fun pkgs =>
           "/bin/sh",
           "-ec",
           m%"
+            # QEMU installs one common firmware blob set even for a restricted
+            # target-list. These PA-RISC payloads are useful only to the HPPA
+            # system emulator and must not enter the x86_64-only package.
+            rm -fv \
+              /usr/share/qemu/hppa-firmware.img \
+              /usr/share/qemu/hppa-firmware64.img
+
             test -x /usr/bin/qemu-system-x86_64
             test -x /usr/bin/qemu-img
             test -d /usr/share/qemu
+            test ! -e /usr/share/qemu/hppa-firmware.img
+            test ! -e /usr/share/qemu/hppa-firmware64.img
           "%,
         ],
       },
