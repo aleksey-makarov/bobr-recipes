@@ -534,7 +534,15 @@ fun pkgs =>
   # build rootfs or whose install touches shared paths (a recursive chown, a
   # re-rooted DESTDIR). Recipes using this tag MUST install into `/stage`.
   let lower_sandbox_stage_deps_node = fun node =>
-    let installed = lower_sandbox_build_with "SandboxInstall" node in
+    # `deps` describes the outer package's runtime contract. Do not copy it to
+    # the generated implementation node: graph analyses that inspect raw
+    # package metadata must see one runtime root, not both `name` and the
+    # internal `name-staged` SandboxInstall.
+    let installed =
+      std.record.remove
+        "deps"
+        (lower_sandbox_build_with "SandboxInstall" node)
+    in
     let staged = std.record.update "name" (node.name ++ "-staged") installed in
     {
       name = node.name,

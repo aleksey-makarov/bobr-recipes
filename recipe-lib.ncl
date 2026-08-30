@@ -275,6 +275,48 @@ in
       in
       (go { visited = {}, rootfs = {} } root_node).rootfs,
 
+  # Walk the graph reachable from `root_node` and collect every raw recipe node
+  # that declares `deps`. Such a node is a self-contained runtime-bearing
+  # fs-tree package: its `deps.runtime` describes the closure in which its
+  # output must work. Inspect the raw node before lowering so package metadata
+  # survives synthetic wrappers such as SandboxStageDeps -> TreeMove, but walk
+  # lowered inputs as well so generated build rootfs and default build deps are
+  # reachable. Declared deps are visited explicitly because they are metadata,
+  # not necessarily ordinary inputs of the lowered package node.
+  #
+  # Returns a record `name -> raw recipe node`, deduplicated by recipe name.
+  collect_runtime_roots = fun pkgs =>
+    fun root_node =>
+      let lower = lower_node pkgs in
+      let rec go = fun acc =>
+        fun node =>
+          if std.record.has_field node.name acc.visited then
+            acc
+          else
+            let acc = {
+              visited = std.record.insert node.name true acc.visited,
+              roots =
+                if std.record.has_field "deps" node then
+                  std.record.insert node.name node acc.roots
+                else
+                  acc.roots,
+            }
+            in
+            let declared_deps =
+              if std.record.has_field "deps" node then
+                node.deps.build @ node.deps.runtime
+              else
+                []
+            in
+            let with_declared_deps = std.array.fold_left go acc declared_deps in
+            let lowered_inputs = node_inputs (lower node) in
+            std.array.fold_left
+              (fun a => fun slot => go a (std.record.get slot lowered_inputs))
+              with_declared_deps
+              (std.record.fields lowered_inputs)
+      in
+      (go { visited = {}, roots = {} } root_node).roots,
+
   to_request = fun raw_ctx =>
     fun pkgs =>
     fun root_node =>

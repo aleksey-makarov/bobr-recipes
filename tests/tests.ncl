@@ -2,6 +2,11 @@
 #
 # `test_host_bundles` -- smoke checks over the test Mesa and QEMU HostBundles.
 #
+# `test_runtime_closures` -- one isolated closure check for every runtime-bearing
+# fs-tree recipe (every reachable node with `deps`). Each closure contains only
+# the package, its transitive `deps.runtime`, and `base_filesystem`, so unrelated
+# packages cannot mask a missing runtime dependency.
+#
 # `test_all_rootfs` -- runtime-closure checks over every rootfs used in the
 # `world` graph. It discovers every node used as a `_rootfs` input of
 # a Sandbox/SandboxInstall (i.e. every build environment), plus the shipped
@@ -219,6 +224,67 @@ fun pkgs =>
       }
   in
 
+  # Collapse an arbitrary set of one-report check nodes into one Bundle, then
+  # run the common gate over it. Keeping the fan-in behind one input avoids a
+  # hundreds-of-mounts gate sandbox for the per-package runtime checks.
+  let mk_check_gate = fun target_name =>
+    fun bundle_name =>
+      fun checks =>
+        let reports_bundle = {
+          name = bundle_name,
+          tag = "Bundle",
+          config = {},
+          inputs = recipe.numbered_inputs checks,
+        }
+        in
+        {
+          name = target_name,
+          tag = "Sandbox",
+          config = {
+            steps = [
+              {
+                name = "gate",
+                run_as = "root",
+                cwd = "@{out}",
+                argv = ["@{script}"],
+              },
+            ],
+          },
+          inputs = {
+            _rootfs = pkgs.oci_buildpack_deps_rootfs,
+            script = check_gate_source,
+            reports = reports_bundle,
+          },
+        }
+  in
+
+  # Check every package-level runtime contract independently. The collector
+  # keeps the original raw node (and therefore its deps) even when a synthetic
+  # builder lowers to technical SandboxInstall/TreeMove nodes.
+  let runtime_roots = recipe.collect_runtime_roots pkgs pkgs.world in
+  let runtime_closure_checks =
+    std.array.map
+      (fun recipe_name =>
+        let package = std.record.get recipe_name runtime_roots in
+        let closure = {
+          name = "check-runtime-closure-%{recipe_name}",
+          tag = "RootfsClosure",
+          config = {},
+          inputs = { root = package },
+        }
+        in
+        mk_rootfs_check "runtime-%{recipe_name}" closure
+      )
+      (std.record.fields runtime_roots)
+  in
+
+  let test_runtime_closures =
+    mk_check_gate
+      "test-runtime-closures"
+      "runtime-closure-check-reports"
+      runtime_closure_checks
+  in
+
   let test_rootfs = mk_image_check "qemu" pkgs.qemu_rootfs {} in
 
   let test_gnome_rootfs =
@@ -267,39 +333,11 @@ fun pkgs =>
   ]
   in
 
-  let checks = build_rootfs_checks @ image_checks in
-
-  # Fan-in via `Bundle`: collapse the per-rootfs report directories into ONE
-  # object, so the gate bind-mounts a single input regardless of how many rootfs
-  # were checked. `numbered_inputs` gives valid (`nNNN`) bundle slot keys; the
-  # rootfs identity is inside each report (`name:` line).
-  let reports_bundle = {
-    name = "check-reports",
-    tag = "Bundle",
-    config = {},
-    inputs = recipe.numbered_inputs checks,
-  }
-  in
-
-  let test_all_rootfs = {
-    name = "test-all-rootfs",
-    tag = "Sandbox",
-    config = {
-      steps = [
-        {
-          name = "gate",
-          run_as = "root",
-          cwd = "@{out}",
-          argv = ["@{script}"],
-        },
-      ],
-    },
-    inputs = {
-      _rootfs = pkgs.oci_buildpack_deps_rootfs,
-      script = check_gate_source,
-      reports = reports_bundle,
-    },
-  }
+  let test_all_rootfs =
+    mk_check_gate
+      "test-all-rootfs"
+      "check-reports"
+      (build_rootfs_checks @ image_checks)
   in
 
   # Run every explicit check. The artifact-only world is a separate target.
@@ -310,6 +348,7 @@ fun pkgs =>
     inputs =
       recipe.numbered_inputs [
         test_host_bundles,
+        test_runtime_closures,
         test_all_rootfs,
         test_final_toolchain,
       ],
@@ -320,6 +359,7 @@ fun pkgs =>
     include [
       test_host_bundles,
       test_final_toolchain,
+      test_runtime_closures,
       test_all_rootfs,
       test_all,
     ],

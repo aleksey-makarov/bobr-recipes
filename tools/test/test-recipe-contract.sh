@@ -837,6 +837,168 @@ jq -e '
   and .many.config.include == ["usr/lib/libsystemd.so*", "usr/lib/libudev.so*"]
 ' <<<"${recipe_split_libs_helper_json}" >/dev/null
 
+cat > "${tmpdir}/check-runtime-roots-collection.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let plain_tree = fun name => {
+  include name,
+  tag = "Tree",
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = name }],
+    },
+  },
+  inputs = {},
+} in
+let runtime_tree = fun name => fun build => fun runtime =>
+  plain_tree name
+  & {
+    deps = { include [build, runtime] },
+  }
+in
+let runtime_leaf = runtime_tree "runtime-leaf" [] [] in
+let runtime_mid = runtime_tree "runtime-mid" [] [runtime_leaf] in
+let build_dep = runtime_tree "build-dep" [] [] in
+let ignored = plain_tree "ignored" in
+let package = {
+  name = "package",
+  tag = "SandboxStageDeps",
+  deps = {
+    build = [build_dep],
+    runtime = [runtime_mid],
+  },
+  config = {
+    steps = [{
+      name = "install",
+      run_as = "root",
+      cwd = "/stage",
+      argv = ["/bin/sh", "-c", "true"],
+    }],
+  },
+  inputs = { source = ignored },
+} in
+let pkgs = {
+  base_filesystem = plain_tree "base-filesystem",
+  bash = plain_tree "bash",
+  tar = plain_tree "tar",
+  gzip = plain_tree "gzip",
+  bzip2 = plain_tree "bzip2",
+  xz = plain_tree "xz",
+  patch = plain_tree "patch",
+} in
+let root = {
+  name = "root",
+  tag = "Group",
+  config = {},
+  inputs = {
+    package_input = package,
+    duplicate = package,
+    ignored_input = ignored,
+  },
+} in
+let roots = recipe.collect_runtime_roots pkgs root in
+{
+  names = std.record.fields roots,
+  package_tag = (std.record.get "package" roots).tag,
+  package_runtime =
+    std.array.map (fun dep => dep.name) (std.record.get "package" roots).deps.runtime,
+  has_internal_staged = std.record.has_field "package-staged" roots,
+}
+EOF_INNER
+
+runtime_roots_collection_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-runtime-roots-collection.ncl --format json
+)"
+
+jq -e '
+  .names == ["build-dep", "package", "runtime-leaf", "runtime-mid"]
+  and .package_tag == "SandboxStageDeps"
+  and .package_runtime == ["runtime-mid"]
+  and (.has_internal_staged | not)
+' <<<"${runtime_roots_collection_json}" >/dev/null
+
+cat > "${tmpdir}/check-runtime-roots-cycle.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let rec cycle = {
+  left = {
+    name = "cycle-left",
+    tag = "Tree",
+    deps = { build = [], runtime = [cycle.right] },
+    config = { tree = { entries = [{ type = "dir", path = "left" }] } },
+    inputs = {},
+  },
+  right = {
+    name = "cycle-right",
+    tag = "Tree",
+    deps = { build = [], runtime = [cycle.left] },
+    config = { tree = { entries = [{ type = "dir", path = "right" }] } },
+    inputs = {},
+  },
+} in
+std.record.fields (recipe.collect_runtime_roots {} cycle.left)
+EOF_INNER
+
+runtime_roots_cycle_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-runtime-roots-cycle.ncl --format json
+)"
+
+jq -e '. == ["cycle-left", "cycle-right"]' \
+  <<<"${runtime_roots_cycle_json}" >/dev/null
+
+cat > "${tmpdir}/check-collected-runtime-closure-lowering.ncl" <<EOF_INNER
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let runtime_tree = fun name => fun build => fun runtime => {
+  include name,
+  tag = "Tree",
+  deps = { include [build, runtime] },
+  config = {
+    tree = {
+      entries = [{ type = "dir", path = name }],
+    },
+  },
+  inputs = {},
+} in
+let base = runtime_tree "base-filesystem" [] [] in
+let build_only = runtime_tree "build-only" [] [] in
+let runtime_leaf = runtime_tree "runtime-leaf" [] [] in
+let runtime_mid = runtime_tree "runtime-mid" [] [runtime_leaf] in
+let package = runtime_tree "package" [build_only] [runtime_mid] in
+let world = {
+  name = "world",
+  tag = "Group",
+  config = {},
+  inputs = { package_input = package },
+} in
+let pkgs = { base_filesystem = base } in
+let roots = recipe.collect_runtime_roots pkgs world in
+let collected_package = std.record.get "package" roots in
+recipe.to_request { recipes_path = "/recipes" } pkgs {
+  name = "check-runtime-closure-package",
+  tag = "RootfsClosure",
+  config = {},
+  inputs = { root = collected_package },
+}
+EOF_INNER
+
+collected_runtime_closure_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-collected-runtime-closure-lowering.ncl --format json
+)"
+
+# A per-package closure contains the package, the transitive runtime closure,
+# and base_filesystem. Build-only dependencies must not leak into it.
+jq -e '
+  .root.tag == "TreeMerge"
+  and .root.name == "check-runtime-closure-package"
+  and ([.[] | select(.name == "base-filesystem")] | length == 1)
+  and ([.[] | select(.name == "package")] | length == 1)
+  and ([.[] | select(.name == "runtime-mid")] | length == 1)
+  and ([.[] | select(.name == "runtime-leaf")] | length == 1)
+  and ([.[] | select(.name == "build-only")] | length == 0)
+  and (.root.inputs | length == 4)
+' <<<"${collected_runtime_closure_json}" >/dev/null
+
 cat > "${tmpdir}/check-rootfs-closure-lowering.ncl" <<EOF_INNER
 let recipe = import "${repo_root}/recipe-lib.ncl" in
 let base_tree = {
@@ -1005,6 +1167,75 @@ if ! rg "RootfsClosure 'empty-rootfs' must have at least one input" "${tmpdir}/r
   cat "${tmpdir}/rootfs-empty.err" >&2
   exit 1
 fi
+
+# Exercise the static runtime checker itself with a tiny pair of shared
+# libraries. The consumer has one DT_NEEDED edge and no interpreter/libc edge;
+# omitting the provider must report an error, while adding it makes the same
+# closure pass.
+runtime_fixture="${tmpdir}/runtime-check-fixture"
+mkdir -p \
+  "${runtime_fixture}/build" \
+  "${runtime_fixture}/negative/config" \
+  "${runtime_fixture}/negative/inputs/_target/usr/lib" \
+  "${runtime_fixture}/negative/out" \
+  "${runtime_fixture}/positive/config" \
+  "${runtime_fixture}/positive/inputs/_target/usr/lib" \
+  "${runtime_fixture}/positive/out"
+
+cat > "${runtime_fixture}/build/provider.c" <<'EOF_INNER'
+int fixture_provider(void) { return 7; }
+EOF_INNER
+cat > "${runtime_fixture}/build/consumer.c" <<'EOF_INNER'
+extern int fixture_provider(void);
+int fixture_consumer(void) { return fixture_provider(); }
+EOF_INNER
+
+cc -fPIC -c \
+  -o "${runtime_fixture}/build/provider.o" \
+  "${runtime_fixture}/build/provider.c"
+cc -shared -nostdlib \
+  -Wl,-soname,libfixture-provider.so.1 \
+  -o "${runtime_fixture}/build/libfixture-provider.so.1" \
+  "${runtime_fixture}/build/provider.o"
+cc -fPIC -c \
+  -o "${runtime_fixture}/build/consumer.o" \
+  "${runtime_fixture}/build/consumer.c"
+cc -shared -nostdlib \
+  -Wl,-soname,libfixture-consumer.so.1 \
+  -Wl,-rpath,/usr/lib \
+  -Wl,--no-as-needed \
+  -L"${runtime_fixture}/build" \
+  -o "${runtime_fixture}/build/libfixture-consumer.so.1" \
+  "${runtime_fixture}/build/consumer.o" \
+  -l:libfixture-provider.so.1
+
+readelf -d "${runtime_fixture}/build/libfixture-consumer.so.1" \
+  | rg 'NEEDED.*libfixture-provider\.so\.1' >/dev/null
+
+cp "${runtime_fixture}/build/libfixture-consumer.so.1" \
+  "${runtime_fixture}/negative/inputs/_target/usr/lib/"
+cp "${runtime_fixture}/build/libfixture-consumer.so.1" \
+  "${runtime_fixture}/positive/inputs/_target/usr/lib/"
+cp "${runtime_fixture}/build/libfixture-provider.so.1" \
+  "${runtime_fixture}/positive/inputs/_target/usr/lib/"
+printf '%s\n' fixture-negative > "${runtime_fixture}/negative/config/name"
+printf '%s\n' fixture-positive > "${runtime_fixture}/positive/config/name"
+
+BOBR_CONFIG_DIR="${runtime_fixture}/negative/config" \
+BOBR_INPUTS_DIR="${runtime_fixture}/negative/inputs" \
+BOBR_OUT_DIR="${runtime_fixture}/negative/out" \
+  bash "${repo_root}/tests/rootfs-check.sh"
+BOBR_CONFIG_DIR="${runtime_fixture}/positive/config" \
+BOBR_INPUTS_DIR="${runtime_fixture}/positive/inputs" \
+BOBR_OUT_DIR="${runtime_fixture}/positive/out" \
+  bash "${repo_root}/tests/rootfs-check.sh"
+
+rg -x 'status: error' \
+  "${runtime_fixture}/negative/out/report-fixture-negative-error.txt" >/dev/null
+rg -x 'FAIL  missing shared library for /usr/lib/libfixture-consumer.so.1: libfixture-provider.so.1' \
+  "${runtime_fixture}/negative/out/report-fixture-negative-error.txt" >/dev/null
+rg -x 'status: ok' \
+  "${runtime_fixture}/positive/out/report-fixture-positive-ok.txt" >/dev/null
 
 cat > "${tmpdir}/check-meson-synthetic-lowering.ncl" <<EOF_INNER
 let recipe = import "${repo_root}/recipe-lib.ncl" in
