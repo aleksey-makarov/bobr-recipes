@@ -44,7 +44,6 @@ fun pkgs =>
       runtime = [
         pkgs.c_runtime,
         pkgs.glib,
-        pkgs.libgudev,
         pkgs.polkit,
       ],
     },

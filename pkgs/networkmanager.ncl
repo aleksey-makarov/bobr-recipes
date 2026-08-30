@@ -42,7 +42,6 @@ fun pkgs =>
         pkgs.nspr,
         pkgs.libpsl,
         pkgs.readline,
-        pkgs.ncurses,
         pkgs.polkit,
         pkgs.gobject_introspection,
         pkgs.python,
@@ -53,7 +52,6 @@ fun pkgs =>
       runtime = [
         pkgs.c_runtime,
         pkgs.glib,
-        pkgs.util_linux_libs,
         pkgs.systemd_libs,
         pkgs.dbus,
         pkgs.libndp,
@@ -61,7 +59,6 @@ fun pkgs =>
         pkgs.nspr,
         pkgs.libpsl,
         pkgs.readline,
-        pkgs.ncurses,
         pkgs.polkit,
       ],
     },

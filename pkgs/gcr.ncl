@@ -43,7 +43,6 @@ fun pkgs =>
         pkgs.glib,
         pkgs.libgcrypt,
         pkgs.p11_kit,
-        pkgs.libtasn1,
       ],
     },
     config = {

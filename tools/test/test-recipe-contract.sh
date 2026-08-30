@@ -1580,6 +1580,17 @@ in
   networkmanager_runtime = runtime_names pkgs.networkmanager,
   polkit_runtime = runtime_names pkgs.polkit,
   upower_runtime = runtime_names pkgs.upower,
+  colord_runtime = runtime_names pkgs.colord,
+  colord_gtk_runtime = runtime_names pkgs.colord_gtk,
+  gcr_runtime = runtime_names pkgs.gcr,
+  gtk4_runtime = runtime_names pkgs.gtk4,
+  libdecor_runtime = runtime_names pkgs.libdecor,
+  libei_runtime = runtime_names pkgs.libei,
+  nss_runtime = runtime_names pkgs.nss,
+  qemu_runtime = runtime_names pkgs.qemu,
+  samba_runtime = runtime_names pkgs.samba,
+  udisks_runtime = runtime_names pkgs.udisks,
+  weston_runtime = runtime_names pkgs.weston,
 }
 EOF_INNER
 
@@ -1690,6 +1701,25 @@ jq -e '
   and (.networkmanager_runtime | index("polkit-126")) != null
   and (.polkit_runtime | index("dbus-1.16.2")) != null
   and (.upower_runtime | index("systemd-libs-260.1")) == null
+  and (.colord_runtime | index("sqlite-3.53.3")) == null
+  and (.colord_runtime | index("libgudev-238")) == null
+  and (.colord_gtk_runtime | index("lcms2-2.17")) == null
+  and (.gcr_runtime | index("libtasn1-4.21.0")) == null
+  and .gsettings_desktop_schemas_runtime == []
+  and (.gtk4_runtime | index("libdrm-2.4.134")) == null
+  and (.ibus_runtime | index("libevdev-1.13.4")) == null
+  and (.libdecor_runtime | index("libxkbcommon-1.13.2")) == null
+  and (.libei_runtime | index("libxkbcommon-1.13.2")) == null
+  and (.networkmanager_runtime | index("ncurses-6.6")) == null
+  and (.networkmanager_runtime | index("util-linux-libs-2.41.5")) == null
+  and (.nss_runtime | index("zlib-1.3.1")) == null
+  and (.qemu_runtime | index("libdrm-libs-2.4.134")) == null
+  and (.samba_runtime | index("libtirpc-1.3.7")) == null
+  and (.samba_runtime | index("gmp-6.3.0")) == null
+  and (.samba_runtime | index("libtasn1-4.21.0")) == null
+  and (.udisks_runtime | index("libgudev-238")) == null
+  and (.weston_runtime | index("freetype-2.14.3")) == null
+  and (.weston_runtime | index("fontconfig-2.16.0")) == null
 ' <<<"${gcc_runtime_split_json}" >/dev/null
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER

@@ -39,7 +39,6 @@ fun pkgs =>
       runtime = [
         pkgs.c_runtime,
         pkgs.libevdev,
-        pkgs.libxkbcommon,
       ],
     },
     config = {

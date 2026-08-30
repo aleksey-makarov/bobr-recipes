@@ -32,7 +32,6 @@ fun pkgs =>
         pkgs.cairo,
         pkgs.pango,
         pkgs.wayland,
-        pkgs.libxkbcommon,
       ],
     },
     config = {

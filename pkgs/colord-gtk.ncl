@@ -42,7 +42,6 @@ fun pkgs =>
         pkgs.glib,
         pkgs.colord,
         pkgs.gtk4,
-        pkgs.lcms2,
       ],
     },
     config = {

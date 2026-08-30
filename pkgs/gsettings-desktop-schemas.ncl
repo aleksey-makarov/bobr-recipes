@@ -31,9 +31,7 @@ fun pkgs =>
         pkgs.glib,
         pkgs.gobject_introspection,
       ],
-      runtime = [
-        pkgs.glib,
-      ],
+      runtime = [],
     },
     config = {
       setup_args = [

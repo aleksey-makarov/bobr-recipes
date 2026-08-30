@@ -52,7 +52,6 @@ fun pkgs =>
         pkgs.libslirp,
         pkgs.sdl2_compat,
         pkgs.libepoxy_host,
-        pkgs.libdrm_libs,
         pkgs.mesa,
         pkgs.virglrenderer,
       ],

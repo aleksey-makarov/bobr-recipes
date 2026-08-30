@@ -60,7 +60,6 @@ fun pkgs =>
         pkgs.libjpeg_turbo,
         pkgs.libtiff,
         pkgs.wayland,
-        pkgs.libdrm,
         pkgs.fontconfig,
         pkgs.libxkbcommon,
       ],

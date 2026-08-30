@@ -47,8 +47,6 @@ fun pkgs =>
         pkgs.cairo,
         pkgs.libdrm_libs,
         pkgs.mesa_guest,
-        pkgs.freetype,
-        pkgs.fontconfig,
         pkgs.libpng,
         pkgs.libdisplay_info,
         pkgs.systemd_libs,

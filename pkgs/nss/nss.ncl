@@ -62,7 +62,6 @@ fun pkgs =>
         pkgs.c_runtime,
         pkgs.nspr,
         pkgs.sqlite,
-        pkgs.zlib,
       ],
     },
     config = {
