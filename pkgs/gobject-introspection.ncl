@@ -43,12 +43,12 @@ fun pkgs =>
     },
     config = {
       # gen1 lives in its private prefix (/usr/lib/glib-gen1); point pkg-config
-      # and the loader there so g-i builds/links against it. The rpath is
+      # there and embed the same path in g-i's own linked outputs. gen1 itself
+      # carries a RUNPATH, so no ambient loader override is needed. The rpath is
       # harmless in the final image (that dir does not exist there, so the loader
       # falls back to /usr/lib, i.e. the final glib).
       env = {
         PKG_CONFIG_PATH = "/usr/lib/glib-gen1/lib/pkgconfig",
-        LD_LIBRARY_PATH = "/usr/lib/glib-gen1/lib",
         LDFLAGS = "-Wl,-rpath,/usr/lib/glib-gen1/lib",
       },
       setup_args = [

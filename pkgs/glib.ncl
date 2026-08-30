@@ -78,6 +78,10 @@ fun pkgs =>
           "-Dintrospection=disabled",
           "--prefix=%{gen1_prefix}",
           "--libdir=%{gen1_prefix}/lib",
+          # gen1 is a self-contained private-prefix tool package: both its
+          # executables and shared libraries must find sibling GLib libraries
+          # without relying on an ambient LD_LIBRARY_PATH.
+          "-Dc_link_args=-Wl,-rpath,%{gen1_prefix}/lib",
         ],
     },
     inputs = {
@@ -92,8 +96,8 @@ fun pkgs =>
   # glib substituted by glib_gen1 -- so the recipe builds against gen1 and there
   # is no glib-in-its-own-build-rootfs cycle. deps.build is ignored for *Rootfs
   # recipes; deps.runtime is honest (the final glib's runtime), so a runtime
-  # closure ships this glib and never gen1. env points the gir scanner at gen1 in
-  # its private prefix.
+  # closure ships this glib and never gen1. PKG_CONFIG_PATH selects gen1's build
+  # metadata; its installed ELF files carry their own RUNPATH.
   let glib = {
     version | default = default_version,
     source_object_hash | default = default_hash,
@@ -107,7 +111,6 @@ fun pkgs =>
       setup_args = base_setup @ ["-Dintrospection=enabled"],
       env = {
         PKG_CONFIG_PATH = "%{gen1_prefix}/lib/pkgconfig",
-        LD_LIBRARY_PATH = "%{gen1_prefix}/lib",
       },
     },
     inputs = {
