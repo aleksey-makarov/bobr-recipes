@@ -15,9 +15,9 @@
 #   -h | --help              show this help
 #
 # The profile says where to build and what; this run's name and its log and work
-# directories are minted here, per invocation. `bobr` comes from PATH -- install
-# a release, or use the engine's tools/build-dev.sh to build it from a source
-# checkout first.
+# directories are minted here, per invocation. `bobr` comes from PATH -- use
+# tools/bobr-install.sh, or use the engine's tools/build-dev.sh when working in
+# a source checkout.
 
 set -euo pipefail
 
