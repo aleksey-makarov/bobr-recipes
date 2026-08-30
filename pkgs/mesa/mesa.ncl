@@ -166,6 +166,7 @@ fun pkgs =>
         pkgs.expat,
         pkgs.wayland,
         pkgs.libglvnd,
+        pkgs.vulkan_loader,
       ],
     },
     config = {

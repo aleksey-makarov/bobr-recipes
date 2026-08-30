@@ -48,7 +48,6 @@ fun pkgs =>
         pkgs.c_runtime,
         pkgs.mesa,
         pkgs.libglvnd,
-        pkgs.glu,
         pkgs.wayland,
         pkgs.libxkbcommon,
         pkgs.libdecor,

@@ -15,12 +15,30 @@ blueprint-compiler-v0.22.2	gobject-introspection-1.86.0	blueprintcompiler loads 
 blueprint-compiler-v0.22.2	pygobject-3.56.3	blueprintcompiler imports the gi Python module
 dejagnu-1.6.3	expect-5.45.4	runtest executes Expect to interpret the test suite
 flex-2.6.4	m4-1.4.20	flex executes GNU M4 to expand its scanner skeleton
+gdk-pixbuf-2.44.7	shared-mime-info-2.5.1	GIO MIME sniffing reads the shared MIME database
+glmark2-2023.01	libglvnd-1.7.0	glmark2 loads the GLVND EGL and OpenGL dispatch libraries
+glmark2-2023.01	mesa-26.1.4	glmark2 needs Mesa as its EGL and OpenGL vendor implementation
+gnome-desktop-44.5	gsettings-desktop-schemas-50.1	libgnome-desktop reads org.gnome.desktop GSettings schemas
+gnome-desktop-44.5	iso-codes-4.20.1	libgnome-desktop reads ISO language and territory data
+ibus-1.5.34	iso-codes-4.20.1	IBus reads ISO 639 language data and translations
 intltool-0.51.0	perl-xml-parser-2.47	intltool loads XML::Parser at run time
+libepoxy-1.5.10	mesa-guest-26.1.4	libepoxy dlopens Mesa-provided EGL, OpenGL, and GLES libraries
+libepoxy-host-1.5.10	libglvnd-1.7.0	libepoxy dlopens GLVND EGL, OpenGL, and GLES libraries
+libgweather-4.6.0	gweather-locations-2026.2	libgweather reads the compiled locations database
+libnma-1.10.6	iso-codes-4.20.1	libnma reads ISO 3166 country data and translations
 libtool-2.5.4	autoconf-2.73	libtool and libtoolize execute autoconf
 libtool-2.5.4	grep-3.12	libtool and libtoolize execute grep
 libtool-2.5.4	m4-1.4.20	libtoolize executes GNU M4
 libtool-2.5.4	sed-4.9	libtool and libtoolize execute sed
+libxkbcommon-1.13.2	xcompose-data-1.8.13	libxkbcommon reads X11 locale and Compose data
+libxkbcommon-1.13.2	xkeyboard-config-2.44	libxkbcommon reads the XKB rules and symbols database
+man-db-2.13.1	groff-1.23.0	man executes groff or nroff to format manual pages
+mesa-26.1.4	libglvnd-1.7.0	Mesa installs a GLVND vendor library and its registration metadata
+mesa-26.1.4	vulkan-loader-1.4.350.0	Mesa Zink dlopens libvulkan.so.1
+mesa-demos-9.0.0	mesa-26.1.4	Mesa demos need Mesa as their EGL and OpenGL vendor implementation
+mesa-guest-26.1.4	vulkan-loader-1.4.350.0	Mesa Zink dlopens libvulkan.so.1
 meson-1.8.3	ninja-1.13.1	Meson detects and executes Ninja
+mutter-50.3	gsettings-desktop-schemas-50.1	Mutter reads org.gnome.desktop GSettings schemas
 perl-xml-parser-2.47	perl-5.42.2	XML::Parser is loaded by the Perl interpreter
 pygobject-3.56.3	python-3.13.7	PyGObject is loaded by the Python interpreter
 python-flit-core-3.12.0	python-3.13.7	flit_core is loaded by the Python interpreter
@@ -31,3 +49,5 @@ python-markupsafe-3.0.2	python-3.13.7	MarkupSafe is loaded by the Python interpr
 python-packaging-25.0	python-3.13.7	packaging is loaded by the Python interpreter
 python-pyyaml-6.0.3	python-3.13.7	PyYAML is loaded by the Python interpreter
 python-setuptools-80.9.0	python-3.13.7	setuptools is loaded by the Python interpreter
+sdl2-compat-2.32.68	sdl3-3.4.10	sdl2-compat dlopens libSDL3.so.0
+vulkan-tools-1.4.350.0	vulkan-loader-1.4.350.0	Vulkan tools dlopen libvulkan.so.1
