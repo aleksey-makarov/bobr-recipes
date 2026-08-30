@@ -23,7 +23,8 @@
 let base_modules =
   (import "pkgs/pkgs.ncl")
   @ [
-    # Tests
+    # Aggregate artifact and test targets
+    import "tests/world.ncl",
     import "tests/tests.ncl",
 
     # Linux

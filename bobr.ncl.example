@@ -13,7 +13,7 @@
 # driver from.
 {
   # What to build when the command line does not say (`--target NAME`).
-  target = "test_all",
+  target = "world",
 
   # The store. Create it yourself -- the driver will not, so that a mistyped
   # path fails at once instead of starting a from-scratch rebuild somewhere
@@ -53,7 +53,7 @@
   # The one host that needs less than the default is gitlab.freedesktop.org,
   # and not because it is fragile: its `/-/archive/<commit>/` URLs are not
   # files but a tarball built from the repository per request. Six of those at
-  # once is more than it will do -- a from-scratch fetch of test_all drew HTTP
+  # once is more than it will do -- a from-scratch fetch of world drew HTTP
   # 502 from nearly every one of its 14 sources, 26 retries between them,
   # spread over the whole first minute rather than one bad moment. Nothing
   # failed, since the retries covered it, but it is waste on both sides.

@@ -2,7 +2,9 @@
 
 # Rebuilds everything from scratch into a fresh store.
 #
-# Usage: bobr-rebuild-world.sh
+# Usage: bobr-rebuild-world.sh [--tests]
+#
+#   --tests    Realize `test_all` instead of the profile's `world` target.
 #
 # Install the host tools first with tools/bobr-install.sh. The recipes are
 # pulled first, then the target is realized by one real bin/bobr-build.sh
@@ -24,9 +26,14 @@ require_cmd() {
   command -v "$1" >/dev/null 2>&1 || die "required tool not found on PATH: $1"
 }
 
+run_tests=0
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    -h | --help) sed -n '3,14p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2; exit 0 ;;
+    --tests)
+      run_tests=1
+      shift
+      ;;
+    -h | --help) sed -n '3,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2; exit 0 ;;
     *) die "unexpected argument: $1" ;;
   esac
 done
@@ -144,6 +151,11 @@ git_head() { git -C "$1" rev-parse HEAD 2>/dev/null || echo unknown; }
 log "store=${store_root}"
 log "bobr=${bobr_revision:-unknown}"
 log "previous_store=${previous_store:-none}"
+if [ "${run_tests}" -eq 1 ]; then
+  log "target=test_all"
+else
+  log "target=world"
+fi
 log_host_snapshot "after-store-create"
 
 # bobr-build.sh prints its lowering and realization timings to stderr; pointing
@@ -176,12 +188,19 @@ run_phase() {
   return "${status}"
 }
 
-echo "==> realize world" >&2
+build_args=("${profile_path}")
+realize_target="world"
+if [ "${run_tests}" -eq 1 ]; then
+  build_args=(--target test_all "${profile_path}")
+  realize_target="test_all"
+fi
+
+echo "==> realize ${realize_target}" >&2
 log_host_snapshot "before-realize"
 realize_started_at="$(date '+%s')"
 realize_status=0
 run_phase realize \
-  "${recipes_repo}/bin/bobr-build.sh" "${profile_path}" || realize_status=$?
+  "${recipes_repo}/bin/bobr-build.sh" "${build_args[@]}" || realize_status=$?
 log "realize_seconds=$(( $(date '+%s') - realize_started_at ))"
 [ "${realize_status}" -eq 0 ] || exit "${realize_status}"
 log_host_snapshot "after-realize"

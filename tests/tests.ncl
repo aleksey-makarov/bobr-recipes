@@ -1,15 +1,9 @@
-# Test targets.
+# Aggregate test targets. Artifact-only targets live in `world.ncl`.
 #
-# `test_all_recipes` -- the buildable artifacts group for a normal build; it
-# carries no checks.
-#
-# `test_all_host_bundles` -- all shipped host-side bundles and both release
-# launcher packages. It is separate from `test_all_recipes` because these
-# artifacts are not rootfs build environments and must not affect rootfs-check
-# discovery.
+# `test_host_bundles` -- smoke checks over the test Mesa and QEMU HostBundles.
 #
 # `test_all_rootfs` -- runtime-closure checks over every rootfs used in the
-# `test_all_recipes` graph. It discovers every node used as a `_rootfs` input of
+# `world` graph. It discovers every node used as a `_rootfs` input of
 # a Sandbox/SandboxInstall (i.e. every build environment), plus the shipped
 # images (packed via `_tree`, not `_rootfs`, so the walk misses them), runs a
 # check over each, bundles the reports, and a gate step fails the build if any
@@ -21,45 +15,21 @@
 # initramfs) are checkable. The common script is rootfs-check.sh; the shipped
 # images additionally source rootfs-check-image.sh (image-specific checks).
 #
-# `test_all_rootfs` is deliberately NOT part of `test_all_recipes`, so the normal
-# build stays lean; run it on demand / in CI via `bobr build test_all_rootfs`.
-# Every rootfs it needs is already built by `test_all_recipes`, so only the
-# (cheap) check sandboxes are new work.
+# `test_all` -- all explicit checks: HostBundle smoke tests, rootfs closure
+# checks, and the final toolchain smoke test. Tests are deliberately outside
+# `world`; run them on demand / in CI with `bin/bobr-build.sh --target test_all`.
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let test_all_recipes = {
-    name = "test-all-recipes",
+  let test_host_bundles = {
+    name = "test-host-bundles",
     tag = "Group",
     config = {},
     inputs =
       recipe.numbered_inputs [
-        pkgs.glibc_locales,
-        pkgs.linux,
-        pkgs.qemu_image,
-        pkgs.initrd,
-        pkgs.qemu_weston_image,
-        pkgs.qemu_gnome_image,
-      ],
-  }
-  in
-
-  let test_all_host_bundles = {
-    name = "test-all-host-bundles",
-    tag = "Group",
-    config = {},
-    inputs =
-      recipe.numbered_inputs [
-        pkgs.bobr_bundle_launcher_host_x86_64,
-        pkgs.bobr_bundle_launcher_host_aarch64,
-        pkgs.host_bundle_mc,
-        pkgs.host_bundle_test_mesa,
         pkgs.test_host_bundle_test_mesa,
-        pkgs.host_bundle_qemu,
         pkgs.test_host_bundle_qemu,
-        pkgs.host_bundle_qemu_weston,
         pkgs.test_host_bundle_qemu_weston,
-        pkgs.host_bundle_qemu_gnome,
         pkgs.test_host_bundle_qemu_gnome,
       ],
   }
@@ -273,11 +243,12 @@ fun pkgs =>
   in
 
   # Closure checks over exactly the `_rootfs` inputs of every Sandbox/
-  # SandboxInstall in the test_all_recipes graph -- i.e. every build environment.
+  # SandboxInstall in the world graph -- i.e. every build environment used to
+  # produce either the guest-side OS artifacts or the host-side bundles.
   # This is precisely what the walk returns; nothing is added to or removed from
   # it here.
   let build_rootfs_checks =
-    let targets = recipe.collect_rootfs_inputs pkgs test_all_recipes in
+    let targets = recipe.collect_rootfs_inputs pkgs pkgs.world in
     std.array.map
       (fun rname => mk_rootfs_check rname (std.record.get rname targets))
       (std.record.fields targets)
@@ -331,15 +302,14 @@ fun pkgs =>
   }
   in
 
-  # Build the artifacts, run rootfs checks, and exercise the final compiler.
+  # Run every explicit check. The artifact-only world is a separate target.
   let test_all = {
     name = "test-all",
     tag = "Group",
     config = {},
     inputs =
       recipe.numbered_inputs [
-        test_all_recipes,
-        test_all_host_bundles,
+        test_host_bundles,
         test_all_rootfs,
         test_final_toolchain,
       ],
@@ -348,8 +318,7 @@ fun pkgs =>
 
   {
     include [
-      test_all_recipes,
-      test_all_host_bundles,
+      test_host_bundles,
       test_final_toolchain,
       test_all_rootfs,
       test_all,
