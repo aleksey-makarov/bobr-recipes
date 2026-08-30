@@ -145,20 +145,6 @@ fun pkgs =>
     # recipe. glibc-bootstrap is the same buildpack image plus gawk/bison.
     "oci-buildpack-deps-rootfs" = ["libsvn_auth_kwallet", "libsvn_auth_gnome_keyring"],
     "glibc-bootstrap-rootfs" = ["libsvn_auth_kwallet", "libsvn_auth_gnome_keyring"],
-    # glib's gen1 bootstrap binaries live in the private /usr/lib/glib-gen1
-    # prefix and find their libs via LD_LIBRARY_PATH set during glib's build.
-    "glib-2.88.2-build-rootfs" = ["/usr/lib/glib-gen1/"],
-    "gobject-introspection-1.86.0-build-rootfs" = ["/usr/lib/glib-gen1/"],
-    # libsystemd-core loads libsystemd-shared (same /usr/lib/systemd dir) via the
-    # systemd binaries' RUNPATH, not its own.
-    "initrd-rootfs" = ["/usr/lib/systemd/libsystemd-core"],
-    # Prebuilt clang toolchain: libc++/libunwind live in its triple dir and
-    # resolve via clang's build-time LD_LIBRARY_PATH; the ompd GDB helper is dead
-    # (references an old python, only ever loaded inside gdb).
-    "mozjs-140.12.0esr-build-rootfs" = [
-      "/usr/lib/x86_64-unknown-linux-gnu/",
-      "/usr/share/gdb/python/ompd/",
-    ],
   }
   in
 

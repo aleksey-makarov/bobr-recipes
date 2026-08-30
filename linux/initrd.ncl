@@ -211,6 +211,7 @@ fun pkgs =>
       include = [
         "usr/bin/systemctl",
         "usr/bin/udevadm",
+        "usr/lib/libsystemd-shared-*.so",
         "usr/lib/systemd/libsystemd-core-*.so",
         "usr/lib/systemd/libsystemd-shared-*.so",
         "usr/lib/systemd/systemd",
