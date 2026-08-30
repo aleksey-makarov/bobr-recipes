@@ -32,12 +32,10 @@ fun pkgs =>
     deps = {
       build = [
         pkgs.tcl,
-        pkgs.zlib,
       ],
       runtime = [
         pkgs.c_runtime,
         pkgs.tcl,
-        pkgs.zlib,
       ],
     },
     config = {

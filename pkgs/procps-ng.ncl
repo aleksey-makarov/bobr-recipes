@@ -22,13 +22,11 @@ fun pkgs =>
       build = [
         pkgs.pkgconf,
         pkgs.ncurses,
-        pkgs.libcap,
         pkgs.systemd,
       ],
       runtime = [
         pkgs.c_runtime,
         pkgs.ncurses_libs,
-        pkgs.libcap_libs,
         pkgs.systemd_libs,
       ],
     },

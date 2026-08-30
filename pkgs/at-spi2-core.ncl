@@ -39,7 +39,6 @@ fun pkgs =>
         pkgs.c_runtime,
         pkgs.glib,
         pkgs.dbus,
-        pkgs.libxml2,
         pkgs.systemd_libs,
       ],
     },

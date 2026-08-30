@@ -21,6 +21,7 @@ glmark2-2023.01	libglvnd-1.7.0	glmark2 loads the GLVND EGL and OpenGL dispatch l
 glmark2-2023.01	mesa-26.1.4	glmark2 needs Mesa as its EGL and OpenGL vendor implementation
 gnome-desktop-44.5	gsettings-desktop-schemas-50.1	libgnome-desktop reads org.gnome.desktop GSettings schemas
 gnome-desktop-44.5	iso-codes-4.20.1	libgnome-desktop reads ISO language and territory data
+gnutls-3.8.13	zlib-1.3.1	GnuTLS dlopens libz.so.1 for certificate compression
 ibus-1.5.34	iso-codes-4.20.1	IBus reads ISO 639 language data and translations
 intltool-0.51.0	perl-xml-parser-2.47	intltool loads XML::Parser at run time
 libepoxy-1.5.10	mesa-guest-26.1.4	libepoxy dlopens Mesa-provided EGL, OpenGL, and GLES libraries
@@ -54,6 +55,7 @@ python-packaging-25.0	python-3.13.7	packaging is loaded by the Python interprete
 python-pyyaml-6.0.3	python-3.13.7	PyYAML is loaded by the Python interpreter
 python-setuptools-80.9.0	python-3.13.7	setuptools is loaded by the Python interpreter
 sdl2-compat-2.32.68	sdl3-3.4.10	sdl2-compat dlopens libSDL3.so.0
+slang-2.3.3	ncurses-libs-6.6	S-Lang reads the ncurses terminfo database directly
 systemd-260.1	acl-libs-2.3.2	systemd utilities load libacl.so.1 dynamically
 systemd-260.1	kmod-libs-34.2	udev and PID 1 load libkmod.so.2 dynamically
 systemd-260.1	libxcrypt-libs-4.5.2	systemd loads libcrypt for password hashing

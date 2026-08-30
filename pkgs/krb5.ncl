@@ -31,13 +31,11 @@ fun pkgs =>
         pkgs.bison,
         pkgs.perl,
         pkgs.openssl,
-        pkgs.libxcrypt,
         pkgs.pkgconf,
       ],
       runtime = [
         pkgs.c_runtime,
         pkgs.openssl,
-        pkgs.libxcrypt_libs,
       ],
     },
     config = {

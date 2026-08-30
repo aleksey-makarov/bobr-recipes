@@ -1559,6 +1559,18 @@ in
   systemd_build = build_names pkgs.systemd,
   systemd_runtime = runtime_names pkgs.systemd,
   systemd_libs_runtime = runtime_names pkgs.systemd_libs,
+  at_spi2_core_build = build_names pkgs.at_spi2_core,
+  at_spi2_core_runtime = runtime_names pkgs.at_spi2_core,
+  expect_build = build_names pkgs.expect,
+  expect_runtime = runtime_names pkgs.expect,
+  gnutls_build = build_names pkgs.gnutls,
+  gnutls_runtime = runtime_names pkgs.gnutls,
+  krb5_build = build_names pkgs.krb5,
+  krb5_runtime = runtime_names pkgs.krb5,
+  procps_ng_build = build_names pkgs.procps_ng,
+  procps_ng_runtime = runtime_names pkgs.procps_ng,
+  slang_build = build_names pkgs.slang,
+  slang_runtime = runtime_names pkgs.slang,
 }
 EOF_INNER
 
@@ -1633,6 +1645,32 @@ jq -e '
     "openssl-libs-3.5.7",
     "util-linux-libs-2.41.5",
     "kmod-libs-34.2"
+  ]
+  and (.at_spi2_core_build | index("libxml2-2.15.3")) != null
+  and .at_spi2_core_runtime == [
+    $c_runtime,
+    "glib-2.88.2",
+    "dbus-1.16.2",
+    "systemd-libs-260.1"
+  ]
+  and .expect_build == ["tcl-8.6.16"]
+  and .expect_runtime == [$c_runtime, "tcl-8.6.16"]
+  and (.gnutls_build | index("zlib-1.3.1")) != null
+  and (.gnutls_runtime | index("zlib-1.3.1")) != null
+  and (.krb5_build | index("libxcrypt-4.5.2")) == null
+  and .krb5_runtime == [$c_runtime, "openssl-3.5.7"]
+  and (.procps_ng_build | index("libcap-2.78")) == null
+  and .procps_ng_runtime == [
+    $c_runtime,
+    "ncurses-libs-6.6",
+    "systemd-libs-260.1"
+  ]
+  and (.slang_build | index("ncurses-6.6")) != null
+  and .slang_runtime == [
+    $c_runtime,
+    "libpng-1.6.50",
+    "ncurses-libs-6.6",
+    "zlib-1.3.1"
   ]
 ' <<<"${gcc_runtime_split_json}" >/dev/null
 
