@@ -38,7 +38,6 @@ fun pkgs =>
         pkgs.acl,
         pkgs.gperf,
         pkgs.kmod,
-        pkgs.libcap,
         pkgs.libxcrypt,
         pkgs.linux_pam,
         pkgs.openssl,
@@ -50,7 +49,6 @@ fun pkgs =>
       runtime = [
         pkgs.c_runtime,
         pkgs.acl_libs,
-        pkgs.libcap_libs,
         pkgs.libxcrypt_libs,
         # pam_systemd.so links libpam.so.0 (built once -Dpam=enabled).
         pkgs.linux_pam_libs,
@@ -150,16 +148,13 @@ fun pkgs =>
     & {
       deps = {
         build = [],
-        # libsystemd-shared (bundled here, pulled in by libsystemd.so) links the
-        # same libraries as systemd's own binaries, so mirror the package's
-        # runtime libs -- minus linux_pam, which only pam_systemd.so (not shipped
-        # in this split) needs. Under-declaring here leaves a dangling NEEDED
-        # wherever this split is used without the full systemd (e.g. systemd_dev
-        # in build rootfs).
+        # libsystemd-shared contains the enabled ACL, kmod, libcrypt, blkid,
+        # and libmount implementations. These providers are loaded dynamically,
+        # so they do not appear in DT_NEEDED. PAM remains full-package-only:
+        # pam_systemd.so, which is not part of this split, is its consumer.
         runtime = [
           pkgs.c_runtime,
           pkgs.acl_libs,
-          pkgs.libcap_libs,
           pkgs.libxcrypt_libs,
           pkgs.openssl_libs,
           pkgs.util_linux_libs,

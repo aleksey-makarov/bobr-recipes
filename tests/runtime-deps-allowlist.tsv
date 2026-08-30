@@ -54,4 +54,11 @@ python-packaging-25.0	python-3.13.7	packaging is loaded by the Python interprete
 python-pyyaml-6.0.3	python-3.13.7	PyYAML is loaded by the Python interpreter
 python-setuptools-80.9.0	python-3.13.7	setuptools is loaded by the Python interpreter
 sdl2-compat-2.32.68	sdl3-3.4.10	sdl2-compat dlopens libSDL3.so.0
+systemd-260.1	acl-libs-2.3.2	systemd utilities load libacl.so.1 dynamically
+systemd-260.1	kmod-libs-34.2	udev and PID 1 load libkmod.so.2 dynamically
+systemd-260.1	libxcrypt-libs-4.5.2	systemd loads libcrypt for password hashing
+systemd-libs-260.1	acl-libs-2.3.2	libsystemd-shared contains the enabled ACL loader
+systemd-libs-260.1	kmod-libs-34.2	libsystemd-shared contains the enabled kmod loader
+systemd-libs-260.1	libxcrypt-libs-4.5.2	libsystemd-shared contains the enabled libcrypt loader
+systemd-libs-260.1	util-linux-libs-2.41.5	libsystemd-shared loads libblkid and libmount dynamically
 vulkan-tools-1.4.350.0	vulkan-loader-1.4.350.0	Vulkan tools dlopen libvulkan.so.1

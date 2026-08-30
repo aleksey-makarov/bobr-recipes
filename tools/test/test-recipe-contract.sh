@@ -1556,6 +1556,9 @@ in
   libxml2_build = build_names pkgs.libxml2,
   libxml2_runtime = runtime_names pkgs.libxml2,
   libxml2_configure_args = pkgs.libxml2.config.configure_args,
+  systemd_build = build_names pkgs.systemd,
+  systemd_runtime = runtime_names pkgs.systemd,
+  systemd_libs_runtime = runtime_names pkgs.systemd_libs,
 }
 EOF_INNER
 
@@ -1613,6 +1616,24 @@ jq -e '
   and .libxml2_build == ["zlib-1.3.1", "pkgconf-2.5.1"]
   and .libxml2_runtime == [$c_runtime, "zlib-1.3.1"]
   and (.libxml2_configure_args | index("--with-lzma")) == null
+  and (.systemd_build | index("libcap-2.77")) == null
+  and .systemd_runtime == [
+    $c_runtime,
+    "acl-libs-2.3.2",
+    "libxcrypt-libs-4.5.2",
+    "linux-pam-libs-1.6.1",
+    "openssl-libs-3.5.7",
+    "util-linux-libs-2.41.5",
+    "kmod-libs-34.2"
+  ]
+  and .systemd_libs_runtime == [
+    $c_runtime,
+    "acl-libs-2.3.2",
+    "libxcrypt-libs-4.5.2",
+    "openssl-libs-3.5.7",
+    "util-linux-libs-2.41.5",
+    "kmod-libs-34.2"
+  ]
 ' <<<"${gcc_runtime_split_json}" >/dev/null
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER
