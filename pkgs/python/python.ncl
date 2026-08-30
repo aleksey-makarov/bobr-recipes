@@ -137,6 +137,7 @@ fun pkgs =>
         # _bz2 -> libbz2, readline -> libreadline, _gdbm/_dbm -> libgdbm,
         # _uuid -> libuuid.so.1 (util-linux libs split).
         pkgs.bzip2,
+        pkgs.xz_libs,
         pkgs.readline,
         pkgs.gdbm,
         pkgs.util_linux_libs,

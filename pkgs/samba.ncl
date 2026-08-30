@@ -42,6 +42,7 @@ fun pkgs =>
         pkgs.zlib,
         pkgs.libtasn1,
         pkgs.libxcrypt,
+        pkgs.readline,
         pkgs.gettext,
         pkgs.pkgconf,
       ],
@@ -55,6 +56,7 @@ fun pkgs =>
         pkgs.zlib,
         pkgs.libtasn1,
         pkgs.libxcrypt_libs,
+        pkgs.readline,
       ],
     },
     config = {

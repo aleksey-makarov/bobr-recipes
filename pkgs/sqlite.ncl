@@ -32,9 +32,12 @@ fun pkgs =>
     name = "sqlite-%{version}",
     tag = "Autotools",
     deps = {
-      build = [],
+      build = [
+        pkgs.zlib,
+      ],
       runtime = [
         pkgs.glibc_libs,
+        pkgs.zlib,
       ],
     },
     config = {

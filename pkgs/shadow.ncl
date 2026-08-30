@@ -32,6 +32,7 @@ fun pkgs =>
         pkgs.glibc_libs,
         pkgs.libxcrypt_libs,
         pkgs.linux_pam,
+        pkgs.systemd_libs,
       ],
     },
     config = {

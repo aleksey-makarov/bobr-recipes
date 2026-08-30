@@ -29,12 +29,14 @@ fun pkgs =>
     tag = "Autotools",
     deps = {
       build = [
+        pkgs.libxcrypt,
         pkgs.openssl,
         pkgs.zlib,
         pkgs.linux_pam,
       ],
       runtime = [
         pkgs.glibc_libs,
+        pkgs.libxcrypt_libs,
         pkgs.openssl_libs,
         pkgs.zlib,
         pkgs.linux_pam_libs,

@@ -24,10 +24,12 @@ fun pkgs =>
       build = [
         pkgs.ncurses,
         pkgs.pkgconf,
+        pkgs.zlib,
       ],
       runtime = [
         pkgs.glibc_libs,
         pkgs.ncurses_libs,
+        pkgs.zlib,
       ],
     },
     config = {

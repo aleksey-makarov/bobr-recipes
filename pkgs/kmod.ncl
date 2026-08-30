@@ -20,11 +20,15 @@ fun pkgs =>
     deps = {
       build = [
         pkgs.openssl,
+        pkgs.xz,
+        pkgs.zlib,
         pkgs.zstd,
       ],
       runtime = [
         pkgs.glibc_libs,
         pkgs.openssl_libs,
+        pkgs.xz_libs,
+        pkgs.zlib,
         pkgs.zstd,
       ],
     },

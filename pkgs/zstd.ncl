@@ -20,14 +20,16 @@ fun pkgs =>
     deps = {
       # zstd's Makefile links zlib into the CLI when zlib.h is present (as in the
       # old system_rootfs_2 environment); declare it so the deps-derived build
-      # rootfs still has it and the binary is unchanged. lzma comes from xz,
-      # which is already in the native toolchain.
+      # rootfs still has it and the binary is unchanged. The CLI likewise
+      # detects liblzma from xz, so keep both optional features explicit.
       build = [
         pkgs.zlib,
+        pkgs.xz,
       ],
       runtime = [
         pkgs.glibc_libs,
         pkgs.zlib,
+        pkgs.xz_libs,
       ],
     },
     config = {
