@@ -50,7 +50,6 @@ fun pkgs =>
       ],
       runtime = [
         pkgs.expect,
-        pkgs.tcl,
       ],
     },
     config = {

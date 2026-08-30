@@ -6,3 +6,28 @@
 # Names are versioned recipe `name` values. An upgrade therefore requires the
 # exception to be reviewed. The same entry can approve either an unobserved or
 # a content-redundant edge when its non-static direct use is documented.
+autoconf-2.73	grep-3.12	autom4te probes the external M4 executable through grep
+autoconf-2.73	m4-1.4.20	autom4te and autoupdate execute GNU M4
+automake-1.18.1	autoconf-2.73	aclocal executes autom4te and automake executes autoconf
+bison-3.8.2	m4-1.4.20	bison executes GNU M4 to expand its parser skeletons
+blueprint-compiler-v0.22.2	glib-2.88.2	blueprintcompiler imports the GLib GI namespace
+blueprint-compiler-v0.22.2	gobject-introspection-1.86.0	blueprintcompiler loads the GIRepository typelib
+blueprint-compiler-v0.22.2	pygobject-3.56.3	blueprintcompiler imports the gi Python module
+dejagnu-1.6.3	expect-5.45.4	runtest executes Expect to interpret the test suite
+flex-2.6.4	m4-1.4.20	flex executes GNU M4 to expand its scanner skeleton
+intltool-0.51.0	perl-xml-parser-2.47	intltool loads XML::Parser at run time
+libtool-2.5.4	autoconf-2.73	libtool and libtoolize execute autoconf
+libtool-2.5.4	grep-3.12	libtool and libtoolize execute grep
+libtool-2.5.4	m4-1.4.20	libtoolize executes GNU M4
+libtool-2.5.4	sed-4.9	libtool and libtoolize execute sed
+meson-1.8.3	ninja-1.13.1	Meson detects and executes Ninja
+perl-xml-parser-2.47	perl-5.42.2	XML::Parser is loaded by the Perl interpreter
+pygobject-3.56.3	python-3.13.7	PyGObject is loaded by the Python interpreter
+python-flit-core-3.12.0	python-3.13.7	flit_core is loaded by the Python interpreter
+python-jinja2-3.1.6	python-3.13.7	Jinja is loaded by the Python interpreter
+python-jinja2-3.1.6	python-markupsafe-3.0.2	Jinja imports MarkupSafe
+python-mako-1.3.12	python-markupsafe-3.0.2	Mako imports MarkupSafe
+python-markupsafe-3.0.2	python-3.13.7	MarkupSafe is loaded by the Python interpreter
+python-packaging-25.0	python-3.13.7	packaging is loaded by the Python interpreter
+python-pyyaml-6.0.3	python-3.13.7	PyYAML is loaded by the Python interpreter
+python-setuptools-80.9.0	python-3.13.7	setuptools is loaded by the Python interpreter

@@ -34,6 +34,16 @@ fun pkgs =>
     source_object_hash | default = "9fd672b1c8425fac2fa67fa0477b990987268b90ff36d5f016dae57be0d6b52e",
     name = "autoconf-%{version}",
     tag = "AutotoolsStageRootfs",
+    deps = {
+      build = [],
+      runtime = [
+        # Autoconf's installed frontends are Perl programs. autom4te and
+        # autoupdate execute GNU M4, and autom4te probes it through grep.
+        pkgs.perl,
+        pkgs.m4,
+        pkgs.grep,
+      ],
+    },
     config = {},
     inputs = {
       _rootfs = autoconf_build_rootfs,

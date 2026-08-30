@@ -22,7 +22,6 @@ fun pkgs =>
       build = [],
       runtime = [
         pkgs.autoconf,
-        pkgs.m4,
         pkgs.perl,
       ],
     },
