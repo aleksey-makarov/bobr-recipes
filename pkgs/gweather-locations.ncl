@@ -36,9 +36,7 @@ fun pkgs =>
         pkgs.gettext,
         pkgs.pkgconf,
       ],
-      runtime = [
-        pkgs.c_runtime,
-      ],
+      runtime = [],
     },
     config = {
       setup_args = [

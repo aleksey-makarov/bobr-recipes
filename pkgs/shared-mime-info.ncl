@@ -30,6 +30,7 @@ fun pkgs =>
       ],
       runtime = [
         pkgs.c_runtime,
+        pkgs.gcc_libstdcxx,
         pkgs.glib,
         pkgs.libxml2,
       ],

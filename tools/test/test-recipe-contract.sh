@@ -1539,6 +1539,12 @@ in
   popt_runtime = runtime_names pkgs.popt,
   gperf_runtime = runtime_names pkgs.gperf,
   gettext_runtime = runtime_names pkgs.gettext,
+  harfbuzz_runtime = runtime_names pkgs.harfbuzz,
+  shared_mime_info_runtime = runtime_names pkgs.shared_mime_info,
+  gweather_locations_runtime = runtime_names pkgs.gweather_locations,
+  dejagnu_runtime = runtime_names pkgs.dejagnu,
+  gsettings_desktop_schemas_runtime =
+    runtime_names pkgs.gsettings_desktop_schemas,
 }
 EOF_INNER
 
@@ -1548,6 +1554,7 @@ gcc_runtime_split_json="$(
 )"
 
 jq -e '
+  .c_runtime.name as $c_runtime |
   (.has_legacy_gcc_libs | not)
   and .c_runtime.tag == "TreeMerge"
   and .c_runtime.runtime == []
@@ -1572,6 +1579,11 @@ jq -e '
     "gcc-libstdcxx-15.2.0",
     "gcc-libgomp-15.2.0"
   ]
+  and (.harfbuzz_runtime | index("gcc-libstdcxx-15.2.0")) != null
+  and (.shared_mime_info_runtime | index("gcc-libstdcxx-15.2.0")) != null
+  and .gweather_locations_runtime == []
+  and (.dejagnu_runtime | index($c_runtime)) == null
+  and (.gsettings_desktop_schemas_runtime | index($c_runtime)) == null
 ' <<<"${gcc_runtime_split_json}" >/dev/null
 
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER
