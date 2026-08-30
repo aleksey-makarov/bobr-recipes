@@ -23,7 +23,7 @@ fun pkgs =>
       # sdl2-compat opens libSDL3 dynamically, so this dependency must be
       # explicit even though it is not visible through DT_NEEDED.
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.sdl3,
       ],
     },

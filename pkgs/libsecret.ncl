@@ -35,8 +35,7 @@ fun pkgs =>
         pkgs.gettext,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
         pkgs.glib,
         pkgs.libgcrypt,
       ],

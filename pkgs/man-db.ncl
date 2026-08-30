@@ -33,7 +33,7 @@ fun pkgs =>
         pkgs.util_linux,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.gdbm,
         pkgs.groff,
         pkgs.libpipeline,

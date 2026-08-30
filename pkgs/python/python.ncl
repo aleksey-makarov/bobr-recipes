@@ -121,7 +121,7 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.zlib,
         # Built --with-system-expat, so pyexpat (xml.parsers.expat, used by
         # gdbus-codegen and others) links libexpat.so.1. _ctypes links libffi.

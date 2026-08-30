@@ -37,7 +37,7 @@ fun pkgs =>
         pkgs.python_jinja2,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.libevdev,
         pkgs.libxkbcommon,
       ],

@@ -33,7 +33,7 @@ fun pkgs =>
         pkgs.libpng,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.zlib,
         pkgs.libpng,
       ],

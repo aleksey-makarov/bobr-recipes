@@ -23,7 +23,7 @@ fun pkgs =>
         pkgs.hwdata,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
       ],
     },
     config = {

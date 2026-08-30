@@ -37,7 +37,7 @@ fun pkgs =>
         pkgs.zlib,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.libpng,
         pkgs.ncurses_libs,
         pkgs.zlib,
@@ -80,7 +80,7 @@ fun pkgs =>
       deps = {
         build = [],
         runtime = [
-          pkgs.glibc_libs,
+          pkgs.c_runtime,
         ],
       },
     }

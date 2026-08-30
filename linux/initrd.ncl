@@ -203,7 +203,7 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.openssl_libs,
       ],
     },
@@ -266,7 +266,7 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.openssl_libs,
         pkgs.xz_libs,
         pkgs.zstd,
@@ -297,7 +297,7 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
       ],
     },
     config = {
@@ -314,8 +314,8 @@ fun pkgs =>
   }
   in
 
-  let initrd_glibc = {
-    name = "initrd-glibc",
+  let initrd_c_runtime = {
+    name = "initrd-c-runtime",
     tag = "TreeSubset",
     deps = {
       build = [],
@@ -325,11 +325,12 @@ fun pkgs =>
       include = [
         "usr/lib/ld-linux-x86-64.so.2",
         "usr/lib/libc.so.6",
+        "usr/lib/libgcc_s.so.1",
         "usr/lib/libm.so.6",
       ],
     },
     inputs = {
-      tree = pkgs.glibc_libs,
+      tree = pkgs.c_runtime,
     },
   }
   in
@@ -340,7 +341,7 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
       ],
     },
     config = {
@@ -360,7 +361,7 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
       ],
     },
     config = {
@@ -380,7 +381,7 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
       ],
     },
     config = {
@@ -400,7 +401,7 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
       ],
     },
     config = {
@@ -444,7 +445,7 @@ fun pkgs =>
       initrd_systemd,
       initrd_kmod,
       initrd_util_linux,
-      initrd_glibc,
+      initrd_c_runtime,
       initrd_openssl,
       initrd_xz,
       initrd_zstd,

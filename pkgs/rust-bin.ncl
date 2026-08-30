@@ -37,8 +37,7 @@ fun pkgs =>
         pkgs.gawk,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
         # rustc/cargo link libz.so.1; without it they fail to start in a build
         # rootfs that has no other zlib provider (glycin only got it transitively
         # via glib).

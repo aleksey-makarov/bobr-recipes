@@ -25,7 +25,7 @@ fun pkgs =>
         pkgs.zstd,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.openssl_libs,
         pkgs.xz_libs,
         pkgs.zlib,
@@ -69,7 +69,7 @@ fun pkgs =>
       deps = {
         build = [],
         runtime = [
-          pkgs.glibc_libs,
+          pkgs.c_runtime,
           pkgs.openssl_libs,
           pkgs.xz_libs,
           pkgs.zstd,

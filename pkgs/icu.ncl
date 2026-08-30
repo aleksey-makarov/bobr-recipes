@@ -34,9 +34,9 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         # ICU is C++, so libicu*.so link libstdc++/libgcc_s.
-        pkgs.gcc_libs,
+        pkgs.gcc_libstdcxx,
       ],
     },
     config = {

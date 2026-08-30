@@ -30,7 +30,7 @@ fun pkgs =>
         pkgs.libffi,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.libtasn1,
         pkgs.libffi,
       ],

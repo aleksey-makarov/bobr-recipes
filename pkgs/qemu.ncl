@@ -42,8 +42,7 @@ fun pkgs =>
         pkgs.virglrenderer,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
         pkgs.glib,
         pkgs.zlib,
         pkgs.bzip2,

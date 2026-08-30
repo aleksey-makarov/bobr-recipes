@@ -50,7 +50,7 @@ fun pkgs =>
     deps = {
       build = recipe.native_build_deps pkgs,
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
       ],
     },
     config = {

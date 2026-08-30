@@ -35,7 +35,7 @@ fun pkgs =>
         pkgs.linux_pam,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.libxcrypt_libs,
         pkgs.openssl_libs,
         pkgs.zlib,

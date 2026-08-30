@@ -39,7 +39,7 @@ fun pkgs =>
         pkgs.vulkan_loader,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.libepoxy_host,
         pkgs.libdrm_libs,
         pkgs.mesa,

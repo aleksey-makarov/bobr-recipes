@@ -51,7 +51,7 @@ fun pkgs =>
         pkgs.slang,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.glib,
         pkgs.ncurses_libs,
         pkgs.slang_libs,

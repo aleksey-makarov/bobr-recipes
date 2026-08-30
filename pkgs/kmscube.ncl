@@ -29,8 +29,7 @@ fun pkgs =>
         pkgs.mesa_guest,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
         pkgs.libdrm_libs,
         pkgs.mesa_guest,
       ],
@@ -60,8 +59,7 @@ fun pkgs =>
         pkgs.libglvnd,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
         pkgs.libdrm_libs,
         pkgs.mesa,
         pkgs.libglvnd,

@@ -41,8 +41,8 @@ fun pkgs =>
         pkgs.pkgconf,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
+        pkgs.gcc_libstdcxx,
         pkgs.mesa,
         pkgs.libglvnd,
         pkgs.libjpeg_turbo,

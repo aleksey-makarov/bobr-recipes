@@ -23,7 +23,7 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
       ],
     },
     config = {
@@ -53,7 +53,7 @@ fun pkgs =>
       deps = {
         build = [],
         runtime = [
-          pkgs.glibc_libs,
+          pkgs.c_runtime,
         ],
       },
     }

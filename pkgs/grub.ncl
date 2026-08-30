@@ -25,7 +25,7 @@ fun pkgs =>
         pkgs.python,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.xz_libs,
       ],
     },

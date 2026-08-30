@@ -29,7 +29,7 @@ fun pkgs =>
         pkgs.gettext,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.glib,
         pkgs.libxml2,
       ],

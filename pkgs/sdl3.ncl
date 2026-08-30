@@ -28,7 +28,7 @@ fun pkgs =>
         pkgs.libglvnd,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.wayland,
         pkgs.libxkbcommon,
         pkgs.libdecor,

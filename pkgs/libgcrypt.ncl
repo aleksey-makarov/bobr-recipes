@@ -29,7 +29,7 @@ fun pkgs =>
         pkgs.libgpg_error,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.libgpg_error,
       ],
     },

@@ -36,7 +36,7 @@ fun pkgs =>
       # Honest runtime dep on the FINAL glib, so a runtime closure ships it, not
       # gen1. (The build environment is _rootfs below, which uses gen1 instead.)
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.glib,
         pkgs.libffi,
       ],

@@ -26,8 +26,7 @@ fun pkgs =>
     deps = {
       build = [],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
         # clang-sys loads libclang at runtime.
         pkgs.llvm_bin,
       ],

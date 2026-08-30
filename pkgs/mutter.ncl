@@ -60,8 +60,7 @@ fun pkgs =>
         pkgs.libxcvt,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
         pkgs.glib,
         pkgs.gsettings_desktop_schemas,
         pkgs.graphene,

@@ -33,7 +33,7 @@ fun pkgs =>
         pkgs.bison,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.libxcrypt_libs,
       ],
     },
@@ -91,7 +91,7 @@ fun pkgs =>
       deps = {
         build = [],
         runtime = [
-          pkgs.glibc_libs,
+          pkgs.c_runtime,
         ],
       },
     }

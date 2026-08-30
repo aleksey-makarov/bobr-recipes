@@ -28,7 +28,7 @@ fun pkgs =>
         pkgs.gperf,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
       ],
     },
     config = {

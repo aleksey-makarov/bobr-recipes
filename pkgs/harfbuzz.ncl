@@ -32,7 +32,7 @@ fun pkgs =>
         pkgs.gobject_introspection,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.freetype,
         pkgs.glib,
       ],

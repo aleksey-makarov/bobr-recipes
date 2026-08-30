@@ -31,7 +31,7 @@ fun pkgs =>
         pkgs.glib,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.pixman,
         pkgs.freetype,
         pkgs.fontconfig,

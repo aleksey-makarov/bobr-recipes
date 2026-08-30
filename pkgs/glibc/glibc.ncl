@@ -144,6 +144,9 @@ fun pkgs =>
   }
   in
 
+  # Raw glibc shared-library component used while assembling c_runtime in the
+  # GCC module. Normal packages depend on c_runtime, which also carries the
+  # libgcc_s unwinder that glibc loads dynamically.
   let glibc_libs =
     recipe.split.libs glibc "usr/lib/*.so*"
     & {

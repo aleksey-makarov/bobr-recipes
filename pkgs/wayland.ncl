@@ -24,7 +24,7 @@ fun pkgs =>
         pkgs.expat,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.libffi,
         pkgs.expat,
       ],

@@ -35,7 +35,7 @@ fun pkgs =>
         pkgs.zlib,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.tcl,
         pkgs.zlib,
       ],

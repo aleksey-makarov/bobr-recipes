@@ -86,8 +86,7 @@ fun pkgs =>
         pkgs.rust_bin,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
         pkgs.glib,
         pkgs.fontconfig,
         pkgs.lcms2,

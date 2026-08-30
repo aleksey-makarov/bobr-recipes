@@ -1510,6 +1510,70 @@ jq -e '
   and ([.[] | select(.name == "pkg-staged")][0].config.steps[0].name == "install")
 ' <<<"${sandbox_stage_rootfs_lowering_json}" >/dev/null
 
+cat > "${tmpdir}/check-gcc-runtime-split.ncl" <<EOF_INNER
+let pkgs = (import "${repo_root}/recipe-set.ncl") [] in
+let runtime_names = fun package =>
+  std.array.map (fun dependency => dependency.name) package.deps.runtime
+in
+{
+  has_legacy_gcc_libs = std.record.has_field "gcc_libs" pkgs,
+  c_runtime = {
+    name = pkgs.c_runtime.name,
+    tag = pkgs.c_runtime.tag,
+    inputs = std.record.map (fun _ input => input.name) pkgs.c_runtime.inputs,
+    runtime = runtime_names pkgs.c_runtime,
+  },
+  libgcc = {
+    input = pkgs.gcc_libgcc.inputs.tree.name,
+    include = pkgs.gcc_libgcc.config.include,
+    runtime = runtime_names pkgs.gcc_libgcc,
+  },
+  libstdcxx = {
+    include = pkgs.gcc_libstdcxx.config.include,
+    runtime = runtime_names pkgs.gcc_libstdcxx,
+  },
+  libgomp = {
+    include = pkgs.gcc_libgomp.config.include,
+    runtime = runtime_names pkgs.gcc_libgomp,
+  },
+  popt_runtime = runtime_names pkgs.popt,
+  gperf_runtime = runtime_names pkgs.gperf,
+  gettext_runtime = runtime_names pkgs.gettext,
+}
+EOF_INNER
+
+gcc_runtime_split_json="$(
+  cd "${tmpdir}" &&
+    nickel export check-gcc-runtime-split.ncl --format json
+)"
+
+jq -e '
+  (.has_legacy_gcc_libs | not)
+  and .c_runtime.tag == "TreeMerge"
+  and .c_runtime.runtime == []
+  and .c_runtime.inputs.glibc == .libgcc.runtime[0]
+  and .c_runtime.inputs.libgcc == "gcc-libgcc-15.2.0"
+  and .libgcc.input == "gcc-15.2.0"
+  and .libgcc.include == ["usr/lib/libgcc_s.so.1"]
+  and .libstdcxx.runtime == [.c_runtime.name]
+  and .libstdcxx.include == [
+    "usr/lib/libstdc++.so.6",
+    "usr/lib/libstdc++.so.6.0.34"
+  ]
+  and .libgomp.runtime == [.c_runtime.name]
+  and .libgomp.include == [
+    "usr/lib/libgomp.so.1",
+    "usr/lib/libgomp.so.1.0.0"
+  ]
+  and .popt_runtime == [.c_runtime.name]
+  and .gperf_runtime == [.c_runtime.name, "gcc-libstdcxx-15.2.0"]
+  and .gettext_runtime == [
+    .c_runtime.name,
+    "gcc-libstdcxx-15.2.0",
+    "gcc-libgomp-15.2.0"
+  ]
+' <<<"${gcc_runtime_split_json}" >/dev/null
+
 cat > "${tmpdir}/list-raw-pkgs.ncl" <<EOF_INNER
 let raw_pkgs = (import "${repo_root}/recipe-set.ncl") [] in
 std.record.fields raw_pkgs

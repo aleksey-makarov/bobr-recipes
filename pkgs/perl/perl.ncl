@@ -43,7 +43,7 @@ fun pkgs =>
       # so this closure does not pull perl back in.
       build = br.native_build_deps pkgs @ [pkgs.zlib],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.bzip2,
         pkgs.zlib,
       ],

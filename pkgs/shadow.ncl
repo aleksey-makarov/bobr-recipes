@@ -29,7 +29,7 @@ fun pkgs =>
       # login/su/passwd link libpam and libcrypt; login's PAM stack loads the
       # pam modules from the full linux_pam package (usr/lib/security).
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.libxcrypt_libs,
         pkgs.linux_pam,
         pkgs.systemd_libs,

@@ -47,8 +47,7 @@ fun pkgs =>
         pkgs.pkgconf,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
         pkgs.gnutls,
         pkgs.popt,
         pkgs.libtirpc,

@@ -47,8 +47,8 @@ fun pkgs =>
         pkgs.python_pyyaml,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
+        pkgs.gcc_libstdcxx,
         pkgs.libdrm_libs,
         pkgs.zlib,
         pkgs.zstd,
@@ -157,8 +157,8 @@ fun pkgs =>
         pkgs.libglvnd,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
+        pkgs.gcc_libstdcxx,
         pkgs.libdrm_libs,
         pkgs.elfutils,
         pkgs.zlib,

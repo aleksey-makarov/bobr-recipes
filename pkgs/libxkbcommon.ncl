@@ -26,7 +26,7 @@ fun pkgs =>
         pkgs.libxml2,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.xkeyboard_config,
         pkgs.xcompose_data,
         pkgs.libxml2,

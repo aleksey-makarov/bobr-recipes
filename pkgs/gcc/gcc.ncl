@@ -124,30 +124,95 @@ fun pkgs =>
   }
   in
 
-  let gcc_libs =
-    recipe.split.libs
-      gcc
-      [
+  # libgcc_s is part of the baseline C runtime even for binaries which do not
+  # carry a DT_NEEDED entry for it: glibc loads it by name for cancellation,
+  # backtraces, and stack unwinding. Keep the raw glibc split below libgcc_s in
+  # the dependency DAG; c_runtime then combines both physical trees into one
+  # directly attributable runtime package without introducing a cycle.
+  let gcc_libgcc = {
+    name = "gcc-libgcc-%{gcc.version}",
+    tag = "TreeSubset",
+    deps = {
+      build = [],
+      runtime = [
+        pkgs.glibc_libs,
+      ],
+    },
+    config = {
+      include = [
         "usr/lib/libgcc_s.so.1",
-        "usr/lib/libgomp.so.1",
-        "usr/lib/libgomp.so.1.0.0",
+      ],
+    },
+    inputs = {
+      tree = gcc,
+    },
+  }
+  in
+
+  let c_runtime = {
+    name = "c-runtime-%{pkgs.glibc.name}-%{gcc.version}",
+    tag = "TreeMerge",
+    deps = {
+      build = [],
+      runtime = [],
+    },
+    config = {},
+    inputs = {
+      glibc = pkgs.glibc_libs,
+      libgcc = gcc_libgcc,
+    },
+  }
+  in
+
+  let gcc_libstdcxx = {
+    name = "gcc-libstdcxx-%{gcc.version}",
+    tag = "TreeSubset",
+    deps = {
+      build = [],
+      runtime = [
+        c_runtime,
+      ],
+    },
+    config = {
+      include = [
         "usr/lib/libstdc++.so.6",
         "usr/lib/libstdc++.so.6.0.34",
-      ]
-    & {
-      deps = {
-        build = [],
-        runtime = [
-          pkgs.glibc_libs,
-        ],
-      },
-    }
+      ],
+    },
+    inputs = {
+      tree = gcc,
+    },
+  }
+  in
+
+  let gcc_libgomp = {
+    name = "gcc-libgomp-%{gcc.version}",
+    tag = "TreeSubset",
+    deps = {
+      build = [],
+      runtime = [
+        c_runtime,
+      ],
+    },
+    config = {
+      include = [
+        "usr/lib/libgomp.so.1",
+        "usr/lib/libgomp.so.1.0.0",
+      ],
+    },
+    inputs = {
+      tree = gcc,
+    },
+  }
   in
 
   {
     include [
       gcc_gen1,
       gcc,
-      gcc_libs,
+      gcc_libgcc,
+      c_runtime,
+      gcc_libstdcxx,
+      gcc_libgomp,
     ],
   }

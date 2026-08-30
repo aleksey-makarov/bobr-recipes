@@ -48,7 +48,7 @@ fun pkgs =>
         pkgs.python_jinja2,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.acl_libs,
         pkgs.libcap_libs,
         pkgs.libxcrypt_libs,
@@ -157,7 +157,7 @@ fun pkgs =>
         # wherever this split is used without the full systemd (e.g. systemd_dev
         # in build rootfs).
         runtime = [
-          pkgs.glibc_libs,
+          pkgs.c_runtime,
           pkgs.acl_libs,
           pkgs.libcap_libs,
           pkgs.libxcrypt_libs,

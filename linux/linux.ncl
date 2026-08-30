@@ -293,7 +293,7 @@ fun pkgs =>
     tag = "SandboxInstallDeps",
     deps = {
       build = recipe.native_build_deps pkgs,
-      runtime = [pkgs.glibc_libs],
+      runtime = [pkgs.c_runtime],
     },
     config = {
       steps = [

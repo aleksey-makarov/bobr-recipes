@@ -25,7 +25,7 @@ fun pkgs =>
         pkgs.attr,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.attr_libs,
       ],
     },
@@ -47,7 +47,7 @@ fun pkgs =>
       deps = {
         build = [],
         runtime = [
-          pkgs.glibc_libs,
+          pkgs.c_runtime,
           pkgs.attr_libs,
         ],
       },

@@ -46,7 +46,7 @@ fun pkgs =>
         pkgs.texinfo,
       ],
       runtime = [
-        pkgs.glibc_libs,
+        pkgs.c_runtime,
         pkgs.util_linux_libs,
       ],
     },

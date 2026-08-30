@@ -39,7 +39,7 @@ fun pkgs =>
         pkgs.sed,
         pkgs.tar,
         # The install step executes the imported tools for validation.
-        pkgs.gcc_libs,
+        pkgs.gcc_libstdcxx,
         pkgs.zlib,
         pkgs.zstd,
         pkgs.zstd_static,
@@ -47,8 +47,8 @@ fun pkgs =>
         pkgs.libxml2,
       ],
       runtime = [
-        pkgs.glibc_libs,
-        pkgs.gcc_libs,
+        pkgs.c_runtime,
+        pkgs.gcc_libstdcxx,
         pkgs.zlib,
         pkgs.zstd,
         pkgs.zstd_static,
