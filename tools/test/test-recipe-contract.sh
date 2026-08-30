@@ -1179,7 +1179,13 @@ mkdir -p \
   "${runtime_fixture}/negative/inputs/_target/usr/lib" \
   "${runtime_fixture}/negative/out" \
   "${runtime_fixture}/positive/config" \
+  "${runtime_fixture}/positive/config/redundant_runtime_dependencies" \
+  "${runtime_fixture}/positive/config/runtime_dependencies" \
+  "${runtime_fixture}/positive/inputs/_subject/usr/lib" \
   "${runtime_fixture}/positive/inputs/_target/usr/lib" \
+  "${runtime_fixture}/positive/inputs/_runtime_dep_n000/usr/lib" \
+  "${runtime_fixture}/positive/inputs/_runtime_dep_n001/usr/share" \
+  "${runtime_fixture}/positive/inputs/_runtime_dep_n002/usr/share" \
   "${runtime_fixture}/positive/out"
 
 cat > "${runtime_fixture}/build/provider.c" <<'EOF_INNER'
@@ -1216,10 +1222,25 @@ cp "${runtime_fixture}/build/libfixture-consumer.so.1" \
   "${runtime_fixture}/negative/inputs/_target/usr/lib/"
 cp "${runtime_fixture}/build/libfixture-consumer.so.1" \
   "${runtime_fixture}/positive/inputs/_target/usr/lib/"
+cp "${runtime_fixture}/build/libfixture-consumer.so.1" \
+  "${runtime_fixture}/positive/inputs/_subject/usr/lib/"
 cp "${runtime_fixture}/build/libfixture-provider.so.1" \
   "${runtime_fixture}/positive/inputs/_target/usr/lib/"
+cp "${runtime_fixture}/build/libfixture-provider.so.1" \
+  "${runtime_fixture}/positive/inputs/_runtime_dep_n000/usr/lib/"
 printf '%s\n' fixture-negative > "${runtime_fixture}/negative/config/name"
 printf '%s\n' fixture-positive > "${runtime_fixture}/positive/config/name"
+printf '%s\n' fixture-consumer > "${runtime_fixture}/positive/config/subject"
+printf '%s\n' fixture-provider \
+  > "${runtime_fixture}/positive/config/runtime_dependencies/_runtime_dep_n000"
+printf '%s\n' fixture-data \
+  > "${runtime_fixture}/positive/config/runtime_dependencies/_runtime_dep_n001"
+printf '%s\n' fixture-redundant \
+  > "${runtime_fixture}/positive/config/runtime_dependencies/_runtime_dep_n002"
+: > "${runtime_fixture}/positive/config/redundant_runtime_dependencies/_runtime_dep_n000"
+: > "${runtime_fixture}/positive/config/redundant_runtime_dependencies/_runtime_dep_n001"
+printf '%s\n' fixture-data \
+  > "${runtime_fixture}/positive/config/redundant_runtime_dependencies/_runtime_dep_n002"
 
 BOBR_CONFIG_DIR="${runtime_fixture}/negative/config" \
 BOBR_INPUTS_DIR="${runtime_fixture}/negative/inputs" \
@@ -1236,6 +1257,66 @@ rg -x 'FAIL  missing shared library for /usr/lib/libfixture-consumer.so.1: libfi
   "${runtime_fixture}/negative/out/report-fixture-negative-error.txt" >/dev/null
 rg -x 'status: ok' \
   "${runtime_fixture}/positive/out/report-fixture-positive-ok.txt" >/dev/null
+rg $'^RUNTIME_DEP\tobserved\tfixture-consumer\tfixture-provider\tstatic\telf-needed:' \
+  "${runtime_fixture}/positive/out/report-fixture-positive-ok.txt" >/dev/null
+rg $'^RUNTIME_DEP\tunobserved\tfixture-consumer\tfixture-data\t-\t-$' \
+  "${runtime_fixture}/positive/out/report-fixture-positive-ok.txt" >/dev/null
+rg $'^RUNTIME_DEP\tredundant\tfixture-consumer\tfixture-redundant\tvia\tfixture-data$' \
+  "${runtime_fixture}/positive/out/report-fixture-positive-ok.txt" >/dev/null
+
+# The aggregate audit must publish a complete negative result and exit zero;
+# only the dependent gate turns that durable status into a failed goal.
+audit_fixture="${tmpdir}/runtime-audit-fixture"
+mkdir -p \
+  "${audit_fixture}/negative/inputs/reports" \
+  "${audit_fixture}/negative/out" \
+  "${audit_fixture}/negative/gate-inputs" \
+  "${audit_fixture}/negative/gate-out" \
+  "${audit_fixture}/positive/inputs/reports" \
+  "${audit_fixture}/positive/out" \
+  "${audit_fixture}/positive/gate-inputs" \
+  "${audit_fixture}/positive/gate-out"
+
+cp "${runtime_fixture}/negative/out/report-fixture-negative-error.txt" \
+  "${audit_fixture}/negative/inputs/reports/negative"
+cp "${runtime_fixture}/positive/out/report-fixture-positive-ok.txt" \
+  "${audit_fixture}/negative/inputs/reports/positive"
+printf 'fixture-consumer\tfixture-data\tloaded by pathname in the fixture\n' \
+  > "${audit_fixture}/negative/inputs/allowlist"
+
+BOBR_INPUTS_DIR="${audit_fixture}/negative/inputs" \
+BOBR_OUT_DIR="${audit_fixture}/negative/out" \
+  bash "${repo_root}/tests/runtime-closure-audit.sh" 2>/dev/null
+rg -x error "${audit_fixture}/negative/out/status" >/dev/null
+rg $'^fixture-consumer\tfixture-data\t' \
+  "${audit_fixture}/negative/out/approved-runtime-deps.txt" >/dev/null
+rg $'^fixture-consumer\tfixture-redundant\tfixture-data$' \
+  "${audit_fixture}/negative/out/redundant-runtime-deps.txt" >/dev/null
+ln -s ../out "${audit_fixture}/negative/gate-inputs/audit"
+if BOBR_INPUTS_DIR="${audit_fixture}/negative/gate-inputs" \
+  BOBR_OUT_DIR="${audit_fixture}/negative/gate-out" \
+  bash "${repo_root}/tests/runtime-closure-gate.sh" >/dev/null 2>&1; then
+  echo "expected runtime closure gate to reject a negative audit" >&2
+  exit 1
+fi
+
+cat > "${audit_fixture}/positive/inputs/reports/positive" <<'EOF_INNER'
+runtime-rootfs check
+name: clean-fixture
+RUNTIME_DEP	observed	clean-subject	clean-dependency	static	fixture
+status: ok
+failures: 0
+EOF_INNER
+: > "${audit_fixture}/positive/inputs/allowlist"
+BOBR_INPUTS_DIR="${audit_fixture}/positive/inputs" \
+BOBR_OUT_DIR="${audit_fixture}/positive/out" \
+  bash "${repo_root}/tests/runtime-closure-audit.sh" 2>/dev/null
+rg -x ok "${audit_fixture}/positive/out/status" >/dev/null
+ln -s ../out "${audit_fixture}/positive/gate-inputs/audit"
+BOBR_INPUTS_DIR="${audit_fixture}/positive/gate-inputs" \
+BOBR_OUT_DIR="${audit_fixture}/positive/gate-out" \
+  bash "${repo_root}/tests/runtime-closure-gate.sh"
+rg -x ok "${audit_fixture}/positive/gate-out/status" >/dev/null
 
 cat > "${tmpdir}/check-meson-synthetic-lowering.ncl" <<EOF_INNER
 let recipe = import "${repo_root}/recipe-lib.ncl" in

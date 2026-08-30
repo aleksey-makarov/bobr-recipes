@@ -5,7 +5,9 @@
 # `test_runtime_closures` -- one isolated closure check for every runtime-bearing
 # fs-tree recipe (every reachable node with `deps`). Each closure contains only
 # the package, its transitive `deps.runtime`, and `base_filesystem`, so unrelated
-# packages cannot mask a missing runtime dependency.
+# packages cannot mask a missing runtime dependency. The raw reports also audit
+# direct runtime dependency evidence; a durable aggregate audit is published
+# before the final gate interprets its status.
 #
 # `test_bootstrap_rootfs` -- checks the small set of canonical external and
 # bootstrap toolchain environments whose gen1 members do not yet have package
@@ -126,6 +128,39 @@ fun pkgs =>
     origin = {
       tag = "RecipePath",
       path = "tests/rootfs-check-gate.sh",
+    },
+  }
+  in
+
+  let runtime_closure_audit_source = {
+    name = "runtime-closure-audit-source",
+    tag = "Source",
+    object_hash = import "runtime-closure-audit.sh.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "tests/runtime-closure-audit.sh",
+    },
+  }
+  in
+
+  let runtime_closure_gate_source = {
+    name = "runtime-closure-gate-source",
+    tag = "Source",
+    object_hash = import "runtime-closure-gate.sh.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "tests/runtime-closure-gate.sh",
+    },
+  }
+  in
+
+  let runtime_deps_allowlist_source = {
+    name = "runtime-deps-allowlist-source",
+    tag = "Source",
+    object_hash = import "runtime-deps-allowlist.tsv.fsobj-hash" as 'Text,
+    origin = {
+      tag = "RecipePath",
+      path = "tests/runtime-deps-allowlist.tsv",
     },
   }
   in
@@ -252,6 +287,41 @@ fun pkgs =>
     std.array.map
       (fun recipe_name =>
         let package = std.record.get recipe_name runtime_roots in
+        let numbered_runtime_inputs = recipe.numbered_inputs package.deps.runtime in
+        let direct_runtime_inputs =
+          std.record.from_array (
+            std.array.map
+              (fun slot => {
+                field = "_runtime_dep_%{slot}",
+                value = std.record.get slot numbered_runtime_inputs,
+              })
+              (std.record.fields numbered_runtime_inputs)
+          )
+        in
+        let direct_runtime_names =
+          std.record.map (fun _ dependency => dependency.name) direct_runtime_inputs
+        in
+        let redundant_runtime_dependency_names =
+          std.record.map
+            (fun _ dependency =>
+              let via =
+                std.array.map
+                  (fun other => other.name)
+                  (
+                    std.array.filter
+                      (fun other =>
+                        other.name != dependency.name
+                        && std.record.has_field
+                          dependency.name
+                          (recipe.runtime_closure_set [other])
+                      )
+                      package.deps.runtime
+                  )
+              in
+              std.string.join " " via
+            )
+            direct_runtime_inputs
+        in
         let closure = {
           name = "check-runtime-closure-%{recipe_name}",
           tag = "RootfsClosure",
@@ -259,16 +329,91 @@ fun pkgs =>
           inputs = { root = package },
         }
         in
-        mk_rootfs_check "runtime-%{recipe_name}" closure
+        {
+          name = "check-runtime-%{recipe_name}",
+          tag = "Sandbox",
+          config = {
+            script_config = {
+              name = "runtime-%{recipe_name}",
+              subject = package.name,
+              runtime_dependencies = direct_runtime_names,
+              redundant_runtime_dependencies = redundant_runtime_dependency_names,
+              suppress = [],
+            },
+            steps = [
+              {
+                name = "check_runtime_closure",
+                run_as = "root",
+                cwd = "@{out}",
+                argv = ["@{script}"],
+              },
+            ],
+          },
+          inputs =
+            direct_runtime_inputs
+            & {
+              _rootfs = pkgs.oci_buildpack_deps_rootfs,
+              _subject = package,
+              _target = closure,
+              script = check_source,
+            },
+        }
       )
       (std.record.fields runtime_roots)
   in
 
-  let test_runtime_closures =
-    mk_check_gate
-      "test-runtime-closures"
-      "runtime-closure-check-reports"
-      runtime_closure_checks
+  let runtime_closure_reports = {
+    name = "runtime-closure-check-reports",
+    tag = "Bundle",
+    config = {},
+    inputs = recipe.numbered_inputs runtime_closure_checks,
+  }
+  in
+
+  # Findings are data: the audit always publishes its complete summary and a
+  # machine-readable status. Only the following gate turns that status into a
+  # failing goal, so cancellation cannot discard the useful audit object.
+  let runtime_closure_audit = {
+    name = "runtime-closure-audit",
+    tag = "Sandbox",
+    config = {
+      steps = [
+        {
+          name = "audit",
+          run_as = "root",
+          cwd = "@{out}",
+          argv = ["@{script}"],
+        },
+      ],
+    },
+    inputs = {
+      _rootfs = pkgs.oci_buildpack_deps_rootfs,
+      allowlist = runtime_deps_allowlist_source,
+      reports = runtime_closure_reports,
+      script = runtime_closure_audit_source,
+    },
+  }
+  in
+
+  let test_runtime_closures = {
+    name = "test-runtime-closures",
+    tag = "Sandbox",
+    config = {
+      steps = [
+        {
+          name = "gate",
+          run_as = "root",
+          cwd = "@{out}",
+          argv = ["@{script}"],
+        },
+      ],
+    },
+    inputs = {
+      _rootfs = pkgs.oci_buildpack_deps_rootfs,
+      audit = runtime_closure_audit,
+      script = runtime_closure_gate_source,
+    },
+  }
   in
 
   # Gen1 recipes intentionally predate the ordinary package dependency model:

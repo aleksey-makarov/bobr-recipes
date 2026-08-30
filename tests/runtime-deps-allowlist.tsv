@@ -1,0 +1,8 @@
+# Statically unobserved deps.runtime entries that are nevertheless required.
+#
+# Format (literal TAB separators):
+#   subject-package-name<TAB>dependency-package-name<TAB>reason
+#
+# Names are versioned recipe `name` values. An upgrade therefore requires the
+# exception to be reviewed. The same entry can approve either an unobserved or
+# a content-redundant edge when its non-static direct use is documented.

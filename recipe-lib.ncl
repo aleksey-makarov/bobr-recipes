@@ -114,6 +114,7 @@ in
   },
 
   numbered_inputs = build_rootfs_lib.numbered_inputs,
+  runtime_closure_set = build_rootfs_lib.runtime_closure_set,
 
   # First `n` dot-separated components of a version string, e.g.
   # `recipe.version_prefix 2 "2.88.2"` == "2.88" (release branch/series in
