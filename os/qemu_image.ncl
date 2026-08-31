@@ -13,6 +13,7 @@ fun pkgs =>
     # database at init, on any machine this image is put on.
     pkgs.wireless_regdb,
     pkgs.glibc,
+    pkgs.glibc_locales,
     pkgs.zlib,
     pkgs.bzip2,
     pkgs.xz,
