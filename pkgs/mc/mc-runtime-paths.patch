@@ -1,3 +1,17 @@
+Allow Midnight Commander to find its runtime data after relocation.
+
+Upstream compiles DATADIR, LIBEXECDIR, and EXTHELPERSDIR as absolute paths.
+Those paths work in a normal root filesystem, but not in a HostBundle: its
+unchanged payload lives below the bundle's root/ directory and the bundle may
+itself be moved.
+
+MC already supports MC_DATADIR for the system configuration directory.  Add
+MC_SHARE_DATADIR for architecture-independent data and MC_LIBEXECDIR for VFS
+plugins, scripts, and extension helpers.  The HostBundle launcher supplies
+absolute paths derived from the bundle location.  Without these environment
+variables MC retains the upstream compile-time paths, so the ordinary package
+continues to behave normally.
+
 diff --git a/lib/global.c b/lib/global.c
 --- a/lib/global.c
 +++ b/lib/global.c
