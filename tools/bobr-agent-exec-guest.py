@@ -120,7 +120,13 @@ def run_locked(sock_path: str, command: str, timeout: float) -> tuple[int, str]:
         s.close()
         return 3, f"bobr-agent-exec-guest: send failed: {e}"
 
-    buf = ""
+    # Keep the transport as bytes until the complete framed response has been
+    # received.  recv() may split a UTF-8 character between chunks; decoding
+    # each chunk independently would replace both halves and corrupt otherwise
+    # valid non-ASCII guest output.
+    buf = bytearray()
+    begin_bytes = begin.encode()
+    end_bytes = end.encode()
     deadline = (
         time.monotonic()
         + timeout
@@ -136,27 +142,28 @@ def run_locked(sock_path: str, command: str, timeout: float) -> tuple[int, str]:
                 break
             if not chunk:
                 break
-            buf += chunk.decode("utf-8", "replace")
-            if end in buf and begin in buf:
+            buf.extend(chunk)
+            if end_bytes in buf and begin_bytes in buf:
                 break
     finally:
         s.close()
 
-    if begin not in buf or end not in buf:
+    if begin_bytes not in buf or end_bytes not in buf:
+        raw_tail = bytes(buf[-2000:]).decode("utf-8", "replace")
         return 4, (
             "bobr-agent-exec-guest: no complete response after guest timeout "
-            f"({timeout}s), kill grace, and transport grace; raw tail:\n{buf[-2000:]}"
+            f"({timeout}s), kill grace, and transport grace; raw tail:\n{raw_tail}"
         )
 
-    body = buf.split(begin, 1)[1]
-    body, rest = body.split(end, 1)
+    body = bytes(buf).split(begin_bytes, 1)[1]
+    body, rest = body.split(end_bytes, 1)
     # exit code is whatever follows END: up to the newline
-    code_str = rest.lstrip().split("\n", 1)[0].strip()
+    code_str = rest.lstrip().split(b"\n", 1)[0].strip()
     try:
         code = int(code_str)
     except ValueError:
         code = 0
-    return code, body.strip("\r\n")
+    return code, body.strip(b"\r\n").decode("utf-8", "replace")
 
 
 def run(sock_path: str, command: str, timeout: float) -> tuple[int, str]:
