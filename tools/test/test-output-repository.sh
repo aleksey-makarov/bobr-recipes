@@ -6,7 +6,7 @@
 set -euo pipefail
 
 script_path="$(readlink -f "${BASH_SOURCE[0]}")"
-recipes_path="$(cd "$(dirname "${script_path}")/.." && pwd)"
+recipes_path="$(cd "$(dirname "${script_path}")/../.." && pwd)"
 tool="test-output-repository.sh"
 # shellcheck source=build-profile/profile-lib.sh
 . "${recipes_path}/build-profile/profile-lib.sh"
