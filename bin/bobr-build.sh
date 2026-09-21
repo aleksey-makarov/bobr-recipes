@@ -30,6 +30,8 @@ recipes_path="$(cd "$(dirname "${script_path}")/.." && pwd)"
 tool="bobr-build.sh"
 # shellcheck source=build-profile/profile-lib.sh
 . "${recipes_path}/build-profile/profile-lib.sh"
+# shellcheck source=build-profile/output-repository-lib.sh
+. "${recipes_path}/build-profile/output-repository-lib.sh"
 
 profile_path=""
 target=""
@@ -184,4 +186,8 @@ bobr_status=0
 "${bobr_cmd[@]}" < "${request_json}" || bobr_status="$?"
 bobr_finished_at="$(date +%s.%N)"
 report_phase_time "bobr build" "${bobr_started_at}" "${bobr_finished_at}"
-exit "${bobr_status}"
+if [ "${bobr_status}" -ne 0 ]; then
+  exit "${bobr_status}"
+fi
+
+run_output_repository_stage
