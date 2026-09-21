@@ -123,24 +123,26 @@ if [ -e "${store_link}" ] || [ -L "${store_link}" ]; then
     || die "previous store is not a directory: ${previous_store}"
 fi
 
-# The profile is the shipped example with its store pointed at the one just
-# made: a rebuild should go through the same settings a reader of the recipes
-# would get, not through a private two-line file that could drift from them.
-cp "${recipes_repo}/bobr.ncl.example" "${profile_path}"
-sed -i "s|^  store = \".*\",\$|  store = \"${store_root}\",|" "${profile_path}"
-grep -Fq "  store = \"${store_root}\"," "${profile_path}" \
-  || die "could not point the profile at the store; has bobr.ncl.example changed shape?"
-if [ -n "${previous_store}" ]; then
-  sed -i "/^}$/i\\
-  secondaries = {\\
-    local_repositories = [{\\
-      name = \"previous-world\",\\
-      store = \"${previous_store}\",\\
-      trusted = false,\\
-      transfer = \"hardlink\",\\
-    }],\\
-  }," "${profile_path}"
-fi
+# Import the shipped user preset rather than copying it. The generated profile
+# records only this rebuild's store and optional previous-world secondary, so
+# future preset changes are picked up without rewriting old template text.
+{
+  printf '(import "%s/build-profile/bobr-user.ncl") & {\n' "${recipes_repo}"
+  printf '  store = "%s",\n' "${store_root}"
+  if [ -n "${previous_store}" ]; then
+    printf '%s\n' \
+      '  secondaries = {' \
+      '    local_repositories = [{' \
+      '      name = "previous-world",'
+    printf '      store = "%s",\n' "${previous_store}"
+    printf '%s\n' \
+      '      trusted = false,' \
+      '      transfer = "hardlink",' \
+      '    }],' \
+      '  },'
+  fi
+  printf '}\n'
+} > "${profile_path}"
 
 git_head() { git -C "$1" rev-parse HEAD 2>/dev/null || echo unknown; }
 {

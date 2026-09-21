@@ -165,9 +165,9 @@ def _build_argv(target: str, dry_run: bool, jobs: int | None) -> list[str]:
         raise FileNotFoundError(f"bobr-build.sh not found at {BUILD_SH}")
     if not _profile_path.is_file():
         raise FileNotFoundError(
-            f"no build profile at {_profile_path}; copy "
-            f"{RECIPES_DIR / 'bobr.ncl.example'} there, or start this server "
-            f"with --profile"
+            f"no build profile at {_profile_path}; create one importing "
+            f"{RECIPES_DIR / 'build-profile' / 'bobr-user.ncl'}, or start "
+            f"this server with --profile"
         )
     if _resolve_bobr() is None:
         raise FileNotFoundError(

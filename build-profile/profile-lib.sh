@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+
 # Shared shell support for `bobr-build.sh`: resolving a build profile, checking
 # that the recipes and binary agree on a request format, and timing phases.
 #
@@ -25,20 +27,32 @@ require_cmd() {
 #
 # Every field is exported whether or not the calling script needs it: a script
 # that ignores one costs nothing, while a field missing from this list is a
-# setting silently ignored by whoever forgot it.
+# setting silently ignored by whoever forgot it. Optional output publication
+# is represented by an enable flag, scalar variables, and one Bash array; it is
+# deliberately not serialized into the Bobr request.
 resolve_profile() {
   local profile_path="$1" profile_dir resolved
   profile_dir="$(dirname "${profile_path}")"
 
   resolved="$(
-    nickel export --format raw <<EOF_PROFILE || die "invalid build profile '${profile_path}'"
-let contracts = import "${recipes_path}/build-profile.ncl" in
+    nickel export --format raw <<EOF_PROFILE
+let contracts = import "${recipes_path}/build-profile/build-profile.ncl" in
 let profile | contracts.Profile = import "${profile_path}" in
 let absolute = fun path =>
   if std.string.is_match "^/" path then path else "${profile_dir}/" ++ path
 in
 let store = absolute profile.store in
-let quote = fun value => "'" ++ value ++ "'" in
+# Shell single quotes are literal except that a quote itself ends them. Emit
+# the standard '"'"' sequence for each embedded quote before this generated
+# shell fragment is evaluated below.
+let quote = fun value =>
+  "'" ++ std.string.replace "'" "'\"'\"'" value ++ "'"
+in
+let assignment = fun name => fun value => name ++ "=" ++ quote value in
+let boolean = fun value => if value then "1" else "0" in
+let shell_array = fun values =>
+  "(" ++ std.string.join " " (std.array.map quote values) ++ ")"
+in
 let overlays =
   if std.array.length profile.overlays == 0 then
     "[]"
@@ -85,7 +99,68 @@ let secondaries =
   "{ local_repositories = "
   ++ repository_array profile.secondaries.local_repositories ++ " }"
 in
-std.string.join "\n" [
+let has_output_repository =
+  std.record.has_field "output_repository" profile
+in
+let output_repository_lines =
+  if !has_output_repository then [
+    "profile_output_repository_enabled='0'",
+    "profile_output_repository_create_bucket_if_missing=''",
+    "profile_output_repository_repository=''",
+    "profile_output_repository_endpoint_url=''",
+    "profile_output_repository_region=''",
+    "profile_output_repository_credentials_file=''",
+    "profile_output_repository_credentials_profile=''",
+    "profile_output_repository_ca_bundle=''",
+    "profile_output_repository_master_url=''",
+    "profile_output_repository_data_base_url=''",
+    "profile_output_repository_trusted_keys=()",
+    "profile_output_repository_cache=''",
+    "profile_output_repository_candidate=''",
+    "profile_output_repository_max_active_content_bytes=''",
+    "profile_output_repository_max_current_slots=''",
+    "profile_output_repository_retention=''",
+  ] else
+    let output = profile.output_repository in
+    let trusted_keys =
+      if std.array.length output.trusted_keys == 0 then
+        ["${recipes_path}/signing-key-1.pub.pem"]
+      else
+        std.array.map absolute output.trusted_keys
+    in [
+      assignment "profile_output_repository_enabled" "1",
+      assignment
+        "profile_output_repository_create_bucket_if_missing"
+        (boolean output.create_bucket_if_missing),
+      assignment "profile_output_repository_repository" output.repository,
+      assignment "profile_output_repository_endpoint_url" output.endpoint_url,
+      assignment "profile_output_repository_region" output.region,
+      assignment
+        "profile_output_repository_credentials_file"
+        (if output.credentials_file == "" then "" else absolute output.credentials_file),
+      assignment
+        "profile_output_repository_credentials_profile"
+        output.credentials_profile,
+      assignment
+        "profile_output_repository_ca_bundle"
+        (if output.ca_bundle == "" then "" else absolute output.ca_bundle),
+      assignment "profile_output_repository_master_url" output.master_url,
+      assignment "profile_output_repository_data_base_url" output.data_base_url,
+      "profile_output_repository_trusted_keys=" ++ shell_array trusted_keys,
+      assignment
+        "profile_output_repository_cache"
+        (if output.cache == "" then store ++ "/repository-cache" else absolute output.cache),
+      assignment "profile_output_repository_candidate" (absolute output.candidate),
+      assignment
+        "profile_output_repository_max_active_content_bytes"
+        (std.string.from_number output.rotation.max_active_content_bytes),
+      assignment
+        "profile_output_repository_max_current_slots"
+        (std.string.from_number output.rotation.max_current_slots),
+      assignment "profile_output_repository_retention" output.rotation.retention,
+    ]
+in
+std.string.join "\n" ([
   "profile_target=" ++ quote profile.target,
   "profile_store=" ++ quote store,
   "profile_logs=" ++ quote (if profile.logs == "" then store ++ "/logs" else absolute profile.logs),
@@ -97,9 +172,9 @@ std.string.join "\n" [
   "profile_overlays=" ++ quote overlays,
   "profile_fetch=" ++ quote fetch,
   "profile_secondaries=" ++ quote secondaries,
-]
+] @ output_repository_lines)
 EOF_PROFILE
-  )"
+  )" || die "invalid build profile '${profile_path}'"
   eval "${resolved}"
   # Kept for --dry-run, which shows the caller what its profile came to.
   profile_resolved="${resolved}"

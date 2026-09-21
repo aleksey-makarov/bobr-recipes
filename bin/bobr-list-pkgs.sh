@@ -38,7 +38,7 @@ if [ -n "${profile_path}" ]; then
   profile_dir="$(dirname "${profile_path}")"
   overlays_expr="$(
     nickel export --format raw <<EOF_OVERLAYS || die "invalid build profile '${profile_path}'"
-let contracts = import "${recipes_root}/build-profile.ncl" in
+let contracts = import "${recipes_root}/build-profile/build-profile.ncl" in
 let profile | contracts.Profile = import "${profile_path}" in
 let absolute = fun path =>
   if std.string.is_match "^/" path then path else "${profile_dir}/" ++ path

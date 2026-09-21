@@ -5,8 +5,8 @@
 # Usage:
 #   bobr-build.sh [OPTIONS] [PROFILE.ncl]
 #
-#   PROFILE.ncl              the build profile (default: ./bobr.ncl); start from
-#                            <recipes>/bobr.ncl.example
+#   PROFILE.ncl              the build profile (default: ./bobr.ncl); normally
+#                            imports <recipes>/build-profile/bobr-user.ncl
 #   --target NAME            build this recipe instead of the profile's
 #   --jobs N | -j N          cap builders running at once
 #   --quiet                  keep only warnings and errors on screen
@@ -28,8 +28,8 @@ usage() {
 script_path="$(readlink -f "${BASH_SOURCE[0]}")"
 recipes_path="$(cd "$(dirname "${script_path}")/.." && pwd)"
 tool="bobr-build.sh"
-# shellcheck source=bin/profile-lib.sh
-. "${recipes_path}/bin/profile-lib.sh"
+# shellcheck source=build-profile/profile-lib.sh
+. "${recipes_path}/build-profile/profile-lib.sh"
 
 profile_path=""
 target=""
@@ -75,7 +75,7 @@ done
 [ -n "${profile_path}" ] || profile_path="bobr.ncl"
 profile_given="${profile_path}"
 profile_path="$(realpath -e -- "${profile_given}" 2>/dev/null)" \
-  || die "no build profile at '${profile_given}'; copy ${recipes_path}/bobr.ncl.example to ./bobr.ncl"
+  || die "no build profile at '${profile_given}'; create ./bobr.ncl importing ${recipes_path}/build-profile/bobr-user.ncl"
 
 if [ -n "${jobs}" ] && ! [[ "${jobs}" =~ ^[1-9][0-9]*$ ]]; then
   die "--jobs must be a positive integer"

@@ -29,7 +29,7 @@
 let mkPkgs = import "recipe-set.ncl" in
 let request_schema = import "request-schema.ncl" in
 let recipe = import "recipe-lib.ncl" in
-let profile_contracts = import "build-profile.ncl" in
+let profile_contracts = import "build-profile/build-profile.ncl" in
 let RequestArgs = {
   store_path | String,
   logs_path | String,
