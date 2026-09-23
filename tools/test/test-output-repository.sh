@@ -27,17 +27,69 @@ assert_equal() {
     || fail "${description}: expected '${expected}', got '${actual}'"
 }
 
-assert_log_contains() {
-  local text="$1"
-  grep -F -- "${text}" "${MOCK_LOG}" >/dev/null \
-    || fail "command log does not contain: ${text}"
+format_logged_command() {
+  local command_name="$1"
+  shift
+
+  printf '%s' "${command_name}"
+  printf ' <%s>' "$@"
+  printf ' env=<%s>|<%s>|<%s>|<%s>' \
+    "${profile_output_repository_endpoint_url}" \
+    "${profile_output_repository_region}" \
+    "${profile_output_repository_credentials_file}" \
+    "${profile_output_repository_credentials_profile}"
 }
 
-assert_log_excludes() {
-  local text="$1"
-  if grep -F -- "${text}" "${MOCK_LOG}" >/dev/null; then
-    fail "command log unexpectedly contains: ${text}"
-  fi
+expected_status() {
+  local -a args=(
+    --repository "${profile_output_repository_repository}"
+    --master-url "${profile_output_repository_master_url}"
+    --cache "${profile_output_repository_cache}"
+  )
+  local trusted_key
+  for trusted_key in "${profile_output_repository_trusted_keys[@]}"; do
+    args+=(--trusted-key "${trusted_key}")
+  done
+  args+=(--ca-bundle "${profile_output_repository_ca_bundle}")
+  args+=(--compact --scan-storage)
+  format_logged_command status "${args[@]}"
+}
+
+expected_init() {
+  format_logged_command init \
+    --repository "${profile_output_repository_repository}" \
+    --ca-bundle "${profile_output_repository_ca_bundle}"
+}
+
+expected_prepare() {
+  local data_base_url="$1"
+  shift
+  local -a args=(
+    --store "${profile_store}"
+    --repository "${profile_output_repository_repository}"
+    --master-url "${profile_output_repository_master_url}"
+    --cache "${profile_output_repository_cache}"
+    --output "${profile_output_repository_candidate}"
+  )
+  local trusted_key
+  for trusted_key in "${profile_output_repository_trusted_keys[@]}"; do
+    args+=(--trusted-key "${trusted_key}")
+  done
+  args+=(--ca-bundle "${profile_output_repository_ca_bundle}")
+  [ -z "${data_base_url}" ] \
+    || args+=(--data-base-url "${data_base_url}")
+  args+=("$@")
+  format_logged_command prepare "${args[@]}"
+}
+
+assert_commands() {
+  local expected="" line actual
+  for line in "$@"; do
+    [ -z "${expected}" ] || expected+=$'\n'
+    expected+="${line}"
+  done
+  actual="$(cat "${MOCK_LOG}")"
+  assert_equal "${expected}" "${actual}" "repository command log"
 }
 
 mkdir -p "${temporary}/bin" "${temporary}/store" "${temporary}/cache"
@@ -155,17 +207,12 @@ write_statuses \
   '{"state":"empty","current_slots":0,"active_slot":null}'
 run_stage_ok
 assert_equal "" "$(cat "${temporary}/stdout")" "initial publication stdout"
-assert_log_contains 'status <--repository> <s3://test-repository>'
-assert_log_contains '<--scan-storage>'
-assert_log_contains 'init <--repository> <s3://test-repository>'
-assert_log_contains 'prepare <--store>'
-assert_log_contains '<--append> <--retention> <1d>'
-assert_log_contains '<--data-base-url> <https://data.example.test/>'
-assert_log_contains \
-  'env=<https://s3.example.test>|<test-region-1>|'
-assert_log_contains "<${temporary}/credentials>|<publisher>"
-assert_log_contains '<--trusted-key>'
-assert_log_contains '<--ca-bundle>'
+assert_commands \
+  "$(expected_status)" \
+  "$(expected_init)" \
+  "$(expected_status)" \
+  "$(expected_prepare 'https://data.example.test/' \
+    --append --retention 1d)"
 
 # Existing active slots below the threshold append without requiring an
 # explicit data URL; bobr-repo gets it from the signed master.
@@ -173,16 +220,18 @@ reset_profile
 write_statuses \
   '{"state":"ready","current_slots":2,"active_slot":{"serial":7,"content_bytes":199}}'
 run_stage_ok
-assert_log_contains '<--append> <--retention> <1d>'
-assert_log_excludes '<--data-base-url>'
+assert_commands \
+  "$(expected_status)" \
+  "$(expected_prepare '' --append --retention 1d)"
 
 # Equality starts a new slot when room remains.
 reset_profile
 write_statuses \
   '{"state":"ready","current_slots":2,"active_slot":{"serial":7,"content_bytes":200}}'
 run_stage_ok
-assert_log_contains '<--add-slot>'
-assert_log_excludes '<--retention>'
+assert_commands \
+  "$(expected_status)" \
+  "$(expected_prepare '' --add-slot)"
 
 # Once the configured number of current slots exists, a full active slot is
 # rotated and the grace period is passed through.
@@ -190,7 +239,9 @@ reset_profile
 write_statuses \
   '{"state":"ready","current_slots":3,"active_slot":{"serial":7,"content_bytes":201}}'
 run_stage_ok
-assert_log_contains '<--rotate> <--retention> <1d>'
+assert_commands \
+  "$(expected_status)" \
+  "$(expected_prepare '' --rotate --retention 1d)"
 
 # `unchanged` is a successful result and is reported only on stderr.
 reset_profile
@@ -202,6 +253,44 @@ run_stage_ok
 assert_equal "" "$(cat "${temporary}/stdout")" "unchanged stdout"
 grep -F 'output repository is unchanged' "${temporary}/stderr" >/dev/null \
   || fail "unchanged result was not reported"
+assert_commands \
+  "$(expected_status)" \
+  "$(expected_prepare '' --append --retention 1d)"
+
+# Operational failures are fatal and stop before the next repository
+# operation. Check status, init, and prepare independently.
+reset_profile
+write_statuses \
+  '{"state":"ready","current_slots":1,"active_slot":{"serial":1,"content_bytes":1}}'
+MOCK_FAIL_COMMAND=status
+export MOCK_FAIL_COMMAND
+if run_stage; then
+  fail "failed status command was accepted"
+fi
+assert_commands "$(expected_status)"
+
+reset_profile
+profile_output_repository_create_bucket_if_missing=1
+write_statuses \
+  '{"state":"missing","current_slots":0,"active_slot":null}'
+MOCK_FAIL_COMMAND=init
+export MOCK_FAIL_COMMAND
+if run_stage; then
+  fail "failed init command was accepted"
+fi
+assert_commands "$(expected_status)" "$(expected_init)"
+
+reset_profile
+write_statuses \
+  '{"state":"ready","current_slots":1,"active_slot":{"serial":1,"content_bytes":1}}'
+MOCK_FAIL_COMMAND=prepare
+export MOCK_FAIL_COMMAND
+if run_stage; then
+  fail "failed prepare command was accepted"
+fi
+assert_commands \
+  "$(expected_status)" \
+  "$(expected_prepare '' --append --retention 1d)"
 
 # A missing bucket without permission to create it is a hard publication
 # failure and never reaches prepare.
@@ -211,7 +300,7 @@ write_statuses \
 if (run_stage); then
   fail "missing bucket without initialization permission was accepted"
 fi
-assert_log_excludes 'prepare '
+assert_commands "$(expected_status)"
 
 # Empty and malformed repositories fail before prepare. In particular, the
 # initial master cannot be constructed without a content base URL.
@@ -221,14 +310,14 @@ write_statuses \
 if (run_stage); then
   fail "empty repository without data_base_url was accepted"
 fi
-assert_log_excludes 'prepare '
+assert_commands "$(expected_status)"
 
 reset_profile
 write_statuses '{"state":"ready","current_slots":1,"active_slot":null}'
 if (run_stage); then
   fail "invalid status JSON was accepted"
 fi
-assert_log_excludes 'prepare '
+assert_commands "$(expected_status)"
 
 reset_profile
 MOCK_PREPARE_RESULT='{"result":"surprise"}'
@@ -238,6 +327,9 @@ write_statuses \
 if (run_stage); then
   fail "invalid prepare JSON was accepted"
 fi
+assert_commands \
+  "$(expected_status)" \
+  "$(expected_prepare '' --append --retention 1d)"
 
 # Exercise the actual build wrapper as well as the sourced module. Bobr's goal
 # hash must reach stdout immediately; a failed build must skip publication, and
@@ -255,6 +347,37 @@ exit "\${MOCK_BOBR_STATUS:-0}"
 EOF_BOBR
 chmod +x "${temporary}/bin/bobr"
 
+# A build-only profile must not even inspect publication tools. Put deliberately
+# unusable bobr-repo and jq executables first on PATH and exercise the complete
+# wrapper, rather than calling the sourced publication module directly.
+mkdir -p "${temporary}/broken-bin"
+export BROKEN_TOOL_LOG="${temporary}/broken-tools.log"
+for broken_tool in bobr-repo jq; do
+  cat > "${temporary}/broken-bin/${broken_tool}" <<'EOF_BROKEN'
+#!/usr/bin/env bash
+printf '%s\n' "${0##*/}" >> "${BROKEN_TOOL_LOG}"
+exit 97
+EOF_BROKEN
+  chmod +x "${temporary}/broken-bin/${broken_tool}"
+done
+
+build_only_profile="${temporary}/build-only.ncl"
+cat > "${build_only_profile}" <<EOF_PROFILE
+{
+  target = "glibc_gen1",
+  store = "${temporary}/store",
+}
+EOF_PROFILE
+
+: > "${BROKEN_TOOL_LOG}"
+MOCK_BOBR_STATUS=0 PATH="${temporary}/broken-bin:${PATH}" \
+  "${recipes_path}/bin/bobr-build.sh" "${build_only_profile}" \
+  > "${temporary}/wrapper-stdout" 2> "${temporary}/wrapper-stderr"
+assert_equal "goal-hash" "$(cat "${temporary}/wrapper-stdout")" \
+  "build-only wrapper stdout"
+assert_equal "" "$(cat "${BROKEN_TOOL_LOG}")" \
+  "publication tools used by build-only wrapper"
+
 integration_profile="${temporary}/integration.ncl"
 cat > "${integration_profile}" <<EOF_PROFILE
 {
@@ -262,8 +385,13 @@ cat > "${integration_profile}" <<EOF_PROFILE
   store = "${temporary}/store",
   output_repository = {
     repository = "s3://test-repository",
+    endpoint_url = "https://s3.example.test",
+    region = "test-region-1",
+    credentials_file = "credentials",
+    credentials_profile = "publisher",
+    ca_bundle = "ca.pem",
     master_url = "https://repo.example.test/master",
-    trusted_keys = ["key-one.pem"],
+    trusted_keys = ["key-one.pem", "key-two.pem"],
     cache = "cache",
     candidate = "candidate.cbor",
     rotation = {
@@ -275,6 +403,18 @@ cat > "${integration_profile}" <<EOF_PROFILE
 }
 EOF_PROFILE
 
+# Dry-run lowers a publication profile but creates and publishes nothing. Its
+# success must not depend on working repository tools either.
+: > "${BROKEN_TOOL_LOG}"
+: > "${MOCK_LOG}"
+PATH="${temporary}/broken-bin:${PATH}" \
+  "${recipes_path}/bin/bobr-build.sh" --dry-run "${integration_profile}" \
+  > "${temporary}/wrapper-stdout" 2> "${temporary}/wrapper-stderr"
+assert_equal "" "$(cat "${BROKEN_TOOL_LOG}")" \
+  "publication tools used by dry-run wrapper"
+assert_equal "" "$(cat "${MOCK_LOG}")" \
+  "repository operations used by dry-run wrapper"
+
 reset_profile
 write_statuses \
   '{"state":"ready","current_slots":1,"active_slot":{"serial":1,"content_bytes":1}}'
@@ -283,7 +423,9 @@ MOCK_BOBR_STATUS=0 "${recipes_path}/bin/bobr-build.sh" \
   2> "${temporary}/wrapper-stderr"
 assert_equal "goal-hash" "$(cat "${temporary}/wrapper-stdout")" \
   "wrapper success stdout"
-assert_log_contains 'prepare <--store>'
+assert_commands \
+  "$(expected_status)" \
+  "$(expected_prepare '' --append --retention 1d)"
 
 reset_profile
 write_statuses \
@@ -310,6 +452,8 @@ if MOCK_BOBR_STATUS=0 "${recipes_path}/bin/bobr-build.sh" \
 fi
 assert_equal "goal-hash" "$(cat "${temporary}/wrapper-stdout")" \
   "publication failure stdout"
-assert_log_contains 'prepare <--store>'
+assert_commands \
+  "$(expected_status)" \
+  "$(expected_prepare '' --append --retention 1d)"
 
 echo "test-output-repository.sh: all tests passed"
