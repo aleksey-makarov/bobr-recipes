@@ -58,7 +58,7 @@ commit_file="${bobr_root}/commit.txt"
 github_repo="https://github.com/aleksey-makarov/bobr.git"
 github_api="https://api.github.com/repos/aleksey-makarov/bobr"
 potato_repo="potato:/mnt/git/bobr.git"
-required_binaries=(bobr fsobj-hash bobr-sandbox-launcher)
+required_binaries=(bobr bobr-fsobj-hash bobr-sandbox-launcher)
 
 [ -d "${recipes_repo}/.git" ] || die "missing git repository: ${recipes_repo}"
 
@@ -97,7 +97,7 @@ validate_staged_bin() {
       || die "installation did not produce executable ${binary}"
   done
   "${staged_bin}/bobr" --version >&2
-  "${staged_bin}/fsobj-hash" --help >/dev/null
+  "${staged_bin}/bobr-fsobj-hash" --help >/dev/null
   "${staged_bin}/bobr-sandbox-launcher" --protocol-info >/dev/null
 }
 

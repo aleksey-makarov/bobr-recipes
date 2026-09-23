@@ -54,7 +54,7 @@ git -C "${recipes_repo}" pull --ff-only
 
 # Whatever a run of bobr needs on PATH. Installation is intentionally separate
 # from rebuilding the world, so fail early and point at the exact remedy.
-required_binaries=(bobr fsobj-hash bobr-sandbox-launcher)
+required_binaries=(bobr bobr-fsobj-hash bobr-sandbox-launcher)
 for binary in "${required_binaries[@]}"; do
   [ -x "${bin_dir}/${binary}" ] \
     || die "missing ${bin_dir}/${binary}; run tools/bobr-install.sh first"

@@ -192,7 +192,7 @@ def _assert_agent(path: Path) -> None:
 @mcp.tool()
 def bobr_compile(profile: str = "debug") -> dict:
     """Rebuild the whole bobr toolchain so recipe builds use the current bobr
-    sources: the host binaries (bobr, fsobj-hash -- bobr-build.sh needs both)
+        sources: the host binaries (bobr, bobr-fsobj-hash -- bobr-build.sh needs both)
     and the musl-static bobr-sandbox-launcher (the sandbox needs it, and prefers
     the musl build). profile: 'debug' or 'release'."""
     if profile not in ("debug", "release"):

@@ -9,7 +9,7 @@ set -euo pipefail
 workspace_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 recipes_root="${workspace_root}/bobr-recipes"
 source_tool="${recipes_root}/bin/bobr-update-fsobj-hashes.sh"
-fsobj_hash_bin="${workspace_root}/bobr/target/debug/fsobj-hash"
+fsobj_hash_bin="${workspace_root}/bobr/target/debug/bobr-fsobj-hash"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
@@ -24,8 +24,8 @@ tool="${fixture_repo}/bin/bobr-update-fsobj-hashes.sh"
 cp "${source_tool}" "${tool}"
 chmod +x "${tool}"
 
-# The tool's default fsobj-hash path is derived from its own location, which
-# would point inside the fixture; pass the real binary explicitly.
+# Pass the freshly built bobr-fsobj-hash explicitly instead of relying on the
+# test process's PATH.
 run_tool() { "${tool}" --fsobj-hash="${fsobj_hash_bin}" "$@"; }
 
 assert_file_equals() {

@@ -2,7 +2,7 @@
 """Verify object payload hashes in a bobr store.
 
 The tool walks direct children of <store>/objects, recomputes each payload hash
-with fsobj-hash, and compares the computed hash with the object entry name.
+with bobr-fsobj-hash, and compares the computed hash with the object entry name.
 """
 
 from __future__ import annotations
@@ -63,7 +63,7 @@ def main() -> int:
         "--fsobj-hash",
         type=Path,
         default=None,
-        help="path to fsobj-hash (default: PATH or target/debug/fsobj-hash)",
+        help="path to bobr-fsobj-hash (default: PATH or target/debug/bobr-fsobj-hash)",
     )
     parser.add_argument(
         "-j",
@@ -111,21 +111,23 @@ def resolve_fsobj_hash(explicit: Path | None) -> Path:
     if explicit is not None:
         if explicit.is_file() and os.access(explicit, os.X_OK):
             return explicit.resolve()
-        raise CheckError(f"fsobj-hash is not executable: {explicit}")
+        raise CheckError(f"bobr-fsobj-hash is not executable: {explicit}")
 
-    if path := shutil.which("fsobj-hash"):
+    if path := shutil.which("bobr-fsobj-hash"):
         return Path(path)
 
     # This tool lives in the bobr-recipes checkout; the bobr build tree is a
     # sibling under the workspace root (see bobr-build.sh, which uses
     # `${workspace_root}/bobr`). tools/ -> bobr-recipes -> workspace root.
     workspace_root = Path(__file__).resolve().parents[2]
-    repo_binary = workspace_root / "bobr" / "target" / "debug" / "fsobj-hash"
+    repo_binary = (
+        workspace_root / "bobr" / "target" / "debug" / "bobr-fsobj-hash"
+    )
     if repo_binary.is_file() and os.access(repo_binary, os.X_OK):
         return repo_binary
 
     raise CheckError(
-        "fsobj-hash not found; build it with `cargo build -p fsobj-hash` "
+        "bobr-fsobj-hash not found; build it with `cargo build -p fsobj-hash` "
         "or pass --fsobj-hash"
     )
 
@@ -253,7 +255,8 @@ def check_one_object(
             expected_hash,
             display_name,
             object_path,
-            error=stderr or f"fsobj-hash exited with status {completed.returncode}",
+            error=stderr
+            or f"bobr-fsobj-hash exited with status {completed.returncode}",
         )
 
     actual_hash = completed.stdout.strip()
@@ -263,7 +266,7 @@ def check_one_object(
             display_name,
             object_path,
             actual_hash=actual_hash,
-            error=f"fsobj-hash printed invalid hash: {actual_hash!r}",
+            error=f"bobr-fsobj-hash printed invalid hash: {actual_hash!r}",
         )
 
     return CheckResult(expected_hash, display_name, object_path, actual_hash=actual_hash)
