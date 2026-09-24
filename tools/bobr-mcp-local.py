@@ -18,11 +18,9 @@ the path of the failing sandbox log (which the agent reads itself from the
 store).
 
 The build profile names the store, so it decides where everything is built; it
-is passed explicitly rather than left to the working directory. The bobr
-binaries come from the development bin directory, which is put at the front of
-the child's PATH -- so whichever `bobr` was last installed by
-the engine's tools/build-dev.sh is the one that builds, whatever PATH the shell
-that started this server happened to have.
+is passed explicitly rather than left to the working directory. Bobr and its
+companion tools are resolved through the PATH inherited when this server is
+started. Restart the server after changing that PATH or replacing the tools.
 
 Run it (in a normal, non-no_new_privs shell on the machine that owns the store):
 
@@ -46,7 +44,6 @@ import argparse
 import asyncio
 import json
 import logging
-import os
 import re
 import shutil
 import subprocess
@@ -62,9 +59,6 @@ RECIPES_DIR = Path(__file__).resolve().parent.parent
 WORKSPACE_DIR = RECIPES_DIR.parent
 BUILD_SH = RECIPES_DIR / "bin" / "bobr-build.sh"
 DEFAULT_PROFILE = WORKSPACE_DIR / "bobr.ncl"
-DEFAULT_BIN_DIR = Path(
-    os.environ.get("BOBR_DEV_BIN") or WORKSPACE_DIR / "bobr-bin" / "bin"
-)
 
 TARGET_RE = re.compile(r"^[A-Za-z0-9_]+$")
 HASH_RE = re.compile(r"unexpected object hash:.*got ([0-9a-f]{64})")
@@ -113,23 +107,10 @@ _jobs: dict[str, BuildJob] = {}
 
 # Set by main() before the server starts serving.
 _profile_path: Path = DEFAULT_PROFILE
-_bin_dir: Path = DEFAULT_BIN_DIR
-
-
-def _child_env() -> dict[str, str]:
-    """Environment for bobr-build.sh: the development bin directory first.
-
-    Prepending rather than resolving the binaries here is deliberate -- the
-    installer replaces them in place, so a long-lived server keeps picking up
-    whatever was installed last without being restarted.
-    """
-    env = dict(os.environ)
-    env["PATH"] = f"{_bin_dir}{os.pathsep}{env.get('PATH', '')}"
-    return env
 
 
 def _resolve_bobr() -> str | None:
-    return shutil.which("bobr", path=_child_env()["PATH"])
+    return shutil.which("bobr")
 
 
 async def _stream_stderr(stream: asyncio.StreamReader, job: BuildJob) -> None:
@@ -170,10 +151,7 @@ def _build_argv(target: str, dry_run: bool, jobs: int | None) -> list[str]:
             f"this server with --profile"
         )
     if _resolve_bobr() is None:
-        raise FileNotFoundError(
-            f"no 'bobr' on PATH, and none in {_bin_dir}; build one with "
-            f"the engine's tools/build-dev.sh"
-        )
+        raise FileNotFoundError("no 'bobr' on PATH")
 
     # The profile is passed explicitly: relying on the working directory would
     # make the result depend on where this server happens to have been started.
@@ -236,7 +214,6 @@ async def _run_job(job: BuildJob) -> None:
             proc = await asyncio.create_subprocess_exec(
                 *job.argv,
                 cwd=str(RECIPES_DIR),
-                env=_child_env(),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
@@ -400,10 +377,7 @@ def _report_setup() -> None:
 
     bobr_path = _resolve_bobr()
     if bobr_path is None:
-        print(
-            f"bobr-mcp-local: WARNING: no 'bobr' on PATH, and none in {_bin_dir}",
-            flush=True,
-        )
+        print("bobr-mcp-local: WARNING: no 'bobr' on PATH", flush=True)
         return
     try:
         version = subprocess.run(
@@ -419,7 +393,7 @@ def _report_setup() -> None:
 
 
 def main() -> None:
-    global _profile_path, _bin_dir
+    global _profile_path
 
     parser = argparse.ArgumentParser(description="local bobr build MCP server")
     parser.add_argument("--host", default="127.0.0.1")
@@ -430,17 +404,9 @@ def main() -> None:
         default=DEFAULT_PROFILE,
         help=f"build profile naming the store (default: {DEFAULT_PROFILE})",
     )
-    parser.add_argument(
-        "--bin-dir",
-        type=Path,
-        default=DEFAULT_BIN_DIR,
-        help="bobr binaries to build with, put first on PATH "
-        f"(default: {DEFAULT_BIN_DIR})",
-    )
     args = parser.parse_args()
 
     _profile_path = args.profile.expanduser().resolve()
-    _bin_dir = args.bin_dir.expanduser().resolve()
 
     mcp.settings.host = args.host
     mcp.settings.port = args.port

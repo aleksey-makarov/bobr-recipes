@@ -6,9 +6,10 @@
 #
 #   --tests    Realize `test_all` instead of the profile's `world` target.
 #
-# Install the host tools first with tools/bobr-install.sh. The recipes are
-# pulled first, then the target is realized by one real bin/bobr-build.sh
-# invocation into <workspace>/bobr-store.<YYMMDDhhmmss>.
+# The four Bobr host tools must be installed together in one directory on
+# PATH. The recipes are pulled first, then the target is realized by one real
+# bin/bobr-build.sh invocation into
+# <workspace>/bobr-store.<YYMMDDhhmmss>.
 # The last successful store is an untrusted hardlink repository: Source content
 # is reused lazily, while its build and reuse mappings remain unavailable.
 # Only after the build succeeds is the `bobr-store` symlink repointed at the new
@@ -33,7 +34,7 @@ while [ "$#" -gt 0 ]; do
       run_tests=1
       shift
       ;;
-    -h | --help) sed -n '3,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2; exit 0 ;;
+    -h | --help) sed -n '3,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2; exit 0 ;;
     *) die "unexpected argument: $1" ;;
   esac
 done
@@ -41,9 +42,6 @@ done
 script_path="$(readlink -f "${BASH_SOURCE[0]}")"
 recipes_repo="$(cd "$(dirname "${script_path}")/.." && pwd)"
 workspace_root="$(cd "${recipes_repo}/.." && pwd)"
-bobr_root="${workspace_root}/bobr-bin"
-bin_dir="${bobr_root}/bin"
-commit_file="${bobr_root}/commit.txt"
 
 [ -d "${recipes_repo}/.git" ] || die "missing git repository: ${recipes_repo}"
 
@@ -52,23 +50,35 @@ require_cmd git
 echo "==> pull bobr-recipes" >&2
 git -C "${recipes_repo}" pull --ff-only
 
-# Whatever a run of bobr needs on PATH. Installation is intentionally separate
-# from rebuilding the world, so fail early and point at the exact remedy.
-required_binaries=(bobr bobr-fsobj-hash bobr-sandbox-launcher)
+# Whatever a run of bobr and its post-build publication stage need on PATH.
+# Requiring one directory prevents an accidental mixture of installations.
+required_binaries=(bobr bobr-repo bobr-fsobj-hash bobr-sandbox-launcher)
+bin_dir=""
 for binary in "${required_binaries[@]}"; do
-  [ -x "${bin_dir}/${binary}" ] \
-    || die "missing ${bin_dir}/${binary}; run tools/bobr-install.sh first"
+  binary_path="$(command -v "${binary}" || true)"
+  [ -n "${binary_path}" ] || die "required tool not found on PATH: ${binary}"
+  binary_path="$(readlink -f "${binary_path}")" \
+    || die "cannot resolve ${binary} on PATH"
+  [ -x "${binary_path}" ] || die "not an executable: ${binary_path}"
+  binary_dir="$(dirname "${binary_path}")"
+  if [ -z "${bin_dir}" ]; then
+    bin_dir="${binary_dir}"
+  elif [ "${binary_dir}" != "${bin_dir}" ]; then
+    die "${binary} resolves to ${binary_path}; expected every Bobr tool in ${bin_dir}"
+  fi
 done
-[ -f "${commit_file}" ] \
-  || die "missing ${commit_file}; run tools/bobr-install.sh first"
-bobr_revision="$(tr -d '[:space:]' < "${commit_file}")"
-[[ "${bobr_revision}" =~ ^[0-9a-f]{40}$ \
-  || "${bobr_revision}" =~ ^[0-9a-f]{64}$ ]] \
-  || die "invalid bobr commit in ${commit_file}"
 
-# Make sure this installed set is used even if the caller has not put it on
-# PATH.
-export PATH="${bin_dir}:${PATH}"
+bobr_build_info="$(bobr --build-info)" \
+  || die "cannot read build information from bobr"
+[ -n "${bobr_build_info}" ] || die "bobr --build-info returned an empty value"
+[[ "${bobr_build_info}" != *$'\n'* ]] \
+  || die "bobr --build-info must be compact single-line JSON"
+[[ "${bobr_build_info}" != *'"provenance":null'* ]] \
+  || die "bobr has unknown build provenance; install a developer or release build"
+if [[ "${bobr_build_info}" != *'"git_dirty":true'* \
+  && "${bobr_build_info}" != *'"git_dirty":false'* ]]; then
+  die "bobr --build-info returned unexpected provenance"
+fi
 
 # ---------------------------------------------------------------------------
 # the store
@@ -146,12 +156,12 @@ fi
 
 git_head() { git -C "$1" rev-parse HEAD 2>/dev/null || echo unknown; }
 {
-  printf 'bobr %s\n' "${bobr_revision:-unknown}"
+  printf 'bobr %s\n' "${bobr_build_info}"
   printf 'bobr-recipes %s\n' "$(git_head "${recipes_repo}")"
 } > "${hashes_file}"
 
 log "store=${store_root}"
-log "bobr=${bobr_revision:-unknown}"
+log "bobr=${bobr_build_info}"
 log "previous_store=${previous_store:-none}"
 if [ "${run_tests}" -eq 1 ]; then
   log "target=test_all"

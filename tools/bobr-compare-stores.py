@@ -8,7 +8,7 @@ Usage:
     bobr-compare-stores.py STORE_A STORE_B [options]
 
 What it does (never aborts on a mismatch -- it reports and continues):
-  1. Compares hashes.txt (bobr / bobr-recipes commits).
+  1. Compares hashes.txt (Bobr build identity / bobr-recipes commit).
   2. Compares the set of Build Keys (builds/<key>); reports keys present in
      only one store.
   3. On the build keys present in BOTH, compares the produced object hash.
@@ -26,7 +26,7 @@ Exit code: 0 if no object-hash divergences or unreadable mappings are found
 among common build keys, else 1.
 
 Store layout used:
-  hashes.txt                      "bobr <sha>" / "bobr-recipes <sha>"
+  hashes.txt                      compact Bobr build info / recipes commit
   builds/<build_key>              symlink -> ../objects/<object_hash>
   object-records/<object_hash>.json
                                   optional build provenance used to classify
@@ -78,7 +78,7 @@ def _read_many(paths, read_one, readers: int):
 # -----------------------------------------------------------------------------
 
 def load_hashes(store: Path) -> dict[str, str]:
-    """Parse hashes.txt into {repo: sha}. Missing file -> empty dict."""
+    """Parse hashes.txt into {component: build identity}."""
     path = store / "hashes.txt"
     result: dict[str, str] = {}
     if not path.is_file():
@@ -411,11 +411,11 @@ def compare_hashes(a: StoreView, b: StoreView) -> None:
         return
     # Only bobr-rebuild-world.sh writes this file; a store built straight from
     # bobr-build.sh has none. Comparing against what it does not record would
-    # report every commit as differing, which reads like a finding and is not
-    # one -- the store is still perfectly comparable, see below.
+    # report every build identity as differing, which reads like a finding and
+    # is not one -- the store is still perfectly comparable, see below.
     for label, view, other in (("A", a, b), ("B", b, a)):
         if not view.hashes and other.hashes:
-            print(f"  store {label} records no commits (no hashes.txt);"
+            print(f"  store {label} records no build identities (no hashes.txt);"
                   f" nothing to compare here.")
             return
     all_match = True
@@ -427,7 +427,7 @@ def compare_hashes(a: StoreView, b: StoreView) -> None:
             all_match = False
             print(f"  DIFF  {key}: A={va or '<missing>'}  B={vb or '<missing>'}")
     if not all_match:
-        print("  NOTE: commits differ -- continuing anyway.")
+        print("  NOTE: build identities differ -- continuing anyway.")
 
 
 def compare_build_keys(a: StoreView, b: StoreView) -> set[str]:

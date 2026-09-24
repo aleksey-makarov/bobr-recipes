@@ -15,14 +15,12 @@
 #   -h | --help              show this help
 #
 # The profile says where to build and what; this run's name and its log and work
-# directories are minted here, per invocation. `bobr` comes from PATH -- use
-# tools/bobr-install.sh, or use the engine's tools/build-dev.sh when working in
-# a source checkout.
+# directories are minted here, per invocation. Bobr host tools come from PATH.
 
 set -euo pipefail
 
 usage() {
-  sed -n '3,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+  sed -n '3,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
 }
 
 script_path="$(readlink -f "${BASH_SOURCE[0]}")"
