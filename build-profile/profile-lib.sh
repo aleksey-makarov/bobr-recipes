@@ -181,19 +181,25 @@ EOF_PROFILE
 }
 
 # Dies unless the request format these recipes emit is the one the binary
-# accepts. $1 is the schema file, $2 the binary; the binary's `--version` line
-# is left in `tool_version` for the caller to print.
+# accepts. $1 is the schema file, $2 the binary. Compatibility is read from
+# machine-readable `--build-info`; the human `--version` line is left in
+# `tool_version` for the caller to print.
 #
 # Checked before anything slow so a mismatched pair costs one sentence rather
 # than the seconds it takes to lower the recipes.
 check_request_schema() {
-  local schema_file="$1" binary="$2" recipes_schema binary_schema
+  local schema_file="$1" binary="$2" recipes_schema binary_schema build_info
   recipes_schema="$(nickel export --format raw "${schema_file}")"
   tool_version="$("${binary}" --version 2>/dev/null)" \
     || die "'${binary} --version' failed; is the binary on PATH usable?"
-  binary_schema="$(printf '%s' "${tool_version}" | sed -n 's/.*(request \(.*\))$/\1/p')"
+  build_info="$("${binary}" --build-info 2>/dev/null)" \
+    || die "'${binary} --build-info' failed; ${binary} is too old for these recipes (expected ${recipes_schema})"
+  binary_schema="$(
+    printf '%s' "${build_info}" \
+      | sed -n 's/^{"version":"[^"]*","request_schema":"\([^"]*\)","provenance":.*}$/\1/p'
+  )"
   if [ -z "${binary_schema}" ]; then
-    die "cannot read the request schema from '${tool_version}'; ${binary} is too old for these recipes (expected ${recipes_schema})"
+    die "cannot read request schema from '${build_info}'; expected compact bobr build information"
   fi
   if [ "${binary_schema}" != "${recipes_schema}" ]; then
     die "these recipes emit ${recipes_schema}, but ${tool_version} accepts ${binary_schema}; update the older of the two"

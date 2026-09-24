@@ -338,7 +338,11 @@ cat > "${temporary}/bin/bobr" <<EOF_BOBR
 #!/usr/bin/env bash
 set -euo pipefail
 if [ "\${1:-}" = "--version" ]; then
-  printf '%s\n' 'bobr test (request $(nickel export --format raw "${recipes_path}/request-schema.ncl"))'
+  printf '%s\n' 'bobr test (request $(nickel export --format raw "${recipes_path}/request-schema.ncl")) (provenance unknown)'
+  exit 0
+fi
+if [ "\${1:-}" = "--build-info" ]; then
+  printf '%s\n' '{"version":"test","request_schema":"$(nickel export --format raw "${recipes_path}/request-schema.ncl")","provenance":null}'
   exit 0
 fi
 cat >/dev/null

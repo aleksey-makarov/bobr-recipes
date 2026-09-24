@@ -153,7 +153,11 @@ request_schema="$(nickel export --format raw "${recipes_path}/request-schema.ncl
 printf '%s\n' \
   '#!/usr/bin/env bash' \
   'if [ "${1:-}" = "--version" ]; then' \
-  "  printf '%s\\n' 'bobr test (request ${request_schema})'" \
+  "  printf '%s\\n' 'bobr test (request ${request_schema}) (provenance unknown)'" \
+  '  exit 0' \
+  'fi' \
+  'if [ "${1:-}" = "--build-info" ]; then' \
+  "  printf '%s\\n' '{\"version\":\"test\",\"request_schema\":\"${request_schema}\",\"provenance\":null}'" \
   '  exit 0' \
   'fi' \
   'exit 1' > "${temporary}/bin/bobr"
