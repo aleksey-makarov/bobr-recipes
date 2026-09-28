@@ -8,7 +8,7 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://pypi.org/packages/source/J/Jinja2/jinja2-%{version}.tar.gz",
+      url = "https://files.pythonhosted.org/packages/source/J/Jinja2/jinja2-%{version}.tar.gz",
     },
   }
   in

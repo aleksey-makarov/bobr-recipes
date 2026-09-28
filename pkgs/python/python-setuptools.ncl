@@ -9,7 +9,7 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://pypi.org/packages/source/s/setuptools/setuptools-%{version}.tar.gz",
+      url = "https://files.pythonhosted.org/packages/source/s/setuptools/setuptools-%{version}.tar.gz",
     },
   }
   in

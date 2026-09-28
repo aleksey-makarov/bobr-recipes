@@ -10,7 +10,7 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://pypi.org/packages/source/d/docutils/docutils-%{version}.tar.gz",
+      url = "https://files.pythonhosted.org/packages/source/d/docutils/docutils-%{version}.tar.gz",
     },
   }
   in

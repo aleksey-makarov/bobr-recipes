@@ -8,7 +8,7 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://pypi.org/packages/source/M/Mako/mako-%{version}.tar.gz",
+      url = "https://files.pythonhosted.org/packages/source/M/Mako/mako-%{version}.tar.gz",
     },
   }
   in

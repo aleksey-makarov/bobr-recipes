@@ -9,7 +9,7 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://pypi.org/packages/source/P/PyYAML/pyyaml-%{version}.tar.gz",
+      url = "https://files.pythonhosted.org/packages/source/P/PyYAML/pyyaml-%{version}.tar.gz",
     },
   }
   in

@@ -8,7 +8,7 @@ fun pkgs =>
     object_hash = hash,
     origin = {
       tag = "Http",
-      url = "https://pypi.org/packages/source/w/wheel/wheel-%{version}.tar.gz",
+      url = "https://files.pythonhosted.org/packages/source/w/wheel/wheel-%{version}.tar.gz",
     },
   }
   in
