@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.10
 
 - Standardized OS images, HostBundles, toolchains, and packages on `/usr/lib`;
   `/usr/lib64` is now a compatibility symlink.
