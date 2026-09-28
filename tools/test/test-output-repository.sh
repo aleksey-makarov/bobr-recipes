@@ -46,6 +46,7 @@ expected_status() {
     --master-url "${profile_output_repository_master_url}"
     --cache "${profile_output_repository_cache}"
   )
+  [ "${profile_quiet}" -eq 0 ] || args+=(--quiet)
   local trusted_key
   for trusted_key in "${profile_output_repository_trusted_keys[@]}"; do
     args+=(--trusted-key "${trusted_key}")
@@ -71,6 +72,7 @@ expected_prepare() {
     --cache "${profile_output_repository_cache}"
     --output "${profile_output_repository_candidate}"
   )
+  [ "${profile_quiet}" -eq 0 ] || args+=(--quiet)
   local trusted_key
   for trusted_key in "${profile_output_repository_trusted_keys[@]}"; do
     args+=(--trusted-key "${trusted_key}")
@@ -169,6 +171,7 @@ reset_profile() {
   profile_output_repository_max_current_slots=3
   profile_output_repository_retention=1d
   profile_store="${temporary}/store"
+  profile_quiet=0
 }
 
 run_stage() {
@@ -257,6 +260,21 @@ assert_commands \
   "$(expected_status)" \
   "$(expected_prepare '' --append --retention 1d)"
 
+# Quiet publication forwards the setting to long-running repository commands,
+# while wrapper phase timings remain visible.
+reset_profile
+profile_quiet=1
+write_statuses \
+  '{"state":"ready","current_slots":1,"active_slot":{"serial":1,"content_bytes":1}}'
+run_stage_ok
+assert_commands \
+  "$(expected_status)" \
+  "$(expected_prepare '' --append --retention 1d)"
+grep -F '==> bobr-repo status:' "${temporary}/stderr" >/dev/null \
+  || fail "status timing was not reported"
+grep -F '==> bobr-repo prepare:' "${temporary}/stderr" >/dev/null \
+  || fail "prepare timing was not reported"
+
 # Operational failures are fatal and stop before the next repository
 # operation. Check status, init, and prepare independently.
 reset_profile
@@ -268,6 +286,8 @@ if run_stage; then
   fail "failed status command was accepted"
 fi
 assert_commands "$(expected_status)"
+grep -F '==> bobr-repo status:' "${temporary}/stderr" >/dev/null \
+  || fail "failed status timing was not reported"
 
 reset_profile
 profile_output_repository_create_bucket_if_missing=1

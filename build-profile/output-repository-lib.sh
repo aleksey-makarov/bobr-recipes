@@ -75,6 +75,17 @@ _output_repository_parse_prepare_result() {
   '
 }
 
+_output_repository_run_timed() {
+  local label="$1"
+  shift
+  local started_at finished_at status=0
+  started_at="$(date +%s.%N)"
+  "$@" || status="$?"
+  finished_at="$(date +%s.%N)"
+  report_phase_time "${label}" "${started_at}" "${finished_at}"
+  return "${status}"
+}
+
 run_output_repository_stage() {
   [ "${profile_output_repository_enabled}" = "1" ] || return 0
 
@@ -117,6 +128,7 @@ run_output_repository_stage() {
     --master-url "${profile_output_repository_master_url}"
     --cache "${profile_output_repository_cache}"
   )
+  [ "${profile_quiet}" -eq 0 ] || common_args+=(--quiet)
   for trusted_key in "${profile_output_repository_trusted_keys[@]}"; do
     common_args+=(--trusted-key "${trusted_key}")
   done
@@ -127,7 +139,8 @@ run_output_repository_stage() {
   local status_json
   echo "==> inspect output repository ${profile_output_repository_repository}" >&2
   status_json="$(
-    env "${repository_environment[@]}" bobr-repo status \
+    _output_repository_run_timed "bobr-repo status" \
+      env "${repository_environment[@]}" bobr-repo status \
       "${common_args[@]}" --compact --scan-storage
   )" || die "failed to inspect output repository"
   _output_repository_parse_status "${status_json}"
@@ -143,11 +156,14 @@ run_output_repository_stage() {
       init_args+=(--ca-bundle "${profile_output_repository_ca_bundle}")
     fi
     echo "==> initialize output repository bucket" >&2
-    env "${repository_environment[@]}" bobr-repo "${init_args[@]}" >/dev/null \
+    _output_repository_run_timed "bobr-repo init" \
+      env "${repository_environment[@]}" bobr-repo "${init_args[@]}" \
+      >/dev/null \
       || die "failed to initialize output repository bucket"
 
     status_json="$(
-      env "${repository_environment[@]}" bobr-repo status \
+      _output_repository_run_timed "bobr-repo status" \
+        env "${repository_environment[@]}" bobr-repo status \
         "${common_args[@]}" --compact --scan-storage
     )" || die "failed to inspect initialized output repository"
     _output_repository_parse_status "${status_json}"
@@ -191,6 +207,7 @@ run_output_repository_stage() {
     --cache "${profile_output_repository_cache}"
     --output "${profile_output_repository_candidate}"
   )
+  [ "${profile_quiet}" -eq 0 ] || prepare_args+=(--quiet)
   for trusted_key in "${profile_output_repository_trusted_keys[@]}"; do
     prepare_args+=(--trusted-key "${trusted_key}")
   done
@@ -215,7 +232,8 @@ run_output_repository_stage() {
   local prepare_json prepare_result
   echo "==> prepare output repository (${action})" >&2
   prepare_json="$(
-    env "${repository_environment[@]}" bobr-repo "${prepare_args[@]}"
+    _output_repository_run_timed "bobr-repo prepare" \
+      env "${repository_environment[@]}" bobr-repo "${prepare_args[@]}"
   )" || die "failed to prepare output repository"
   prepare_result="$(_output_repository_parse_prepare_result "${prepare_json}")" \
     || die "bobr-repo returned an invalid prepare result"
