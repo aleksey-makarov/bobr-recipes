@@ -25,9 +25,7 @@
 
   # Downloads per host normally default to 6. GitLab's archive URLs build a
   # tarball per request and reliably need a lower concurrency limit.
-  fetch | priority -50 = {
-    per_host = { "gitlab.freedesktop.org" = 2 },
-  },
+  fetch.per_host."gitlab.freedesktop.org" | priority -50 = 2,
 
   # Other useful local overrides include:
   #

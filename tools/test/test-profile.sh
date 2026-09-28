@@ -48,7 +48,7 @@ assert_equal "0" "${#profile_output_repository_trusted_keys[@]}" \
 
 potato_profile="${temporary}/potato.ncl"
 write_profile "${potato_profile}" \
-  "(import \"${recipes_path}/build-profile/bobr-potato.ncl\") & { store = \"potato-store\" }"
+  "(import \"${recipes_path}/build-profile/bobr-user.ncl\") & (import \"${recipes_path}/build-profile/output-repo-potato.ncl\") & { store = \"potato-store\" }"
 resolve_profile "${potato_profile}"
 assert_equal "${temporary}/potato-store" "${profile_store}" "potato store"
 assert_equal "1" "${profile_output_repository_enabled}" "publication enabled"
@@ -79,6 +79,20 @@ assert_equal "3" "${profile_output_repository_max_current_slots}" \
   "default current-slot limit"
 assert_equal "1d" "${profile_output_repository_retention}" \
   "default retention"
+
+layered_profile="${temporary}/layered.ncl"
+write_profile "${layered_profile}" \
+  "(import \"${recipes_path}/build-profile/bobr-user.ncl\") & (import \"${recipes_path}/build-profile/output-repo-potato.ncl\") & { fetch.per_host_default = 3, output_repository.create_bucket_if_missing = false }"
+resolve_profile "${layered_profile}"
+[[ "${profile_fetch}" == *'per_host_default = 3'* ]] \
+  || fail "user fetch default override was not preserved"
+[[ "${profile_fetch}" == *'"gitlab.freedesktop.org" = 2'* ]] \
+  || fail "user profile GitLab limit was not preserved"
+assert_equal "0" "${profile_output_repository_create_bucket_if_missing}" \
+  "user bucket-creation override"
+assert_equal "https://192.168.0.169:7070/bobr/master" \
+  "${profile_output_repository_master_url}" \
+  "repository fields preserved after leaf override"
 
 custom_profile="${temporary}/custom.ncl"
 write_profile "${custom_profile}" '
@@ -163,7 +177,7 @@ printf '%s\n' \
   'exit 1' > "${temporary}/bin/bobr"
 chmod +x "${temporary}/bin/bobr"
 write_profile "${temporary}/request.ncl" \
-  "(import \"${recipes_path}/build-profile/bobr-potato.ncl\") & { store = \"request-store\" }"
+  "(import \"${recipes_path}/build-profile/bobr-user.ncl\") & (import \"${recipes_path}/build-profile/output-repo-potato.ncl\") & { store = \"request-store\" }"
 PATH="${temporary}/bin:${PATH}" \
   "${recipes_path}/bin/bobr-build.sh" --dry-run --target glibc_gen1 \
   "${temporary}/request.ncl" > "${temporary}/request.json" 2> "${temporary}/dry-run.log"
