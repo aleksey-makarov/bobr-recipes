@@ -69,20 +69,70 @@ let LocalTransferPolicyContract =
     std.contract.from_predicate (fun value => value == "hardlink" || value == "copy"),
   ]
 in
-let LocalRepositoryContract = {
-  name
-    | String
-    | doc "Unique diagnostic name; also identifies mapping and content providers in logs.",
+let LocalProviderBackendContract = {
   store
     | String
     | doc "Read-only bobr store path, resolved relative to this profile.",
-  trusted
-    | Bool
-    | doc "Allow BuildKey and ReuseKey lookup; content is verified regardless of this value.",
   transfer
     | LocalTransferPolicyContract
-    | doc "Use `hardlink` on matching filesystems or `copy` for independent inodes.",
+    | doc "Use `hardlink` on matching filesystems or `copy` for independent inodes."
+    | optional,
 }
+in
+let RemoteProviderBackendContract = {
+  master_url
+    | String
+    | doc "Absolute HTTPS URL of the signed repository master.",
+  trusted_keys
+    | Array String
+    | doc "Pinned master signing keys, resolved relative to this profile.",
+  ca_bundle
+    | String
+    | doc "Optional HTTPS CA bundle, resolved relative to this profile."
+    | default
+    = "",
+}
+in
+let SecondaryProviderContract = {
+  name
+    | String
+    | doc "Unique diagnostic name within each enabled capability.",
+  mappings
+    | Bool
+    | doc "Use authoritative BuildKey and ReuseKey mappings from this backend."
+    | default
+    = false,
+  content
+    | Bool
+    | doc "Use verified object and fs-file content from this backend."
+    | default
+    = false,
+  local | LocalProviderBackendContract | optional,
+  remote | RemoteProviderBackendContract | optional,
+}
+in
+let check_secondary_provider = fun entry =>
+  let has_local = std.record.has_field "local" entry in
+  let has_remote = std.record.has_field "remote" entry in
+  if entry.name == "" then
+    std.fail_with "secondary provider name must not be empty"
+  else if has_local == has_remote then
+    std.fail_with
+      "secondary provider '%{entry.name}' must specify exactly one of local or remote"
+  else if !entry.mappings && !entry.content then
+    std.fail_with
+      "secondary provider '%{entry.name}' must enable mappings, content, or both"
+  else if has_local && entry.content && !std.record.has_field "transfer" entry.local then
+    std.fail_with
+      "local content provider '%{entry.name}' requires a transfer policy"
+  else if has_local && !entry.content && std.record.has_field "transfer" entry.local then
+    std.fail_with
+      "local mapping provider '%{entry.name}' must not specify a transfer policy"
+  else if has_remote && std.array.length entry.remote.trusted_keys == 0 then
+    std.fail_with
+      "remote provider '%{entry.name}' requires at least one trusted key"
+  else
+    entry
 in
 let RotationPolicyContract = {
   max_active_content_bytes
@@ -169,7 +219,8 @@ let OutputRepositoryContract = {
 in
 {
   ProgressPolicy = ProgressPolicyContract,
-  LocalRepository = LocalRepositoryContract,
+  SecondaryProvider = SecondaryProviderContract,
+  validate_secondary_provider = check_secondary_provider,
   RotationPolicy = RotationPolicyContract,
   OutputRepository = OutputRepositoryContract,
   Profile = {
@@ -273,18 +324,23 @@ in
 
     secondaries
       | {
-        local_repositories
-          | Array LocalRepositoryContract
+        repository_cache
+          | String
+          | doc "Remote repository metadata cache; empty selects <store>/repository-cache."
+          | default
+          = "",
+        providers
+          | Array SecondaryProviderContract
           | default
           = [],
       }
       | doc m%"
-        Ordered local read-only bobr stores. Every entry supplies verified
-        content; `trusted` additionally permits build/reuse mapping lookup.
-        `hardlink` requires matching `objects/` and `fs-files/` filesystems and
-        shares regular-file inodes. `copy` works across filesystems and always
-        creates independent regular-file inodes. No mode falls back to the
-        other. Paths are resolved relative to this profile.
+        Ordered local and remote secondary backends. `mappings` enables
+        authoritative BuildKey/ReuseKey lookup and `content` enables verified
+        content acquisition; enabling both is shorthand for two independent
+        request capabilities backed by the same source. Local content requires
+        an explicit `hardlink` or `copy` transfer policy. Paths are resolved
+        relative to this profile.
       "%
       | default
       = {},

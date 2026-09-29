@@ -37,11 +37,14 @@
   # progress = { mode = "fixed", max_lines = 8 },
   # podman_unshare = true,
   # secondaries = {
-  #   local_repositories = [{
+  #   providers = [{
   #     name = "previous",
-  #     store = "../old-store",
-  #     trusted = true,
-  #     transfer = "hardlink",
+  #     mappings = true,
+  #     content = true,
+  #     local = {
+  #       store = "../old-store",
+  #       transfer = "hardlink",
+  #     },
   #   }],
   # },
 }

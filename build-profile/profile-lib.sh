@@ -86,18 +86,42 @@ let progress =
   else
     "{ mode = \"" ++ profile.progress.mode ++ "\" }"
 in
-let repository = fun entry =>
-  "{ name = " ++ std.serialize 'Json entry.name
-  ++ ", store = " ++ std.serialize 'Json (absolute entry.store)
-  ++ ", trusted = " ++ std.serialize 'Json entry.trusted
-  ++ ", transfer = " ++ std.serialize 'Json entry.transfer ++ " }"
+let resolve_provider = fun raw_entry =>
+  let entry = contracts.validate_secondary_provider raw_entry in
+  {
+    name = entry.name,
+    mappings = entry.mappings,
+    content = entry.content,
+  }
+  & (if std.record.has_field "local" entry then
+    {
+      local = { store = absolute entry.local.store }
+        & (if std.record.has_field "transfer" entry.local then
+          { transfer = entry.local.transfer }
+        else
+          {}),
+    }
+  else
+    {
+      remote = {
+        master_url = entry.remote.master_url,
+        trusted_keys = std.array.map absolute entry.remote.trusted_keys,
+        ca_bundle =
+          if entry.remote.ca_bundle == "" then "" else absolute entry.remote.ca_bundle,
+      },
+    })
 in
-let repository_array = fun entries =>
-  "[" ++ std.string.join ", " (std.array.map repository entries) ++ "]"
+let secondaries_json = std.serialize 'Json {
+    repository_cache =
+      if profile.secondaries.repository_cache == "" then
+        store ++ "/repository-cache"
+      else
+        absolute profile.secondaries.repository_cache,
+    providers = std.array.map resolve_provider profile.secondaries.providers,
+  }
 in
 let secondaries =
-  "{ local_repositories = "
-  ++ repository_array profile.secondaries.local_repositories ++ " }"
+  "(std.deserialize 'Json " ++ std.serialize 'Json secondaries_json ++ ")"
 in
 let has_output_repository =
   std.record.has_field "output_repository" profile

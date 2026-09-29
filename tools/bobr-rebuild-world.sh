@@ -10,7 +10,7 @@
 # PATH. The recipes are pulled first, then the target is realized by one real
 # bin/bobr-build.sh invocation into
 # <workspace>/bobr-store.<YYMMDDhhmmss>.
-# The last successful store is an untrusted hardlink repository: Source content
+# The last successful store is a content-only hardlink provider: Source content
 # is reused lazily, while its build and reuse mappings remain unavailable.
 # Only after the build succeeds is the `bobr-store` symlink repointed at the new
 # store. What was built from, and how the host was doing while it built, are
@@ -142,12 +142,14 @@ fi
   if [ -n "${previous_store}" ]; then
     printf '%s\n' \
       '  secondaries = {' \
-      '    local_repositories = [{' \
-      '      name = "previous-world",'
-    printf '      store = "%s",\n' "${previous_store}"
+      '    providers = [{' \
+      '      name = "previous-world",' \
+      '      content = true,' \
+      '      local = {'
+    printf '        store = "%s",\n' "${previous_store}"
     printf '%s\n' \
-      '      trusted = false,' \
-      '      transfer = "hardlink",' \
+      '        transfer = "hardlink",' \
+      '      },' \
       '    }],' \
       '  },'
   fi

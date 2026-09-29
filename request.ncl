@@ -24,7 +24,7 @@
 # The returned value has this outer shape:
 # - `schema` from `request-schema.ncl`
 # - `store = store_path`, `logs = logs_path`, `work = work_path`, `run_id`
-# - ordered `goals`, acquisition `limits`, local `secondaries`
+# - ordered `goals`, acquisition `limits`, normalized `secondaries`
 # - `nodes = recipe.to_request { recipes_path } raw (...)`
 let mkPkgs = import "recipe-set.ncl" in
 let request_schema = import "request-schema.ncl" in
@@ -49,8 +49,9 @@ let RequestArgs = {
     | default = {},
   secondaries
     | {
-      local_repositories
-        | Array profile_contracts.LocalRepository
+      repository_cache | String | default = "",
+      providers
+        | Array profile_contracts.SecondaryProvider
         | default = [],
     }
     | default = {},
@@ -111,6 +112,78 @@ let request | RequestArgs -> Dyn = fun args =>
           { per_host = args.limits.per_host }
       )
     in
+    let normalize_provider = fun raw_provider =>
+      let provider = profile_contracts.validate_secondary_provider raw_provider in
+      let has_local = std.record.has_field "local" provider in
+      let backend_path =
+        if has_local then
+          provider.local.store
+        else
+          std.array.first provider.remote.trusted_keys
+      in
+      if !std.string.is_match "^/" backend_path then
+        std.fail_with
+          "request.ncl: secondary provider '%{provider.name}' paths must be absolute"
+      else if !has_local
+        && std.array.length
+          (std.array.filter
+            (fun path => !std.string.is_match "^/" path)
+            provider.remote.trusted_keys) != 0 then
+        std.fail_with
+          "request.ncl: remote provider '%{provider.name}' trusted-key paths must be absolute"
+      else if !has_local
+        && provider.remote.ca_bundle != ""
+        && !std.string.is_match "^/" provider.remote.ca_bundle then
+        std.fail_with
+          "request.ncl: remote provider '%{provider.name}' CA bundle path must be absolute"
+      else
+        let remote_backend =
+          {
+            kind = "remote",
+            master_url = provider.remote.master_url,
+            trusted_keys = provider.remote.trusted_keys,
+          }
+          & (if provider.remote.ca_bundle == "" then
+            {}
+          else
+            { ca_bundle = provider.remote.ca_bundle })
+        in
+        let mapping_backend =
+          if has_local then
+            { kind = "local", store = provider.local.store }
+          else
+            remote_backend
+        in
+        let content_backend =
+          if has_local then
+            {
+              kind = "local",
+              store = provider.local.store,
+              transfer = provider.local.transfer,
+            }
+          else
+            remote_backend
+        in
+        (if provider.mappings then [{
+          name = provider.name,
+          capability = "mappings",
+          backend = mapping_backend,
+        }] else [])
+        @ (if provider.content then [{
+          name = provider.name,
+          capability = "content",
+          backend = content_backend,
+        }] else [])
+    in
+    let resolved_repository_cache =
+      if args.secondaries.repository_cache == "" then
+        store_path ++ "/repository-cache"
+      else
+        args.secondaries.repository_cache
+    in
+    if !std.string.is_match "^/" resolved_repository_cache then
+      std.fail_with "request.ncl: repository_cache must be an absolute path"
+    else
     {
       schema = request_schema,
       store = store_path,
@@ -120,7 +193,12 @@ let request | RequestArgs -> Dyn = fun args =>
       goals = ["root"],
       progress = args.progress,
       limits = request_limits,
-      secondaries = args.secondaries,
+      secondaries = {
+        repository_cache = resolved_repository_cache,
+        providers = std.array.flatten (
+          std.array.map normalize_provider args.secondaries.providers
+        ),
+      },
       nodes = recipe.to_request { include recipes_path } raw (std.record.get target_name raw),
     }
 in

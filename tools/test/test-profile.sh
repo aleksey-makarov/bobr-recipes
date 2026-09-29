@@ -159,6 +159,20 @@ reject_profile unknown-output-field \
   '{ output_repository = { master_url = "https://example/master", endpoint = "typo" } }'
 reject_profile unknown-profile-field \
   '{ output_repositroy = {} }'
+reject_profile provider-without-backend \
+  '{ secondaries.providers = [{ name = "missing", mappings = true }] }'
+reject_profile provider-with-two-backends \
+  '{ secondaries.providers = [{ name = "ambiguous", mappings = true, local.store = "old", remote = { master_url = "https://repo.example/master", trusted_keys = ["key.pem"] } }] }'
+reject_profile provider-without-capability \
+  '{ secondaries.providers = [{ name = "unused", local.store = "old" }] }'
+reject_profile local-content-without-transfer \
+  '{ secondaries.providers = [{ name = "content", content = true, local.store = "old" }] }'
+reject_profile local-mappings-with-transfer \
+  '{ secondaries.providers = [{ name = "mappings", mappings = true, local = { store = "old", transfer = "hardlink" } }] }'
+reject_profile remote-without-keys \
+  '{ secondaries.providers = [{ name = "remote", mappings = true, remote = { master_url = "https://repo.example/master", trusted_keys = [] } }] }'
+reject_profile unknown-provider-field \
+  '{ secondaries.providers = [{ name = "typo", mappings = true, local.store = "old", priority = 1 }] }'
 
 # Exercise the real build wrapper through request lowering. A fake bobr is
 # sufficient for its schema handshake because --dry-run never invokes a build.
@@ -177,12 +191,64 @@ printf '%s\n' \
   'exit 1' > "${temporary}/bin/bobr"
 chmod +x "${temporary}/bin/bobr"
 write_profile "${temporary}/request.ncl" \
-  "(import \"${recipes_path}/build-profile/bobr-user.ncl\") & (import \"${recipes_path}/build-profile/output-repo-potato.ncl\") & { store = \"request-store\" }"
+  "(import \"${recipes_path}/build-profile/bobr-user.ncl\") & (import \"${recipes_path}/build-profile/output-repo-potato.ncl\") & {
+    store = \"request-store\",
+    secondaries = {
+      repository_cache = \"metadata-cache\",
+      providers = [
+        {
+          name = \"previous\",
+          mappings = true,
+          content = true,
+          local = { store = \"previous-store\", transfer = \"hardlink\" },
+        },
+        {
+          name = \"remote-metadata\",
+          mappings = true,
+          remote = {
+            master_url = \"https://repo.example/master\",
+            trusted_keys = [\"keys/repository.pem\"],
+            ca_bundle = \"tls/ca.pem\",
+          },
+        },
+      ],
+    },
+  }"
 PATH="${temporary}/bin:${PATH}" \
   "${recipes_path}/bin/bobr-build.sh" --dry-run --target glibc_gen1 \
   "${temporary}/request.ncl" > "${temporary}/request.json" 2> "${temporary}/dry-run.log"
 if grep -q 'output_repository' "${temporary}/request.json"; then
   fail "output_repository leaked into the Bobr request"
 fi
+jq -e --arg root "${temporary}" '
+  .schema == "bobr-request-v6"
+  and .secondaries.repository_cache == ($root + "/metadata-cache")
+  and (.secondaries.providers | length) == 3
+  and .secondaries.providers[0] == {
+    name: "previous",
+    capability: "mappings",
+    backend: { kind: "local", store: ($root + "/previous-store") }
+  }
+  and .secondaries.providers[1] == {
+    name: "previous",
+    capability: "content",
+    backend: {
+      kind: "local",
+      store: ($root + "/previous-store"),
+      transfer: "hardlink"
+    }
+  }
+  and .secondaries.providers[2] == {
+    name: "remote-metadata",
+    capability: "mappings",
+    backend: {
+      kind: "remote",
+      master_url: "https://repo.example/master",
+      trusted_keys: [$root + "/keys/repository.pem"],
+      ca_bundle: ($root + "/tls/ca.pem")
+    }
+  }
+' "${temporary}/request.json" >/dev/null \
+  || fail "secondary providers were not resolved and normalized as expected"
 
 echo "test-profile.sh: all tests passed"
