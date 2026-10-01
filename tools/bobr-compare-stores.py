@@ -2,13 +2,13 @@
 """Catch reproducibility issues: find builds that produced different output from
 the same inputs across two stores.
 
-Compare two bobr stores built by bobr-rebuild-world.sh.
+Compare two bobr stores.
 
 Usage:
     bobr-compare-stores.py STORE_A STORE_B [options]
 
 What it does (never aborts on a mismatch -- it reports and continues):
-  1. Compares hashes.txt (Bobr build identity / bobr-recipes commit).
+  1. Compares the Bobr and bobr-recipes identities recorded by each build run.
   2. Compares the set of Build Keys (builds/<key>); reports keys present in
      only one store.
   3. On the build keys present in BOTH, compares the produced object hash.
@@ -26,7 +26,9 @@ Exit code: 0 if no object-hash divergences or unreadable mappings are found
 among common build keys, else 1.
 
 Store layout used:
-  hashes.txt                      compact Bobr build info / recipes commit
+  logs/<run-id>/context.json      Bobr build info / recipes provenance
+  logs/<run-id>/recipe-catalog.json
+                                  recipe names and builder tags
   builds/<build_key>              symlink -> ../objects/<object_hash>
   object-records/<object_hash>.json
                                   optional build provenance used to classify
@@ -37,7 +39,8 @@ Store layout used:
                                   line keyed by "p"; t=f/d/l, h/m/u/g/x by type)
                                   or a plain-object directory of real files
                                   (reports, EROFS images, ...)
-  request.json (optional)         {"nodes": {"n1": {"name","tag",...}, ...}}
+  hashes.txt (legacy fallback)    old Bobr / recipes build identities
+  request.json (legacy fallback)  {"nodes": {"n1": {"name","tag",...}, ...}}
 """
 
 from __future__ import annotations
@@ -61,6 +64,8 @@ from pathlib import Path
 DEFAULT_READERS = 48
 HEX64 = re.compile(r"[0-9a-f]{64}")
 OBJECT_TARGET = re.compile(r"\.\./objects/([0-9a-f]{64})")
+RUN_CONTEXT_SCHEMA = "bobr-run-context-v1"
+RECIPE_CATALOG_SCHEMA = "bobr-recipe-catalog-v1"
 
 
 def _read_many(paths, read_one, readers: int):
@@ -78,7 +83,7 @@ def _read_many(paths, read_one, readers: int):
 # -----------------------------------------------------------------------------
 
 def load_hashes(store: Path) -> dict[str, str]:
-    """Parse hashes.txt into {component: build identity}."""
+    """Parse the legacy hashes.txt into {component: build identity}."""
     path = store / "hashes.txt"
     result: dict[str, str] = {}
     if not path.is_file():
@@ -88,6 +93,108 @@ def load_hashes(store: Path) -> dict[str, str]:
         if len(parts) >= 2:
             result[parts[0]] = parts[1]
     return result
+
+
+def _canonical_json(value) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+def _load_optional_json(path: Path):
+    try:
+        return json.loads(path.read_text()), None
+    except FileNotFoundError:
+        return None, None
+    except OSError as error:
+        return None, f"cannot read {path}: {error}"
+    except json.JSONDecodeError as error:
+        return None, f"invalid JSON in {path}: {error}"
+
+
+def _run_files(store: Path, filename: str) -> list[Path]:
+    logs = store / "logs"
+    if not logs.is_dir():
+        return []
+    try:
+        with os.scandir(logs) as entries:
+            return sorted(
+                Path(entry.path) / filename
+                for entry in entries
+                if entry.is_dir(follow_symlinks=False)
+            )
+    except OSError:
+        return []
+
+
+def load_build_contexts(store: Path, readers: int):
+    """Loads distinct run identities, outcomes, and non-fatal diagnostics.
+
+    A store can be filled by several Bobr and recipes revisions, so the result
+    is a set per component rather than one alleged store-wide identity. The old
+    hashes.txt is consulted only when no modern run context is available.
+    """
+    identities: dict[str, set[str]] = {
+        "bobr": set(),
+        "bobr-recipes": set(),
+    }
+    outcomes: dict[str, int] = {}
+    warnings: list[str] = []
+    valid_contexts = 0
+    paths = _run_files(store, "context.json")
+    for path, result in zip(
+        paths,
+        _read_many(paths, _load_optional_json, readers),
+    ):
+        context, error = result
+        if error is not None:
+            warnings.append(error)
+            continue
+        if context is None:
+            continue
+        if not isinstance(context, dict) \
+                or context.get("schema") != RUN_CONTEXT_SCHEMA:
+            warnings.append(f"invalid run context schema in {path}")
+            continue
+        valid_contexts += 1
+        outcome = context.get("outcome")
+        if outcome in {"running", "success", "failed"}:
+            outcomes[outcome] = outcomes.get(outcome, 0) + 1
+        else:
+            warnings.append(f"invalid run outcome in {path}")
+
+        bobr = context.get("bobr")
+        if isinstance(bobr, dict):
+            identities["bobr"].add(_canonical_json(bobr))
+        else:
+            warnings.append(f"invalid Bobr build information in {path}")
+
+        recipes = context.get("recipes")
+        if recipes is None:
+            identities["bobr-recipes"].add("unknown")
+        elif isinstance(recipes, dict) \
+                and isinstance(recipes.get("git_commit"), str) \
+                and isinstance(recipes.get("git_dirty"), bool):
+            identity = recipes["git_commit"]
+            if recipes["git_dirty"]:
+                identity += "-dirty"
+            identities["bobr-recipes"].add(identity)
+        else:
+            warnings.append(f"invalid recipes provenance in {path}")
+
+    source = "run logs"
+    if valid_contexts == 0:
+        legacy = load_hashes(store)
+        if legacy:
+            source = "legacy hashes.txt"
+            for component, identity in legacy.items():
+                identities.setdefault(component, set()).add(identity)
+        else:
+            source = "unavailable"
+            logs = store / "logs"
+            if logs.is_dir():
+                warnings.append(f"no run contexts found under {logs}")
+            else:
+                warnings.append(f"run logs directory is unavailable: {logs}")
+    return identities, outcomes, warnings, source
 
 
 def load_build_keys(store: Path) -> set[str]:
@@ -221,22 +328,64 @@ def load_oh_to_name(store: Path, readers: int) -> dict[str, str]:
     return mapping
 
 
-def load_name_to_tag(store: Path) -> dict[str, str]:
-    """name -> tag from request.json (.nodes is keyed by nN). Optional."""
-    mapping: dict[str, str] = {}
+def _merge_name_tags(mapping: dict[str, set[str]], data) -> bool:
+    """Merges one catalog/request nodes object, returning whether it was valid."""
+    if not isinstance(data, dict):
+        return False
+    nodes = data.get("nodes", {})
+    if isinstance(nodes, dict):
+        values = nodes.values()
+    elif isinstance(nodes, list):
+        values = nodes
+    else:
+        return False
+    for node in values:
+        if not isinstance(node, dict):
+            continue
+        name, tag = node.get("name"), node.get("tag")
+        if isinstance(name, str) and isinstance(tag, str):
+            mapping.setdefault(name, set()).add(tag)
+    return True
+
+
+def load_name_to_tags(store: Path, readers: int):
+    """Loads name -> possible tags from run catalogs or legacy request.json."""
+    mapping: dict[str, set[str]] = {}
+    warnings: list[str] = []
+    valid_catalogs = 0
+    paths = _run_files(store, "recipe-catalog.json")
+    for path, result in zip(
+        paths,
+        _read_many(paths, _load_optional_json, readers),
+    ):
+        catalog, error = result
+        if error is not None:
+            warnings.append(error)
+            continue
+        if catalog is None:
+            continue
+        if not isinstance(catalog, dict) \
+                or catalog.get("schema") != RECIPE_CATALOG_SCHEMA \
+                or not _merge_name_tags(mapping, catalog):
+            warnings.append(f"invalid recipe catalog in {path}")
+            continue
+        valid_catalogs += 1
+
+    if valid_catalogs != 0:
+        return mapping, warnings
+
+    # A few old stores retained one complete lowered request at their root.
     path = store / "request.json"
     if not path.is_file():
-        return mapping
-    try:
-        data = json.loads(path.read_text())
-    except (OSError, json.JSONDecodeError):
-        return mapping
-    nodes = data.get("nodes", {})
-    values = nodes.values() if isinstance(nodes, dict) else nodes
-    for node in values:
-        if isinstance(node, dict) and node.get("name"):
-            mapping[node["name"]] = node.get("tag", "?")
-    return mapping
+        if _run_files(store, "context.json"):
+            warnings.append(f"no recipe catalogs found under {store / 'logs'}")
+        return mapping, warnings
+    data, error = _load_optional_json(path)
+    if error is not None:
+        warnings.append(error)
+    elif not _merge_name_tags(mapping, data):
+        warnings.append(f"invalid legacy request in {path}")
+    return mapping, warnings
 
 
 def _sha256_file(path: Path) -> str:
@@ -351,16 +500,20 @@ class Resolver:
         return f"(unnamed {build_key[:12]})"
 
     def tag(self, name: str) -> str:
+        tags: set[str] = set()
         for sv in self.stores:
-            if name in sv.name_to_tag:
-                return sv.name_to_tag[name]
-        return "?"
+            tags.update(sv.name_to_tags.get(name, set()))
+        if not tags:
+            return "?"
+        if len(tags) == 1:
+            return next(iter(tags))
+        return "ambiguous: " + ", ".join(sorted(tags))
 
 
 class StoreView:
     """One store, read as late as possible.
 
-    Only `hashes` and the set of build keys are read up front. Handles follow
+    Only run contexts and the set of build keys are read up front. Handles follow
     once both stores are known, for the keys they share. The name and tag maps
     exist solely to label divergences in the report, so a run that finds none
     never pays for the thousand-odd readlinks behind them.
@@ -370,12 +523,17 @@ class StoreView:
         self.path = path
         self.label = path.name
         self.readers = readers
-        self.hashes = load_hashes(path)
+        (
+            self.build_contexts,
+            self.run_outcomes,
+            self.metadata_warnings,
+            self.context_source,
+        ) = load_build_contexts(path, readers)
         self.build_keys = load_build_keys(path)
         self.mappings: dict[str, dict] = {}
         self.mapping_errors: dict[str, str] = {}
         self._oh_to_name: dict[str, str] | None = None
-        self._name_to_tag: dict[str, str] | None = None
+        self._name_to_tags: dict[str, set[str]] | None = None
 
     def read_mappings(self, keys) -> None:
         self.mappings, self.mapping_errors = load_mappings(
@@ -388,10 +546,13 @@ class StoreView:
         return self._oh_to_name
 
     @property
-    def name_to_tag(self) -> dict[str, str]:
-        if self._name_to_tag is None:
-            self._name_to_tag = load_name_to_tag(self.path)
-        return self._name_to_tag
+    def name_to_tags(self) -> dict[str, set[str]]:
+        if self._name_to_tags is None:
+            self._name_to_tags, warnings = load_name_to_tags(
+                self.path, self.readers
+            )
+            self.metadata_warnings.extend(warnings)
+        return self._name_to_tags
 
 
 # -----------------------------------------------------------------------------
@@ -403,31 +564,40 @@ def section(title: str) -> None:
     print(f"== {title} ==")
 
 
-def compare_hashes(a: StoreView, b: StoreView) -> None:
-    section("hashes.txt")
-    keys = sorted(set(a.hashes) | set(b.hashes))
+def _format_identity_set(values: set[str]) -> str:
+    if not values:
+        return "<unavailable>"
+    return ", ".join(sorted(values))
+
+
+def compare_build_contexts(a: StoreView, b: StoreView) -> None:
+    section("build contexts")
+    print(f"  A: {a.context_source}")
+    print(f"  B: {b.context_source}")
+    keys = sorted(set(a.build_contexts) | set(b.build_contexts))
     if not keys:
-        print("  (no hashes.txt in either store)")
+        print("  (no build identities in either store)")
         return
-    # Only bobr-rebuild-world.sh writes this file; a store built straight from
-    # bobr-build.sh has none. Comparing against what it does not record would
-    # report every build identity as differing, which reads like a finding and
-    # is not one -- the store is still perfectly comparable, see below.
-    for label, view, other in (("A", a, b), ("B", b, a)):
-        if not view.hashes and other.hashes:
-            print(f"  store {label} records no build identities (no hashes.txt);"
-                  f" nothing to compare here.")
-            return
-    all_match = True
+    if a.run_outcomes:
+        print("  A outcomes: " + ", ".join(
+            f"{name}={count}" for name, count in sorted(a.run_outcomes.items())
+        ))
+    if b.run_outcomes:
+        print("  B outcomes: " + ", ".join(
+            f"{name}={count}" for name, count in sorted(b.run_outcomes.items())
+        ))
     for key in keys:
-        va, vb = a.hashes.get(key), b.hashes.get(key)
+        va = a.build_contexts.get(key, set())
+        vb = b.build_contexts.get(key, set())
         if va == vb:
-            print(f"  ok    {key}: {va}")
+            print(f"  ok    {key}: {_format_identity_set(va)}")
         else:
-            all_match = False
-            print(f"  DIFF  {key}: A={va or '<missing>'}  B={vb or '<missing>'}")
-    if not all_match:
-        print("  NOTE: build identities differ -- continuing anyway.")
+            print(f"  DIFF  {key}:")
+            print(f"          A={_format_identity_set(va)}")
+            print(f"          B={_format_identity_set(vb)}")
+    if any(a.build_contexts.get(key, set()) != b.build_contexts.get(key, set())
+           for key in keys):
+        print("  NOTE: recorded build contexts differ -- continuing anyway.")
 
 
 def compare_build_keys(a: StoreView, b: StoreView) -> set[str]:
@@ -599,7 +769,7 @@ def main() -> int:
     print(f"A = {a.path}")
     print(f"B = {b.path}")
 
-    compare_hashes(a, b)
+    compare_build_contexts(a, b)
     # Every key of each store is read: the ones they share carry the comparison,
     # and the ones they do not are still named in the report.
     a.read_mappings(a.build_keys)
@@ -609,6 +779,13 @@ def main() -> int:
                          show_files=not args.no_files,
                          max_files=args.max_files,
                          show_inherited=args.inherited)
+
+    warnings = [("A", warning) for warning in a.metadata_warnings]
+    warnings += [("B", warning) for warning in b.metadata_warnings]
+    if warnings:
+        section("metadata warnings")
+        for label, warning in warnings:
+            print(f"  {label}: {warning}")
 
     section("summary")
     print(f"  exit {rc}: "

@@ -94,6 +94,42 @@ assert_commands() {
   assert_equal "${expected}" "${actual}" "repository command log"
 }
 
+context_count() {
+  find "${temporary}/store/logs" -mindepth 2 -maxdepth 2 \
+    -name context.json -type f 2>/dev/null | wc -l | tr -d '[:space:]'
+}
+
+catalog_count() {
+  find "${temporary}/store/logs" -mindepth 2 -maxdepth 2 \
+    -name recipe-catalog.json -type f 2>/dev/null | wc -l \
+    | tr -d '[:space:]'
+}
+
+assert_context_outcomes() {
+  local expected_success="$1" expected_failed="$2"
+  local -a contexts
+  mapfile -t contexts < <(
+    find "${temporary}/store/logs" -mindepth 2 -maxdepth 2 \
+      -name context.json -type f | sort
+  )
+  jq -s -e \
+    --argjson successes "${expected_success}" \
+    --argjson failures "${expected_failed}" '
+      all(.[];
+        .schema == "bobr-run-context-v1"
+        and (.run_id | type == "string")
+        and .target == "glibc_gen1"
+        and .bobr.version == "test"
+        and (.recipes.git_commit | type == "string")
+        and (.recipes.git_dirty | type == "boolean")
+      )
+      and ([.[] | select(.outcome == "success")] | length) == $successes
+      and ([.[] | select(.outcome == "failed")] | length) == $failures
+      and ([.[] | select(.outcome == "running")] | length) == 0
+    ' "${contexts[@]}" >/dev/null \
+    || fail "unexpected build run contexts"
+}
+
 mkdir -p "${temporary}/bin" "${temporary}/store" "${temporary}/cache"
 touch "${temporary}/credentials" "${temporary}/ca.pem" \
   "${temporary}/key-one.pem" "${temporary}/key-two.pem"
@@ -401,6 +437,20 @@ assert_equal "goal-hash" "$(cat "${temporary}/wrapper-stdout")" \
   "build-only wrapper stdout"
 assert_equal "" "$(cat "${BROKEN_TOOL_LOG}")" \
   "publication tools used by build-only wrapper"
+assert_equal "1" "$(context_count)" "build-only context count"
+assert_equal "1" "$(catalog_count)" "build-only catalog count"
+assert_context_outcomes 1 0
+catalog="$(find "${temporary}/store/logs" -mindepth 2 -maxdepth 2 \
+  -name recipe-catalog.json -type f -print -quit)"
+jq -e '
+  .schema == "bobr-recipe-catalog-v1"
+  and (.nodes | length) > 0
+  and all(.nodes[];
+    (.name | type == "string")
+    and (.tag | type == "string")
+    and (keys | sort) == ["name", "tag"]
+  )
+' "${catalog}" >/dev/null || fail "unsafe or invalid recipe catalog"
 
 integration_profile="${temporary}/integration.ncl"
 cat > "${integration_profile}" <<EOF_PROFILE
@@ -438,6 +488,8 @@ assert_equal "" "$(cat "${BROKEN_TOOL_LOG}")" \
   "publication tools used by dry-run wrapper"
 assert_equal "" "$(cat "${MOCK_LOG}")" \
   "repository operations used by dry-run wrapper"
+assert_equal "1" "$(context_count)" "dry-run context count"
+assert_equal "1" "$(catalog_count)" "dry-run catalog count"
 
 reset_profile
 write_statuses \
@@ -450,6 +502,9 @@ assert_equal "goal-hash" "$(cat "${temporary}/wrapper-stdout")" \
 assert_commands \
   "$(expected_status)" \
   "$(expected_prepare '' --append --retention 1d)"
+assert_equal "2" "$(context_count)" "successful context count"
+assert_equal "2" "$(catalog_count)" "successful catalog count"
+assert_context_outcomes 2 0
 
 reset_profile
 write_statuses \
@@ -463,6 +518,9 @@ assert_equal "goal-hash" "$(cat "${temporary}/wrapper-stdout")" \
   "failed build stdout"
 assert_equal "" "$(cat "${MOCK_LOG}")" \
   "publication after failed build"
+assert_equal "3" "$(context_count)" "failed context count"
+assert_equal "3" "$(catalog_count)" "failed catalog count"
+assert_context_outcomes 2 1
 
 reset_profile
 write_statuses \
@@ -479,5 +537,8 @@ assert_equal "goal-hash" "$(cat "${temporary}/wrapper-stdout")" \
 assert_commands \
   "$(expected_status)" \
   "$(expected_prepare '' --append --retention 1d)"
+assert_equal "4" "$(context_count)" "publication-failure context count"
+assert_equal "4" "$(catalog_count)" "publication-failure catalog count"
+assert_context_outcomes 3 1
 
 echo "test-output-repository.sh: all tests passed"

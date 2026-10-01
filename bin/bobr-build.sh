@@ -37,6 +37,58 @@ jobs=""
 quiet=""
 dry_run=0
 
+recipes_provenance() {
+  local commit dirty status
+  if ! command -v git >/dev/null 2>&1 \
+    || ! git -C "${recipes_path}" rev-parse --is-inside-work-tree \
+      >/dev/null 2>&1; then
+    printf '%s\n' null
+    return
+  fi
+  commit="$(git -C "${recipes_path}" rev-parse HEAD 2>/dev/null)" \
+    || { printf '%s\n' null; return; }
+  status="$(git -C "${recipes_path}" status --porcelain \
+    --untracked-files=normal 2>/dev/null)" \
+    || { printf '%s\n' null; return; }
+  dirty=false
+  if [ -n "${status}" ]; then
+    dirty=true
+  fi
+  printf '{"git_commit":"%s","git_dirty":%s}\n' "${commit}" "${dirty}"
+}
+
+write_run_context() {
+  local outcome="$1" exit_status="$2" temporary_context
+  temporary_context="$(mktemp "${logs_path}/.context.json.XXXXXX")"
+  {
+    printf '{"schema":"bobr-run-context-v1"'
+    printf ',"run_id":"%s","target":"%s"' "${run_id}" "${target}"
+    printf ',"outcome":"%s","exit_status":%s' "${outcome}" "${exit_status}"
+    printf ',"bobr":%s,"recipes":%s}\n' \
+      "${tool_build_info}" "${run_recipes_provenance}"
+  } > "${temporary_context}"
+  mv -f "${temporary_context}" "${logs_path}/context.json"
+}
+
+write_recipe_catalog() {
+  local request_path="$1" temporary_catalog
+  temporary_catalog="$(mktemp "${logs_path}/.recipe-catalog.json.XXXXXX")"
+  if ! nickel export --format json > "${temporary_catalog}" <<EOF_CATALOG
+let request = import "${request_path}" as 'Json in
+{
+  schema = "bobr-recipe-catalog-v1",
+  nodes = std.record.map
+    (fun _name node => { name = node.name, tag = node.tag })
+    request.nodes,
+}
+EOF_CATALOG
+  then
+    rm -f "${temporary_catalog}"
+    return 1
+  fi
+  mv -f "${temporary_catalog}" "${logs_path}/recipe-catalog.json"
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --target)
@@ -179,13 +231,20 @@ nickel_finished_at="$(date +%s.%N)"
 report_phase_time "nickel recipes -> json request" \
   "${nickel_started_at}" "${nickel_finished_at}"
 
+run_recipes_provenance="$(recipes_provenance)"
+write_recipe_catalog "${request_json}"
+write_run_context running null
+
 bobr_started_at="$(date +%s.%N)"
 bobr_status=0
 "${bobr_cmd[@]}" < "${request_json}" || bobr_status="$?"
 bobr_finished_at="$(date +%s.%N)"
 report_phase_time "bobr build" "${bobr_started_at}" "${bobr_finished_at}"
 if [ "${bobr_status}" -ne 0 ]; then
+  write_run_context failed "${bobr_status}"
   exit "${bobr_status}"
 fi
+
+write_run_context success 0
 
 run_output_repository_stage

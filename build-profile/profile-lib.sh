@@ -212,18 +212,20 @@ EOF_PROFILE
 # Checked before anything slow so a mismatched pair costs one sentence rather
 # than the seconds it takes to lower the recipes.
 check_request_schema() {
-  local schema_file="$1" binary="$2" recipes_schema binary_schema build_info
+  local schema_file="$1" binary="$2" recipes_schema binary_schema
   recipes_schema="$(nickel export --format raw "${schema_file}")"
   tool_version="$("${binary}" --version 2>/dev/null)" \
     || die "'${binary} --version' failed; is the binary on PATH usable?"
-  build_info="$("${binary}" --build-info 2>/dev/null)" \
+  tool_build_info="$("${binary}" --build-info 2>/dev/null)" \
     || die "'${binary} --build-info' failed; ${binary} is too old for these recipes (expected ${recipes_schema})"
+  [[ "${tool_build_info}" != *$'\n'* ]] \
+    || die "'${binary} --build-info' returned more than one line"
   binary_schema="$(
-    printf '%s' "${build_info}" \
+    printf '%s' "${tool_build_info}" \
       | sed -n 's/^{"version":"[^"]*","request_schema":"\([^"]*\)","provenance":.*}$/\1/p'
   )"
   if [ -z "${binary_schema}" ]; then
-    die "cannot read request schema from '${build_info}'; expected compact bobr build information"
+    die "cannot read request schema from '${tool_build_info}'; expected compact bobr build information"
   fi
   if [ "${binary_schema}" != "${recipes_schema}" ]; then
     die "these recipes emit ${recipes_schema}, but ${tool_version} accepts ${binary_schema}; update the older of the two"
@@ -253,16 +255,10 @@ allocate_run_id() {
   die "failed to allocate a unique run id under ${logs_root}"
 }
 
-# Prints the wall time of one phase to stderr. When BOBR_BUILD_TIMING_LOG names
-# a file, appends the same line there too -- that lets callers such as
-# bobr-rebuild-world.sh record the split without teeing the live progress UI off
-# stderr.
+# Prints the wall time of one phase to stderr.
 report_phase_time() {
   local label="$1" start="$2" end="$3" line
   line="$(awk -v l="${label}" -v s="${start}" -v e="${end}" \
     'BEGIN { printf "==> %s: %.2fs", l, e - s }')"
   printf '%s\n' "${line}" >&2
-  if [ -n "${BOBR_BUILD_TIMING_LOG:-}" ]; then
-    printf '%s\n' "${line}" >> "${BOBR_BUILD_TIMING_LOG}"
-  fi
 }

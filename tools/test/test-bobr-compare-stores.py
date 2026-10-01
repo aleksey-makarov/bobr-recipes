@@ -6,10 +6,12 @@ from __future__ import annotations
 import importlib.util
 import io
 import json
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).parents[1] / "bobr-compare-stores.py"
@@ -20,6 +22,43 @@ SPEC.loader.exec_module(compare)
 
 
 class CompareStoresTests(unittest.TestCase):
+    def make_run(
+        self,
+        store: Path,
+        run_id: str,
+        *,
+        outcome: str = "success",
+        commit: str = "1" * 40,
+        dirty: bool = False,
+        names: dict[str, str] | None = None,
+    ) -> None:
+        run = store / "logs" / run_id
+        run.mkdir(parents=True, exist_ok=True)
+        (run / "context.json").write_text(json.dumps({
+            "schema": "bobr-run-context-v1",
+            "run_id": run_id,
+            "target": "world",
+            "outcome": outcome,
+            "exit_status": 0 if outcome == "success" else 1,
+            "bobr": {
+                "version": "test",
+                "request_schema": "bobr-request-v6",
+                "provenance": None,
+            },
+            "recipes": {
+                "git_commit": commit,
+                "git_dirty": dirty,
+            },
+        }))
+        nodes = {
+            f"n{index}": {"name": name, "tag": tag}
+            for index, (name, tag) in enumerate((names or {}).items())
+        }
+        (run / "recipe-catalog.json").write_text(json.dumps({
+            "schema": "bobr-recipe-catalog-v1",
+            "nodes": nodes,
+        }))
+
     def make_store(
         self,
         root: Path,
@@ -139,6 +178,85 @@ class CompareStoresTests(unittest.TestCase):
             self.assertEqual(result, 1)
             self.assertIn("unreadable mappings: 1", output.getvalue())
             self.assertIn("cannot read mapping symlink", output.getvalue())
+
+    def test_run_contexts_are_deduplicated_and_keep_outcomes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            store = Path(temporary)
+            self.make_run(store, "one")
+            self.make_run(store, "two", outcome="failed")
+            self.make_run(store, "three", commit="2" * 40, dirty=True)
+
+            identities, outcomes, warnings, source = (
+                compare.load_build_contexts(store, readers=2)
+            )
+
+            self.assertEqual(source, "run logs")
+            self.assertEqual(outcomes, {"success": 2, "failed": 1})
+            self.assertEqual(len(identities["bobr"]), 1)
+            self.assertEqual(
+                identities["bobr-recipes"],
+                {"1" * 40, "2" * 40 + "-dirty"},
+            )
+            self.assertEqual(warnings, [])
+
+    def test_legacy_hashes_are_used_only_without_run_contexts(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            store = Path(temporary)
+            (store / "hashes.txt").write_text(
+                "bobr deadbeef\nbobr-recipes cafeaffe\n"
+            )
+
+            identities, outcomes, warnings, source = (
+                compare.load_build_contexts(store, readers=1)
+            )
+
+            self.assertEqual(source, "legacy hashes.txt")
+            self.assertEqual(identities["bobr"], {"deadbeef"})
+            self.assertEqual(identities["bobr-recipes"], {"cafeaffe"})
+            self.assertEqual(outcomes, {})
+            self.assertEqual(warnings, [])
+
+    def test_missing_logs_are_diagnostic_only(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            store = Path(temporary)
+            identities, outcomes, warnings, source = (
+                compare.load_build_contexts(store, readers=1)
+            )
+
+            self.assertEqual(source, "unavailable")
+            self.assertEqual(identities["bobr"], set())
+            self.assertEqual(outcomes, {})
+            self.assertIn("run logs directory is unavailable", warnings[0])
+
+    def test_main_compares_stores_without_logs(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            a, b = root / "a", root / "b"
+            (a / "builds").mkdir(parents=True)
+            (b / "builds").mkdir(parents=True)
+            output = io.StringIO()
+
+            with patch.object(sys, "argv", [str(SCRIPT), str(a), str(b)]):
+                with redirect_stdout(output):
+                    result = compare.main()
+
+            self.assertEqual(result, 0)
+            self.assertIn("run logs directory is unavailable", output.getvalue())
+            self.assertIn("stores reproduce identically", output.getvalue())
+
+    def test_conflicting_catalog_tags_are_reported_as_ambiguous(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            store = Path(temporary)
+            self.make_run(store, "one", names={"compiler": "Sandbox"})
+            self.make_run(store, "two", names={"compiler": "Bundle"})
+            view = compare.StoreView(store, readers=2)
+            resolver = compare.Resolver([view])
+
+            self.assertEqual(
+                resolver.tag("compiler"),
+                "ambiguous: Bundle, Sandbox",
+            )
+            self.assertEqual(view.metadata_warnings, [])
 
 
 if __name__ == "__main__":
