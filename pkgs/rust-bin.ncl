@@ -115,9 +115,15 @@ fun pkgs =>
             m%"
               target=x86_64-unknown-linux-musl
               source="@{build}/source/rust-std-$target/lib/rustlib/$target"
+              destination="/stage/usr/lib/rustlib/$target"
               test -d "$source/lib/self-contained"
               install -d /stage/usr/lib/rustlib
-              cp -a "$source" /stage/usr/lib/rustlib/
+              cp -a "$source" "$destination"
+
+              # This sysroot exists solely for statically linked native
+              # binaries. The distributed shared libstd requires a separate
+              # musl runtime and libgcc_s, while Cargo uses the rlib here.
+              rm "$destination"/lib/libstd-*.so
             "%,
           ],
         },
