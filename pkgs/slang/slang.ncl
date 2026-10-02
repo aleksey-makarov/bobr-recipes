@@ -44,7 +44,7 @@ fun pkgs =>
       ],
     },
     config = {
-      in-tree = true,
+      in_tree = true,
       configure_args = [
         "--without-pcre",
         "--without-x",

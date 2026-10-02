@@ -28,7 +28,7 @@ fun pkgs =>
       ],
     },
     config = {
-      in-tree = true,
+      in_tree = true,
       # Pin the recorded builder; otherwise vim's pathdef.c derives compiled_user
       # from (logname || whoami). logname reads /proc/self/loginuid, which the
       # namespace runtime translates to uid 0 (-> "root") while the host runtime

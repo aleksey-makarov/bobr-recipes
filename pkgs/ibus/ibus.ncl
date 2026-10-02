@@ -64,7 +64,7 @@ fun pkgs =>
     },
     config = {
       # In-tree build so gencomposetable finds ./Compose (from the patch).
-      in-tree = true,
+      in_tree = true,
       configure_args = [
         "--enable-introspection",
         "--disable-gtk2",

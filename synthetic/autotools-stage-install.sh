@@ -76,15 +76,15 @@ resolve_project_source_dir() {
 }
 
 resolve_in_tree() {
-  if [ ! -f "${cfg}/in-tree" ]; then
+  if [ ! -f "${cfg}/in_tree" ]; then
     return 1
   fi
 
-  case "$(cat "${cfg}/in-tree")" in
+  case "$(cat "${cfg}/in_tree")" in
     true|1|yes|on) return 0 ;;
     false|0|no|off|"") return 1 ;;
     *)
-      echo "autotools-stage-install build-script: invalid boolean in ${cfg}/in-tree" >&2
+      echo "autotools-stage-install build-script: invalid boolean in ${cfg}/in_tree" >&2
       exit 1
       ;;
   esac

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Renamed the Autotools `in-tree` recipe option to `in_tree` throughout
+  lowering and build-script configuration.
+
 ## 0.1.10
 
 - Standardized OS images, HostBundles, toolchains, and packages on `/usr/lib`;

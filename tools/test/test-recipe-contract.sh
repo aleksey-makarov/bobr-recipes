@@ -74,8 +74,9 @@ run_case "source-oci-registry" pass '{"name":"img","tag":"Source","object_hash":
 run_case "bundle" pass '{"name":"crates","tag":"Bundle","config":{},"inputs":{"a-crate":'"${source_node}"'}}'
 run_case "bundle-nonempty-config" fail '{"name":"crates","tag":"Bundle","config":{"x":1},"inputs":{"a-crate":'"${source_node}"'}}'
 run_case "bundle-empty-inputs" fail '{"name":"crates","tag":"Bundle","config":{},"inputs":{}}'
-run_case "autotools-stage-rootfs" pass '{"name":"pkg-rootfs","tag":"AutotoolsStageRootfs","config":{"configure_args":["--disable-nls"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "autotools-stage-rootfs" pass '{"name":"pkg-rootfs","tag":"AutotoolsStageRootfs","config":{"configure_args":["--disable-nls"],"in_tree":true,"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"fix-mode","run_as":"root","argv":["chmod","0755","/usr/bin/tool"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "autotools-package" pass '{"name":"pkg-package","tag":"Autotools","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"configure_args":["--disable-nls"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
+run_case "legacy-autotools-in-tree" fail '{"name":"pkg-package","tag":"Autotools","deps":{"build":['"${rootfs_tree}"'],"runtime":[]},"config":{"in-tree":true},"inputs":{"source":'"${source_node}"'}}'
 run_case "makefile-package" pass '{"name":"pkg-package","tag":"Makefile","deps":{"build":[],"runtime":[]},"config":{"make_args":["PREFIX=/usr"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "meson-rootfs" pass '{"name":"pkg-rootfs","tag":"MesonRootfs","config":{"setup_args":["--buildtype=release"],"pre_configure":{"name":"patch","run_as":"build-user","argv":["patch","-p1","-i",""]},"post_install":[{"name":"link","run_as":"root","argv":["ln","-svf","tool","/usr/bin/tool"]}]},"inputs":{"_rootfs":'"${rootfs_tree}"',"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
 run_case "meson-package" pass '{"name":"pkg-package","tag":"Meson","deps":{"build":[],"runtime":[]},"config":{"setup_args":["--buildtype=release"]},"inputs":{"source":'"${source_node}"',"patch":'"${patch_node}"'}}'
@@ -219,6 +220,7 @@ recipe.to_request { recipes_path = "/recipes" } {} {
   name = "pkg",
   tag = "AutotoolsStageRootfs",
   config = {
+    in_tree = true,
     source_subdir = "subdir",
     pre_configure = {
       name = "pre",
@@ -253,6 +255,8 @@ jq -e '
   and $s.config.steps[0].env.BOBR_PATCH_INPUTS == "@{patch} @{patch_extra}"
   and [$s.config.steps[].name] == ["bobr_prepare_source", "pre", "bobr_configure", "bobr_build", "bobr_install"]
   and $s.config.steps[1].cwd == "@{build}/source/subdir"
+  and $s.config.script_config.in_tree == "true"
+  and ($s.config.script_config | has("in-tree") | not)
   and ($s.inputs | has("_rootfs"))
   and ($s.inputs | has("script"))
   and ($s.inputs | has("synthetic_common"))

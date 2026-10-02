@@ -204,7 +204,7 @@ fun pkgs =>
       pre_hook = "pre_configure",
       phases = configure_build_install_phases,
       passthrough = ["configure_args", "make_args", "env", "source_subdir"],
-      flags = ["in-tree"],
+      flags = ["in_tree"],
       extra_step_env = {},
     },
     makefile = {
