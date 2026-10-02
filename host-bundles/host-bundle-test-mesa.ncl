@@ -170,7 +170,7 @@ fun pkgs =>
     },
     inputs = {
       _root = host_bundle_test_mesa_payload,
-      _launcher = pkgs.bobr_bundle_launcher_host_x86_64,
+      _launcher = pkgs.bobr_bundle_launcher,
       overrides = overrides_source,
     },
   }

@@ -32,8 +32,7 @@ fun pkgs =>
     config = {},
     inputs =
       recipe.numbered_inputs [
-        pkgs.bobr_bundle_launcher_host_x86_64,
-        pkgs.bobr_bundle_launcher_host_aarch64,
+        pkgs.bobr_bundle_launcher,
         pkgs.host_bundle_mc,
         pkgs.host_bundle_test_mesa,
         pkgs.host_bundle_qemu,
