@@ -206,6 +206,7 @@ if [ "${dry_run}" -eq 1 ]; then
     echo "==> target: ${target}"
     echo "==> ${tool_version}"
   } >&2
+  echo "==> evaluate Nickel recipes and generate JSON request" >&2
   nickel_started_at="$(date +%s.%N)"
   printf '%s\n' "${request_expr}" | nickel export --format json
   nickel_finished_at="$(date +%s.%N)"
@@ -225,6 +226,7 @@ fi
 # measured and reported separately.
 request_json="$(mktemp)"
 trap 'rm -f "${request_json}"' EXIT
+echo "==> evaluate Nickel recipes and generate JSON request" >&2
 nickel_started_at="$(date +%s.%N)"
 printf '%s\n' "${request_expr}" | nickel export --format json > "${request_json}"
 nickel_finished_at="$(date +%s.%N)"
