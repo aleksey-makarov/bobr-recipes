@@ -45,6 +45,8 @@ assert_equal "${temporary}/bobr-store" "${profile_store}" "user store"
 assert_equal "0" "${profile_output_repository_enabled}" "publication disabled"
 assert_equal "0" "${#profile_output_repository_trusted_keys[@]}" \
   "disabled trusted-key count"
+[[ "${profile_secondaries}" == *"${temporary}/bobr-store/repository-cache"* ]] \
+  || fail "default secondary repository cache was not resolved under the store"
 
 potato_profile="${temporary}/potato.ncl"
 write_profile "${potato_profile}" \
@@ -165,12 +167,16 @@ reject_profile provider-with-two-backends \
   '{ secondaries.providers = [{ name = "ambiguous", mappings = true, local.store = "old", remote = { master_url = "https://repo.example/master", trusted_keys = ["key.pem"] } }] }'
 reject_profile provider-without-capability \
   '{ secondaries.providers = [{ name = "unused", local.store = "old" }] }'
+reject_profile provider-with-empty-name \
+  '{ secondaries.providers = [{ name = "", mappings = true, local.store = "old" }] }'
 reject_profile local-content-without-transfer \
   '{ secondaries.providers = [{ name = "content", content = true, local.store = "old" }] }'
 reject_profile local-mappings-with-transfer \
   '{ secondaries.providers = [{ name = "mappings", mappings = true, local = { store = "old", transfer = "hardlink" } }] }'
 reject_profile remote-without-keys \
   '{ secondaries.providers = [{ name = "remote", mappings = true, remote = { master_url = "https://repo.example/master", trusted_keys = [] } }] }'
+reject_profile remote-with-transfer \
+  '{ secondaries.providers = [{ name = "remote", content = true, remote = { master_url = "https://repo.example/master", trusted_keys = ["key.pem"], transfer = "copy" } }] }'
 reject_profile unknown-provider-field \
   '{ secondaries.providers = [{ name = "typo", mappings = true, local.store = "old", priority = 1 }] }'
 
@@ -205,11 +211,17 @@ write_profile "${temporary}/request.ncl" \
         {
           name = \"remote-metadata\",
           mappings = true,
+          content = true,
           remote = {
             master_url = \"https://repo.example/master\",
             trusted_keys = [\"keys/repository.pem\"],
             ca_bundle = \"tls/ca.pem\",
           },
+        },
+        {
+          name = \"archive-content\",
+          content = true,
+          local = { store = \"archive-store\", transfer = \"copy\" },
         },
       ],
     },
@@ -223,7 +235,7 @@ fi
 jq -e --arg root "${temporary}" '
   .schema == "bobr-request-v6"
   and .secondaries.repository_cache == ($root + "/metadata-cache")
-  and (.secondaries.providers | length) == 3
+  and (.secondaries.providers | length) == 5
   and .secondaries.providers[0] == {
     name: "previous",
     capability: "mappings",
@@ -246,6 +258,25 @@ jq -e --arg root "${temporary}" '
       master_url: "https://repo.example/master",
       trusted_keys: [$root + "/keys/repository.pem"],
       ca_bundle: ($root + "/tls/ca.pem")
+    }
+  }
+  and .secondaries.providers[3] == {
+    name: "remote-metadata",
+    capability: "content",
+    backend: {
+      kind: "remote",
+      master_url: "https://repo.example/master",
+      trusted_keys: [$root + "/keys/repository.pem"],
+      ca_bundle: ($root + "/tls/ca.pem")
+    }
+  }
+  and .secondaries.providers[4] == {
+    name: "archive-content",
+    capability: "content",
+    backend: {
+      kind: "local",
+      store: ($root + "/archive-store"),
+      transfer: "copy"
     }
   }
 ' "${temporary}/request.json" >/dev/null \
