@@ -49,4 +49,4 @@ fun pkgs =>
   }
   in
 
-  { include [ nettle ] }
+  { include [nettle] }

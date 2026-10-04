@@ -440,18 +440,19 @@ fun pkgs =>
     name = "initrd-rootfs",
     tag = "TreeMerge",
     config = {},
-    inputs = recipe.numbered_inputs [
-      initrd_files,
-      initrd_systemd,
-      initrd_kmod,
-      initrd_util_linux,
-      initrd_c_runtime,
-      initrd_openssl,
-      initrd_xz,
-      initrd_zstd,
-      initrd_zlib,
-      initrd_modules,
-    ],
+    inputs =
+      recipe.numbered_inputs [
+        initrd_files,
+        initrd_systemd,
+        initrd_kmod,
+        initrd_util_linux,
+        initrd_c_runtime,
+        initrd_openssl,
+        initrd_xz,
+        initrd_zstd,
+        initrd_zlib,
+        initrd_modules,
+      ],
   }
   in
 

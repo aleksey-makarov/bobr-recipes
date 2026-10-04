@@ -1,14 +1,15 @@
-
 fun pkgs =>
-  let libxkbcommon_src = fun version => fun hash => {
-    name = "libxkbcommon-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/xkbcommon/libxkbcommon/archive/refs/tags/xkbcommon-%{version}.tar.gz",
-    },
-  }
+  let libxkbcommon_src = fun version =>
+    fun hash =>
+      {
+        name = "libxkbcommon-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/xkbcommon/libxkbcommon/archive/refs/tags/xkbcommon-%{version}.tar.gz",
+        },
+      }
   in
 
   # Keymap compiler used by the compositor. x11/wayland integrations are off;

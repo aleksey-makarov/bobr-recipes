@@ -2,15 +2,17 @@
 # templates. flit_core backend, MarkupSafe at runtime. Build-only module.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let python_jinja2_src = fun version => fun hash => {
-    name = "python-jinja2-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://files.pythonhosted.org/packages/source/J/Jinja2/jinja2-%{version}.tar.gz",
-    },
-  }
+  let python_jinja2_src = fun version =>
+    fun hash =>
+      {
+        name = "python-jinja2-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://files.pythonhosted.org/packages/source/J/Jinja2/jinja2-%{version}.tar.gz",
+        },
+      }
   in
 
   {

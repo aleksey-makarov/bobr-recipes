@@ -1,14 +1,15 @@
-
 fun pkgs =>
-  let vulkan_headers_src = fun version => fun hash => {
-    name = "vulkan-headers-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/vulkan-sdk-%{version}.tar.gz",
-    },
-  }
+  let vulkan_headers_src = fun version =>
+    fun hash =>
+      {
+        name = "vulkan-headers-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/vulkan-sdk-%{version}.tar.gz",
+        },
+      }
   in
 
   # Header-only (+ registry + CMake package config), consumed by vulkan-loader,

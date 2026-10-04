@@ -7,15 +7,17 @@ let recipe = import "../recipe-lib.ncl" in
 let br = import "../build-rootfs.ncl" in
 
 fun pkgs =>
-  let ninja_src = fun version => fun hash => {
-    name = "ninja-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/ninja-build/ninja/archive/v%{version}/ninja-%{version}.tar.gz",
-    },
-  }
+  let ninja_src = fun version =>
+    fun hash =>
+      {
+        name = "ninja-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/ninja-build/ninja/archive/v%{version}/ninja-%{version}.tar.gz",
+        },
+      }
   in
 
   let ninja = {
@@ -24,7 +26,7 @@ fun pkgs =>
     name = "ninja-%{version}",
     tag = "SandboxInstallDeps",
     deps = {
-      build = br.native_build_deps pkgs @ [ pkgs.python ],
+      build = br.native_build_deps pkgs @ [pkgs.python],
       runtime = [
         pkgs.c_runtime,
         pkgs.gcc_libstdcxx,
@@ -62,4 +64,4 @@ fun pkgs =>
   }
   in
 
-  { include [ ninja ] }
+  { include [ninja] }

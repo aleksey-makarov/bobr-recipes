@@ -1,17 +1,19 @@
 fun pkgs =>
-  let intltool_src = fun version => fun hash => {
-    name = "intltool-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://gstreamer.freedesktop.org/src/mirror/intltool-%{version}.tar.gz",
-        "https://ftp.osuosl.org/pub/blfs/conglomeration/intltool/intltool-%{version}.tar.gz",
-        "https://launchpad.net/intltool/trunk/%{version}/+download/intltool-%{version}.tar.gz",
-      ],
-    },
-  }
+  let intltool_src = fun version =>
+    fun hash =>
+      {
+        name = "intltool-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://gstreamer.freedesktop.org/src/mirror/intltool-%{version}.tar.gz",
+            "https://ftp.osuosl.org/pub/blfs/conglomeration/intltool/intltool-%{version}.tar.gz",
+            "https://launchpad.net/intltool/trunk/%{version}/+download/intltool-%{version}.tar.gz",
+          ],
+        },
+      }
   in
 
   let intltool = {

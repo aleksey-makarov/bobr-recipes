@@ -3,7 +3,6 @@
 # tarball ships the pre-generated gperf syscall table (`syscalls.perf.c`), but
 # `gperf` is kept as a build dep since configure probes for it.
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

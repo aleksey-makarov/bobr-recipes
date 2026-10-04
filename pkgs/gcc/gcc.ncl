@@ -1,18 +1,20 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let gcc_src = fun version => fun hash => {
-    name = "gcc-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/gcc/gcc-%{version}/gcc-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/gcc/gcc-%{version}/gcc-%{version}.tar.xz",
-      ],
-    },
-  }
+  let gcc_src = fun version =>
+    fun hash =>
+      {
+        name = "gcc-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/gcc/gcc-%{version}/gcc-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/gcc/gcc-%{version}/gcc-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let gcc_x86_64_libdir_patch = {

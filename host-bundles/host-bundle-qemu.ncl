@@ -1,29 +1,34 @@
 let recipe = import "../recipe-lib.ncl" in
 fun pkgs =>
-  let payload_path = fun relative => {
-    source = "payload",
-    path = relative,
-  }
+  let payload_path = fun relative =>
+    {
+      source = "payload",
+      path = relative,
+    }
   in
-  let override_path = fun relative => {
-    source = "overrides",
-    path = relative,
-  }
+  let override_path = fun relative =>
+    {
+      source = "overrides",
+      path = relative,
+    }
   in
-  let replace_paths = fun entries => {
-    operation = "replace",
-    paths = std.array.map payload_path entries,
-  }
+  let replace_paths = fun entries =>
+    {
+      operation = "replace",
+      paths = std.array.map payload_path entries,
+    }
   in
-  let replace_override_path = fun relative => {
-    operation = "replace",
-    paths = [override_path relative],
-  }
+  let replace_override_path = fun relative =>
+    {
+      operation = "replace",
+      paths = [override_path relative],
+    }
   in
-  let replace_value = fun value => {
-    operation = "replace",
-    values = [value],
-  }
+  let replace_value = fun value =>
+    {
+      operation = "replace",
+      values = [value],
+    }
   in
 
   # The runner is an ordinary bundled script. Its public top-level entry is a
@@ -101,19 +106,21 @@ fun pkgs =>
     },
   }
   in
-  let mk_overrides = fun bundle_name => fun rootfs_image_node => {
-    name = "%{bundle_name}-overrides",
-    tag = "Sandbox",
-    config = {
-      steps = [
-        {
-          name = "compose_boot_artifacts",
-          run_as = "root",
-          cwd = "@{out}",
-          argv = [
-            "/bin/bash",
-            "-ec",
-            m%"
+  let mk_overrides = fun bundle_name =>
+    fun rootfs_image_node =>
+      {
+        name = "%{bundle_name}-overrides",
+        tag = "Sandbox",
+        config = {
+          steps = [
+            {
+              name = "compose_boot_artifacts",
+              run_as = "root",
+              cwd = "@{out}",
+              argv = [
+                "/bin/bash",
+                "-ec",
+                m%"
               install -Dm644 "@{rootfs_image}/erofs-rootfs.erofs" qemu/rootfs.erofs
               install -Dm644 "@{kernel}/bzImage" qemu/bzImage
               install -Dm644 "@{initrd}/initramfs.img" qemu/initramfs.img
@@ -121,18 +128,18 @@ fun pkgs =>
                 "@{fontconfig_overrides}/fontconfig/fonts.conf" \
                 fontconfig/fonts.conf
             "%,
+              ],
+            },
           ],
         },
-      ],
-    },
-    inputs = {
-      _rootfs = overrides_rootfs,
-      rootfs_image = rootfs_image_node,
-      kernel = pkgs.linux_bzimage,
-      initrd = pkgs.initrd,
-      fontconfig_overrides = common_overrides,
-    },
-  }
+        inputs = {
+          _rootfs = overrides_rootfs,
+          rootfs_image = rootfs_image_node,
+          kernel = pkgs.linux_bzimage,
+          initrd = pkgs.initrd,
+          fontconfig_overrides = common_overrides,
+        },
+      }
   in
 
   let graphics_environment = {
@@ -154,75 +161,78 @@ fun pkgs =>
     SDL_VIDEODRIVER = replace_value "wayland",
   }
   in
-  let mk_host_bundle = fun args => {
-    name = args.bundle_name,
-    tag = "HostBundle",
-    config = {
-      arch = "x86_64",
-      policy = "strict",
-      library_dirs = ["usr/lib"],
-      public_tools = {
-        "qemu-system-x86_64" = {
-          path = "usr/bin/qemu-system-x86_64",
-          argument_prefix = [
-            { value = "-L" },
-            payload_path "usr/share/qemu",
-          ],
-          environment = graphics_environment & {
-            # virglrenderer starts the Venus render server out of process.
-            # Its patched explicit override uses PATH, whose first directory
-            # is HostBundle's managed internal-wrapper directory.
-            RENDER_SERVER_EXEC_PATH = replace_value "virgl_render_server",
+  let mk_host_bundle = fun args =>
+    {
+      name = args.bundle_name,
+      tag = "HostBundle",
+      config = {
+        arch = "x86_64",
+        policy = "strict",
+        library_dirs = ["usr/lib"],
+        public_tools = {
+          "qemu-system-x86_64" = {
+            path = "usr/bin/qemu-system-x86_64",
+            argument_prefix = [
+              { value = "-L" },
+              payload_path "usr/share/qemu",
+            ],
+            environment =
+              graphics_environment
+              & {
+                # virglrenderer starts the Venus render server out of process.
+                # Its patched explicit override uses PATH, whose first directory
+                # is HostBundle's managed internal-wrapper directory.
+                RENDER_SERVER_EXEC_PATH = replace_value "virgl_render_server",
+              },
+          },
+          "qemu-img" = {
+            path = "usr/bin/qemu-img",
+          },
+          "bobr-run-qemu" = {
+            path = "usr/bin/bobr-run-qemu",
+            environment = {
+              BOBR_QEMU_ROOTFS = replace_override_path "qemu/rootfs.erofs",
+              BOBR_QEMU_KERNEL = replace_override_path "qemu/bzImage",
+              BOBR_QEMU_INITRD = replace_override_path "qemu/initramfs.img",
+              BOBR_QEMU_VARIANT = replace_value args.variant,
+              BOBR_QEMU_GRAPHICAL = replace_value args.graphical,
+              BOBR_QEMU_DEFAULT_MEMORY_MIB = replace_value args.memory_mib,
+              BOBR_QEMU_DEFAULT_HOME_IMAGE = replace_value args.home_image,
+              BOBR_QEMU_DEFAULT_DIAG_SOCK = replace_value args.diag_sock,
+            },
           },
         },
-        "qemu-img" = {
-          path = "usr/bin/qemu-img",
-        },
-        "bobr-run-qemu" = {
-          path = "usr/bin/bobr-run-qemu",
-          environment = {
-            BOBR_QEMU_ROOTFS = replace_override_path "qemu/rootfs.erofs",
-            BOBR_QEMU_KERNEL = replace_override_path "qemu/bzImage",
-            BOBR_QEMU_INITRD = replace_override_path "qemu/initramfs.img",
-            BOBR_QEMU_VARIANT = replace_value args.variant,
-            BOBR_QEMU_GRAPHICAL = replace_value args.graphical,
-            BOBR_QEMU_DEFAULT_MEMORY_MIB = replace_value args.memory_mib,
-            BOBR_QEMU_DEFAULT_HOME_IMAGE = replace_value args.home_image,
-            BOBR_QEMU_DEFAULT_DIAG_SOCK = replace_value args.diag_sock,
+        internal_tools = {
+          bash = {
+            path = "usr/bin/bash",
+          },
+          rm = {
+            path = "usr/bin/rm",
+          },
+          truncate = {
+            path = "usr/bin/truncate",
+          },
+          "mkfs.ext4" = {
+            path = "usr/bin/mkfs.ext4",
+          },
+          "fc-match" = {
+            path = "usr/bin/fc-match",
+            environment = {
+              FONTCONFIG_FILE = replace_override_path "fontconfig/fonts.conf",
+            },
+          },
+          virgl_render_server = {
+            path = "usr/libexec/virgl_render_server",
           },
         },
+        environment = {},
       },
-      internal_tools = {
-        bash = {
-          path = "usr/bin/bash",
-        },
-        rm = {
-          path = "usr/bin/rm",
-        },
-        truncate = {
-          path = "usr/bin/truncate",
-        },
-        "mkfs.ext4" = {
-          path = "usr/bin/mkfs.ext4",
-        },
-        "fc-match" = {
-          path = "usr/bin/fc-match",
-          environment = {
-            FONTCONFIG_FILE = replace_override_path "fontconfig/fonts.conf",
-          },
-        },
-        virgl_render_server = {
-          path = "usr/libexec/virgl_render_server",
-        },
+      inputs = {
+        _root = payload,
+        _launcher = pkgs.bobr_bundle_launcher,
+        overrides = mk_overrides args.bundle_name args.rootfs_image,
       },
-      environment = {},
-    },
-    inputs = {
-      _root = payload,
-      _launcher = pkgs.bobr_bundle_launcher,
-      overrides = mk_overrides args.bundle_name args.rootfs_image,
-    },
-  }
+    }
   in
 
   let plain_args = {
@@ -270,33 +280,35 @@ fun pkgs =>
     },
   }
   in
-  let mk_host_bundle_test = fun args => fun bundle_node => {
-    name = "test-%{args.bundle_name}",
-    tag = "Sandbox",
-    config = {
-      steps = [
-        {
-          name = "qemu_smoke",
-          run_as = "root",
-          cwd = "@{out}",
-          argv = [
-            "@{script}",
-            "@{bundle}",
-            args.variant,
-            args.graphical,
-            args.memory_mib,
-            args.home_image,
-            args.diag_sock,
+  let mk_host_bundle_test = fun args =>
+    fun bundle_node =>
+      {
+        name = "test-%{args.bundle_name}",
+        tag = "Sandbox",
+        config = {
+          steps = [
+            {
+              name = "qemu_smoke",
+              run_as = "root",
+              cwd = "@{out}",
+              argv = [
+                "@{script}",
+                "@{bundle}",
+                args.variant,
+                args.graphical,
+                args.memory_mib,
+                args.home_image,
+                args.diag_sock,
+              ],
+            },
           ],
         },
-      ],
-    },
-    inputs = {
-      _rootfs = pkgs.oci_buildpack_deps_rootfs,
-      script = smoke_script,
-      bundle = bundle_node,
-    },
-  }
+        inputs = {
+          _rootfs = pkgs.oci_buildpack_deps_rootfs,
+          script = smoke_script,
+          bundle = bundle_node,
+        },
+      }
   in
 
   let test_host_bundle_qemu =

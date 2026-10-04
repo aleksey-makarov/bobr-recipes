@@ -5,7 +5,6 @@
 # The native KMS backend (via logind + udev, EGL/GLES2 from mesa) is on. gvdb is
 # a bundled meson subproject, so it needs no recipe.
 # `version`/`source_object_hash`/`series` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun series =>

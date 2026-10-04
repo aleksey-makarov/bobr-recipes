@@ -3,15 +3,15 @@ let recipe = import "../recipe-lib.ncl" in
 fun pkgs =>
   let libxcrypt_src = fun version =>
     fun hash =>
-    {
-      name = "libxcrypt-src-%{version}",
-      tag = "Source",
-      object_hash = hash,
-      origin = {
-        tag = "Http",
-        url = "https://github.com/besser82/libxcrypt/releases/download/v%{version}/libxcrypt-%{version}.tar.xz",
-      },
-    }
+      {
+        name = "libxcrypt-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/besser82/libxcrypt/releases/download/v%{version}/libxcrypt-%{version}.tar.xz",
+        },
+      }
   in
 
   let libxcrypt = {

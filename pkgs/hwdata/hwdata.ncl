@@ -1,15 +1,17 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let hwdata_src = fun version => fun hash => {
-    name = "hwdata-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/vcrhonek/hwdata/archive/refs/tags/v%{version}.tar.gz",
-    },
-  }
+  let hwdata_src = fun version =>
+    fun hash =>
+      {
+        name = "hwdata-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/vcrhonek/hwdata/archive/refs/tags/v%{version}.tar.gz",
+        },
+      }
   in
 
   let buildscript_hwdata = {

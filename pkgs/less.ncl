@@ -1,13 +1,15 @@
 fun pkgs =>
-  let less_src = fun version => fun hash => {
-    name = "less-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://www.greenwoodsoftware.com/less/less-%{version}.tar.gz",
-    },
-  }
+  let less_src = fun version =>
+    fun hash =>
+      {
+        name = "less-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://www.greenwoodsoftware.com/less/less-%{version}.tar.gz",
+        },
+      }
   in
 
   let less = {

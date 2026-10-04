@@ -68,4 +68,4 @@ fun pkgs =>
   }
   in
 
-  { include [ krb5 ] }
+  { include [krb5] }

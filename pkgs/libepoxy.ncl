@@ -1,7 +1,6 @@
 # libepoxy -- GL/EGL function-pointer dispatch, used by GTK4. It dlopens the GL
 # stack (Mesa) at runtime; X11/GLX off (pure Wayland/EGL). `version`/`source_object_hash`
 # are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

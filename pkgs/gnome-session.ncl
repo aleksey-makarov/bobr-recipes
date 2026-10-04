@@ -58,4 +58,4 @@ fun pkgs =>
   }
   in
 
-  { include [ gnome_session ] }
+  { include [gnome_session] }

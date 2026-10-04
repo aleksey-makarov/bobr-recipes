@@ -1,16 +1,18 @@
 fun pkgs =>
-  let gperf_src = fun version => fun hash => {
-    name = "gperf-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/gperf/gperf-%{version}.tar.gz",
-        "https://mirrors.kernel.org/gnu/gperf/gperf-%{version}.tar.gz",
-      ],
-    },
-  }
+  let gperf_src = fun version =>
+    fun hash =>
+      {
+        name = "gperf-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/gperf/gperf-%{version}.tar.gz",
+            "https://mirrors.kernel.org/gnu/gperf/gperf-%{version}.tar.gz",
+          ],
+        },
+      }
   in
 
   let gperf = {

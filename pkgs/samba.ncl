@@ -120,4 +120,4 @@ fun pkgs =>
   }
   in
 
-  { include [ samba ] }
+  { include [samba] }

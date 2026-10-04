@@ -1,18 +1,20 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let dejagnu_src = fun version => fun hash => {
-    name = "dejagnu-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/dejagnu/dejagnu-%{version}.tar.gz",
-        "https://mirrors.kernel.org/gnu/dejagnu/dejagnu-%{version}.tar.gz",
-      ],
-    },
-  }
+  let dejagnu_src = fun version =>
+    fun hash =>
+      {
+        name = "dejagnu-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/dejagnu/dejagnu-%{version}.tar.gz",
+            "https://mirrors.kernel.org/gnu/dejagnu/dejagnu-%{version}.tar.gz",
+          ],
+        },
+      }
   in
 
   let buildscript_dejagnu = {

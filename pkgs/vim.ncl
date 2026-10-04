@@ -1,15 +1,15 @@
 fun pkgs =>
   let vim_src = fun version =>
     fun hash =>
-    {
-      name = "vim-src-%{version}",
-      tag = "Source",
-      object_hash = hash,
-      origin = {
-        tag = "Http",
-        url = "https://github.com/vim/vim/archive/v%{version}/vim-%{version}.tar.gz",
-      },
-    }
+      {
+        name = "vim-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/vim/vim/archive/v%{version}/vim-%{version}.tar.gz",
+        },
+      }
   in
 
   let vim = {

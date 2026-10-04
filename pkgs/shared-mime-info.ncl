@@ -2,7 +2,6 @@
 # Used by GIO/gdk-pixbuf for content-type detection. Only git-archive tarballs
 # are published (gitlab.fd.o archives are deterministic). `version`/`source_object_hash`
 # are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

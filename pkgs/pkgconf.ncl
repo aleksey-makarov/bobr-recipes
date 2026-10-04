@@ -1,51 +1,55 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let pkgconf_src = fun version => fun hash => {
-    name = "pkgconf-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://distfiles.ariadne.space/pkgconf/pkgconf-%{version}.tar.xz",
-    },
-  }
+  let pkgconf_src = fun version =>
+    fun hash =>
+      {
+        name = "pkgconf-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://distfiles.ariadne.space/pkgconf/pkgconf-%{version}.tar.xz",
+        },
+      }
   in
 
-  let pkgconf_config = fun version => fun install_dir => {
-    configure_args = [
-      "--disable-static",
-      "--docdir=/usr/share/doc/pkgconf-%{version}",
-      # The native system has one physical library directory. Keep pkgconf's
-      # built-in defaults aligned with it, so a package cannot accidentally
-      # discover metadata or a library through the compatibility lib64 alias.
-      "--with-pkg-config-dir=/usr/lib/pkgconfig:/usr/share/pkgconfig",
-      "--with-system-libdir=/usr/lib",
-      "--with-system-includedir=/usr/include",
-    ],
-    post_install = [
+  let pkgconf_config = fun version =>
+    fun install_dir =>
       {
-        name = "link_pkg_config",
-        run_as = "root",
-        argv = [
-          "ln",
-          "-sv",
-          "pkgconf",
-          "%{install_dir}/usr/bin/pkg-config",
+        configure_args = [
+          "--disable-static",
+          "--docdir=/usr/share/doc/pkgconf-%{version}",
+          # The native system has one physical library directory. Keep pkgconf's
+          # built-in defaults aligned with it, so a package cannot accidentally
+          # discover metadata or a library through the compatibility lib64 alias.
+          "--with-pkg-config-dir=/usr/lib/pkgconfig:/usr/share/pkgconfig",
+          "--with-system-libdir=/usr/lib",
+          "--with-system-includedir=/usr/include",
         ],
-      },
-      {
-        name = "link_pkg_config_manpage",
-        run_as = "root",
-        argv = [
-          "ln",
-          "-sv",
-          "pkgconf.1",
-          "%{install_dir}/usr/share/man/man1/pkg-config.1",
+        post_install = [
+          {
+            name = "link_pkg_config",
+            run_as = "root",
+            argv = [
+              "ln",
+              "-sv",
+              "pkgconf",
+              "%{install_dir}/usr/bin/pkg-config",
+            ],
+          },
+          {
+            name = "link_pkg_config_manpage",
+            run_as = "root",
+            argv = [
+              "ln",
+              "-sv",
+              "pkgconf.1",
+              "%{install_dir}/usr/share/man/man1/pkg-config.1",
+            ],
+          },
         ],
-      },
-    ],
-  }
+      }
   in
 
   let pkgconf_gen1 = {

@@ -144,16 +144,17 @@ in
 
   split = {
     libs = fun base =>
-      fun globs => {
-        name = split_libs_name base,
-        tag = "TreeSubset",
-        config = {
-          "include" = split_libs_include globs,
+      fun globs =>
+        {
+          name = split_libs_name base,
+          tag = "TreeSubset",
+          config = {
+            "include" = split_libs_include globs,
+          },
+          inputs = {
+            tree = base,
+          },
         },
-        inputs = {
-          tree = base,
-        },
-      },
   },
 
   # Pack a filesystem tree into a reproducible EROFS image. There is no native
@@ -290,110 +291,114 @@ in
 
   to_request_goals = fun raw_ctx =>
     fun pkgs =>
-    fun root_nodes =>
-    let ctx = raw_ctx | { recipes_path | String } in
-    let lower_origin = lower_source_origin ctx in
-    if std.array.length root_nodes == 0 then
-      std.fail_with "recipe-lib.to_request_goals: at least one goal is required"
-    else
-    let lowered_goal_names = std.array.map (fun node => (lower_node pkgs node).name) root_nodes in
-    let goal_name_set = std.array.fold_left
-      (fun seen => fun name =>
-        if std.record.has_field name seen then
-          std.fail_with "recipe-lib.to_request_goals: goal recipe names must be unique"
+      fun root_nodes =>
+        let ctx = raw_ctx | { recipes_path | String } in
+        let lower_origin = lower_source_origin ctx in
+        if std.array.length root_nodes == 0 then
+          std.fail_with "recipe-lib.to_request_goals: at least one goal is required"
         else
-          std.record.insert name true seen)
-      {}
-      lowered_goal_names
-    in
-    let unique_nodes = collect_unique_nodes_for_roots pkgs root_nodes in
-    let single_goal = std.array.length lowered_goal_names == 1 in
-    let other_names =
-      # `std.record.fields` already returns names in sorted order, so no explicit
-      # sort is needed here (`filter` preserves order). Nickel's `std.array.sort`
-      # is quadratic with a huge constant -- a few hundred names take tens of
-      # seconds -- so sorting the already-sorted field list dominated request
-      # generation.
-      std.array.filter
-        (fun name => !std.record.has_field name goal_name_set)
-        (std.record.fields unique_nodes)
-    in
-    let ordered_names = lowered_goal_names @ other_names in
-    let goal_id = fun idx =>
-      fun name =>
-        if single_goal then
-          "root"
-        else
-          "g" ++ std.string.from_number idx ++ "_" ++ node_name_slug name
-    in
-    let name_to_id =
-      std.record.from_array (
-        std.array.map_with_index
-          (fun idx => fun name => { field = name, value = goal_id idx name })
-          lowered_goal_names
-        @ std.array.map_with_index
-          (fun idx =>
-            fun name =>
-              {
-                field = name,
-                value = "n" ++ std.string.from_number idx ++ "_" ++ node_name_slug name,
-              }
-          )
-          other_names
-      )
-    in
-    let input_to_id = fun node_name =>
-      fun slot_name =>
-        fun input =>
-          if input == null then
-            old_style_input_error node_name slot_name "null"
-          else if std.is_array input then
-            old_style_input_error node_name slot_name "array"
-          else
-            std.record.get input.name name_to_id
-    in
-    {
-      goals = std.array.map_with_index goal_id lowered_goal_names,
-      nodes = std.record.from_array (
-        std.array.map
-        (fun name =>
-          let node = std.record.get name unique_nodes in
-          let node_value =
-            if node.tag == "Source" then
-              {
-                name = node.name,
-                tag = node.tag,
-                object_hash = node.object_hash,
-              }
-              & (
-                if std.record.has_field "origin" node then
-                  { origin = lower_origin node.origin }
-                else
-                  {}
+          let lowered_goal_names = std.array.map (fun node => (lower_node pkgs node).name) root_nodes in
+          let goal_name_set =
+            std.array.fold_left
+              (fun seen =>
+                fun name =>
+                  if std.record.has_field name seen then
+                    std.fail_with "recipe-lib.to_request_goals: goal recipe names must be unique"
+                  else
+                    std.record.insert name true seen
               )
-            else
-              {
-                name = node.name,
-                tag = node.tag,
-                config = node.config,
-                inputs =
-                  std.record.map
-                    (fun slot_name input => input_to_id node.name slot_name input)
-                    node.inputs,
-              }
+              {}
+              lowered_goal_names
+          in
+          let unique_nodes = collect_unique_nodes_for_roots pkgs root_nodes in
+          let single_goal = std.array.length lowered_goal_names == 1 in
+          let other_names =
+            # `std.record.fields` already returns names in sorted order, so no explicit
+            # sort is needed here (`filter` preserves order). Nickel's `std.array.sort`
+            # is quadratic with a huge constant -- a few hundred names take tens of
+            # seconds -- so sorting the already-sorted field list dominated request
+            # generation.
+            std.array.filter
+              (fun name => !std.record.has_field name goal_name_set)
+              (std.record.fields unique_nodes)
+          in
+          let ordered_names = lowered_goal_names @ other_names in
+          let goal_id = fun idx =>
+            fun name =>
+              if single_goal then
+                "root"
+              else
+                "g" ++ std.string.from_number idx ++ "_" ++ node_name_slug name
+          in
+          let name_to_id =
+            std.record.from_array (
+              std.array.map_with_index
+                (fun idx => fun name => { field = name, value = goal_id idx name })
+                lowered_goal_names
+              @ std.array.map_with_index
+                (fun idx =>
+                  fun name =>
+                    {
+                      field = name,
+                      value = "n" ++ std.string.from_number idx ++ "_" ++ node_name_slug name,
+                    }
+                )
+                other_names
+            )
+          in
+          let input_to_id = fun node_name =>
+            fun slot_name =>
+              fun input =>
+                if input == null then
+                  old_style_input_error node_name slot_name "null"
+                else if std.is_array input then
+                  old_style_input_error node_name slot_name "array"
+                else
+                  std.record.get input.name name_to_id
           in
           {
-            field = std.record.get name name_to_id,
-            value = node_value,
-          }
-        )
-          ordered_names
-      ),
-    },
+            goals = std.array.map_with_index goal_id lowered_goal_names,
+            nodes =
+              std.record.from_array (
+                std.array.map
+                  (fun name =>
+                    let node = std.record.get name unique_nodes in
+                    let node_value =
+                      if node.tag == "Source" then
+                        {
+                          name = node.name,
+                          tag = node.tag,
+                          object_hash = node.object_hash,
+                        }
+                        & (
+                          if std.record.has_field "origin" node then
+                            { origin = lower_origin node.origin }
+                          else
+                            {}
+                        )
+                      else
+                        {
+                          name = node.name,
+                          tag = node.tag,
+                          config = node.config,
+                          inputs =
+                            std.record.map
+                              (fun slot_name input => input_to_id node.name slot_name input)
+                              node.inputs,
+                        }
+                    in
+                    {
+                      field = std.record.get name name_to_id,
+                      value = node_value,
+                    }
+                  )
+                  ordered_names
+              ),
+          },
 
   # Compatibility helper for recipe-level tests and callers lowering one root.
   to_request = fun raw_ctx =>
     fun pkgs =>
-    fun root_node =>
-      (to_request_goals raw_ctx pkgs [root_node]).nodes,
+      fun root_node =>
+        (to_request_goals raw_ctx pkgs [root_node]).nodes,
 }

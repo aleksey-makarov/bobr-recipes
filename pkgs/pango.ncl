@@ -2,7 +2,6 @@ let recipe = import "../recipe-lib.ncl" in
 # pango -- text layout, used by GTK4. Uses harfbuzz (shaping), fribidi (bidi),
 # cairo (rendering), fontconfig/freetype (fonts). Xft off (no X).
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 let branch = recipe.version_prefix 2 in
 
 fun pkgs =>

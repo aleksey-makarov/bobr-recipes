@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let binutils_src = fun version => fun hash => {
-    name = "binutils-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://sourceware.org/pub/binutils/releases/binutils-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/binutils/binutils-%{version}.tar.xz",
-      ],
-    },
-  }
+  let binutils_src = fun version =>
+    fun hash =>
+      {
+        name = "binutils-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://sourceware.org/pub/binutils/releases/binutils-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/binutils/binutils-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let binutils_gen1 = {

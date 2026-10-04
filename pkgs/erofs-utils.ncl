@@ -1,15 +1,15 @@
 fun pkgs =>
   let erofs_utils_src = fun version =>
     fun hash =>
-    {
-      name = "erofs-utils-src-%{version}",
-      tag = "Source",
-      object_hash = hash,
-      origin = {
-        tag = "Http",
-        url = "https://git.kernel.org/pub/scm/linux/kernel/git/xiang/erofs-utils.git/snapshot/erofs-utils-%{version}.tar.gz",
-      },
-    }
+      {
+        name = "erofs-utils-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://git.kernel.org/pub/scm/linux/kernel/git/xiang/erofs-utils.git/snapshot/erofs-utils-%{version}.tar.gz",
+        },
+      }
   in
 
   let erofs_utils = {

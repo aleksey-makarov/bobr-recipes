@@ -1,13 +1,15 @@
 fun pkgs =>
-  let lz4_src = fun version => fun hash => {
-    name = "lz4-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/lz4/lz4/releases/download/v%{version}/lz4-%{version}.tar.gz",
-    },
-  }
+  let lz4_src = fun version =>
+    fun hash =>
+      {
+        name = "lz4-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/lz4/lz4/releases/download/v%{version}/lz4-%{version}.tar.gz",
+        },
+      }
   in
 
   let lz4 = {

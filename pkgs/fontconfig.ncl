@@ -1,17 +1,18 @@
-
 fun pkgs =>
-  let fontconfig_src = fun version => fun hash => {
-    name = "fontconfig-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://www.freedesktop.org/software/fontconfig/release/fontconfig-%{version}.tar.xz",
-        "https://sources.buildroot.net/fontconfig/fontconfig-%{version}.tar.xz",
-      ],
-    },
-  }
+  let fontconfig_src = fun version =>
+    fun hash =>
+      {
+        name = "fontconfig-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://www.freedesktop.org/software/fontconfig/release/fontconfig-%{version}.tar.xz",
+            "https://sources.buildroot.net/fontconfig/fontconfig-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let fontconfig = {

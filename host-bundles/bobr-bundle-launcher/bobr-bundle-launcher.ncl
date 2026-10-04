@@ -1,17 +1,18 @@
 # bobr-bundle-launcher is built from its published source crate rather than a
 # prebuilt bobr release asset. Cargo.lock supplies the complete immutable
 # dependency set consumed by the generic offline Cargo builder.
-
 fun pkgs =>
-  let mk_src = fun version => fun hash => {
-    name = "bobr-bundle-launcher-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://static.crates.io/crates/bobr-bundle-launcher/bobr-bundle-launcher-%{version}.crate",
-    },
-  }
+  let mk_src = fun version =>
+    fun hash =>
+      {
+        name = "bobr-bundle-launcher-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://static.crates.io/crates/bobr-bundle-launcher/bobr-bundle-launcher-%{version}.crate",
+        },
+      }
   in
 
   let bobr_bundle_launcher = {

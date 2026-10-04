@@ -1,14 +1,15 @@
 fun pkgs =>
-  let sdl3_src = fun version => fun hash => {
-    name = "sdl3-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url =
-        "https://github.com/libsdl-org/SDL/archive/refs/tags/release-%{version}.tar.gz",
-    },
-  }
+  let sdl3_src = fun version =>
+    fun hash =>
+      {
+        name = "sdl3-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/libsdl-org/SDL/archive/refs/tags/release-%{version}.tar.gz",
+        },
+      }
   in
 
   # Host-side SDL: Wayland-only video with desktop OpenGL. Audio and the other

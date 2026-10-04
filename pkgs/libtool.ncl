@@ -1,16 +1,18 @@
 fun pkgs =>
-  let libtool_src = fun version => fun hash => {
-    name = "libtool-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/libtool/libtool-%{version}.tar.xz",
-      ],
-    },
-  }
+  let libtool_src = fun version =>
+    fun hash =>
+      {
+        name = "libtool-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/libtool/libtool-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let libtool = {

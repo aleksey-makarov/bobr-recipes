@@ -1,15 +1,17 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let iana_etc_src = fun version => fun hash => {
-    name = "iana-etc-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/Mic92/iana-etc/releases/download/%{version}/iana-etc-%{version}.tar.gz",
-    },
-  }
+  let iana_etc_src = fun version =>
+    fun hash =>
+      {
+        name = "iana-etc-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/Mic92/iana-etc/releases/download/%{version}/iana-etc-%{version}.tar.gz",
+        },
+      }
   in
 
   let buildscript_iana_etc = {

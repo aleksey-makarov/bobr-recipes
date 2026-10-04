@@ -8,7 +8,6 @@ let br = import "../build-rootfs.ncl" in
 #     version = "6.19.1",
 #     source_object_hash = "<sha256>",
 #   }
-
 let major_version = fun version =>
   let matched = std.string.find "^([0-9]+)[.]" version in
   if matched.index == 0 && std.array.length matched.groups == 1 then

@@ -3,7 +3,6 @@
 # other deps. `version`/`source_object_hash`/`year` are node fields (overridable), as in
 # linux.ncl. sqlite's tarball URL embeds the release year and a packed version
 # number X YY ZZ 00 (e.g. 3.53.3 -> 3530300), derived here.
-
 let pad2 = fun s => if std.string.length s == 1 then "0%{s}" else s in
 let autoconf_num = fun version =>
   let p = std.string.split "." version in

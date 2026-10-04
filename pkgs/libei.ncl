@@ -9,7 +9,6 @@
 # the object hash is the extracted tree's fsobj-hash rather than the tarball
 # bytes -- GitLab regenerates archive tarballs non-reproducibly, but the tree is
 # stable. `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

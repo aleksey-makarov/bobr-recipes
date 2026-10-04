@@ -1,15 +1,17 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let kmod_src = fun version => fun hash => {
-    name = "kmod-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-%{version}.tar.xz",
-    },
-  }
+  let kmod_src = fun version =>
+    fun hash =>
+      {
+        name = "kmod-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-%{version}.tar.xz",
+        },
+      }
   in
 
   let kmod = {
@@ -62,9 +64,11 @@ fun pkgs =>
   # tools themselves). depends on the compression/crypto libs libkmod is built
   # against (see libkmod_deps in kmod's meson.build).
   let kmod_libs =
-    recipe.split.libs kmod [
-      "usr/lib/libkmod.so*",
-    ]
+    recipe.split.libs
+      kmod
+      [
+        "usr/lib/libkmod.so*",
+      ]
     & {
       deps = {
         build = [],

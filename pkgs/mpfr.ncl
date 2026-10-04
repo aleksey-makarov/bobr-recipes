@@ -1,16 +1,18 @@
 fun pkgs =>
-  let mpfr_src = fun version => fun hash => {
-    name = "mpfr-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/mpfr/mpfr-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/mpfr/mpfr-%{version}.tar.xz",
-      ],
-    },
-  }
+  let mpfr_src = fun version =>
+    fun hash =>
+      {
+        name = "mpfr-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/mpfr/mpfr-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/mpfr/mpfr-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let mpfr = {

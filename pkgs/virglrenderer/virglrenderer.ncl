@@ -1,14 +1,15 @@
 fun pkgs =>
-  let virglrenderer_src = fun version => fun hash => {
-    name = "virglrenderer-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url =
-        "https://gitlab.freedesktop.org/virgl/virglrenderer/-/archive/%{version}/virglrenderer-%{version}.tar.gz",
-    },
-  }
+  let virglrenderer_src = fun version =>
+    fun hash =>
+      {
+        name = "virglrenderer-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://gitlab.freedesktop.org/virgl/virglrenderer/-/archive/%{version}/virglrenderer-%{version}.tar.gz",
+        },
+      }
   in
 
   let render_server_path_patch = {

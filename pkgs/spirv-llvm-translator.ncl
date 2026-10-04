@@ -1,13 +1,15 @@
 fun pkgs =>
-  let spirv_llvm_translator_src = fun version => fun hash => {
-    name = "spirv-llvm-translator-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v%{version}.tar.gz",
-    },
-  }
+  let spirv_llvm_translator_src = fun version =>
+    fun hash =>
+      {
+        name = "spirv-llvm-translator-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v%{version}.tar.gz",
+        },
+      }
   in
 
   # Mesa's CLC compiler links LLVMSPIRVLib. Translator release lines are tied

@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let acl_src = fun version => fun hash => {
-    name = "acl-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://download.savannah.gnu.org/releases/acl/acl-%{version}.tar.xz",
-        "https://deb.debian.org/debian/pool/main/a/acl/acl_%{version}.orig.tar.xz",
-      ],
-    },
-  }
+  let acl_src = fun version =>
+    fun hash =>
+      {
+        name = "acl-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://download.savannah.gnu.org/releases/acl/acl-%{version}.tar.xz",
+            "https://deb.debian.org/debian/pool/main/a/acl/acl_%{version}.orig.tar.xz",
+          ],
+        },
+      }
   in
 
   let acl = {

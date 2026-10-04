@@ -1,16 +1,18 @@
 fun pkgs =>
-  let mesa_demos_src = fun version => fun hash => {
-    name = "mesa-demos-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://archive.mesa3d.org/demos/mesa-demos-%{version}.tar.xz",
-        "https://downloads.yoctoproject.org/mirror/sources/mesa-demos-%{version}.tar.xz",
-      ],
-    },
-  }
+  let mesa_demos_src = fun version =>
+    fun hash =>
+      {
+        name = "mesa-demos-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://archive.mesa3d.org/demos/mesa-demos-%{version}.tar.xz",
+            "https://downloads.yoctoproject.org/mirror/sources/mesa-demos-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let use_libopengl_patch = {

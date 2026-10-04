@@ -3,15 +3,17 @@
 # skipped rather than failing. setuptools backend. Build-only module.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let python_pyyaml_src = fun version => fun hash => {
-    name = "python-pyyaml-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://files.pythonhosted.org/packages/source/P/PyYAML/pyyaml-%{version}.tar.gz",
-    },
-  }
+  let python_pyyaml_src = fun version =>
+    fun hash =>
+      {
+        name = "python-pyyaml-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://files.pythonhosted.org/packages/source/P/PyYAML/pyyaml-%{version}.tar.gz",
+        },
+      }
   in
 
   {

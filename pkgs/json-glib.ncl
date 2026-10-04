@@ -2,7 +2,6 @@ let recipe = import "../recipe-lib.ncl" in
 # json-glib -- JSON parsing/serialization on GObject, used by mutter and other
 # GNOME components. `version`/`source_object_hash` are node fields (overridable), as in
 # linux.ncl.
-
 let branch = recipe.version_prefix 2 in
 
 fun pkgs =>

@@ -1,14 +1,15 @@
-
 fun pkgs =>
-  let seatd_src = fun version => fun hash => {
-    name = "seatd-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://git.sr.ht/~kennylevinsen/seatd/archive/%{version}.tar.gz",
-    },
-  }
+  let seatd_src = fun version =>
+    fun hash =>
+      {
+        name = "seatd-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://git.sr.ht/~kennylevinsen/seatd/archive/%{version}.tar.gz",
+        },
+      }
   in
 
   # libseat + the seatd daemon. The logind backend (libseat over systemd-logind)

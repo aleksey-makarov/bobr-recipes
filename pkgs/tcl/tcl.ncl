@@ -1,18 +1,20 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let tcl_src = fun version => fun hash => {
-    name = "tcl-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://downloads.sourceforge.net/project/tcl/Tcl/%{version}/tcl%{version}-src.tar.gz",
-        "https://sourceforge.net/projects/tcl/files/Tcl/%{version}/tcl%{version}-src.tar.gz/download",
-      ],
-    },
-  }
+  let tcl_src = fun version =>
+    fun hash =>
+      {
+        name = "tcl-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://downloads.sourceforge.net/project/tcl/Tcl/%{version}/tcl%{version}-src.tar.gz",
+            "https://sourceforge.net/projects/tcl/files/Tcl/%{version}/tcl%{version}-src.tar.gz/download",
+          ],
+        },
+      }
   in
 
   let buildscript_tcl = {

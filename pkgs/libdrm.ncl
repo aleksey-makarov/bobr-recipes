@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let libdrm_src = fun version => fun hash => {
-    name = "libdrm-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://dri.freedesktop.org/libdrm/libdrm-%{version}.tar.xz",
-        "https://sources.buildroot.net/libdrm/libdrm-%{version}.tar.xz",
-      ],
-    },
-  }
+  let libdrm_src = fun version =>
+    fun hash =>
+      {
+        name = "libdrm-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://dri.freedesktop.org/libdrm/libdrm-%{version}.tar.xz",
+            "https://sources.buildroot.net/libdrm/libdrm-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let libdrm = {
@@ -45,10 +47,12 @@ fun pkgs =>
   in
 
   let libdrm_libs =
-    recipe.split.libs libdrm [
-      "usr/lib/libdrm.so*",
-      "usr/lib/libdrm_*.so*",
-    ]
+    recipe.split.libs
+      libdrm
+      [
+        "usr/lib/libdrm.so*",
+        "usr/lib/libdrm_*.so*",
+      ]
     & {
       deps = {
         build = [],

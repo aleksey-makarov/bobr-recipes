@@ -1,28 +1,33 @@
 fun pkgs =>
-  let payload_path = fun relative => {
-    source = "payload",
-    path = relative,
-  }
+  let payload_path = fun relative =>
+    {
+      source = "payload",
+      path = relative,
+    }
   in
-  let replace_paths = fun entries => {
-    operation = "replace",
-    paths = std.array.map payload_path entries,
-  }
+  let replace_paths = fun entries =>
+    {
+      operation = "replace",
+      paths = std.array.map payload_path entries,
+    }
   in
-  let replace_value = fun value => {
-    operation = "replace",
-    values = [value],
-  }
+  let replace_value = fun value =>
+    {
+      operation = "replace",
+      values = [value],
+    }
   in
-  let override_path = fun relative => {
-    source = "overrides",
-    path = relative,
-  }
+  let override_path = fun relative =>
+    {
+      source = "overrides",
+      path = relative,
+    }
   in
-  let replace_override_paths = fun entries => {
-    operation = "replace",
-    paths = std.array.map override_path entries,
-  }
+  let replace_override_paths = fun entries =>
+    {
+      operation = "replace",
+      paths = std.array.map override_path entries,
+    }
   in
   let software_opengl_environment = {
     LIBGL_ALWAYS_SOFTWARE = replace_value "true",

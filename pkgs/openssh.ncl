@@ -7,7 +7,6 @@
 # sshd_config so the image can drop in policy (system-runtime-files provides
 # 10-stateless.conf); prepended because sshd uses the first value per keyword.
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

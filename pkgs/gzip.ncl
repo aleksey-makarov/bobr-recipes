@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let gzip_src = fun version => fun hash => {
-    name = "gzip-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/gzip/gzip-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/gzip/gzip-%{version}.tar.xz",
-      ],
-    },
-  }
+  let gzip_src = fun version =>
+    fun hash =>
+      {
+        name = "gzip-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/gzip/gzip-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/gzip/gzip-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let gzip_gen1 = {

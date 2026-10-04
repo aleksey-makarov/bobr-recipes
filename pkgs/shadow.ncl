@@ -1,15 +1,15 @@
 fun pkgs =>
   let shadow_src = fun version =>
     fun hash =>
-    {
-      name = "shadow-src-%{version}",
-      tag = "Source",
-      object_hash = hash,
-      origin = {
-        tag = "Http",
-        url = "https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz",
-      },
-    }
+      {
+        name = "shadow-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz",
+        },
+      }
   in
 
   let shadow = {

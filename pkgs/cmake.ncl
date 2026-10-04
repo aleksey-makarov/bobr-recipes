@@ -1,14 +1,15 @@
-
 fun pkgs =>
-  let cmake_src = fun version => fun hash => {
-    name = "cmake-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/Kitware/CMake/releases/download/v%{version}/cmake-%{version}.tar.gz",
-    },
-  }
+  let cmake_src = fun version =>
+    fun hash =>
+      {
+        name = "cmake-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/Kitware/CMake/releases/download/v%{version}/cmake-%{version}.tar.gz",
+        },
+      }
   in
 
   # Bootstrap build: no cmake exists yet, so ./bootstrap builds a bootstrap

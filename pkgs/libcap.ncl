@@ -3,15 +3,15 @@ let recipe = import "../recipe-lib.ncl" in
 fun pkgs =>
   let libcap_src = fun version =>
     fun hash =>
-    {
-      name = "libcap-src-%{version}",
-      tag = "Source",
-      object_hash = hash,
-      origin = {
-        tag = "Http",
-        url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-%{version}.tar.xz",
-      },
-    }
+      {
+        name = "libcap-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-%{version}.tar.xz",
+        },
+      }
   in
 
   let libcap = {

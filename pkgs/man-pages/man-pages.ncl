@@ -1,15 +1,17 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let man_pages_src = fun version => fun hash => {
-    name = "man-pages-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-%{version}.tar.xz",
-    },
-  }
+  let man_pages_src = fun version =>
+    fun hash =>
+      {
+        name = "man-pages-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-%{version}.tar.xz",
+        },
+      }
   in
 
   let buildscript_man_pages = {

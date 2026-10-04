@@ -1,13 +1,15 @@
 fun pkgs =>
-  let qemu_src = fun version => fun hash => {
-    name = "qemu-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://download.qemu.org/qemu-%{version}.tar.xz",
-    },
-  }
+  let qemu_src = fun version =>
+    fun hash =>
+      {
+        name = "qemu-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://download.qemu.org/qemu-%{version}.tar.xz",
+        },
+      }
   in
 
   # Host-side system emulator for the x86-64 development images. This is a

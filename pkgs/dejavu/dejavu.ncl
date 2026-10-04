@@ -1,15 +1,17 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let dejavu_src = fun version => fun hash => {
-    name = "dejavu-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-%{version}.tar.bz2",
-    },
-  }
+  let dejavu_src = fun version =>
+    fun hash =>
+      {
+        name = "dejavu-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-%{version}.tar.bz2",
+        },
+      }
   in
 
   let buildscript_dejavu = {

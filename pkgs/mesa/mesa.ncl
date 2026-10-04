@@ -1,17 +1,18 @@
-
 fun pkgs =>
-  let mesa_src = fun version => fun hash => {
-    name = "mesa-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://archive.mesa3d.org/mesa-%{version}.tar.xz",
-        "https://sources.buildroot.net/mesa3d/mesa-%{version}.tar.xz",
-      ],
-    },
-  }
+  let mesa_src = fun version =>
+    fun hash =>
+      {
+        name = "mesa-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://archive.mesa3d.org/mesa-%{version}.tar.xz",
+            "https://sources.buildroot.net/mesa3d/mesa-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   # Graphics stack for a QEMU virtio-gpu guest. GL/GLES goes through the virgl
@@ -90,36 +91,37 @@ fun pkgs =>
     |> std.string.replace "." "_"
     |> std.string.replace "+" "_"
   in
-  let mesa_rust_crate_source = fun spec => {
-    name =
-      "mesa_crate_"
-      ++ mesa_rust_source_name_part spec.name
-      ++ "_"
-      ++ mesa_rust_source_name_part spec.version,
-    tag = "Source",
-    object_hash = spec.hash,
-    origin = {
-      tag = "Http",
-      url =
-        "https://static.crates.io/crates/%{spec.name}/%{spec.name}-%{spec.version}.crate",
-    },
-  }
-  in
-  let mesa_rust_crates = fun version => fun rust_crate_specs =>
+  let mesa_rust_crate_source = fun spec =>
     {
-      name = "mesa-rust-crates-%{version}",
-      tag = "Bundle",
-      config = {},
-      inputs =
-        std.array.fold_left
-          (fun acc =>
-            fun spec =>
-              let src = mesa_rust_crate_source spec in
-              std.record.insert src.name src acc
-          )
-          {}
-          rust_crate_specs,
+      name =
+        "mesa_crate_"
+        ++ mesa_rust_source_name_part spec.name
+        ++ "_"
+        ++ mesa_rust_source_name_part spec.version,
+      tag = "Source",
+      object_hash = spec.hash,
+      origin = {
+        tag = "Http",
+        url = "https://static.crates.io/crates/%{spec.name}/%{spec.name}-%{spec.version}.crate",
+      },
     }
+  in
+  let mesa_rust_crates = fun version =>
+    fun rust_crate_specs =>
+      {
+        name = "mesa-rust-crates-%{version}",
+        tag = "Bundle",
+        config = {},
+        inputs =
+          std.array.fold_left
+            (fun acc =>
+              fun spec =>
+                let src = mesa_rust_crate_source spec in
+                std.record.insert src.name src acc
+            )
+            {}
+            rust_crate_specs,
+      }
   in
 
   # Full host graphics stack: Wayland-only OpenGL/EGL/GLES plus open Gallium

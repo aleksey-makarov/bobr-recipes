@@ -3,15 +3,15 @@ let recipe = import "../../recipe-lib.ncl" in
 fun pkgs =>
   let openssl_src = fun version =>
     fun hash =>
-    {
-      name = "openssl-src-%{version}",
-      tag = "Source",
-      object_hash = hash,
-      origin = {
-        tag = "Http",
-        url = "https://github.com/openssl/openssl/releases/download/openssl-%{version}/openssl-%{version}.tar.gz",
-      },
-    }
+      {
+        name = "openssl-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/openssl/openssl/releases/download/openssl-%{version}/openssl-%{version}.tar.gz",
+        },
+      }
   in
 
   let buildscript_openssl = {

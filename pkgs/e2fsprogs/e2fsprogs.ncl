@@ -1,15 +1,17 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let e2fsprogs_src = fun version => fun hash => {
-    name = "e2fsprogs-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v%{version}/e2fsprogs-%{version}.tar.gz",
-    },
-  }
+  let e2fsprogs_src = fun version =>
+    fun hash =>
+      {
+        name = "e2fsprogs-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v%{version}/e2fsprogs-%{version}.tar.gz",
+        },
+      }
   in
 
   let buildscript_e2fsprogs = {

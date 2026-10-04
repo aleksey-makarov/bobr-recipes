@@ -187,49 +187,22 @@ fun pkgs =>
   # (`_rootfs`), with the tree to check mounted as `_target`. Captured as a
   # plain-object directory holding one report file.
   let mk_rootfs_check = fun check_name =>
-    fun rootfs => {
-      name = "check-%{check_name}",
-      tag = "Sandbox",
-      config = {
-        script_config = {
-          name = check_name,
-          suppress =
-            if std.record.has_field check_name suppress_by_rootfs then
-              std.record.get check_name suppress_by_rootfs
-            else
-              [],
-        },
-        steps = [
-          {
-            name = "check_rootfs",
-            run_as = "root",
-            cwd = "@{out}",
-            argv = ["@{script}"],
-          },
-        ],
-      },
-      inputs = {
-        _rootfs = pkgs.oci_buildpack_deps_rootfs,
-        _target = rootfs,
-        script = check_source,
-      },
-    }
-  in
-
-  # Image check: the same OUTSIDE model, but additionally sources
-  # rootfs-check-image.sh (via `special_image`) for the image-specific checks
-  # (os-release layout, shebang interpreters, GNOME typelibs, graphics stack),
-  # gated by `extra_config` flags. Used only for the shipped images below.
-  let mk_image_check = fun check_name =>
-    fun image =>
-      fun extra_config => {
-        name = "check-image-%{check_name}",
+    fun rootfs =>
+      {
+        name = "check-%{check_name}",
         tag = "Sandbox",
         config = {
-          script_config = { name = check_name } & extra_config,
+          script_config = {
+            name = check_name,
+            suppress =
+              if std.record.has_field check_name suppress_by_rootfs then
+                std.record.get check_name suppress_by_rootfs
+              else
+                [],
+          },
           steps = [
             {
-              name = "check_image",
+              name = "check_rootfs",
               run_as = "root",
               cwd = "@{out}",
               argv = ["@{script}"],
@@ -238,11 +211,40 @@ fun pkgs =>
         },
         inputs = {
           _rootfs = pkgs.oci_buildpack_deps_rootfs,
-          _target = image,
+          _target = rootfs,
           script = check_source,
-          special_image = check_image_source,
         },
       }
+  in
+
+  # Image check: the same OUTSIDE model, but additionally sources
+  # rootfs-check-image.sh (via `special_image`) for the image-specific checks
+  # (os-release layout, shebang interpreters, GNOME typelibs, graphics stack),
+  # gated by `extra_config` flags. Used only for the shipped images below.
+  let mk_image_check = fun check_name =>
+    fun image =>
+      fun extra_config =>
+        {
+          name = "check-image-%{check_name}",
+          tag = "Sandbox",
+          config = {
+            script_config = { name = check_name } & extra_config,
+            steps = [
+              {
+                name = "check_image",
+                run_as = "root",
+                cwd = "@{out}",
+                argv = ["@{script}"],
+              },
+            ],
+          },
+          inputs = {
+            _rootfs = pkgs.oci_buildpack_deps_rootfs,
+            _target = image,
+            script = check_source,
+            special_image = check_image_source,
+          },
+        }
   in
 
   # Collapse an arbitrary set of one-report check nodes into one Bundle, then
@@ -291,10 +293,12 @@ fun pkgs =>
         let direct_runtime_inputs =
           std.record.from_array (
             std.array.map
-              (fun slot => {
-                field = "_runtime_dep_%{slot}",
-                value = std.record.get slot numbered_runtime_inputs,
-              })
+              (fun slot =>
+                {
+                  field = "_runtime_dep_%{slot}",
+                  value = std.record.get slot numbered_runtime_inputs,
+                }
+              )
               (std.record.fields numbered_runtime_inputs)
           )
         in
@@ -448,24 +452,30 @@ fun pkgs =>
   let test_rootfs = mk_image_check "qemu" pkgs.qemu_rootfs {} in
 
   let test_gnome_rootfs =
-    mk_image_check "qemu-gnome" pkgs.qemu_gnome_rootfs {
-      check_graphics = "true",
-      check_gnome = "true",
-      # gnome-shell's JS references these GI namespaces, but they are only loaded
-      # behind compile-time flags we built without (NetworkManager, bluetooth) or
-      # a runtime try/catch (Malcontent parental controls), so a missing typelib
-      # is harmless -- reported as INFO, not a failure. The unconditionally
-      # required imports (Geoclue, GWeather, Rsvg) are NOT listed here: their
-      # typelibs must be present or the shell crashes at startup
-      # (misc/dependencies.js). Everything else must have a typelib.
-      gnome_optional_typelibs = "GnomeBluetooth Malcontent",
-    }
+    mk_image_check
+      "qemu-gnome"
+      pkgs.qemu_gnome_rootfs
+      {
+        check_graphics = "true",
+        check_gnome = "true",
+        # gnome-shell's JS references these GI namespaces, but they are only loaded
+        # behind compile-time flags we built without (NetworkManager, bluetooth) or
+        # a runtime try/catch (Malcontent parental controls), so a missing typelib
+        # is harmless -- reported as INFO, not a failure. The unconditionally
+        # required imports (Geoclue, GWeather, Rsvg) are NOT listed here: their
+        # typelibs must be present or the shell crashes at startup
+        # (misc/dependencies.js). Everything else must have a typelib.
+        gnome_optional_typelibs = "GnomeBluetooth Malcontent",
+      }
   in
 
   let test_weston_rootfs =
-    mk_image_check "qemu-weston" pkgs.qemu_weston_rootfs {
-      check_graphics = "true",
-    }
+    mk_image_check
+      "qemu-weston"
+      pkgs.qemu_weston_rootfs
+      {
+        check_graphics = "true",
+      }
   in
 
   let test_initrd_rootfs =

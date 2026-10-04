@@ -1,14 +1,15 @@
 fun pkgs =>
-  let libslirp_src = fun version => fun hash => {
-    name = "libslirp-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url =
-        "https://gitlab.freedesktop.org/slirp/libslirp/-/archive/v%{version}/libslirp-v%{version}.tar.gz",
-    },
-  }
+  let libslirp_src = fun version =>
+    fun hash =>
+      {
+        name = "libslirp-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://gitlab.freedesktop.org/slirp/libslirp/-/archive/v%{version}/libslirp-v%{version}.tar.gz",
+        },
+      }
   in
 
   let libslirp = {

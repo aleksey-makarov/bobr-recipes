@@ -1,7 +1,6 @@
 # hicolor-icon-theme -- the base/fallback icon theme structure (index.theme and
 # the directory layout every other theme inherits). Data only, no deps.
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

@@ -3,15 +3,17 @@
 # Build-only module.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let python_setuptools_src = fun version => fun hash => {
-    name = "python-setuptools-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://files.pythonhosted.org/packages/source/s/setuptools/setuptools-%{version}.tar.gz",
-    },
-  }
+  let python_setuptools_src = fun version =>
+    fun hash =>
+      {
+        name = "python-setuptools-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://files.pythonhosted.org/packages/source/s/setuptools/setuptools-%{version}.tar.gz",
+        },
+      }
   in
 
   {

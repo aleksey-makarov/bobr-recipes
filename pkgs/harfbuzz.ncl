@@ -5,7 +5,6 @@
 # would create a mutual runtime dep, and harfbuzz-in-freetype only tweaks
 # autohinting), so there is no cycle. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

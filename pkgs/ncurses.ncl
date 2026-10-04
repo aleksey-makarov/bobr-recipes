@@ -1,15 +1,17 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let ncurses_src = fun version => fun hash => {
-    name = "ncurses-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://invisible-mirror.net/archives/ncurses/ncurses-%{version}.tar.gz",
-    },
-  }
+  let ncurses_src = fun version =>
+    fun hash =>
+      {
+        name = "ncurses-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://invisible-mirror.net/archives/ncurses/ncurses-%{version}.tar.gz",
+        },
+      }
   in
 
   let ncurses = {

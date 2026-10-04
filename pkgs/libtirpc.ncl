@@ -44,4 +44,4 @@ fun pkgs =>
   }
   in
 
-  { include [ libtirpc ] }
+  { include [libtirpc] }

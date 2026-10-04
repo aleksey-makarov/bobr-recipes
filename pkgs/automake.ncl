@@ -1,16 +1,18 @@
 fun pkgs =>
-  let automake_src = fun version => fun hash => {
-    name = "automake-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/automake/automake-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/automake/automake-%{version}.tar.xz",
-      ],
-    },
-  }
+  let automake_src = fun version =>
+    fun hash =>
+      {
+        name = "automake-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/automake/automake-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/automake/automake-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let automake = {

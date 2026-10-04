@@ -1,16 +1,18 @@
 fun pkgs =>
-  let grub_src = fun version => fun hash => {
-    name = "grub-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/grub/grub-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/grub/grub-%{version}.tar.xz",
-      ],
-    },
-  }
+  let grub_src = fun version =>
+    fun hash =>
+      {
+        name = "grub-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/grub/grub-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/grub/grub-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let grub = {

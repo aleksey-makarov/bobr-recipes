@@ -1,16 +1,18 @@
 fun pkgs =>
-  let mpc_src = fun version => fun hash => {
-    name = "mpc-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/mpc/mpc-%{version}.tar.gz",
-        "https://mirrors.kernel.org/gnu/mpc/mpc-%{version}.tar.gz",
-      ],
-    },
-  }
+  let mpc_src = fun version =>
+    fun hash =>
+      {
+        name = "mpc-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/mpc/mpc-%{version}.tar.gz",
+            "https://mirrors.kernel.org/gnu/mpc/mpc-%{version}.tar.gz",
+          ],
+        },
+      }
   in
 
   let mpc = {

@@ -92,24 +92,25 @@ in
 # <bits/errno.h> pulls in <linux/errno.h>, so even host tools like unifdef won't
 # compile without them), but using the gen1 headers rather than the package's own
 # output avoids a build cycle.
-let native_toolchain_deps = fun pkgs => [
-  pkgs.glibc,
-  pkgs.binutils,
-  pkgs.gcc,
-  pkgs.bash,
-  pkgs.make,
-  pkgs.coreutils,
-  pkgs.gawk,
-  pkgs.sed,
-  pkgs.grep,
-  pkgs.tar,
-  pkgs.gzip,
-  pkgs.bzip2,
-  pkgs.xz,
-  pkgs.patch,
-  pkgs.findutils,
-  pkgs.diffutils,
-]
+let native_toolchain_deps = fun pkgs =>
+  [
+    pkgs.glibc,
+    pkgs.binutils,
+    pkgs.gcc,
+    pkgs.bash,
+    pkgs.make,
+    pkgs.coreutils,
+    pkgs.gawk,
+    pkgs.sed,
+    pkgs.grep,
+    pkgs.tar,
+    pkgs.gzip,
+    pkgs.bzip2,
+    pkgs.xz,
+    pkgs.patch,
+    pkgs.findutils,
+    pkgs.diffutils,
+  ]
 in
 # The default native build toolchain every ordinary native build needs: the
 # toolchain plus the kernel UAPI headers (which ordinary packages compile
@@ -124,24 +125,25 @@ let native_build_deps = fun pkgs => [pkgs.linux_headers] @ native_toolchain_deps
 # build environment (PATH tools) matches what the snapshot provided.
 # The gen1 userland shared by both toolchain closures below; they differ only
 # in the three compiler entries layered on top of it.
-let gen1_userland_deps = fun pkgs => [
-  pkgs.bash_gen1,
-  pkgs.gawk_gen1,
-  pkgs.awk_symlink,
-  pkgs.bison_gen1,
-  pkgs.make_gen1,
-  pkgs.coreutils_gen1,
-  pkgs.sed_gen1,
-  pkgs.grep_gen1,
-  pkgs.gzip_gen1,
-  pkgs.xz_gen1,
-  pkgs.tar_gen1,
-  pkgs.patch_gen1,
-  pkgs.findutils_gen1,
-  pkgs.diffutils_gen1,
-  pkgs.m4_gen1,
-  pkgs.python_gen1,
-]
+let gen1_userland_deps = fun pkgs =>
+  [
+    pkgs.bash_gen1,
+    pkgs.gawk_gen1,
+    pkgs.awk_symlink,
+    pkgs.bison_gen1,
+    pkgs.make_gen1,
+    pkgs.coreutils_gen1,
+    pkgs.sed_gen1,
+    pkgs.grep_gen1,
+    pkgs.gzip_gen1,
+    pkgs.xz_gen1,
+    pkgs.tar_gen1,
+    pkgs.patch_gen1,
+    pkgs.findutils_gen1,
+    pkgs.diffutils_gen1,
+    pkgs.m4_gen1,
+    pkgs.python_gen1,
+  ]
 in
 let bootstrap_toolchain_deps = fun pkgs =>
   [

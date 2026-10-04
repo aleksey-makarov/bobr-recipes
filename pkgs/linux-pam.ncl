@@ -1,15 +1,17 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let linux_pam_src = fun version => fun hash => {
-    name = "linux-pam-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/linux-pam/linux-pam/releases/download/v%{version}/Linux-PAM-%{version}.tar.xz",
-    },
-  }
+  let linux_pam_src = fun version =>
+    fun hash =>
+      {
+        name = "linux-pam-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/linux-pam/linux-pam/releases/download/v%{version}/Linux-PAM-%{version}.tar.xz",
+        },
+      }
   in
 
   # Linux-PAM: libpam + the base modules (pam_unix, pam_permit, pam_env,

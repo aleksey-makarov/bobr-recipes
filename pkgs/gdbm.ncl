@@ -1,16 +1,18 @@
 fun pkgs =>
-  let gdbm_src = fun version => fun hash => {
-    name = "gdbm-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/gdbm/gdbm-%{version}.tar.gz",
-        "https://mirrors.kernel.org/gnu/gdbm/gdbm-%{version}.tar.gz",
-      ],
-    },
-  }
+  let gdbm_src = fun version =>
+    fun hash =>
+      {
+        name = "gdbm-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/gdbm/gdbm-%{version}.tar.gz",
+            "https://mirrors.kernel.org/gnu/gdbm/gdbm-%{version}.tar.gz",
+          ],
+        },
+      }
   in
 
   let gdbm = {

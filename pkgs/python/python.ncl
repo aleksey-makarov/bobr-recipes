@@ -14,15 +14,17 @@ let mk_python_mako = import "python-mako.ncl" in
 let mk_python_pyyaml = import "python-pyyaml.ncl" in
 
 fun pkgs =>
-  let python_src = fun version => fun hash => {
-    name = "python-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://www.python.org/ftp/python/%{version}/Python-%{version}.tar.xz",
-    },
-  }
+  let python_src = fun version =>
+    fun hash =>
+      {
+        name = "python-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://www.python.org/ftp/python/%{version}/Python-%{version}.tar.xz",
+        },
+      }
   in
 
   # Deps-derived build rootfs, replacing the curated system_rootfs_2: the native

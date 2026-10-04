@@ -123,20 +123,15 @@ let check_secondary_provider = fun entry =>
   if entry.name == "" then
     std.fail_with "secondary provider name must not be empty"
   else if has_local == has_remote then
-    std.fail_with
-      "secondary provider '%{entry.name}' must specify exactly one of local or remote"
+    std.fail_with "secondary provider '%{entry.name}' must specify exactly one of local or remote"
   else if !entry.mappings && !entry.content then
-    std.fail_with
-      "secondary provider '%{entry.name}' must enable mappings, content, or both"
+    std.fail_with "secondary provider '%{entry.name}' must enable mappings, content, or both"
   else if has_local && entry.content && !std.record.has_field "transfer" entry.local then
-    std.fail_with
-      "local content provider '%{entry.name}' requires a transfer policy"
+    std.fail_with "local content provider '%{entry.name}' requires a transfer policy"
   else if has_local && !entry.content && std.record.has_field "transfer" entry.local then
-    std.fail_with
-      "local mapping provider '%{entry.name}' must not specify a transfer policy"
+    std.fail_with "local mapping provider '%{entry.name}' must not specify a transfer policy"
   else if has_remote && std.array.length entry.remote.trusted_keys == 0 then
-    std.fail_with
-      "remote provider '%{entry.name}' requires at least one trusted key"
+    std.fail_with "remote provider '%{entry.name}' requires at least one trusted key"
   else
     entry
 in

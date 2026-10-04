@@ -1,18 +1,20 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let wireless_regdb_src = fun version => fun hash => {
-    name = "wireless-regdb-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://mirrors.edge.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-%{version}.tar.xz",
-        "https://mirrors.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-%{version}.tar.xz",
-      ],
-    },
-  }
+  let wireless_regdb_src = fun version =>
+    fun hash =>
+      {
+        name = "wireless-regdb-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://mirrors.edge.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-%{version}.tar.xz",
+            "https://mirrors.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let buildscript_wireless_regdb = {

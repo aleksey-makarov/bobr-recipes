@@ -1,20 +1,21 @@
-
 fun pkgs =>
-  let libpng_src = fun version => fun hash => {
-    name = "libpng-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      # Canonical SourceForge project path (+ /download fallback), matching the
-      # other SF-hosted recipes. The short download.sourceforge.net/libpng/ form
-      # goes through an extra HTML redirect the downloader can save by mistake.
-      url = [
-        "https://downloads.sourceforge.net/project/libpng/libpng16/%{version}/libpng-%{version}.tar.xz",
-        "https://sourceforge.net/projects/libpng/files/libpng16/%{version}/libpng-%{version}.tar.xz/download",
-      ],
-    },
-  }
+  let libpng_src = fun version =>
+    fun hash =>
+      {
+        name = "libpng-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          # Canonical SourceForge project path (+ /download fallback), matching the
+          # other SF-hosted recipes. The short download.sourceforge.net/libpng/ form
+          # goes through an extra HTML redirect the downloader can save by mistake.
+          url = [
+            "https://downloads.sourceforge.net/project/libpng/libpng16/%{version}/libpng-%{version}.tar.xz",
+            "https://sourceforge.net/projects/libpng/files/libpng16/%{version}/libpng-%{version}.tar.xz/download",
+          ],
+        },
+      }
   in
 
   let libpng = {

@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let tar_src = fun version => fun hash => {
-    name = "tar-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/tar/tar-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/tar/tar-%{version}.tar.xz",
-      ],
-    },
-  }
+  let tar_src = fun version =>
+    fun hash =>
+      {
+        name = "tar-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/tar/tar-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/tar/tar-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let tar_gen1 = {

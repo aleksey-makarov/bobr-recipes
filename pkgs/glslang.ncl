@@ -1,13 +1,15 @@
 fun pkgs =>
-  let glslang_src = fun sdk_version => fun hash => {
-    name = "glslang-src-%{sdk_version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/KhronosGroup/glslang/archive/refs/tags/vulkan-sdk-%{sdk_version}.tar.gz",
-    },
-  }
+  let glslang_src = fun sdk_version =>
+    fun hash =>
+      {
+        name = "glslang-src-%{sdk_version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/KhronosGroup/glslang/archive/refs/tags/vulkan-sdk-%{sdk_version}.tar.gz",
+        },
+      }
   in
 
   # Build the compiler against the matching installed SPIRV-Tools release,

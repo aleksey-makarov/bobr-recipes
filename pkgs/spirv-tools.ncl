@@ -1,13 +1,15 @@
 fun pkgs =>
-  let spirv_tools_src = fun sdk_version => fun hash => {
-    name = "spirv-tools-src-%{sdk_version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/vulkan-sdk-%{sdk_version}.tar.gz",
-    },
-  }
+  let spirv_tools_src = fun sdk_version =>
+    fun hash =>
+      {
+        name = "spirv-tools-src-%{sdk_version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/vulkan-sdk-%{sdk_version}.tar.gz",
+        },
+      }
   in
 
   # libclc's SPIR-V backend needs spirv-link, while Mesa also benefits from

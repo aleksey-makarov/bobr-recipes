@@ -2,7 +2,6 @@
 # libusb, json-glib; embeds vendor/product names from hwdata's usb.ids (the
 # default usb_ids path /usr/share/hwdata/usb.ids). `version`/`source_object_hash` are node
 # fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

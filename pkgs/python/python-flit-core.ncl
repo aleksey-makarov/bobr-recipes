@@ -3,15 +3,17 @@
 # it needs no other backend. Build-only module.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let python_flit_core_src = fun version => fun hash => {
-    name = "python-flit-core-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://files.pythonhosted.org/packages/source/f/flit-core/flit_core-%{version}.tar.gz",
-    },
-  }
+  let python_flit_core_src = fun version =>
+    fun hash =>
+      {
+        name = "python-flit-core-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://files.pythonhosted.org/packages/source/f/flit-core/flit_core-%{version}.tar.gz",
+        },
+      }
   in
 
   {

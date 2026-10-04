@@ -1,16 +1,18 @@
 fun pkgs =>
-  let inetutils_src = fun version => fun hash => {
-    name = "inetutils-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/inetutils/inetutils-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/inetutils/inetutils-%{version}.tar.xz",
-      ],
-    },
-  }
+  let inetutils_src = fun version =>
+    fun hash =>
+      {
+        name = "inetutils-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/inetutils/inetutils-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/inetutils/inetutils-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let inetutils = {

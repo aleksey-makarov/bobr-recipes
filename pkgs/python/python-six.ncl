@@ -2,15 +2,17 @@
 # the build toolchain. setuptools backend. Build-only module.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let python_six_src = fun version => fun hash => {
-    name = "python-six-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://files.pythonhosted.org/packages/source/s/six/six-%{version}.tar.gz",
-    },
-  }
+  let python_six_src = fun version =>
+    fun hash =>
+      {
+        name = "python-six-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://files.pythonhosted.org/packages/source/s/six/six-%{version}.tar.gz",
+        },
+      }
   in
 
   {

@@ -4,15 +4,17 @@
 # the PythonModule tag (flit_core backend). See python/README.txt.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let docutils_src = fun version => fun hash => {
-    name = "docutils-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://files.pythonhosted.org/packages/source/d/docutils/docutils-%{version}.tar.gz",
-    },
-  }
+  let docutils_src = fun version =>
+    fun hash =>
+      {
+        name = "docutils-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://files.pythonhosted.org/packages/source/d/docutils/docutils-%{version}.tar.gz",
+        },
+      }
   in
 
   let docutils = {
@@ -35,4 +37,4 @@ fun pkgs =>
   }
   in
 
-  { include [ docutils ] }
+  { include [docutils] }

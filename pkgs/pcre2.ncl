@@ -1,7 +1,6 @@
 # PCRE2 (Perl-compatible regular expressions, v2). GLib 2.x hard-requires it
 # (the bundled PCRE was removed). `version`/`source_object_hash` are node fields so an
 # overlay can override the version (and add its hash), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

@@ -5,7 +5,6 @@ let recipe = import "../recipe-lib.ncl" in
 # skipped and the icon cache is produced later by the qemu_gnome_rootfs finalize
 # step. Hence gtk4 is a build-only dep. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
-
 let branch = recipe.version_prefix 1 in
 
 fun pkgs =>

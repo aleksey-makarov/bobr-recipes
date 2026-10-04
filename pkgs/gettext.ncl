@@ -1,16 +1,18 @@
 fun pkgs =>
-  let gettext_src = fun version => fun hash => {
-    name = "gettext-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/gettext/gettext-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/gettext/gettext-%{version}.tar.xz",
-      ],
-    },
-  }
+  let gettext_src = fun version =>
+    fun hash =>
+      {
+        name = "gettext-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/gettext/gettext-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/gettext/gettext-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let gettext = {

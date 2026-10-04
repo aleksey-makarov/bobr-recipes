@@ -1,23 +1,24 @@
-
 fun pkgs =>
-  let freetype_src = fun version => fun hash => {
-    name = "freetype-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      # SourceForge is freetype's other upstream home. Use the canonical project
-      # path, as the other SF-hosted recipes do: the short
-      # downloads.sourceforge.net/freetype/ form serves an HTML interstitial the
-      # downloader can save by mistake.
-      url = [
-        "https://download.savannah.gnu.org/releases/freetype/freetype-%{version}.tar.xz",
-        "https://downloads.sourceforge.net/project/freetype/freetype2/%{version}/freetype-%{version}.tar.xz",
-        "https://sourceforge.net/projects/freetype/files/freetype2/%{version}/freetype-%{version}.tar.xz/download",
-        "https://tarballs.nixos.org/sha256/%{hash}",
-      ],
-    },
-  }
+  let freetype_src = fun version =>
+    fun hash =>
+      {
+        name = "freetype-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          # SourceForge is freetype's other upstream home. Use the canonical project
+          # path, as the other SF-hosted recipes do: the short
+          # downloads.sourceforge.net/freetype/ form serves an HTML interstitial the
+          # downloader can save by mistake.
+          url = [
+            "https://download.savannah.gnu.org/releases/freetype/freetype-%{version}.tar.xz",
+            "https://downloads.sourceforge.net/project/freetype/freetype2/%{version}/freetype-%{version}.tar.xz",
+            "https://sourceforge.net/projects/freetype/files/freetype2/%{version}/freetype-%{version}.tar.xz/download",
+            "https://tarballs.nixos.org/sha256/%{hash}",
+          ],
+        },
+      }
   in
 
   # harfbuzz is disabled to break the freetype<->harfbuzz cycle (we don't build

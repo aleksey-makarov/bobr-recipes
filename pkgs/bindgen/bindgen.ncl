@@ -1,17 +1,18 @@
 # bindgen-cli is a build-only command used by Mesa's Rust NVK code. Its exact
 # crate dependency graph is vendored from the upstream release lockfile by the
 # generic Cargo builder.
-
 fun pkgs =>
-  let bindgen_src = fun version => fun hash => {
-    name = "bindgen-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://static.crates.io/crates/bindgen-cli/bindgen-cli-%{version}.crate",
-    },
-  }
+  let bindgen_src = fun version =>
+    fun hash =>
+      {
+        name = "bindgen-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://static.crates.io/crates/bindgen-cli/bindgen-cli-%{version}.crate",
+        },
+      }
   in
 
   let bindgen = {

@@ -1,14 +1,15 @@
 fun pkgs =>
-  let libdecor_src = fun version => fun hash => {
-    name = "libdecor-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url =
-        "https://gitlab.freedesktop.org/libdecor/libdecor/-/archive/%{version}/libdecor-%{version}.tar.gz",
-    },
-  }
+  let libdecor_src = fun version =>
+    fun hash =>
+      {
+        name = "libdecor-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://gitlab.freedesktop.org/libdecor/libdecor/-/archive/%{version}/libdecor-%{version}.tar.gz",
+        },
+      }
   in
 
   let libdecor = {

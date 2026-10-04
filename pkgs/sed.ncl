@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let sed_src = fun version => fun hash => {
-    name = "sed-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/sed/sed-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/sed/sed-%{version}.tar.xz",
-      ],
-    },
-  }
+  let sed_src = fun version =>
+    fun hash =>
+      {
+        name = "sed-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/sed/sed-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/sed/sed-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let sed_gen1 = {

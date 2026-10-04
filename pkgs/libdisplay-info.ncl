@@ -1,14 +1,15 @@
-
 fun pkgs =>
-  let libdisplay_info_src = fun version => fun hash => {
-    name = "libdisplay-info-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/%{version}/downloads/libdisplay-info-%{version}.tar.xz",
-    },
-  }
+  let libdisplay_info_src = fun version =>
+    fun hash =>
+      {
+        name = "libdisplay-info-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/%{version}/downloads/libdisplay-info-%{version}.tar.xz",
+        },
+      }
   in
 
   # EDID / DisplayID parsing library, required by weston 15's DRM backend.

@@ -1,14 +1,15 @@
 fun pkgs =>
-  let sdl2_compat_src = fun version => fun hash => {
-    name = "sdl2-compat-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url =
-        "https://github.com/libsdl-org/sdl2-compat/archive/refs/tags/release-%{version}.tar.gz",
-    },
-  }
+  let sdl2_compat_src = fun version =>
+    fun hash =>
+      {
+        name = "sdl2-compat-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/libsdl-org/sdl2-compat/archive/refs/tags/release-%{version}.tar.gz",
+        },
+      }
   in
 
   let sdl2_compat = {

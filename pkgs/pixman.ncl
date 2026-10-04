@@ -1,17 +1,18 @@
-
 fun pkgs =>
-  let pixman_src = fun version => fun hash => {
-    name = "pixman-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://www.cairographics.org/releases/pixman-%{version}.tar.gz",
-        "https://downloads.yoctoproject.org/mirror/sources/pixman-%{version}.tar.gz",
-      ],
-    },
-  }
+  let pixman_src = fun version =>
+    fun hash =>
+      {
+        name = "pixman-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://www.cairographics.org/releases/pixman-%{version}.tar.gz",
+            "https://downloads.yoctoproject.org/mirror/sources/pixman-%{version}.tar.gz",
+          ],
+        },
+      }
   in
 
   let pixman = {

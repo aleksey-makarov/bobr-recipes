@@ -1,16 +1,18 @@
 fun pkgs =>
-  let gmp_src = fun version => fun hash => {
-    name = "gmp-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/gmp/gmp-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/gmp/gmp-%{version}.tar.xz",
-      ],
-    },
-  }
+  let gmp_src = fun version =>
+    fun hash =>
+      {
+        name = "gmp-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/gmp/gmp-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/gmp/gmp-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let gmp = {

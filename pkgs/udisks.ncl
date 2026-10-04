@@ -63,4 +63,4 @@ fun pkgs =>
   }
   in
 
-  { include [ udisks ] }
+  { include [udisks] }

@@ -1,14 +1,15 @@
-
 fun pkgs =>
-  let wayland_protocols_src = fun version => fun hash => {
-    name = "wayland-protocols-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/%{version}/downloads/wayland-protocols-%{version}.tar.xz",
-    },
-  }
+  let wayland_protocols_src = fun version =>
+    fun hash =>
+      {
+        name = "wayland-protocols-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/%{version}/downloads/wayland-protocols-%{version}.tar.xz",
+        },
+      }
   in
 
   # Protocol XML + pkg-config data only (no libraries). Needs wayland-scanner

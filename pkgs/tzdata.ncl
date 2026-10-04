@@ -107,4 +107,4 @@ fun pkgs =>
   }
   in
 
-  { include [ tzdata ] }
+  { include [tzdata] }

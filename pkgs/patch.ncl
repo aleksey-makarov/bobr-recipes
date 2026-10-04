@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let patch_src = fun version => fun hash => {
-    name = "patch-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/patch/patch-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/patch/patch-%{version}.tar.xz",
-      ],
-    },
-  }
+  let patch_src = fun version =>
+    fun hash =>
+      {
+        name = "patch-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/patch/patch-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/patch/patch-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let patch_gen1 = {

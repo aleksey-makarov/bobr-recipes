@@ -2,7 +2,6 @@
 # (png/tiff/jpeg loaders are built into gdk in GTK4, no toggle to skip tiff).
 # Only zlib + jpeg codecs; other optional codecs and the C++ wrapper are off.
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

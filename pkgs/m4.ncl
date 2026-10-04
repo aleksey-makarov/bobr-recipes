@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let m4_src = fun version => fun hash => {
-    name = "m4-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/m4/m4-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/m4/m4-%{version}.tar.xz",
-      ],
-    },
-  }
+  let m4_src = fun version =>
+    fun hash =>
+      {
+        name = "m4-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/m4/m4-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/m4/m4-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let m4_gen1 = {

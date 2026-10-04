@@ -1,15 +1,17 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let zstd_src = fun version => fun hash => {
-    name = "zstd-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/facebook/zstd/releases/download/v%{version}/zstd-%{version}.tar.gz",
-    },
-  }
+  let zstd_src = fun version =>
+    fun hash =>
+      {
+        name = "zstd-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/facebook/zstd/releases/download/v%{version}/zstd-%{version}.tar.gz",
+        },
+      }
   in
 
   let zstd = {

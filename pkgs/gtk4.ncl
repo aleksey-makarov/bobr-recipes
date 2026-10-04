@@ -4,7 +4,6 @@ let recipe = import "../recipe-lib.ncl" in
 # a Rust lib) off. Demos built for the 6a validation (gtk4-demo). Print/media/
 # cloud/colord/sysprof/tracker off. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
-
 let branch = recipe.version_prefix 2 in
 
 fun pkgs =>

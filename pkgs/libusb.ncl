@@ -1,7 +1,6 @@
 # libusb -- USB access library, needed by libgusb (-> colord -> mutter). udev
 # hotplug off (device enumeration via sysfs) to avoid a libudev build dep here.
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

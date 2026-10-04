@@ -1,15 +1,17 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let elfutils_src = fun version => fun hash => {
-    name = "elfutils-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://sourceware.org/ftp/elfutils/%{version}/elfutils-%{version}.tar.bz2",
-    },
-  }
+  let elfutils_src = fun version =>
+    fun hash =>
+      {
+        name = "elfutils-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://sourceware.org/ftp/elfutils/%{version}/elfutils-%{version}.tar.bz2",
+        },
+      }
   in
 
   let elfutils = {
@@ -33,11 +35,14 @@ fun pkgs =>
       # own extra build deps: bzip2/pkgconf (gen1, this is a gen1-stage build) and
       # zlib, which --with-zlib links.
       _rootfs =
-        recipe.bootstrap_toolchain_rootfs pkgs "elfutils-build-rootfs" [
-          pkgs.bzip2_gen1,
-          pkgs.pkgconf_gen1,
-          pkgs.zlib,
-        ],
+        recipe.bootstrap_toolchain_rootfs
+          pkgs
+          "elfutils-build-rootfs"
+          [
+            pkgs.bzip2_gen1,
+            pkgs.pkgconf_gen1,
+            pkgs.zlib,
+          ],
       source = elfutils_src version source_object_hash,
     },
   }

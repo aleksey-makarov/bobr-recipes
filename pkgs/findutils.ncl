@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let findutils_src = fun version => fun hash => {
-    name = "findutils-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/findutils/findutils-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/findutils/findutils-%{version}.tar.xz",
-      ],
-    },
-  }
+  let findutils_src = fun version =>
+    fun hash =>
+      {
+        name = "findutils-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/findutils/findutils-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/findutils/findutils-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let findutils_gen1 = {

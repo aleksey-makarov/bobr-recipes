@@ -1,29 +1,33 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let systemd_src = fun version => fun hash => {
-    name = "systemd-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/systemd/systemd/archive/v%{version}/systemd-%{version}.tar.gz",
-    },
-  }
+  let systemd_src = fun version =>
+    fun hash =>
+      {
+        name = "systemd-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/systemd/systemd/archive/v%{version}/systemd-%{version}.tar.gz",
+        },
+      }
   in
 
-  let systemd_man_pages_src = fun version => fun hash => {
-    name = "systemd-man-pages-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-%{version}.tar.xz",
-        "https://ftp2.osuosl.org/pub/blfs/conglomeration/systemd/systemd-man-pages-%{version}.tar.xz",
-      ],
-    },
-  }
+  let systemd_man_pages_src = fun version =>
+    fun hash =>
+      {
+        name = "systemd-man-pages-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-%{version}.tar.xz",
+            "https://ftp2.osuosl.org/pub/blfs/conglomeration/systemd/systemd-man-pages-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let systemd = {
@@ -139,12 +143,14 @@ fun pkgs =>
   in
 
   let systemd_libs =
-    recipe.split.libs systemd [
-      "usr/lib/libsystemd.so*",
-      "usr/lib/libudev.so*",
-      "usr/lib/libsystemd-shared-*.so",
-      "usr/lib/systemd/libsystemd-shared-*.so",
-    ]
+    recipe.split.libs
+      systemd
+      [
+        "usr/lib/libsystemd.so*",
+        "usr/lib/libudev.so*",
+        "usr/lib/libsystemd-shared-*.so",
+        "usr/lib/systemd/libsystemd-shared-*.so",
+      ]
     & {
       deps = {
         build = [],

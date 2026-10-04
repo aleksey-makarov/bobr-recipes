@@ -1,13 +1,15 @@
 fun pkgs =>
-  let rsync_src = fun version => fun hash => {
-    name = "rsync-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://download.samba.org/pub/rsync/src/rsync-%{version}.tar.gz",
-    },
-  }
+  let rsync_src = fun version =>
+    fun hash =>
+      {
+        name = "rsync-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://download.samba.org/pub/rsync/src/rsync-%{version}.tar.gz",
+        },
+      }
   in
 
   let rsync = {

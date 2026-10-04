@@ -4,7 +4,6 @@ let recipe = import "../recipe-lib.ncl" in
 # .gschema.xml install to /usr/share/glib-2.0/schemas and are compiled by the
 # qemu_gnome_rootfs finalize step. `version`/`source_object_hash` are node fields (overridable),
 # as in linux.ncl.
-
 let branch = recipe.version_prefix 1 in
 
 fun pkgs =>

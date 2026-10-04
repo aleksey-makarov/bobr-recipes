@@ -3,18 +3,20 @@
 # SIMD targets.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let libfyaml_src = fun version => fun hash => {
-    name = "libfyaml-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://github.com/pantoniou/libfyaml/releases/download/v%{version}/libfyaml-%{version}.tar.gz",
-        "https://downloads.yoctoproject.org/mirror/sources/libfyaml-%{version}.tar.gz",
-      ],
-    },
-  }
+  let libfyaml_src = fun version =>
+    fun hash =>
+      {
+        name = "libfyaml-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://github.com/pantoniou/libfyaml/releases/download/v%{version}/libfyaml-%{version}.tar.gz",
+            "https://downloads.yoctoproject.org/mirror/sources/libfyaml-%{version}.tar.gz",
+          ],
+        },
+      }
   in
 
   let libfyaml = {

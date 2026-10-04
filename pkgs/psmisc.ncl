@@ -1,16 +1,18 @@
 fun pkgs =>
-  let psmisc_src = fun version => fun hash => {
-    name = "psmisc-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://downloads.sourceforge.net/project/psmisc/psmisc/psmisc-%{version}.tar.xz",
-        "https://sourceforge.net/projects/psmisc/files/psmisc/psmisc-%{version}.tar.xz/download",
-      ],
-    },
-  }
+  let psmisc_src = fun version =>
+    fun hash =>
+      {
+        name = "psmisc-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://downloads.sourceforge.net/project/psmisc/psmisc/psmisc-%{version}.tar.xz",
+            "https://sourceforge.net/projects/psmisc/files/psmisc/psmisc-%{version}.tar.xz/download",
+          ],
+        },
+      }
   in
 
   let psmisc = {

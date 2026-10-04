@@ -42,4 +42,4 @@ fun pkgs =>
   }
   in
 
-  { include [ popt ] }
+  { include [popt] }

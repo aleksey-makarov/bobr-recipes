@@ -2,15 +2,17 @@
 # backend. Build-only module.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let python_wheel_src = fun version => fun hash => {
-    name = "python-wheel-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://files.pythonhosted.org/packages/source/w/wheel/wheel-%{version}.tar.gz",
-    },
-  }
+  let python_wheel_src = fun version =>
+    fun hash =>
+      {
+        name = "python-wheel-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://files.pythonhosted.org/packages/source/w/wheel/wheel-%{version}.tar.gz",
+        },
+      }
   in
 
   {

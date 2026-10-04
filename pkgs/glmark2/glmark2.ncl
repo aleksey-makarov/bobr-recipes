@@ -1,14 +1,15 @@
 fun pkgs =>
-  let glmark2_src = fun version => fun hash => {
-    name = "glmark2-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url =
-        "https://github.com/glmark2/glmark2/archive/refs/tags/%{version}.tar.gz",
-    },
-  }
+  let glmark2_src = fun version =>
+    fun hash =>
+      {
+        name = "glmark2-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/glmark2/glmark2/archive/refs/tags/%{version}.tar.gz",
+        },
+      }
   in
 
   let data_path_environment_patch = {

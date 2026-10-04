@@ -1,6 +1,5 @@
 # fribidi -- Unicode bidirectional algorithm, used by pango.
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

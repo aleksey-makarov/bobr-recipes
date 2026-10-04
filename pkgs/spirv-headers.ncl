@@ -1,13 +1,15 @@
 fun pkgs =>
-  let spirv_headers_src = fun sdk_version => fun hash => {
-    name = "spirv-headers-src-%{sdk_version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/KhronosGroup/SPIRV-Headers/archive/refs/tags/vulkan-sdk-%{sdk_version}.tar.gz",
-    },
-  }
+  let spirv_headers_src = fun sdk_version =>
+    fun hash =>
+      {
+        name = "spirv-headers-src-%{sdk_version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/KhronosGroup/SPIRV-Headers/archive/refs/tags/vulkan-sdk-%{sdk_version}.tar.gz",
+        },
+      }
   in
 
   # Keep the SPIR-V headers on the same Vulkan SDK release line as the

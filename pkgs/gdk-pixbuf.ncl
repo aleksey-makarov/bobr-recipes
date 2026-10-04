@@ -2,7 +2,6 @@ let recipe = import "../recipe-lib.ncl" in
 # gdk-pixbuf -- image loading for GTK4. PNG/JPEG loaders (libpng/libjpeg-turbo);
 # tiff off (no libtiff); glycin off (a Rust loader -- avoid Rust in this tier).
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 let branch = recipe.version_prefix 2 in
 
 fun pkgs =>

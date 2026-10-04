@@ -1,14 +1,15 @@
 fun pkgs =>
-  let libglvnd_src = fun version => fun hash => {
-    name = "libglvnd-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url =
-        "https://github.com/NVIDIA/libglvnd/archive/refs/tags/v%{version}.tar.gz",
-    },
-  }
+  let libglvnd_src = fun version =>
+    fun hash =>
+      {
+        name = "libglvnd-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/NVIDIA/libglvnd/archive/refs/tags/v%{version}.tar.gz",
+        },
+      }
   in
 
   # Vendor-neutral EGL/OpenGL dispatch for the host graphics stack. X11 and

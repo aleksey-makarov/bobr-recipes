@@ -1,15 +1,17 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let zlib_src = fun version => fun hash => {
-    name = "zlib-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://zlib.net/fossils/zlib-%{version}.tar.gz",
-    },
-  }
+  let zlib_src = fun version =>
+    fun hash =>
+      {
+        name = "zlib-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://zlib.net/fossils/zlib-%{version}.tar.gz",
+        },
+      }
   in
 
   let zlib = {

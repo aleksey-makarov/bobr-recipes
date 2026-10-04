@@ -1,15 +1,17 @@
 let br = import "../../build-rootfs.ncl" in
 
 fun pkgs =>
-  let bzip2_src = fun version => fun hash => {
-    name = "bzip2-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://www.sourceware.org/pub/bzip2/bzip2-%{version}.tar.gz",
-    },
-  }
+  let bzip2_src = fun version =>
+    fun hash =>
+      {
+        name = "bzip2-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://www.sourceware.org/pub/bzip2/bzip2-%{version}.tar.gz",
+        },
+      }
   in
 
   let bzip2_install_docs_patch = {
@@ -26,33 +28,34 @@ fun pkgs =>
   # bzip2's Makefile installs via PREFIX (not DESTDIR), so both bzip2 nodes use
   # MakefileStageRootfs: they install into /stage from a custom hook rather than
   # the synthetic DESTDIR install, and TreeMove then re-roots /stage -> /.
-  let bzip2_config = fun version => {
-    pre_build = {
-      name = "prepare_source",
-      run_as = "build-user",
-      argv = [
-        "/bin/sh",
-        "-ec",
-        # The install-docs patch is applied declaratively via the
-        # patch_install_docs input (see inputs); these seds and the shared-lib
-        # build run afterwards in pre_build.
-        m%"
+  let bzip2_config = fun version =>
+    {
+      pre_build = {
+        name = "prepare_source",
+        run_as = "build-user",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          # The install-docs patch is applied declaratively via the
+          # patch_install_docs input (see inputs); these seds and the shared-lib
+          # build run afterwards in pre_build.
+          m%"
           sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' Makefile
           sed -i 's@(PREFIX)/man@(PREFIX)/share/man@g' Makefile
           make -f Makefile-libbz2_so
           make clean
         "%,
-      ],
-    },
-    skip_install = true,
-    post_install = {
-      name = "install_runtime",
-      run_as = "root",
-      cwd = "@{build}/source",
-      argv = [
-        "/bin/sh",
-        "-ec",
-        m%"
+        ],
+      },
+      skip_install = true,
+      post_install = {
+        name = "install_runtime",
+        run_as = "root",
+        cwd = "@{build}/source",
+        argv = [
+          "/bin/sh",
+          "-ec",
+          m%"
           make PREFIX="/stage/usr" install
           mkdir -p "/stage/usr/lib" "/stage/usr/bin" "/stage/usr/include"
           cp -av libbz2.so.* "/stage/usr/lib/"
@@ -68,9 +71,9 @@ fun pkgs =>
           ln -sfv bzmore "/stage/usr/bin/bzless"
           rm -fv "/stage/usr/lib/libbz2.a"
         "%,
-      ],
-    },
-  }
+        ],
+      },
+    }
   in
 
   # bzip2-gen1 bootstraps the final userland, so it builds one stage earlier than

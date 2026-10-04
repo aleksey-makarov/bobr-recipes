@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let diffutils_src = fun version => fun hash => {
-    name = "diffutils-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/diffutils/diffutils-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/diffutils/diffutils-%{version}.tar.xz",
-      ],
-    },
-  }
+  let diffutils_src = fun version =>
+    fun hash =>
+      {
+        name = "diffutils-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/diffutils/diffutils-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/diffutils/diffutils-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let diffutils_gen1 = {

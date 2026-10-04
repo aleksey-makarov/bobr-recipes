@@ -1,16 +1,18 @@
 fun pkgs =>
-  let groff_src = fun version => fun hash => {
-    name = "groff-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/groff/groff-%{version}.tar.gz",
-        "https://mirrors.kernel.org/gnu/groff/groff-%{version}.tar.gz",
-      ],
-    },
-  }
+  let groff_src = fun version =>
+    fun hash =>
+      {
+        name = "groff-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/groff/groff-%{version}.tar.gz",
+            "https://mirrors.kernel.org/gnu/groff/groff-%{version}.tar.gz",
+          ],
+        },
+      }
   in
 
   let groff = {

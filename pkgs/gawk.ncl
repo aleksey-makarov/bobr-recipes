@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let gawk_src = fun version => fun hash => {
-    name = "gawk-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/gawk/gawk-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/gawk/gawk-%{version}.tar.xz",
-      ],
-    },
-  }
+  let gawk_src = fun version =>
+    fun hash =>
+      {
+        name = "gawk-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/gawk/gawk-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/gawk/gawk-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let gawk_gen1 = {

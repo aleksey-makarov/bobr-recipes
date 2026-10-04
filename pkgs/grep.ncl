@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let grep_src = fun version => fun hash => {
-    name = "grep-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/grep/grep-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/grep/grep-%{version}.tar.xz",
-      ],
-    },
-  }
+  let grep_src = fun version =>
+    fun hash =>
+      {
+        name = "grep-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/grep/grep-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/grep/grep-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let grep_gen1 = {

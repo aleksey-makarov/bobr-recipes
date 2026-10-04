@@ -2,17 +2,18 @@ let commit = "f60e50e887d3c49e91ac9b06d8199b36152632fa" in
 # kmscube has no releases; pin a git commit. The version carries the commit
 # date. The guest and host variants intentionally share the same source but
 # link against different Mesa stacks.
-
 fun pkgs =>
-  let kmscube_src = fun version => fun hash => {
-    name = "kmscube-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://gitlab.freedesktop.org/mesa/kmscube/-/archive/%{commit}/kmscube-%{commit}.tar.gz",
-    },
-  }
+  let kmscube_src = fun version =>
+    fun hash =>
+      {
+        name = "kmscube-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://gitlab.freedesktop.org/mesa/kmscube/-/archive/%{commit}/kmscube-%{commit}.tar.gz",
+        },
+      }
   in
 
   # Minimal DRM/KMS + GBM + EGL/GLES smoke test: `kmscube -D /dev/dri/card0`

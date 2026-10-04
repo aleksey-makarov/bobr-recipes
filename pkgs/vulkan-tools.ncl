@@ -1,14 +1,15 @@
-
 fun pkgs =>
-  let vulkan_tools_src = fun version => fun hash => {
-    name = "vulkan-tools-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/KhronosGroup/Vulkan-Tools/archive/refs/tags/vulkan-sdk-%{version}.tar.gz",
-    },
-  }
+  let vulkan_tools_src = fun version =>
+    fun hash =>
+      {
+        name = "vulkan-tools-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/KhronosGroup/Vulkan-Tools/archive/refs/tags/vulkan-sdk-%{version}.tar.gz",
+        },
+      }
   in
 
   # vulkaninfo (ICD/driver smoke) and vkcube (Vulkan render test) for validating

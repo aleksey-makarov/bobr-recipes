@@ -2,15 +2,17 @@
 # setuptools backend, MarkupSafe at runtime. Build-only module.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let python_mako_src = fun version => fun hash => {
-    name = "python-mako-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://files.pythonhosted.org/packages/source/M/Mako/mako-%{version}.tar.gz",
-    },
-  }
+  let python_mako_src = fun version =>
+    fun hash =>
+      {
+        name = "python-mako-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://files.pythonhosted.org/packages/source/M/Mako/mako-%{version}.tar.gz",
+        },
+      }
   in
 
   {

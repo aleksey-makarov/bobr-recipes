@@ -50,4 +50,4 @@ fun pkgs =>
   }
   in
 
-  { include [ libgtop ] }
+  { include [libgtop] }

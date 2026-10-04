@@ -2,15 +2,17 @@ let recipe = import "../recipe-lib.ncl" in
 let br = import "../build-rootfs.ncl" in
 
 fun pkgs =>
-  let xz_src = fun version => fun hash => {
-    name = "xz-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/tukaani-project/xz/releases/download/v%{version}/xz-%{version}.tar.xz",
-    },
-  }
+  let xz_src = fun version =>
+    fun hash =>
+      {
+        name = "xz-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/tukaani-project/xz/releases/download/v%{version}/xz-%{version}.tar.xz",
+        },
+      }
   in
 
   let xz_gen1 = {

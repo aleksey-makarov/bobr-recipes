@@ -1,7 +1,6 @@
 # libgudev -- GObject bindings for libudev (device enumeration), required by
 # colord and mutter. Wraps libudev from systemd. `version`/`source_object_hash` are node
 # fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

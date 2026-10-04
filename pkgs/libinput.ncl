@@ -1,14 +1,15 @@
-
 fun pkgs =>
-  let libinput_src = fun version => fun hash => {
-    name = "libinput-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://gitlab.freedesktop.org/libinput/libinput/-/archive/%{version}/libinput-%{version}.tar.gz",
-    },
-  }
+  let libinput_src = fun version =>
+    fun hash =>
+      {
+        name = "libinput-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://gitlab.freedesktop.org/libinput/libinput/-/archive/%{version}/libinput-%{version}.tar.gz",
+        },
+      }
   in
 
   # Input handling for the compositor. Needs libevdev and libudev (from

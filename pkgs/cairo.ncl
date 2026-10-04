@@ -1,17 +1,18 @@
-
 fun pkgs =>
-  let cairo_src = fun version => fun hash => {
-    name = "cairo-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://www.cairographics.org/releases/cairo-%{version}.tar.xz",
-        "https://sources.buildroot.net/cairo/cairo-%{version}.tar.xz",
-      ],
-    },
-  }
+  let cairo_src = fun version =>
+    fun hash =>
+      {
+        name = "cairo-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://www.cairographics.org/releases/cairo-%{version}.tar.xz",
+            "https://sources.buildroot.net/cairo/cairo-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   # Used by Weston's desktop-shell and reference clients (panel, terminal). We

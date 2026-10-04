@@ -2,7 +2,6 @@
 # so the daemon is off (-Ddaemon=false), which drops the heavy daemon deps
 # (gusb, sqlite, polkit, libgudev). Client lib needs glib + lcms2.
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

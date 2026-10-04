@@ -12,16 +12,17 @@ let recipe = import "../recipe-lib.ncl" in
   # accelerated-graphics + Vulkan stack, the kmscube DRM/EGL smoke test, fonts
   # and the cursor theme (pure data, not reachable via link deps), and the xkb
   # keymap data. Their runtime closures pull the rest of the stack automatically.
-  graphics_base_roots = fun pkgs => [
-    pkgs.qemu_rootfs,
-    pkgs.mesa_guest,
-    pkgs.vulkan_loader,
-    pkgs.vulkan_tools,
-    pkgs.kmscube_guest,
-    pkgs.dejavu,
-    pkgs.bibata_cursors,
-    pkgs.xkeyboard_config,
-  ],
+  graphics_base_roots = fun pkgs =>
+    [
+      pkgs.qemu_rootfs,
+      pkgs.mesa_guest,
+      pkgs.vulkan_loader,
+      pkgs.vulkan_tools,
+      pkgs.kmscube_guest,
+      pkgs.dejavu,
+      pkgs.bibata_cursors,
+      pkgs.xkeyboard_config,
+    ],
 
   # Finalize: regenerate the aggregate caches over the merged tree. These index
   # files are contributed by many packages and cannot be regenerated on the
@@ -39,20 +40,21 @@ let recipe = import "../recipe-lib.ncl" in
   # `label` names the node (`<label>-finalize`); `contents` is the merged
   # RootfsClosure to finalize.
   finalize = fun label =>
-    fun contents => {
-      name = "%{label}-finalize",
-      tag = "SandboxInstall",
-      config = {
-        script_config = {},
-        steps = [
-          {
-            name = "finalize_caches",
-            run_as = "root",
-            cwd = "/",
-            argv = [
-              "/bin/bash",
-              "-ec",
-              m%"
+    fun contents =>
+      {
+        name = "%{label}-finalize",
+        tag = "SandboxInstall",
+        config = {
+          script_config = {},
+          steps = [
+            {
+              name = "finalize_caches",
+              run_as = "root",
+              cwd = "/",
+              argv = [
+                "/bin/bash",
+                "-ec",
+                m%"
                 # Complete ld.so.cache over the whole tree (glibc ships none now).
                 # -X: write only the cache, do not recreate the version symlinks
                 # packages already installed.
@@ -100,12 +102,12 @@ let recipe = import "../recipe-lib.ncl" in
                   done
                 fi
               "%,
-            ],
-          },
-        ],
+              ],
+            },
+          ],
+        },
+        inputs = {
+          _rootfs = contents,
+        },
       },
-      inputs = {
-        _rootfs = contents,
-      },
-    },
 }

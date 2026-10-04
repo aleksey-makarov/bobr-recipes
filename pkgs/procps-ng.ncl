@@ -1,16 +1,18 @@
 fun pkgs =>
-  let procps_ng_src = fun version => fun hash => {
-    name = "procps-ng-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://downloads.sourceforge.net/project/procps-ng/Production/procps-ng-%{version}.tar.xz",
-        "https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-%{version}.tar.xz/download",
-      ],
-    },
-  }
+  let procps_ng_src = fun version =>
+    fun hash =>
+      {
+        name = "procps-ng-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://downloads.sourceforge.net/project/procps-ng/Production/procps-ng-%{version}.tar.xz",
+            "https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-%{version}.tar.xz/download",
+          ],
+        },
+      }
   in
 
   let procps_ng = {

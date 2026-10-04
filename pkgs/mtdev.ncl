@@ -1,14 +1,15 @@
-
 fun pkgs =>
-  let mtdev_src = fun version => fun hash => {
-    name = "mtdev-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://bitmath.org/code/mtdev/mtdev-%{version}.tar.bz2",
-    },
-  }
+  let mtdev_src = fun version =>
+    fun hash =>
+      {
+        name = "mtdev-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://bitmath.org/code/mtdev/mtdev-%{version}.tar.bz2",
+        },
+      }
   in
 
   # Multitouch protocol translation library; a required dependency of libinput.

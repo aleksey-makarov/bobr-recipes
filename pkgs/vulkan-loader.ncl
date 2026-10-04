@@ -1,14 +1,15 @@
-
 fun pkgs =>
-  let vulkan_loader_src = fun version => fun hash => {
-    name = "vulkan-loader-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/vulkan-sdk-%{version}.tar.gz",
-    },
-  }
+  let vulkan_loader_src = fun version =>
+    fun hash =>
+      {
+        name = "vulkan-loader-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/vulkan-sdk-%{version}.tar.gz",
+        },
+      }
   in
 
   # The Vulkan loader (libvulkan.so.1): dispatches to ICDs listed in

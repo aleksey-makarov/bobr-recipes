@@ -1,17 +1,19 @@
 fun pkgs =>
-  let man_db_src = fun version => fun hash => {
-    name = "man-db-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://download.savannah.gnu.org/releases/man-db/man-db-%{version}.tar.xz",
-        "https://deb.debian.org/debian/pool/main/m/man-db/man-db_%{version}.orig.tar.xz",
-        "https://tarballs.nixos.org/sha256/%{hash}",
-      ],
-    },
-  }
+  let man_db_src = fun version =>
+    fun hash =>
+      {
+        name = "man-db-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://download.savannah.gnu.org/releases/man-db/man-db-%{version}.tar.xz",
+            "https://deb.debian.org/debian/pool/main/m/man-db/man-db_%{version}.orig.tar.xz",
+            "https://tarballs.nixos.org/sha256/%{hash}",
+          ],
+        },
+      }
   in
 
   let man_db = {

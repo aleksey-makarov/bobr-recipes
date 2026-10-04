@@ -325,8 +325,7 @@ fun pkgs =>
   # additive install into / would modify lower-layer files.
   let lower_autotools_stage_rootfs_node = fun node =>
     let staged =
-      lower_autotools_stage_install_node
-        (std.record.update "name" (node.name ++ "-staged") node)
+      lower_autotools_stage_install_node (std.record.update "name" (node.name ++ "-staged") node)
     in
     {
       name = node.name,
@@ -359,8 +358,7 @@ fun pkgs =>
   # recipes whose output overlaps the build rootfs.
   let lower_makefile_stage_rootfs_node = fun node =>
     let staged =
-      lower_makefile_stage_install_node
-        (std.record.update "name" (node.name ++ "-staged") node)
+      lower_makefile_stage_install_node (std.record.update "name" (node.name ++ "-staged") node)
     in
     {
       name = node.name,

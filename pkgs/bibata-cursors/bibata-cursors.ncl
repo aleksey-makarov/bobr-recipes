@@ -1,15 +1,17 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let bibata_cursors_src = fun version => fun hash => {
-    name = "bibata-cursors-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/ful1e5/Bibata_Cursor/releases/download/v%{version}/Bibata-Modern-Classic.tar.xz",
-    },
-  }
+  let bibata_cursors_src = fun version =>
+    fun hash =>
+      {
+        name = "bibata-cursors-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/ful1e5/Bibata_Cursor/releases/download/v%{version}/Bibata-Modern-Classic.tar.xz",
+        },
+      }
   in
 
   let buildscript_bibata_cursors = {

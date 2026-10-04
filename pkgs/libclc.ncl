@@ -7,15 +7,17 @@
 # the matched prebuilt LLVM tools without importing LLVMExports.cmake, whose
 # upstream package describes every large standalone LLVM executable.
 fun pkgs =>
-  let libclc_src = fun version => fun hash => {
-    name = "libclc-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}/llvm-project-%{version}.src.tar.xz",
-    },
-  }
+  let libclc_src = fun version =>
+    fun hash =>
+      {
+        name = "libclc-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}/llvm-project-%{version}.src.tar.xz",
+        },
+      }
   in
 
   let libclc = {

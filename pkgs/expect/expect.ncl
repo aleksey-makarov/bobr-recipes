@@ -1,16 +1,18 @@
 fun pkgs =>
-  let expect_src = fun version => fun hash => {
-    name = "expect-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://downloads.sourceforge.net/project/expect/Expect/%{version}/expect%{version}.tar.gz",
-        "https://sourceforge.net/projects/expect/files/Expect/%{version}/expect%{version}.tar.gz/download",
-      ],
-    },
-  }
+  let expect_src = fun version =>
+    fun hash =>
+      {
+        name = "expect-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://downloads.sourceforge.net/project/expect/Expect/%{version}/expect%{version}.tar.gz",
+            "https://sourceforge.net/projects/expect/files/Expect/%{version}/expect%{version}.tar.gz/download",
+          ],
+        },
+      }
   in
 
   let expect_gcc15_patch = {

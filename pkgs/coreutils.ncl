@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let coreutils_src = fun version => fun hash => {
-    name = "coreutils-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/coreutils/coreutils-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/coreutils/coreutils-%{version}.tar.xz",
-      ],
-    },
-  }
+  let coreutils_src = fun version =>
+    fun hash =>
+      {
+        name = "coreutils-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/coreutils/coreutils-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/coreutils/coreutils-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let coreutils_gen1 = {

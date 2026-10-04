@@ -3,16 +3,16 @@ let recipe = import "../recipe-lib.ncl" in
 fun pkgs =>
   let util_linux_src = fun version =>
     fun hash =>
-    let version_series = "2.41" in
-    {
-      name = "util-linux-src-%{version}",
-      tag = "Source",
-      object_hash = hash,
-      origin = {
-        tag = "Http",
-        url = "https://www.kernel.org/pub/linux/utils/util-linux/v%{version_series}/util-linux-%{version}.tar.xz",
-      },
-    }
+      let version_series = "2.41" in
+      {
+        name = "util-linux-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://www.kernel.org/pub/linux/utils/util-linux/v%{version_series}/util-linux-%{version}.tar.xz",
+        },
+      }
   in
 
   let util_linux = {

@@ -1,13 +1,15 @@
 fun pkgs =>
-  let file_src = fun version => fun hash => {
-    name = "file-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://astron.com/pub/file/file-%{version}.tar.gz",
-    },
-  }
+  let file_src = fun version =>
+    fun hash =>
+      {
+        name = "file-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://astron.com/pub/file/file-%{version}.tar.gz",
+        },
+      }
   in
 
   let file = {

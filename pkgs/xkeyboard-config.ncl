@@ -1,17 +1,18 @@
-
 fun pkgs =>
-  let xkeyboard_config_src = fun version => fun hash => {
-    name = "xkeyboard-config-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://www.x.org/releases/individual/data/xkeyboard-config/xkeyboard-config-%{version}.tar.xz",
-        "https://downloads.yoctoproject.org/mirror/sources/xkeyboard-config-%{version}.tar.xz",
-      ],
-    },
-  }
+  let xkeyboard_config_src = fun version =>
+    fun hash =>
+      {
+        name = "xkeyboard-config-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://www.x.org/releases/individual/data/xkeyboard-config/xkeyboard-config-%{version}.tar.xz",
+            "https://downloads.yoctoproject.org/mirror/sources/xkeyboard-config-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   # Keymap data consumed by libxkbcommon at runtime (installed under

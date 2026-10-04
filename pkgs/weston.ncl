@@ -1,14 +1,15 @@
-
 fun pkgs =>
-  let weston_src = fun version => fun hash => {
-    name = "weston-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://gitlab.freedesktop.org/wayland/weston/-/releases/%{version}/downloads/weston-%{version}.tar.xz",
-    },
-  }
+  let weston_src = fun version =>
+    fun hash =>
+      {
+        name = "weston-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://gitlab.freedesktop.org/wayland/weston/-/releases/%{version}/downloads/weston-%{version}.tar.xz",
+        },
+      }
   in
 
   # Reference Wayland compositor, used to validate the graphical session path

@@ -3,18 +3,18 @@ let br = import "../build-rootfs.ncl" in
 fun pkgs =>
   let autoconf_src = fun version =>
     fun hash =>
-    {
-      name = "autoconf-src-%{version}",
-      tag = "Source",
-      object_hash = hash,
-      origin = {
-        tag = "Http",
-        url = [
-          "https://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz",
-          "https://mirrors.kernel.org/gnu/autoconf/autoconf-%{version}.tar.xz",
-        ],
-      },
-    }
+      {
+        name = "autoconf-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/autoconf/autoconf-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   # Deps-derived build rootfs, replacing the curated system_rootfs_2: the native

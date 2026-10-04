@@ -2,7 +2,6 @@
 # autotools), built with the Cmake builder. SIMD is off to avoid a nasm build
 # dep. `version`/`source_object_hash` are node fields (overridable), as in
 # linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

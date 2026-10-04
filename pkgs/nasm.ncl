@@ -2,7 +2,6 @@
 # probes for it; it never ships in a runtime rootfs. Plain autotools, so the
 # `Autotools` synthetic builder handles it out of the box.
 # `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let nasm_src = fun version =>
     fun hash =>

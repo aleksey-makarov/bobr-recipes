@@ -1,17 +1,19 @@
 fun pkgs =>
-  let libpipeline_src = fun version => fun hash => {
-    name = "libpipeline-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://download.savannah.gnu.org/releases/libpipeline/libpipeline-%{version}.tar.gz",
-        "https://deb.debian.org/debian/pool/main/libp/libpipeline/libpipeline_%{version}.orig.tar.gz",
-        "https://tarballs.nixos.org/sha256/%{hash}",
-      ],
-    },
-  }
+  let libpipeline_src = fun version =>
+    fun hash =>
+      {
+        name = "libpipeline-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://download.savannah.gnu.org/releases/libpipeline/libpipeline-%{version}.tar.gz",
+            "https://deb.debian.org/debian/pool/main/libp/libpipeline/libpipeline_%{version}.orig.tar.gz",
+            "https://tarballs.nixos.org/sha256/%{hash}",
+          ],
+        },
+      }
   in
 
   let libpipeline = {

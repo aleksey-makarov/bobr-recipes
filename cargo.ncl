@@ -21,24 +21,22 @@ let san = fun s =>
   |> std.string.replace "+" "_"
 in
 let is_crates_io = fun p =>
-  (std.record.get_or "source" "" p)
-  == "registry+https://github.com/rust-lang/crates.io-index"
+  (std.record.get_or "source" "" p) == "registry+https://github.com/rust-lang/crates.io-index"
 in
 let crate_sources_fn = fun lock =>
   lock.package
   |> std.array.filter is_crates_io
-  |> std.array.map
-    (fun p =>
-      {
-        name = "crate_%{san p.name}_%{san p.version}",
-        tag = "Source",
-        object_hash = p.checksum,
-        origin = {
-          tag = "Http",
-          url = "https://static.crates.io/crates/%{p.name}/%{p.name}-%{p.version}.crate",
-        },
-      }
-    )
+  |> std.array.map (fun p =>
+    {
+      name = "crate_%{san p.name}_%{san p.version}",
+      tag = "Source",
+      object_hash = p.checksum,
+      origin = {
+        tag = "Http",
+        url = "https://static.crates.io/crates/%{p.name}/%{p.name}-%{p.version}.crate",
+      },
+    }
+  )
 in
 {
   crate_sources = crate_sources_fn,

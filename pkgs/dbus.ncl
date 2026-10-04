@@ -1,16 +1,18 @@
 fun pkgs =>
-  let dbus_src = fun version => fun hash => {
-    name = "dbus-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://dbus.freedesktop.org/releases/dbus/dbus-%{version}.tar.xz",
-        "https://sources.buildroot.net/dbus/dbus-%{version}.tar.xz",
-      ],
-    },
-  }
+  let dbus_src = fun version =>
+    fun hash =>
+      {
+        name = "dbus-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://dbus.freedesktop.org/releases/dbus/dbus-%{version}.tar.xz",
+            "https://sources.buildroot.net/dbus/dbus-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let dbus = {

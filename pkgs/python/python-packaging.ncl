@@ -2,15 +2,17 @@
 # ecosystem (meson imports it). flit_core backend. Build-only module.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let python_packaging_src = fun version => fun hash => {
-    name = "python-packaging-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://files.pythonhosted.org/packages/source/p/packaging/packaging-%{version}.tar.gz",
-    },
-  }
+  let python_packaging_src = fun version =>
+    fun hash =>
+      {
+        name = "python-packaging-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://files.pythonhosted.org/packages/source/p/packaging/packaging-%{version}.tar.gz",
+        },
+      }
   in
 
   {

@@ -8,7 +8,6 @@
 # tag.
 
 # --- small shared contracts --------------------------------------------------
-
 let NonEmptyArray =
   std.contract.from_predicate (fun value => std.array.length value > 0)
 in
@@ -55,14 +54,13 @@ let RecipeDeps = {
 in
 
 # --- Source origins ----------------------------------------------------------
-
 let ArchiveFormat =
   std.contract.from_predicate (fun value => std.array.elem value ["tar-gz", "tar-xz", "tar-bz2", "zip"])
 in
 let UrlField =
   std.contract.any_of [
     String,
-    std.contract.all_of [Array String, NonEmptyArray],
+    std.contract.all_of [ Array String, NonEmptyArray],
   ]
 in
 let is_relative_source_path = fun value =>
@@ -169,7 +167,6 @@ let SourceRecipe = {
 in
 
 # --- per-tag config contracts ------------------------------------------------
-
 let FsTreeInstallAttrs = {
   uid | Number | optional,
   gid | Number | optional,
@@ -400,9 +397,10 @@ let HostBundleEnvironmentRule = {
   host_default | Array String | optional,
 }
 in
-let HostBundleEnvironment = {
-  _ | HostBundleEnvironmentRule
-}
+let HostBundleEnvironment =
+  {
+    _ | HostBundleEnvironmentRule
+  }
 in
 let HostBundleArgument =
   std.contract.any_of [
@@ -417,9 +415,10 @@ let HostBundleTool = {
   environment | HostBundleEnvironment | optional,
 }
 in
-let HostBundleTools = {
-  _ | HostBundleTool
-}
+let HostBundleTools =
+  {
+    _ | HostBundleTool
+  }
 in
 let HostBundleConfig = {
   arch | HostBundleArch,
@@ -433,7 +432,6 @@ let HostBundleConfig = {
 in
 
 # --- per-tag inputs shapes (checked by the deep validator only) --------------
-
 let GroupInputsShape = NonEmptyRecord
 in
 let TreeInputs = {}

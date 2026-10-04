@@ -1,16 +1,16 @@
 fun pkgs =>
   let expat_src = fun version =>
     fun hash =>
-    let release_tag = "R_" ++ std.string.replace "." "_" version in
-    {
-      name = "expat-src-%{version}",
-      tag = "Source",
-      object_hash = hash,
-      origin = {
-        tag = "Http",
-        url = "https://github.com/libexpat/libexpat/releases/download/%{release_tag}/expat-%{version}.tar.xz",
-      },
-    }
+      let release_tag = "R_" ++ std.string.replace "." "_" version in
+      {
+        name = "expat-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/libexpat/libexpat/releases/download/%{release_tag}/expat-%{version}.tar.xz",
+        },
+      }
   in
 
   let expat = {

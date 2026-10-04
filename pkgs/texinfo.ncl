@@ -1,16 +1,18 @@
 fun pkgs =>
-  let texinfo_src = fun version => fun hash => {
-    name = "texinfo-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/texinfo/texinfo-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/texinfo/texinfo-%{version}.tar.xz",
-      ],
-    },
-  }
+  let texinfo_src = fun version =>
+    fun hash =>
+      {
+        name = "texinfo-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/texinfo/texinfo-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/texinfo/texinfo-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let texinfo = {

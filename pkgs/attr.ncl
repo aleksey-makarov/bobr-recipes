@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let attr_src = fun version => fun hash => {
-    name = "attr-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://download.savannah.gnu.org/releases/attr/attr-%{version}.tar.xz",
-        "https://deb.debian.org/debian/pool/main/a/attr/attr_%{version}.orig.tar.xz",
-      ],
-    },
-  }
+  let attr_src = fun version =>
+    fun hash =>
+      {
+        name = "attr-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://download.savannah.gnu.org/releases/attr/attr-%{version}.tar.xz",
+            "https://deb.debian.org/debian/pool/main/a/attr/attr_%{version}.orig.tar.xz",
+          ],
+        },
+      }
   in
 
   let attr = {

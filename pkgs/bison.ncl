@@ -1,18 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let bison_src = fun version => fun hash => {
-    name = "bison-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/bison/bison-%{version}.tar.xz",
-        "https://mirrors.kernel.org/gnu/bison/bison-%{version}.tar.xz",
-      ],
-    },
-  }
+  let bison_src = fun version =>
+    fun hash =>
+      {
+        name = "bison-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/bison/bison-%{version}.tar.xz",
+            "https://mirrors.kernel.org/gnu/bison/bison-%{version}.tar.xz",
+          ],
+        },
+      }
   in
 
   let bison_gen1 = {

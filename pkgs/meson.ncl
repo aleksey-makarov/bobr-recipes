@@ -4,15 +4,17 @@
 # the PythonModule tag (setuptools backend). See python/README.txt.
 # `version`/`source_object_hash` are node fields (overridable).
 fun pkgs =>
-  let meson_src = fun version => fun hash => {
-    name = "meson-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/mesonbuild/meson/releases/download/%{version}/meson-%{version}.tar.gz",
-    },
-  }
+  let meson_src = fun version =>
+    fun hash =>
+      {
+        name = "meson-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/mesonbuild/meson/releases/download/%{version}/meson-%{version}.tar.gz",
+        },
+      }
   in
 
   let meson = {
@@ -53,4 +55,4 @@ fun pkgs =>
   }
   in
 
-  { include [ meson ] }
+  { include [meson] }

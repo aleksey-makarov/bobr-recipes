@@ -6,7 +6,6 @@
 # binary. Because Cargo.lock pins exact versions, `version`, `source_object_hash`
 # and `cargo_lock` are coupled overridable fields -- to move versions an overlay
 # must override all three together.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

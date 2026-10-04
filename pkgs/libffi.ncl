@@ -1,15 +1,15 @@
 fun pkgs =>
   let libffi_src = fun version =>
     fun hash =>
-    {
-      name = "libffi-src-%{version}",
-      tag = "Source",
-      object_hash = hash,
-      origin = {
-        tag = "Http",
-        url = "https://github.com/libffi/libffi/releases/download/v%{version}/libffi-%{version}.tar.gz",
-      },
-    }
+      {
+        name = "libffi-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/libffi/libffi/releases/download/v%{version}/libffi-%{version}.tar.gz",
+        },
+      }
   in
 
   let libffi = {

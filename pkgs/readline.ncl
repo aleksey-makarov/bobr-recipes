@@ -1,16 +1,18 @@
 fun pkgs =>
-  let readline_src = fun version => fun hash => {
-    name = "readline-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = [
-        "https://ftp.gnu.org/gnu/readline/readline-%{version}.tar.gz",
-        "https://mirrors.kernel.org/gnu/readline/readline-%{version}.tar.gz",
-      ],
-    },
-  }
+  let readline_src = fun version =>
+    fun hash =>
+      {
+        name = "readline-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = [
+            "https://ftp.gnu.org/gnu/readline/readline-%{version}.tar.gz",
+            "https://mirrors.kernel.org/gnu/readline/readline-%{version}.tar.gz",
+          ],
+        },
+      }
   in
 
   let readline = {

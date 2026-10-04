@@ -1,13 +1,15 @@
 fun pkgs =>
-  let spirv_headers_llvm_src = fun revision => fun hash => {
-    name = "spirv-headers-llvm-src-%{revision}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/KhronosGroup/SPIRV-Headers/archive/%{revision}.tar.gz",
-    },
-  }
+  let spirv_headers_llvm_src = fun revision =>
+    fun hash =>
+      {
+        name = "spirv-headers-llvm-src-%{revision}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/KhronosGroup/SPIRV-Headers/archive/%{revision}.tar.gz",
+        },
+      }
   in
 
   # SPIRV-LLVM-Translator pins an exact headers revision independently from

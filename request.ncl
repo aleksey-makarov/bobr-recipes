@@ -44,15 +44,18 @@ let RequestArgs = {
       max_connections | Number | default = 0,
       max_local_jobs | Number | default = 0,
     }
-    | default = {},
+    | default
+    = {},
   secondaries
     | {
       repository_cache | String | default = "",
       providers
         | Array profile_contracts.SecondaryProvider
-        | default = [],
+        | default
+        = [],
     }
-    | default = {},
+    | default
+    = {},
 }
 in
 let request | RequestArgs -> Dyn = fun args =>
@@ -72,11 +75,9 @@ let request | RequestArgs -> Dyn = fun args =>
     std.array.filter (fun entry => !std.string.is_match "^/" entry.value) absolute_paths
   in
   if std.array.length relative != 0 then
-    std.fail_with
-      "request.ncl: %{(std.array.first relative).label} must be an absolute path"
+    std.fail_with "request.ncl: %{(std.array.first relative).label} must be an absolute path"
   else if !std.string.is_match "^[A-Za-z0-9][A-Za-z0-9._-]*$" run_name then
-    std.fail_with
-      "request.ncl: run_id must start with a letter or digit and may contain only letters, digits, '.', '_', and '-'"
+    std.fail_with "request.ncl: run_id must start with a letter or digit and may contain only letters, digits, '.', '_', and '-'"
   else
     let lowered_graph = recipe.to_request_goals { include recipes_path } args.pkgs args.goals in
     let request_limits =
@@ -115,20 +116,18 @@ let request | RequestArgs -> Dyn = fun args =>
           std.array.first provider.remote.trusted_keys
       in
       if !std.string.is_match "^/" backend_path then
-        std.fail_with
-          "request.ncl: secondary provider '%{provider.name}' paths must be absolute"
+        std.fail_with "request.ncl: secondary provider '%{provider.name}' paths must be absolute"
       else if !has_local
-        && std.array.length
-          (std.array.filter
-            (fun path => !std.string.is_match "^/" path)
-            provider.remote.trusted_keys) != 0 then
-        std.fail_with
-          "request.ncl: remote provider '%{provider.name}' trusted-key paths must be absolute"
+      && std.array.length (
+        std.array.filter
+          (fun path => !std.string.is_match "^/" path)
+          provider.remote.trusted_keys
+      ) != 0 then
+        std.fail_with "request.ncl: remote provider '%{provider.name}' trusted-key paths must be absolute"
       else if !has_local
-        && provider.remote.ca_bundle != ""
-        && !std.string.is_match "^/" provider.remote.ca_bundle then
-        std.fail_with
-          "request.ncl: remote provider '%{provider.name}' CA bundle path must be absolute"
+      && provider.remote.ca_bundle != ""
+      && !std.string.is_match "^/" provider.remote.ca_bundle then
+        std.fail_with "request.ncl: remote provider '%{provider.name}' CA bundle path must be absolute"
       else
         let remote_backend =
           {
@@ -136,10 +135,12 @@ let request | RequestArgs -> Dyn = fun args =>
             master_url = provider.remote.master_url,
             trusted_keys = provider.remote.trusted_keys,
           }
-          & (if provider.remote.ca_bundle == "" then
-            {}
-          else
-            { ca_bundle = provider.remote.ca_bundle })
+          & (
+            if provider.remote.ca_bundle == "" then
+              {}
+            else
+              { ca_bundle = provider.remote.ca_bundle }
+          )
         in
         let mapping_backend =
           if has_local then
@@ -157,16 +158,30 @@ let request | RequestArgs -> Dyn = fun args =>
           else
             remote_backend
         in
-        (if provider.mappings then [{
-          name = provider.name,
-          capability = "mappings",
-          backend = mapping_backend,
-        }] else [])
-        @ (if provider.content then [{
-          name = provider.name,
-          capability = "content",
-          backend = content_backend,
-        }] else [])
+        (
+          if provider.mappings then
+            [
+              {
+                name = provider.name,
+                capability = "mappings",
+                backend = mapping_backend,
+              }
+            ]
+          else
+            []
+        )
+        @ (
+          if provider.content then
+            [
+              {
+                name = provider.name,
+                capability = "content",
+                backend = content_backend,
+              }
+            ]
+          else
+            []
+        )
     in
     let resolved_repository_cache =
       if args.secondaries.repository_cache == "" then
@@ -177,23 +192,24 @@ let request | RequestArgs -> Dyn = fun args =>
     if !std.string.is_match "^/" resolved_repository_cache then
       std.fail_with "request.ncl: repository_cache must be an absolute path"
     else
-    {
-      schema = request_schema,
-      store = store_path,
-      logs = logs_path,
-      work = work_path,
-      run_id = run_name,
-      goals = lowered_graph.goals,
-      progress = args.progress,
-      limits = request_limits,
-      secondaries = {
-        repository_cache = resolved_repository_cache,
-        providers = std.array.flatten (
-          std.array.map normalize_provider args.secondaries.providers
-        ),
-      },
-      nodes = lowered_graph.nodes,
-    }
+      {
+        schema = request_schema,
+        store = store_path,
+        logs = logs_path,
+        work = work_path,
+        run_id = run_name,
+        goals = lowered_graph.goals,
+        progress = args.progress,
+        limits = request_limits,
+        secondaries = {
+          repository_cache = resolved_repository_cache,
+          providers =
+            std.array.flatten (
+              std.array.map normalize_provider args.secondaries.providers
+            ),
+        },
+        nodes = lowered_graph.nodes,
+      }
 in
 
 request

@@ -1,15 +1,15 @@
 fun pkgs =>
   let iproute2_src = fun version =>
     fun hash =>
-    {
-      name = "iproute2-src-%{version}",
-      tag = "Source",
-      object_hash = hash,
-      origin = {
-        tag = "Http",
-        url = "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-%{version}.tar.xz",
-      },
-    }
+      {
+        name = "iproute2-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-%{version}.tar.xz",
+        },
+      }
   in
 
   let iproute2 = {

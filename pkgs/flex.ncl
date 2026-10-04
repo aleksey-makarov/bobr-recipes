@@ -1,15 +1,17 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let flex_src = fun version => fun hash => {
-    name = "flex-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://github.com/westes/flex/releases/download/v%{version}/flex-%{version}.tar.gz",
-    },
-  }
+  let flex_src = fun version =>
+    fun hash =>
+      {
+        name = "flex-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://github.com/westes/flex/releases/download/v%{version}/flex-%{version}.tar.gz",
+        },
+      }
   in
 
   let flex = {

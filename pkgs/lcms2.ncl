@@ -1,7 +1,6 @@
 # Little CMS 2 -- color management engine, needed by colord and mutter. Core
 # library only (jpeg/tiff/zlib utilities off, no external deps). `version`/
 # `source_object_hash` are node fields (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>

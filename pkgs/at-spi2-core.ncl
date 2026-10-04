@@ -4,7 +4,6 @@
 # adaptor and docs are off; the D-Bus backend is the plain dbus-daemon.
 # `version`/`source_object_hash`/`series` are node fields (overridable), as in linux.ncl;
 # `series` is the download.gnome.org major.minor directory.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun series =>

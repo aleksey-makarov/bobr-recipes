@@ -8,7 +8,6 @@ let recipe = import "../recipe-lib.ncl" in
 # binary), so installing it to /usr works. It never ships in a runtime rootfs --
 # only appears in build rootfs closures. `version`/`source_object_hash` are node fields
 # (overridable), as in linux.ncl.
-
 fun pkgs =>
   let mk_src = fun version =>
     fun hash =>
@@ -77,15 +76,17 @@ fun pkgs =>
   # musl executable for the native x86_64 package set. Keep this as a separate
   # build-only layer instead of enlarging rust_bin for every Rust consumer.
   # The target archive must always have exactly the same version as rust_bin.
-  let mk_rust_std_native_musl_src = fun version => fun hash => {
-    name = "rust-std-x86-64-unknown-linux-musl-src-%{version}",
-    tag = "Source",
-    object_hash = hash,
-    origin = {
-      tag = "Http",
-      url = "https://static.rust-lang.org/dist/rust-std-%{version}-x86_64-unknown-linux-musl.tar.xz",
-    },
-  }
+  let mk_rust_std_native_musl_src = fun version =>
+    fun hash =>
+      {
+        name = "rust-std-x86-64-unknown-linux-musl-src-%{version}",
+        tag = "Source",
+        object_hash = hash,
+        origin = {
+          tag = "Http",
+          url = "https://static.rust-lang.org/dist/rust-std-%{version}-x86_64-unknown-linux-musl.tar.xz",
+        },
+      }
   in
 
   let rust_std_native_musl = {
