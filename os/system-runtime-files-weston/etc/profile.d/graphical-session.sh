@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 # Start the Weston graphical session on the seat0 VT (tty1) login only. Guarded
 # so the root serial console (ttyS0), su and ssh sessions are untouched. Hand the
 # login session's identity to the user manager first, so the compositor (a user

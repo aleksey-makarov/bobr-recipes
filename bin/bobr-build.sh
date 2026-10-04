@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# `resolve_profile` in the sourced profile library assigns the profile_* names.
+# shellcheck disable=SC2154
 
 # Builds one recipe from these recipes, as described by a build profile.
 #

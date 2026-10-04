@@ -162,7 +162,7 @@ bobr_apply_patch_file() {
 
   echo "synthetic build-script: applying patch ${patch_file}" >&2
   (
-    cd "$source_dir"
+    cd "$source_dir" || exit 1
     patch -Np1 -i "$patch_file"
   )
 }

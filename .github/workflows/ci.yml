@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends jq patch shellcheck
+
+      - name: Install pinned Nickel
+        shell: bash
+        env:
+          NICKEL_X86_64_LINUX_SHA256: 9cba4dd65ae9915ec61f73033aafcff307a377665a83fd8f530df086763318cb
+        run: |
+          set -euo pipefail
+          version="$(<.nickel-version)"
+          asset="nickel-x86_64-linux"
+          download="${RUNNER_TEMP}/${asset}"
+          bin_dir="${RUNNER_TEMP}/nickel/bin"
+          curl --fail --location --silent --show-error \
+            --retry 3 --retry-all-errors \
+            "https://github.com/nickel-lang/nickel/releases/download/${version}/${asset}" \
+            --output "${download}"
+          printf '%s  %s\n' "${NICKEL_X86_64_LINUX_SHA256}" "${download}" \
+            | sha256sum --check
+          mkdir -p "${bin_dir}"
+          install -m 0755 "${download}" "${bin_dir}/nickel"
+          echo "${bin_dir}" >>"${GITHUB_PATH}"
+
+      - name: Checks
+        run: ./tools/check.sh

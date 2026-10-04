@@ -14,6 +14,7 @@ step="${step:?step name is required}"
 source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
 synthetic_common="${BOBR_SYNTHETIC_COMMON:?BOBR_SYNTHETIC_COMMON is required}"
 
+# shellcheck source=synthetic/common.sh
 . "$synthetic_common"
 
 # Fixed staging root, matched by the MakefileStageRootfs lowering's

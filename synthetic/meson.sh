@@ -14,6 +14,7 @@ source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
 build_workspace_dir="${BOBR_BUILD_DIR:?BOBR_BUILD_DIR is required}"
 synthetic_common="${BOBR_SYNTHETIC_COMMON:?BOBR_SYNTHETIC_COMMON is required}"
 
+# shellcheck source=synthetic/common.sh
 . "$synthetic_common"
 
 load_env_files() {

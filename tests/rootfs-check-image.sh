@@ -1,3 +1,7 @@
+# shellcheck shell=bash
+# This fragment inherits target, cfg and helper functions from check-rootfs.sh.
+# shellcheck disable=SC2154
+
 # Image-specific checks for a shipped rootfs, run from OUTSIDE it.
 #
 # Sourced by check-rootfs.sh (never run on its own): it inherits that script's

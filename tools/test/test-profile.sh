@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# `resolve_profile` in the sourced library assigns the profile_* test values;
+# single-quoted strings below deliberately generate a fake executable.
+# shellcheck disable=SC2016,SC2154
 
 set -euo pipefail
 

@@ -12,6 +12,7 @@ build_workspace_dir="${BOBR_BUILD_DIR:?BOBR_BUILD_DIR is required}"
 synthetic_common="${BOBR_SYNTHETIC_COMMON:?BOBR_SYNTHETIC_COMMON is required}"
 crates_dir="${BOBR_CRATES_DIR:?BOBR_CRATES_DIR is required}"
 
+# shellcheck source=synthetic/common.sh
 . "$synthetic_common"
 
 # Where `cargo build`/CARGO_HOME/config live, and where `cargo install` stages

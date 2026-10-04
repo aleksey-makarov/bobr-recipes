@@ -1,4 +1,6 @@
 # shellcheck shell=bash
+# This sourced library consumes caller context and publishes profile_* names.
+# shellcheck disable=SC2034,SC2154
 
 # Shared shell support for `bobr-build.sh`: resolving a build profile, checking
 # that the recipes and binary agree on a request format, and timing phases.
