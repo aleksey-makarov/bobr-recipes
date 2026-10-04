@@ -3,9 +3,13 @@
 # This is a partial build profile. Compose it with the standard user profile
 # and local overrides in the workspace's top-level `bobr.ncl`:
 #
+#     let bobrpkgs = import "bobr-recipes/bobrpkgs.ncl" in
+#     let pkgs = bobrpkgs [] in
 #     (import "bobr-recipes/build-profile/bobr-user.ncl")
 #     & (import "bobr-recipes/build-profile/output-repo-potato.ncl")
 #     & {
+#       include pkgs,
+#       goals = [pkgs.world],
 #       output_repository.create_bucket_if_missing = false,
 #     }
 #

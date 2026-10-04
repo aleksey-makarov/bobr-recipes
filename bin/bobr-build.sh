@@ -7,7 +7,8 @@
 #
 #   PROFILE.ncl              the build profile (default: ./bobr.ncl); normally
 #                            imports <recipes>/build-profile/bobr-user.ncl
-#   --target NAME            build this recipe instead of the profile's
+#   --target NAME            build this recipe instead of the profile's goals;
+#                            repeat to select several ordered goals
 #   --jobs N | -j N          cap builders running at once
 #   --quiet                  keep only warnings and errors on screen
 #   --dry-run                print the resolved profile and the JSON request,
@@ -32,7 +33,7 @@ tool="bobr-build.sh"
 . "${recipes_path}/build-profile/output-repository-lib.sh"
 
 profile_path=""
-target=""
+targets=()
 jobs=""
 quiet=""
 dry_run=0
@@ -61,8 +62,8 @@ write_run_context() {
   local outcome="$1" exit_status="$2" temporary_context
   temporary_context="$(mktemp "${logs_path}/.context.json.XXXXXX")"
   {
-    printf '{"schema":"bobr-run-context-v1"'
-    printf ',"run_id":"%s","target":"%s"' "${run_id}" "${target}"
+    printf '{"schema":"bobr-run-context-v2"'
+    printf ',"run_id":"%s","goals":%s' "${run_id}" "${run_goals_json}"
     printf ',"outcome":"%s","exit_status":%s' "${outcome}" "${exit_status}"
     printf ',"bobr":%s,"recipes":%s}\n' \
       "${tool_build_info}" "${run_recipes_provenance}"
@@ -93,7 +94,9 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --target)
       [ "$#" -ge 2 ] || die "$1 requires a value"
-      target="$2"
+      [[ "$2" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] \
+        || die "invalid recipe attribute name: $2"
+      targets+=("$2")
       shift 2
       ;;
     --jobs | -j)
@@ -127,15 +130,11 @@ done
 [ -n "${profile_path}" ] || profile_path="bobr.ncl"
 profile_given="${profile_path}"
 profile_path="$(realpath -e -- "${profile_given}" 2>/dev/null)" \
-  || die "no build profile at '${profile_given}'; create ./bobr.ncl importing ${recipes_path}/build-profile/bobr-user.ncl"
+  || die "no build profile at '${profile_given}'; create ./bobr.ncl with ${recipes_path}/bobrpkgs.ncl, explicit goals, and the bobr-user.ncl preset"
 
 if [ -n "${jobs}" ] && ! [[ "${jobs}" =~ ^[1-9][0-9]*$ ]]; then
   die "--jobs must be a positive integer"
 fi
-if [ -n "${target}" ] && ! [[ "${target}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
-  die "invalid recipe attribute name: ${target}"
-fi
-
 require_cmd nickel
 require_cmd bobr
 
@@ -144,17 +143,13 @@ resolve_profile "${profile_path}"
 store_path="${profile_store}"
 logs_root="${profile_logs}"
 work_root="${profile_work}"
-overlays_expr="${profile_overlays}"
 limits_expr="${profile_fetch}"
 secondaries_expr="${profile_secondaries}"
 progress_expr="${profile_progress}"
-[ -n "${target}" ] || target="${profile_target}"
 [ -n "${jobs}" ] || { [ "${profile_jobs}" = "0" ] || jobs="${profile_jobs}"; }
 [ -n "${quiet}" ] || quiet="${profile_quiet}"
 podman_unshare="${profile_podman_unshare}"
 
-[ -n "${target}" ] \
-  || die "no recipe to build: set 'target' in ${profile_path} or pass --target NAME"
 [ -d "${store_path}" ] \
   || die "store does not exist: ${store_path} (create it: mkdir -p '${store_path}')"
 
@@ -185,14 +180,30 @@ if [ "${#merge_fields[@]}" -gt 0 ]; then
   merge_expr=" & { $(IFS=,; echo "${merge_fields[*]}") }"
 fi
 
-request_expr="(import \"${recipes_path}/request.ncl\") {
+goals_expr="profile.goals"
+display_goals="${profile_goals_json}"
+if [ "${#targets[@]}" -gt 0 ]; then
+  goal_items=()
+  for target in "${targets[@]}"; do
+    goal_items+=("(if std.record.has_field \"${target}\" profile.pkgs then
+      std.record.get \"${target}\" profile.pkgs
+    else
+      std.fail_with \"bobr-build.sh: no recipe attribute named '${target}'; list available attributes with bin/bobr-list-pkgs.sh\")")
+  done
+  goals_expr="[$(IFS=,; echo "${goal_items[*]}")]"
+  display_goals="[$(printf '"%s",' "${targets[@]}" | sed 's/,$//')]"
+fi
+
+request_expr="let contracts = import \"${recipes_path}/build-profile/build-profile.ncl\" in
+let profile | contracts.Profile = import \"${profile_path}\" in
+(import \"${recipes_path}/request.ncl\") {
   store_path = \"${store_path}\",
   logs_path = \"${logs_path}\",
   work_path = \"${work_path}\",
   run_id = \"${run_id}\",
   recipes_path = \"${recipes_path}\",
-  target_name = \"${target}\",
-  overlays = ${overlays_expr},
+  pkgs = profile.pkgs,
+  goals = ${goals_expr},
   progress = ${progress_expr},
   limits = ${limits_expr},
   secondaries = ${secondaries_expr},
@@ -203,7 +214,7 @@ if [ "${dry_run}" -eq 1 ]; then
   {
     echo "==> profile ${profile_path} resolves to:"
     printf '%s\n' "${profile_resolved}" | sed 's/^profile_/  /'
-    echo "==> target: ${target}"
+    echo "==> goals: ${display_goals}"
     echo "==> ${tool_version}"
   } >&2
   echo "==> evaluate Nickel recipes and generate JSON request" >&2
@@ -232,6 +243,16 @@ printf '%s\n' "${request_expr}" | nickel export --format json > "${request_json}
 nickel_finished_at="$(date +%s.%N)"
 report_phase_time "nickel recipes -> json request" \
   "${nickel_started_at}" "${nickel_finished_at}"
+
+run_goals_json="$(nickel export --format raw <<EOF_GOALS
+let request = import "${request_json}" as 'Json in
+let names = std.array.map
+  (fun id => (std.record.get id request.nodes).name)
+  request.goals
+in
+"[" ++ std.string.join "," (std.array.map (std.serialize 'Json) names) ++ "]"
+EOF_GOALS
+)" || die "failed to read lowered goals from the generated request"
 
 run_recipes_provenance="$(recipes_provenance)"
 write_recipe_catalog "${request_json}"

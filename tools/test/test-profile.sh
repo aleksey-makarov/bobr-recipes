@@ -36,11 +36,13 @@ reject_profile() {
   fi
 }
 
+profile_prelude="let bobrpkgs = import \"${recipes_path}/bobrpkgs.ncl\" in let pkgs = bobrpkgs [] in"
+user_profile_value="${profile_prelude} (import \"${recipes_path}/build-profile/bobr-user.ncl\") & { include pkgs, goals = [pkgs.world] }"
+
 user_profile="${temporary}/user.ncl"
-write_profile "${user_profile}" \
-  "import \"${recipes_path}/build-profile/bobr-user.ncl\""
+write_profile "${user_profile}" "${user_profile_value}"
 resolve_profile "${user_profile}"
-assert_equal "world" "${profile_target}" "user target"
+assert_equal '["world"]' "${profile_goals_json}" "user goals"
 assert_equal "${temporary}/bobr-store" "${profile_store}" "user store"
 assert_equal "0" "${profile_output_repository_enabled}" "publication disabled"
 assert_equal "0" "${#profile_output_repository_trusted_keys[@]}" \
@@ -50,7 +52,7 @@ assert_equal "0" "${#profile_output_repository_trusted_keys[@]}" \
 
 potato_profile="${temporary}/potato.ncl"
 write_profile "${potato_profile}" \
-  "(import \"${recipes_path}/build-profile/bobr-user.ncl\") & (import \"${recipes_path}/build-profile/output-repo-potato.ncl\") & { store = \"potato-store\" }"
+  "${user_profile_value} & (import \"${recipes_path}/build-profile/output-repo-potato.ncl\") & { store = \"potato-store\" }"
 resolve_profile "${potato_profile}"
 assert_equal "${temporary}/potato-store" "${profile_store}" "potato store"
 assert_equal "1" "${profile_output_repository_enabled}" "publication enabled"
@@ -84,7 +86,7 @@ assert_equal "1d" "${profile_output_repository_retention}" \
 
 layered_profile="${temporary}/layered.ncl"
 write_profile "${layered_profile}" \
-  "(import \"${recipes_path}/build-profile/bobr-user.ncl\") & (import \"${recipes_path}/build-profile/output-repo-potato.ncl\") & { fetch.per_host_default = 3, output_repository.create_bucket_if_missing = false }"
+  "${user_profile_value} & (import \"${recipes_path}/build-profile/output-repo-potato.ncl\") & { fetch.per_host_default = 3, output_repository.create_bucket_if_missing = false }"
 resolve_profile "${layered_profile}"
 [[ "${profile_fetch}" == *'per_host_default = 3'* ]] \
   || fail "user fetch default override was not preserved"
@@ -97,8 +99,10 @@ assert_equal "https://192.168.0.169:7070/bobr/master" \
   "repository fields preserved after leaf override"
 
 custom_profile="${temporary}/custom.ncl"
-write_profile "${custom_profile}" '
+write_profile "${custom_profile}" "${profile_prelude}"'
 {
+  include pkgs,
+  goals = [pkgs.world],
   store = "custom-store",
   output_repository = {
     master_url = "https://master.example/repository/master",
@@ -138,47 +142,49 @@ assert_equal "0" "${profile_output_repository_retention}" \
 
 quoted_profile="${temporary}/quoted.ncl"
 write_profile "${quoted_profile}" \
-  "{ target = \"world\", store = \"bob's-store\" }"
+  "${user_profile_value} & { store = \"bob's-store\" }"
 resolve_profile "${quoted_profile}"
 assert_equal "${temporary}/bob's-store" "${profile_store}" \
   "shell-quoted apostrophe"
 
 reject_profile missing-master-url \
-  '{ output_repository = {} }'
+  "${user_profile_value} & { output_repository = {} }"
 reject_profile zero-content-threshold \
-  '{ output_repository = { master_url = "https://example/master", rotation.max_active_content_bytes = 0 } }'
+  "${user_profile_value} & { output_repository = { master_url = \"https://example/master\", rotation.max_active_content_bytes = 0 } }"
 reject_profile fractional-content-threshold \
-  '{ output_repository = { master_url = "https://example/master", rotation.max_active_content_bytes = 1.5 } }'
+  "${user_profile_value} & { output_repository = { master_url = \"https://example/master\", rotation.max_active_content_bytes = 1.5 } }"
 reject_profile zero-current-slots \
-  '{ output_repository = { master_url = "https://example/master", rotation.max_current_slots = 0 } }'
+  "${user_profile_value} & { output_repository = { master_url = \"https://example/master\", rotation.max_current_slots = 0 } }"
 reject_profile fractional-current-slots \
-  '{ output_repository = { master_url = "https://example/master", rotation.max_current_slots = 2.5 } }'
+  "${user_profile_value} & { output_repository = { master_url = \"https://example/master\", rotation.max_current_slots = 2.5 } }"
 reject_profile invalid-retention \
-  '{ output_repository = { master_url = "https://example/master", rotation.retention = "1day" } }'
+  "${user_profile_value} & { output_repository = { master_url = \"https://example/master\", rotation.retention = \"1day\" } }"
 reject_profile empty-retention \
-  '{ output_repository = { master_url = "https://example/master", rotation.retention = "" } }'
+  "${user_profile_value} & { output_repository = { master_url = \"https://example/master\", rotation.retention = \"\" } }"
 reject_profile unknown-output-field \
-  '{ output_repository = { master_url = "https://example/master", endpoint = "typo" } }'
+  "${user_profile_value} & { output_repository = { master_url = \"https://example/master\", endpoint = \"typo\" } }"
 reject_profile unknown-profile-field \
-  '{ output_repositroy = {} }'
+  "${user_profile_value} & { output_repositroy = {} }"
 reject_profile provider-without-backend \
-  '{ secondaries.providers = [{ name = "missing", mappings = true }] }'
+  "${user_profile_value} & { secondaries.providers = [{ name = \"missing\", mappings = true }] }"
 reject_profile provider-with-two-backends \
-  '{ secondaries.providers = [{ name = "ambiguous", mappings = true, local.store = "old", remote = { master_url = "https://repo.example/master", trusted_keys = ["key.pem"] } }] }'
+  "${user_profile_value} & { secondaries.providers = [{ name = \"ambiguous\", mappings = true, local.store = \"old\", remote = { master_url = \"https://repo.example/master\", trusted_keys = [\"key.pem\"] } }] }"
 reject_profile provider-without-capability \
-  '{ secondaries.providers = [{ name = "unused", local.store = "old" }] }'
+  "${user_profile_value} & { secondaries.providers = [{ name = \"unused\", local.store = \"old\" }] }"
 reject_profile provider-with-empty-name \
-  '{ secondaries.providers = [{ name = "", mappings = true, local.store = "old" }] }'
+  "${user_profile_value} & { secondaries.providers = [{ name = \"\", mappings = true, local.store = \"old\" }] }"
 reject_profile local-content-without-transfer \
-  '{ secondaries.providers = [{ name = "content", content = true, local.store = "old" }] }'
+  "${user_profile_value} & { secondaries.providers = [{ name = \"content\", content = true, local.store = \"old\" }] }"
 reject_profile local-mappings-with-transfer \
-  '{ secondaries.providers = [{ name = "mappings", mappings = true, local = { store = "old", transfer = "hardlink" } }] }'
+  "${user_profile_value} & { secondaries.providers = [{ name = \"mappings\", mappings = true, local = { store = \"old\", transfer = \"hardlink\" } }] }"
 reject_profile remote-without-keys \
-  '{ secondaries.providers = [{ name = "remote", mappings = true, remote = { master_url = "https://repo.example/master", trusted_keys = [] } }] }'
+  "${user_profile_value} & { secondaries.providers = [{ name = \"remote\", mappings = true, remote = { master_url = \"https://repo.example/master\", trusted_keys = [] } }] }"
 reject_profile remote-with-transfer \
-  '{ secondaries.providers = [{ name = "remote", content = true, remote = { master_url = "https://repo.example/master", trusted_keys = ["key.pem"], transfer = "copy" } }] }'
+  "${user_profile_value} & { secondaries.providers = [{ name = \"remote\", content = true, remote = { master_url = \"https://repo.example/master\", trusted_keys = [\"key.pem\"], transfer = \"copy\" } }] }"
 reject_profile unknown-provider-field \
-  '{ secondaries.providers = [{ name = "typo", mappings = true, local.store = "old", priority = 1 }] }'
+  "${user_profile_value} & { secondaries.providers = [{ name = \"typo\", mappings = true, local.store = \"old\", priority = 1 }] }"
+reject_profile empty-goals \
+  "${profile_prelude} (import \"${recipes_path}/build-profile/bobr-user.ncl\") & { include pkgs, goals = [] }"
 
 # Exercise the real build wrapper through request lowering. A fake bobr is
 # sufficient for its schema handshake because --dry-run never invokes a build.
@@ -197,7 +203,7 @@ printf '%s\n' \
   'exit 1' > "${temporary}/bin/bobr"
 chmod +x "${temporary}/bin/bobr"
 write_profile "${temporary}/request.ncl" \
-  "(import \"${recipes_path}/build-profile/bobr-user.ncl\") & (import \"${recipes_path}/build-profile/output-repo-potato.ncl\") & {
+  "${user_profile_value} & (import \"${recipes_path}/build-profile/output-repo-potato.ncl\") & {
     store = \"request-store\",
     secondaries = {
       repository_cache = \"metadata-cache\",
@@ -281,5 +287,60 @@ jq -e --arg root "${temporary}" '
   }
 ' "${temporary}/request.json" >/dev/null \
   || fail "secondary providers were not resolved and normalized as expected"
+
+# Overlays are ordinary Nickel imports relative to the user profile and retain
+# their array order while constructing the final package set.
+write_profile "${temporary}/overlay-one.ncl" \
+  'fun final => fun prev => { selected = prev.glibc_gen1 & { name | force = "overlay-one" } }'
+write_profile "${temporary}/overlay-two.ncl" \
+  'fun final => fun prev => { selected_two = prev.selected }'
+write_profile "${temporary}/overlay-profile.ncl" \
+  "let bobrpkgs = import \"${recipes_path}/bobrpkgs.ncl\" in
+   let pkgs = bobrpkgs [import \"./overlay-one.ncl\", import \"./overlay-two.ncl\"] in
+   { include pkgs, goals = [pkgs.selected_two], store = \"request-store\" }"
+if ! PATH="${temporary}/bin:${PATH}" \
+  "${recipes_path}/bin/bobr-build.sh" --dry-run \
+  "${temporary}/overlay-profile.ncl" \
+  > "${temporary}/overlay-request.json" 2> "${temporary}/overlay-dry-run.log"; then
+  cat "${temporary}/overlay-dry-run.log" >&2
+  fail "ordered profile overlays failed to lower"
+fi
+jq -e '.nodes.root.name == "overlay-one"' \
+  "${temporary}/overlay-request.json" >/dev/null \
+  || fail "ordered profile overlays were not applied"
+
+# Repeated --target values replace the profile goals as one ordered goal list.
+PATH="${temporary}/bin:${PATH}" \
+  "${recipes_path}/bin/bobr-build.sh" --dry-run \
+  --target glibc_gen1 --target gcc_gen1 "${temporary}/request.ncl" \
+  > "${temporary}/multi-request.json" 2> "${temporary}/multi-dry-run.log"
+jq -e '
+  [.goals[] as $id | .nodes[$id].name]
+    == ["glibc-gen1-2.42", "gcc-gen1-15.2.0"]
+  and (.goals | length) == 2
+  and ([.nodes[].name] | length) == ([.nodes[].name] | unique | length)
+' "${temporary}/multi-request.json" >/dev/null \
+  || fail "ordered multi-goal CLI lowering is invalid"
+
+duplicate_profile="${temporary}/duplicate-goals.ncl"
+write_profile "${duplicate_profile}" \
+  "${profile_prelude} { include pkgs, goals = [pkgs.glibc_gen1, pkgs.glibc_gen1], store = \"request-store\" }"
+if PATH="${temporary}/bin:${PATH}" \
+  "${recipes_path}/bin/bobr-build.sh" --dry-run "${duplicate_profile}" \
+  >/dev/null 2> "${temporary}/duplicate-goals.log"; then
+  fail "duplicate goal recipe names were accepted"
+fi
+grep -F 'goal recipe names must be unique' \
+  "${temporary}/duplicate-goals.log" >/dev/null \
+  || { cat "${temporary}/duplicate-goals.log" >&2; fail "duplicate goals did not produce the expected diagnostic"; }
+
+if PATH="${temporary}/bin:${PATH}" \
+  "${recipes_path}/bin/bobr-build.sh" --dry-run --target no_such_recipe \
+  "${temporary}/request.ncl" >/dev/null 2> "${temporary}/unknown-target.log"; then
+  fail "unknown CLI target was accepted"
+fi
+grep -F "no recipe attribute named 'no_such_recipe'" \
+  "${temporary}/unknown-target.log" >/dev/null \
+  || fail "unknown CLI target did not produce the expected diagnostic"
 
 echo "test-profile.sh: all tests passed"

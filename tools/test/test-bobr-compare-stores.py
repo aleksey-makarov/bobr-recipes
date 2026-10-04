@@ -35,9 +35,9 @@ class CompareStoresTests(unittest.TestCase):
         run = store / "logs" / run_id
         run.mkdir(parents=True, exist_ok=True)
         (run / "context.json").write_text(json.dumps({
-            "schema": "bobr-run-context-v1",
+            "schema": "bobr-run-context-v2",
             "run_id": run_id,
-            "target": "world",
+            "goals": ["world"],
             "outcome": outcome,
             "exit_status": 0 if outcome == "success" else 1,
             "bobr": {
@@ -197,6 +197,7 @@ class CompareStoresTests(unittest.TestCase):
                 identities["bobr-recipes"],
                 {"1" * 40, "2" * 40 + "-dirty"},
             )
+            self.assertEqual(identities["goals"], {'["world"]'})
             self.assertEqual(warnings, [])
 
     def test_legacy_hashes_are_used_only_without_run_contexts(self):

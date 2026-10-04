@@ -2,9 +2,9 @@
 # working directory and normally implements by importing one of the presets in
 # this directory.
 #
-# A profile describes one installation: where the store is, what to build by
-# default, which overlays to apply, and optionally where to publish the
-# completed store. It is deliberately *not* a request: a request also carries
+# A profile describes one installation: its final package set, ordered goals,
+# where the store is, and optionally where to publish the completed store. It
+# is deliberately *not* a request: a request also carries
 # the whole node DAG, plus the identity of a single run (`run_id` and its two
 # directories), which is minted fresh per invocation and cannot be written down
 # in advance. `bin/bobr-build.sh` reads a profile, mints the run, and lowers the
@@ -30,6 +30,12 @@ let RetentionDuration =
   std.contract.all_of [
     String,
     std.contract.from_predicate (fun value => std.string.is_match "^[0-9]+([smhd])?$" value),
+  ]
+in
+let NonEmptyGoals =
+  std.contract.all_of [
+    Array Dyn,
+    std.contract.from_predicate (fun value => std.array.length value > 0),
   ]
 in
 let TaggedUnion = fun discriminator =>
@@ -224,14 +230,13 @@ in
   RotationPolicy = RotationPolicyContract,
   OutputRepository = OutputRepositoryContract,
   Profile = {
-    target
-      | String
-      | doc m%"
-        Recipe attribute to build when the command line does not name one
-        (`--target`). An empty value means the caller must always name it.
-      "%
-      | default
-      = "",
+    pkgs
+      | Dyn
+      | doc "Final package set used to lower the selected recipes.",
+
+    goals
+      | NonEmptyGoals
+      | doc "Non-empty ordered array of recipe values to realize.",
 
     store
       | String
@@ -259,15 +264,6 @@ in
       "%
       | default
       = "",
-
-    overlays
-      | Array String
-      | doc m%"
-        Files to layer over the recipe set, applied in order. Each evaluates to
-        either a single overlay or an array of them; both are accepted.
-      "%
-      | default
-      = [],
 
     jobs
       | Number

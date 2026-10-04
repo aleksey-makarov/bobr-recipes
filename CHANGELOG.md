@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Made package-set construction and ordered build goals explicit in Nickel
+  profiles, with repeatable `--target` overrides for one-off selections.
 - Renamed the Autotools `in-tree` recipe option to `in_tree` throughout
   lowering and build-script configuration.
 

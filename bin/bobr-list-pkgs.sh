@@ -8,9 +8,8 @@
 #
 #   PROFILE.ncl   a build profile (default: ./bobr.ncl, if it exists)
 #
-# It reads the same profile the build driver does and applies its overlays, so
-# the list is what would actually be built, not the untouched recipes. Without a
-# profile it falls back to the plain recipe set.
+# It reads the same final package set as the build driver. Without a profile it
+# falls back to `bobrpkgs []`.
 
 set -euo pipefail
 
@@ -33,29 +32,18 @@ else
   profile_path=""
 fi
 
-overlays_expr="[]"
 if [ -n "${profile_path}" ]; then
-  profile_dir="$(dirname "${profile_path}")"
-  overlays_expr="$(
-    nickel export --format raw <<EOF_OVERLAYS || die "invalid build profile '${profile_path}'"
+  pkgs_expr="$(cat <<EOF_PKGS
 let contracts = import "${recipes_root}/build-profile/build-profile.ncl" in
-let profile | contracts.Profile = import "${profile_path}" in
-let absolute = fun path =>
-  if std.string.is_match "^/" path then path else "${profile_dir}/" ++ path
-in
-if std.array.length profile.overlays == 0 then
-  "[]"
+let profile | contracts.Profile = import "${profile_path}" in profile.pkgs
+EOF_PKGS
+)"
 else
-  "(std.array.flatten (std.array.map (fun o => if std.is_function o then [o] else o) ["
-  ++ std.string.join ", " (std.array.map (fun p => "import \"" ++ absolute p ++ "\"") profile.overlays)
-  ++ "]))"
-EOF_OVERLAYS
-  )"
+  pkgs_expr="(import \"${recipes_root}/bobrpkgs.ncl\") []"
 fi
 
 nickel export --format raw <<EOF_LIST
-let mkPkgs = import "${recipes_root}/recipe-set.ncl" in
-let pkgs = mkPkgs ${overlays_expr} in
+let pkgs = ${pkgs_expr} in
 let attrs = std.array.sort std.string.compare (std.record.fields pkgs) in
 std.string.join "\n" (
   std.array.map

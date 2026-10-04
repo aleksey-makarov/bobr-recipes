@@ -116,9 +116,9 @@ assert_context_outcomes() {
     --argjson successes "${expected_success}" \
     --argjson failures "${expected_failed}" '
       all(.[];
-        .schema == "bobr-run-context-v1"
+        .schema == "bobr-run-context-v2"
         and (.run_id | type == "string")
-        and .target == "glibc_gen1"
+        and .goals == ["glibc-gen1-2.42"]
         and .bobr.version == "test"
         and (.recipes.git_commit | type == "string")
         and (.recipes.git_dirty | type == "boolean")
@@ -423,8 +423,11 @@ done
 
 build_only_profile="${temporary}/build-only.ncl"
 cat > "${build_only_profile}" <<EOF_PROFILE
+let bobrpkgs = import "${recipes_path}/bobrpkgs.ncl" in
+let pkgs = bobrpkgs [] in
 {
-  target = "glibc_gen1",
+  include pkgs,
+  goals = [pkgs.glibc_gen1],
   store = "${temporary}/store",
 }
 EOF_PROFILE
@@ -454,8 +457,11 @@ jq -e '
 
 integration_profile="${temporary}/integration.ncl"
 cat > "${integration_profile}" <<EOF_PROFILE
+let bobrpkgs = import "${recipes_path}/bobrpkgs.ncl" in
+let pkgs = bobrpkgs [] in
 {
-  target = "glibc_gen1",
+  include pkgs,
+  goals = [pkgs.glibc_gen1],
   store = "${temporary}/store",
   output_repository = {
     repository = "s3://test-repository",

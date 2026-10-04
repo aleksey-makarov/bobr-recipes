@@ -1,4 +1,5 @@
-# Exports `mkPkgs`, a function `Array Overlay -> RecipeSet`.
+# Internal implementation of the public `bobrpkgs.ncl` function
+# `Array Overlay -> RecipeSet`.
 #
 # Usage:
 # - `(import "recipe-set.ncl") []`
@@ -10,13 +11,11 @@
 # - `final` is the final package set after all overlays
 # - `prev` is the package set after the previous overlay step
 #
-# Typical entry points built on top of this:
-# - `request.ncl` selects one attribute from `(mkPkgs [])` and lowers it to an
-#   `bobr` JSON request
-# - helper scripts such as `bobr-list-pkgs.sh` inspect the fields of
-#   `(mkPkgs [])` directly
+# `request.ncl` receives the final package set and selected recipe values from
+# a build profile. Helper scripts such as `bobr-list-pkgs.sh` inspect the same
+# final package set through `bobrpkgs.ncl`.
 #
-# Do not run `nickel export` on `(import "recipe-set.ncl") []` directly. Exporting
+# Do not run `nickel export` on `(import "bobrpkgs.ncl") []` directly. Exporting
 # the complete package set serializes the entire fixed-point recipe graph and
 # can exhaust system memory. Use `std.record.fields`, `tools/bobr-list-pkgs.sh`,
 # `request.ncl`, or `tools/bobr-build.sh --dry-run` for targeted inspection.

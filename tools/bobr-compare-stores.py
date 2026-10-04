@@ -64,7 +64,7 @@ from pathlib import Path
 DEFAULT_READERS = 48
 HEX64 = re.compile(r"[0-9a-f]{64}")
 OBJECT_TARGET = re.compile(r"\.\./objects/([0-9a-f]{64})")
-RUN_CONTEXT_SCHEMA = "bobr-run-context-v1"
+RUN_CONTEXT_SCHEMA = "bobr-run-context-v2"
 RECIPE_CATALOG_SCHEMA = "bobr-recipe-catalog-v1"
 
 
@@ -135,6 +135,7 @@ def load_build_contexts(store: Path, readers: int):
     identities: dict[str, set[str]] = {
         "bobr": set(),
         "bobr-recipes": set(),
+        "goals": set(),
     }
     outcomes: dict[str, int] = {}
     warnings: list[str] = []
@@ -154,6 +155,12 @@ def load_build_contexts(store: Path, readers: int):
                 or context.get("schema") != RUN_CONTEXT_SCHEMA:
             warnings.append(f"invalid run context schema in {path}")
             continue
+        goals = context.get("goals")
+        if not isinstance(goals, list) or not goals \
+                or not all(isinstance(goal, str) for goal in goals):
+            warnings.append(f"invalid run goals in {path}")
+            continue
+        identities["goals"].add(_canonical_json(goals))
         valid_contexts += 1
         outcome = context.get("outcome")
         if outcome in {"running", "success", "failed"}:

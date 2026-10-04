@@ -21,9 +21,9 @@ require_cmd() {
 
 # Resolves the profile at $1 through its contract and sets the `profile_*`
 # variables from it. Relative paths come back absolute against the profile's own
-# directory, defaults are filled in, and the two fields that are Nickel values
-# rather than scalars -- the overlay list and the fetch limits -- come back as
-# Nickel expressions ready to splice into a request.
+# directory and defaults are filled in. The package set and goals remain Nickel
+# values in the profile itself; the build driver imports them directly while
+# lowering the request.
 #
 # Every field is exported whether or not the calling script needs it: a script
 # that ignores one costs nothing, while a field missing from this list is a
@@ -52,16 +52,6 @@ let assignment = fun name => fun value => name ++ "=" ++ quote value in
 let boolean = fun value => if value then "1" else "0" in
 let shell_array = fun values =>
   "(" ++ std.string.join " " (std.array.map quote values) ++ ")"
-in
-let overlays =
-  if std.array.length profile.overlays == 0 then
-    "[]"
-  else
-    # Each file may hold one overlay or an array of them; normalize to an array
-    # and flatten, so both spellings work.
-    "(std.array.flatten (std.array.map (fun o => if std.is_function o then [o] else o) ["
-    ++ std.string.join ", " (std.array.map (fun p => "import \"" ++ absolute p ++ "\"") profile.overlays)
-    ++ "]))"
 in
 # Rebuilt as Nickel source rather than passed by re-importing the profile: one
 # reading of the profile, and the value is printable, so --dry-run can show the
@@ -185,7 +175,6 @@ let output_repository_lines =
     ]
 in
 std.string.join "\n" ([
-  "profile_target=" ++ quote profile.target,
   "profile_store=" ++ quote store,
   "profile_logs=" ++ quote (if profile.logs == "" then store ++ "/logs" else absolute profile.logs),
   "profile_work=" ++ quote (if profile.work == "" then store ++ "/work" else absolute profile.work),
@@ -193,7 +182,10 @@ std.string.join "\n" ([
   "profile_quiet=" ++ quote (if profile.quiet then "1" else "0"),
   "profile_progress=" ++ quote progress,
   "profile_podman_unshare=" ++ quote (if profile.podman_unshare then "1" else "0"),
-  "profile_overlays=" ++ quote overlays,
+  "profile_goals_json=" ++ quote
+    ("[" ++ std.string.join "," (
+      std.array.map (fun goal => std.serialize 'Json goal.name) profile.goals
+    ) ++ "]"),
   "profile_fetch=" ++ quote fetch,
   "profile_secondaries=" ++ quote secondaries,
 ] @ output_repository_lines)

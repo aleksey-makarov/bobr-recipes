@@ -1,12 +1,11 @@
 # Exports `request`, a function
-# `{ store_path, logs_path, work_path, run_id, recipes_path, target_name, overlays? } -> Dyn`.
+# `{ store_path, logs_path, work_path, run_id, recipes_path, pkgs, goals } -> Dyn`.
 #
 # Usage:
 # - `request { store_path = "/abs/store", logs_path = "/abs/logs/run",
 #     work_path = "/abs/work/run", run_id = "run", recipes_path = "/abs/recipes",
-#     target_name = "foo" }`
-#   returns a full `bobr` JSON request envelope for the selected package
-#   attribute.
+#     pkgs, goals = [pkgs.foo] }`
+#   returns a full `bobr` JSON request envelope for the selected recipe values.
 #
 # Arguments:
 # - `store_path`: absolute path to the bobr store root
@@ -15,8 +14,8 @@
 #   on the store's filesystem)
 # - `run_id`: name of this run, recorded in the objects it produces
 # - `recipes_path`: absolute path to the bobr-recipes checkout root
-# - `target_name`: recipe attribute name from `recipe-set.ncl`
-# - `overlays`: optional array of `recipe-set.ncl` overlays
+# - `pkgs`: final package set used to lower synthetic recipes
+# - `goals`: non-empty ordered array of recipe values from that package set
 #
 # `bobr` neither names the run nor creates its directories: whoever invokes it
 # does both (see bin/bobr-build.sh).
@@ -25,8 +24,7 @@
 # - `schema` from `request-schema.ncl`
 # - `store = store_path`, `logs = logs_path`, `work = work_path`, `run_id`
 # - ordered `goals`, acquisition `limits`, normalized `secondaries`
-# - `nodes = recipe.to_request { recipes_path } raw (...)`
-let mkPkgs = import "recipe-set.ncl" in
+# - `nodes` and `goals` lowered from the selected recipe values
 let request_schema = import "request-schema.ncl" in
 let recipe = import "recipe-lib.ncl" in
 let profile_contracts = import "build-profile/build-profile.ncl" in
@@ -36,8 +34,8 @@ let RequestArgs = {
   work_path | String,
   run_id | String,
   recipes_path | String,
-  target_name | String,
-  overlays | Array Dyn | default = [],
+  pkgs | Dyn,
+  goals | Array Dyn,
   progress | profile_contracts.ProgressPolicy | default = { mode = "auto" },
   limits
     | {
@@ -63,7 +61,6 @@ let request | RequestArgs -> Dyn = fun args =>
   let work_path = args.work_path in
   let run_name = args.run_id in
   let recipes_path = args.recipes_path in
-  let target_name = args.target_name in
   let absolute_paths = [
     { label = "store_path", value = store_path },
     { label = "logs_path", value = logs_path },
@@ -81,11 +78,7 @@ let request | RequestArgs -> Dyn = fun args =>
     std.fail_with
       "request.ncl: run_id must start with a letter or digit and may contain only letters, digits, '.', '_', and '-'"
   else
-    let raw = mkPkgs args.overlays in
-    if !std.record.has_field target_name raw then
-      std.fail_with
-        "request.ncl: no recipe named '%{target_name}'; list what there is with bin/bobr-list-pkgs.sh"
-    else
+    let lowered_graph = recipe.to_request_goals { include recipes_path } args.pkgs args.goals in
     let request_limits =
       (
         if args.limits.per_host_default > 0 then
@@ -190,7 +183,7 @@ let request | RequestArgs -> Dyn = fun args =>
       logs = logs_path,
       work = work_path,
       run_id = run_name,
-      goals = ["root"],
+      goals = lowered_graph.goals,
       progress = args.progress,
       limits = request_limits,
       secondaries = {
@@ -199,7 +192,7 @@ let request | RequestArgs -> Dyn = fun args =>
           std.array.map normalize_provider args.secondaries.providers
         ),
       },
-      nodes = recipe.to_request { include recipes_path } raw (std.record.get target_name raw),
+      nodes = lowered_graph.nodes,
     }
 in
 

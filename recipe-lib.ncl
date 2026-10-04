@@ -61,11 +61,11 @@ let lower_source_origin = fun ctx =>
     else
       origin
 in
-# Every node reachable from `root_node`, lowered, keyed by name. The recursion
+# Every node reachable from `root_nodes`, lowered, keyed by name. The recursion
 # validates inputs once for the complete request lowering, so malformed input
 # shapes are reported before graph serialization.
-let collect_unique_nodes = fun pkgs =>
-  fun root_node =>
+let collect_unique_nodes_for_roots = fun pkgs =>
+  fun root_nodes =>
     let lower = lower_node pkgs in
     let rec collect = fun seen =>
       fun node =>
@@ -92,7 +92,11 @@ let collect_unique_nodes = fun pkgs =>
             seen_with_node
             (std.record.fields inputs)
     in
-    collect {} root_node
+    std.array.fold_left collect {} root_nodes
+in
+let collect_unique_nodes = fun pkgs =>
+  fun root_node =>
+    collect_unique_nodes_for_roots pkgs [root_node]
 in
 let default_install_attrs = {
   uid = 0,
@@ -284,13 +288,26 @@ in
       in
       (go { visited = {}, roots = {} } root_node).roots,
 
-  to_request = fun raw_ctx =>
+  to_request_goals = fun raw_ctx =>
     fun pkgs =>
-    fun root_node =>
+    fun root_nodes =>
     let ctx = raw_ctx | { recipes_path | String } in
     let lower_origin = lower_source_origin ctx in
-    let unique_nodes = collect_unique_nodes pkgs root_node in
-    let root_name = root_node.name in
+    if std.array.length root_nodes == 0 then
+      std.fail_with "recipe-lib.to_request_goals: at least one goal is required"
+    else
+    let lowered_goal_names = std.array.map (fun node => (lower_node pkgs node).name) root_nodes in
+    let goal_name_set = std.array.fold_left
+      (fun seen => fun name =>
+        if std.record.has_field name seen then
+          std.fail_with "recipe-lib.to_request_goals: goal recipe names must be unique"
+        else
+          std.record.insert name true seen)
+      {}
+      lowered_goal_names
+    in
+    let unique_nodes = collect_unique_nodes_for_roots pkgs root_nodes in
+    let single_goal = std.array.length lowered_goal_names == 1 in
     let other_names =
       # `std.record.fields` already returns names in sorted order, so no explicit
       # sort is needed here (`filter` preserves order). Nickel's `std.array.sort`
@@ -298,13 +315,22 @@ in
       # seconds -- so sorting the already-sorted field list dominated request
       # generation.
       std.array.filter
-        (fun name => name != root_name)
+        (fun name => !std.record.has_field name goal_name_set)
         (std.record.fields unique_nodes)
     in
-    let ordered_names = [root_name] @ other_names in
+    let ordered_names = lowered_goal_names @ other_names in
+    let goal_id = fun idx =>
+      fun name =>
+        if single_goal then
+          "root"
+        else
+          "g" ++ std.string.from_number idx ++ "_" ++ node_name_slug name
+    in
     let name_to_id =
       std.record.from_array (
-        [{ field = root_name, value = "root" }]
+        std.array.map_with_index
+          (fun idx => fun name => { field = name, value = goal_id idx name })
+          lowered_goal_names
         @ std.array.map_with_index
           (fun idx =>
             fun name =>
@@ -326,8 +352,10 @@ in
           else
             std.record.get input.name name_to_id
     in
-    std.record.from_array (
-      std.array.map
+    {
+      goals = std.array.map_with_index goal_id lowered_goal_names,
+      nodes = std.record.from_array (
+        std.array.map
         (fun name =>
           let node = std.record.get name unique_nodes in
           let node_value =
@@ -359,6 +387,13 @@ in
             value = node_value,
           }
         )
-        ordered_names
-    ),
+          ordered_names
+      ),
+    },
+
+  # Compatibility helper for recipe-level tests and callers lowering one root.
+  to_request = fun raw_ctx =>
+    fun pkgs =>
+    fun root_node =>
+      (to_request_goals raw_ctx pkgs [root_node]).nodes,
 }

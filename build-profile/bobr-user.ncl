@@ -3,12 +3,21 @@
 # Do not copy this file. Import it from `bobr.ncl` in the directory where the
 # store should live:
 #
-#     import "bobr-recipes/build-profile/bobr-user.ncl"
+#     let bobrpkgs = import "bobr-recipes/bobrpkgs.ncl" in
+#     let pkgs = bobrpkgs [] in
+#     (import "bobr-recipes/build-profile/bobr-user.ncl") & {
+#       include pkgs,
+#       goals = [pkgs.world],
+#     }
 #
 # The values use a merge priority between contract defaults and ordinary user
 # fields, so a local profile can override them without copying the preset:
 #
+#     let bobrpkgs = import "bobr-recipes/bobrpkgs.ncl" in
+#     let pkgs = bobrpkgs [] in
 #     (import "bobr-recipes/build-profile/bobr-user.ncl") & {
+#       include pkgs,
+#       goals = [pkgs.world],
 #       store = "another-store",
 #       jobs = 8,
 #     }
@@ -16,9 +25,6 @@
 # Relative paths are resolved against that top-level `bobr.ncl`, not this
 # imported file.
 {
-  # What to build when the command line does not say (`--target NAME`).
-  target | priority -50 = "world",
-
   # The store. Create it yourself: a mistyped path must fail instead of
   # silently starting a from-scratch rebuild elsewhere.
   store | priority -50 = "bobr-store",
@@ -31,7 +37,6 @@
   #
   # logs = "bobr-store/logs",
   # work = "bobr-store/work",
-  # overlays = ["./my-overlay.ncl"],
   # jobs = 8,
   # quiet = true,
   # progress = { mode = "fixed", max_lines = 8 },
