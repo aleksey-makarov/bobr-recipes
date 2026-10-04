@@ -208,7 +208,7 @@ fun pkgs =>
       ],
     },
     config = {
-      include = [
+      "include" = [
         "usr/bin/systemctl",
         "usr/bin/udevadm",
         "usr/lib/libsystemd-shared-*.so",
@@ -274,7 +274,7 @@ fun pkgs =>
       ],
     },
     config = {
-      include = [
+      "include" = [
         "usr/bin/kmod",
         "usr/lib/libkmod.so*",
         "usr/bin/depmod",
@@ -301,7 +301,7 @@ fun pkgs =>
       ],
     },
     config = {
-      include = [
+      "include" = [
         "usr/bin/mount",
         "usr/bin/umount",
         "usr/lib/libblkid.so*",
@@ -322,7 +322,7 @@ fun pkgs =>
       runtime = [],
     },
     config = {
-      include = [
+      "include" = [
         "usr/lib/ld-linux-x86-64.so.2",
         "usr/lib/libc.so.6",
         "usr/lib/libgcc_s.so.1",
@@ -345,7 +345,7 @@ fun pkgs =>
       ],
     },
     config = {
-      include = [
+      "include" = [
         "usr/lib/libcrypto.so*",
       ],
     },
@@ -365,7 +365,7 @@ fun pkgs =>
       ],
     },
     config = {
-      include = [
+      "include" = [
         "usr/lib/liblzma.so*",
       ],
     },
@@ -385,7 +385,7 @@ fun pkgs =>
       ],
     },
     config = {
-      include = [
+      "include" = [
         "usr/lib/libzstd.so*",
       ],
     },
@@ -405,7 +405,7 @@ fun pkgs =>
       ],
     },
     config = {
-      include = [
+      "include" = [
         "usr/lib/libz.so*",
       ],
     },
@@ -425,7 +425,7 @@ fun pkgs =>
     name = "initrd-modules",
     tag = "TreeSubset",
     config = {
-      include = [
+      "include" = [
         "usr/lib/modules/*/kernel/drivers/block/virtio_blk.ko*",
         "usr/lib/modules/*/modules.*",
       ],

@@ -267,7 +267,7 @@ fun pkgs =>
     name = "linux-modules-%{pkgs.linux.version}",
     tag = "TreeSubset",
     config = {
-      include = [
+      "include" = [
         "usr/lib/modules/**",
       ],
     },

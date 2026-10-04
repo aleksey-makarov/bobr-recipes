@@ -168,7 +168,7 @@ fun pkgs =>
     name = "systemd-dev-%{systemd.version}",
     tag = "TreeSubset",
     config = {
-      include = [
+      "include" = [
         "usr/include/libudev.h",
         "usr/include/systemd/*.h",
         "usr/lib/libsystemd.so*",

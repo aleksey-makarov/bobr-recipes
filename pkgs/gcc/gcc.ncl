@@ -139,7 +139,7 @@ fun pkgs =>
       ],
     },
     config = {
-      include = [
+      "include" = [
         "usr/lib/libgcc_s.so.1",
       ],
     },
@@ -174,7 +174,7 @@ fun pkgs =>
       ],
     },
     config = {
-      include = [
+      "include" = [
         "usr/lib/libstdc++.so.6",
         "usr/lib/libstdc++.so.6.0.34",
       ],
@@ -195,7 +195,7 @@ fun pkgs =>
       ],
     },
     config = {
-      include = [
+      "include" = [
         "usr/lib/libgomp.so.1",
         "usr/lib/libgomp.so.1.0.0",
       ],

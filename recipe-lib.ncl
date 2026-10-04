@@ -148,7 +148,7 @@ in
         name = split_libs_name base,
         tag = "TreeSubset",
         config = {
-          include = split_libs_include globs,
+          "include" = split_libs_include globs,
         },
         inputs = {
           tree = base,

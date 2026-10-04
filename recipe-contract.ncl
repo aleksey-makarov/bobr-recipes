@@ -344,7 +344,7 @@ let CmakeConfig = {
 }
 in
 let TreeSubsetConfig = {
-  include | Array String | NonEmptyArray,
+  "include" | Array String | NonEmptyArray,
 }
 in
 let TreeMoveConfig = {
