@@ -45,5 +45,33 @@ jobs:
           install -m 0755 "${download}" "${bin_dir}/nickel"
           echo "${bin_dir}" >>"${GITHUB_PATH}"
 
+      - name: Install pinned filesystem hasher
+        shell: bash
+        env:
+          BOBR_RELEASE: v0.1.10
+        run: |
+          set -euo pipefail
+          asset="bobr-x86_64-unknown-linux-musl.tar.xz"
+          release_url="https://github.com/aleksey-makarov/bobr/releases/download/${BOBR_RELEASE}"
+          download_dir="$(mktemp -d "${RUNNER_TEMP}/bobr-release.XXXXXX")"
+          bin_dir="${RUNNER_TEMP}/bobr/bin"
+          for file in "${asset}" SHA256SUMS; do
+            curl --fail --location --silent --show-error \
+              --retry 3 --retry-all-errors \
+              "${release_url}/${file}" --output "${download_dir}/${file}"
+          done
+          awk -v asset="${asset}" '
+            $2 == asset { print; matches++ }
+            END { if (matches != 1) exit 1 }
+          ' "${download_dir}/SHA256SUMS" >"${download_dir}/hasher-archive.sha256"
+          (cd "${download_dir}" && sha256sum --check hasher-archive.sha256)
+          archive_binary="bobr-${BOBR_RELEASE}-x86_64-unknown-linux-musl/bin/bobr-fsobj-hash"
+          tar --extract --xz --no-same-owner --file "${download_dir}/${asset}" \
+            --directory "${download_dir}" "${archive_binary}"
+          mkdir -p "${bin_dir}"
+          install -m 0755 "${download_dir}/${archive_binary}" "${bin_dir}/bobr-fsobj-hash"
+          "${bin_dir}/bobr-fsobj-hash" --help >/dev/null
+          echo "${bin_dir}" >>"${GITHUB_PATH}"
+
       - name: Checks
         run: ./tools/check.sh

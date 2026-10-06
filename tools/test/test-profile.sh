@@ -235,9 +235,12 @@ write_profile "${temporary}/request.ncl" \
       ],
     },
   }"
-PATH="${temporary}/bin:${PATH}" \
+if ! PATH="${temporary}/bin:${PATH}" \
   "${recipes_path}/bin/bobr-build.sh" --dry-run --target glibc_gen1 \
-  "${temporary}/request.ncl" > "${temporary}/request.json" 2> "${temporary}/dry-run.log"
+  "${temporary}/request.ncl" > "${temporary}/request.json" 2> "${temporary}/dry-run.log"; then
+  cat "${temporary}/dry-run.log" >&2
+  fail "secondary provider profile failed to lower"
+fi
 if grep -q 'output_repository' "${temporary}/request.json"; then
   fail "output_repository leaked into the Bobr request"
 fi
@@ -313,10 +316,13 @@ jq -e '.nodes.root.name == "overlay-one"' \
   || fail "ordered profile overlays were not applied"
 
 # Repeated --target values replace the profile goals as one ordered goal list.
-PATH="${temporary}/bin:${PATH}" \
+if ! PATH="${temporary}/bin:${PATH}" \
   "${recipes_path}/bin/bobr-build.sh" --dry-run \
   --target glibc_gen1 --target gcc_gen1 "${temporary}/request.ncl" \
-  > "${temporary}/multi-request.json" 2> "${temporary}/multi-dry-run.log"
+  > "${temporary}/multi-request.json" 2> "${temporary}/multi-dry-run.log"; then
+  cat "${temporary}/multi-dry-run.log" >&2
+  fail "ordered multi-goal profile failed to lower"
+fi
 jq -e '
   [.goals[] as $id | .nodes[$id].name]
     == ["glibc-gen1-2.42", "gcc-gen1-15.2.0"]

@@ -433,9 +433,12 @@ let pkgs = bobrpkgs [] in
 EOF_PROFILE
 
 : > "${BROKEN_TOOL_LOG}"
-MOCK_BOBR_STATUS=0 PATH="${temporary}/broken-bin:${PATH}" \
+if ! MOCK_BOBR_STATUS=0 PATH="${temporary}/broken-bin:${PATH}" \
   "${recipes_path}/bin/bobr-build.sh" "${build_only_profile}" \
-  > "${temporary}/wrapper-stdout" 2> "${temporary}/wrapper-stderr"
+  > "${temporary}/wrapper-stdout" 2> "${temporary}/wrapper-stderr"; then
+  cat "${temporary}/wrapper-stderr" >&2
+  fail "build-only wrapper failed unexpectedly"
+fi
 assert_equal "goal-hash" "$(cat "${temporary}/wrapper-stdout")" \
   "build-only wrapper stdout"
 assert_equal "" "$(cat "${BROKEN_TOOL_LOG}")" \
@@ -487,9 +490,12 @@ EOF_PROFILE
 # success must not depend on working repository tools either.
 : > "${BROKEN_TOOL_LOG}"
 : > "${MOCK_LOG}"
-PATH="${temporary}/broken-bin:${PATH}" \
+if ! PATH="${temporary}/broken-bin:${PATH}" \
   "${recipes_path}/bin/bobr-build.sh" --dry-run "${integration_profile}" \
-  > "${temporary}/wrapper-stdout" 2> "${temporary}/wrapper-stderr"
+  > "${temporary}/wrapper-stdout" 2> "${temporary}/wrapper-stderr"; then
+  cat "${temporary}/wrapper-stderr" >&2
+  fail "publication dry-run wrapper failed unexpectedly"
+fi
 assert_equal "" "$(cat "${BROKEN_TOOL_LOG}")" \
   "publication tools used by dry-run wrapper"
 assert_equal "" "$(cat "${MOCK_LOG}")" \
@@ -500,9 +506,12 @@ assert_equal "1" "$(catalog_count)" "dry-run catalog count"
 reset_profile
 write_statuses \
   '{"state":"ready","current_slots":1,"active_slot":{"serial":1,"content_bytes":1}}'
-MOCK_BOBR_STATUS=0 "${recipes_path}/bin/bobr-build.sh" \
+if ! MOCK_BOBR_STATUS=0 "${recipes_path}/bin/bobr-build.sh" \
   "${integration_profile}" > "${temporary}/wrapper-stdout" \
-  2> "${temporary}/wrapper-stderr"
+  2> "${temporary}/wrapper-stderr"; then
+  cat "${temporary}/wrapper-stderr" >&2
+  fail "publication wrapper failed unexpectedly"
+fi
 assert_equal "goal-hash" "$(cat "${temporary}/wrapper-stdout")" \
   "wrapper success stdout"
 assert_commands \

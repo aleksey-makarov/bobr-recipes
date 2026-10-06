@@ -37,7 +37,8 @@ script_path="$(readlink -f "${BASH_SOURCE[0]}")"
 repository_path="$(cd "$(dirname "${script_path}")/.." && pwd)"
 cd "${repository_path}"
 
-for command in git jq nickel patch python3 shellcheck tar; do
+for command in git jq nickel patch python3 shellcheck tar \
+  "${BOBR_FSOBJ_HASH:-bobr-fsobj-hash}"; do
   if ! command -v "${command}" >/dev/null 2>&1; then
     echo "check.sh: required tool not found on PATH: ${command}" >&2
     exit 1
