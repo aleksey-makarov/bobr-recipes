@@ -245,7 +245,7 @@ fun pkgs =>
   # (a directory holding a single `bzImage`), so tools can use it directly
   # without poking into fs-files by hash.
   let linux_bzimage = {
-    name = "linux-bzimage%{if pkgs.linux.use_tinyconfig then "-tiny" else ""}-%{pkgs.linux.version}",
+    name = "linux-bzimage%{if pkgs.linux.use_tinyconfig then "-tiny" else ""}",
     tag = "FsTreeExport",
     config = {
       copies = [
