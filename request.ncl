@@ -27,7 +27,7 @@
 # - `nodes` and `goals` lowered from the selected recipe values
 let request_schema = import "request-schema.ncl" in
 let recipe = import "recipe-lib.ncl" in
-let profile_contracts = import "build-profile/build-profile.ncl" in
+let profile_contracts = import "profiles/contracts.ncl" in
 let RequestArgs = {
   store_path | String,
   logs_path | String,

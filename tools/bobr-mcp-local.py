@@ -147,7 +147,7 @@ def _build_argv(target: str, dry_run: bool, jobs: int | None) -> list[str]:
     if not _profile_path.is_file():
         raise FileNotFoundError(
             f"no build profile at {_profile_path}; create one importing "
-            f"{RECIPES_DIR / 'build-profile' / 'bobr-user.ncl'}, or start "
+            f"{RECIPES_DIR / 'profiles' / 'bobr-user.ncl'}, or start "
             f"this server with --profile"
         )
     if _resolve_bobr() is None:

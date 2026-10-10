@@ -8,7 +8,7 @@
 #   bobr-build.sh [OPTIONS] [PROFILE.ncl]
 #
 #   PROFILE.ncl              the build profile (default: ./bobr.ncl); normally
-#                            imports <recipes>/build-profile/bobr-user.ncl
+#                            imports <recipes>/profiles/bobr-user.ncl
 #   --target NAME            build this recipe instead of the profile's goals;
 #                            repeat to select several ordered goals
 #   --jobs N | -j N          cap builders running at once
@@ -29,10 +29,10 @@ usage() {
 script_path="$(readlink -f "${BASH_SOURCE[0]}")"
 recipes_path="$(cd "$(dirname "${script_path}")/.." && pwd)"
 tool="bobr-build.sh"
-# shellcheck source=build-profile/profile-lib.sh
-. "${recipes_path}/build-profile/profile-lib.sh"
-# shellcheck source=build-profile/output-repository-lib.sh
-. "${recipes_path}/build-profile/output-repository-lib.sh"
+# shellcheck source=profiles/profile-lib.sh
+. "${recipes_path}/profiles/profile-lib.sh"
+# shellcheck source=profiles/publish-lib.sh
+. "${recipes_path}/profiles/publish-lib.sh"
 
 profile_path=""
 targets=()
@@ -196,7 +196,7 @@ if [ "${#targets[@]}" -gt 0 ]; then
   display_goals="[$(printf '"%s",' "${targets[@]}" | sed 's/,$//')]"
 fi
 
-request_expr="let contracts = import \"${recipes_path}/build-profile/build-profile.ncl\" in
+request_expr="let contracts = import \"${recipes_path}/profiles/contracts.ncl\" in
 let profile | contracts.Profile = import \"${profile_path}\" in
 (import \"${recipes_path}/request.ncl\") {
   store_path = \"${store_path}\",

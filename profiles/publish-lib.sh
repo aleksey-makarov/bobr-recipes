@@ -3,11 +3,12 @@
 # module is called, so static analysis cannot see their assignments.
 # shellcheck disable=SC2154
 
-# Internal post-build publication support for `bobr-build.sh`.
+# Internal post-build publication support for `bin/bobr-build.sh`.
 #
-# This file is sourced after `resolve_profile`. It emits no stdout: the build
-# wrapper reserves stdout for Bobr goal hashes, while repository diagnostics
-# and the candidate hand-off belong on stderr.
+# The wrapper sources this module and calls its entry point after resolving
+# the profile and successfully completing the build. It emits no stdout:
+# stdout is reserved for Bobr goal hashes, while repository diagnostics and
+# the candidate hand-off belong on stderr.
 
 _output_repository_require_file() {
   local description="$1" path="$2"

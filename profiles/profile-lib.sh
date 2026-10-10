@@ -38,7 +38,7 @@ resolve_profile() {
 
   resolved="$(
     nickel export --format raw <<EOF_PROFILE
-let contracts = import "${recipes_path}/build-profile/build-profile.ncl" in
+let contracts = import "${recipes_path}/profiles/contracts.ncl" in
 let profile | contracts.Profile = import "${profile_path}" in
 let absolute = fun path =>
   if std.string.is_match "^/" path then path else "${profile_dir}/" ++ path

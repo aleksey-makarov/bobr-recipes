@@ -5,7 +5,7 @@
 #
 #     let bobrpkgs = import "bobr-recipes/bobrpkgs.ncl" in
 #     let pkgs = bobrpkgs [] in
-#     (import "bobr-recipes/build-profile/bobr-user.ncl") & {
+#     (import "bobr-recipes/profiles/bobr-user.ncl") & {
 #       include pkgs,
 #       goals = [pkgs.world],
 #     }
@@ -15,7 +15,7 @@
 #
 #     let bobrpkgs = import "bobr-recipes/bobrpkgs.ncl" in
 #     let pkgs = bobrpkgs [] in
-#     (import "bobr-recipes/build-profile/bobr-user.ncl") & {
+#     (import "bobr-recipes/profiles/bobr-user.ncl") & {
 #       include pkgs,
 #       goals = [pkgs.world],
 #       store = "another-store",

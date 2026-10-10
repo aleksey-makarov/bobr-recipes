@@ -34,7 +34,7 @@ fi
 
 if [ -n "${profile_path}" ]; then
   pkgs_expr="$(cat <<EOF_PKGS
-let contracts = import "${recipes_root}/build-profile/build-profile.ncl" in
+let contracts = import "${recipes_root}/profiles/contracts.ncl" in
 let profile | contracts.Profile = import "${profile_path}" in profile.pkgs
 EOF_PKGS
 )"

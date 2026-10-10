@@ -8,10 +8,10 @@ set -euo pipefail
 script_path="$(readlink -f "${BASH_SOURCE[0]}")"
 recipes_path="$(cd "$(dirname "${script_path}")/../.." && pwd)"
 tool="test-output-repository.sh"
-# shellcheck source=build-profile/profile-lib.sh
-. "${recipes_path}/build-profile/profile-lib.sh"
-# shellcheck source=build-profile/output-repository-lib.sh
-. "${recipes_path}/build-profile/output-repository-lib.sh"
+# shellcheck source=profiles/profile-lib.sh
+. "${recipes_path}/profiles/profile-lib.sh"
+# shellcheck source=profiles/publish-lib.sh
+. "${recipes_path}/profiles/publish-lib.sh"
 
 temporary="$(mktemp -d)"
 trap 'rm -rf "${temporary}"' EXIT

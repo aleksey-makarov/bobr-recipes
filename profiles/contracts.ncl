@@ -1,4 +1,5 @@
-# Contract for a build profile -- the `bobr.ncl` a caller keeps in their
+# Contracts and validation for build profiles, providers, and publication.
+# `Profile` describes the `bobr.ncl` a caller keeps in their
 # working directory and normally implements by importing one of the presets in
 # this directory.
 #

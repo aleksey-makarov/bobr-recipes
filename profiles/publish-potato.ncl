@@ -1,12 +1,12 @@
-# Output repository preset for the dedicated Bobr bucket on potato.
+# Publication profile preset for the dedicated Bobr bucket on potato.
 #
 # This is a partial build profile. Compose it with the standard user profile
 # and local overrides in the workspace's top-level `bobr.ncl`:
 #
 #     let bobrpkgs = import "bobr-recipes/bobrpkgs.ncl" in
 #     let pkgs = bobrpkgs [] in
-#     (import "bobr-recipes/build-profile/bobr-user.ncl")
-#     & (import "bobr-recipes/build-profile/output-repo-potato.ncl")
+#     (import "bobr-recipes/profiles/bobr-user.ncl")
+#     & (import "bobr-recipes/profiles/publish-potato.ncl")
 #     & {
 #       include pkgs,
 #       goals = [pkgs.world],
