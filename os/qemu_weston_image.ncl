@@ -46,7 +46,7 @@ fun pkgs =>
       pkgs
       {
         name = "qemu-weston-image",
-        tree = qemu_weston_rootfs,
+        tree = pkgs.qemu_weston_rootfs,
       }
   in
 

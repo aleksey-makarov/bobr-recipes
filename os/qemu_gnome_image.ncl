@@ -61,7 +61,7 @@ fun pkgs =>
       pkgs
       {
         name = "qemu-gnome-image",
-        tree = qemu_gnome_rootfs,
+        tree = pkgs.qemu_gnome_rootfs,
       }
   in
 

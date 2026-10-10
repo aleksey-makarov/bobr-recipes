@@ -435,6 +435,24 @@ jq -e '.nodes.root.name == "overlay-one"' \
   "${temporary}/overlay-request.json" >/dev/null \
   || fail "ordered profile overlays were not applied"
 
+# Images must consume the final overlaid rootfs, not a module-local recipe.
+for variant in qemu qemu_weston qemu_gnome; do
+  image_attribute="${variant}_image"
+  rootfs_attribute="${variant}_rootfs"
+  image_rootfs_name="$(nickel export --format text <<EOF_IMAGE_OVERLAY
+let overlay = fun final => fun prev => {
+  "${rootfs_attribute}" = (std.record.get "${rootfs_attribute}" prev) & {
+    name | force = "${rootfs_attribute}-overlaid",
+  },
+} in
+let pkgs = (import "${recipes_path}/bobrpkgs.ncl") [overlay] in
+(std.record.get "${image_attribute}" pkgs).inputs._tree.name
+EOF_IMAGE_OVERLAY
+  )"
+  assert_equal "${rootfs_attribute}-overlaid" "${image_rootfs_name}" \
+    "${image_attribute} uses final rootfs"
+done
+
 # Repeated --target values replace the profile goals as one ordered goal list.
 if ! PATH="${temporary}/bin:${PATH}" \
   "${recipes_path}/bin/bobr-build.sh" --dry-run \
