@@ -148,7 +148,7 @@ fun pkgs =>
   # GCC module. Normal packages depend on c_runtime, which also carries the
   # libgcc_s unwinder that glibc loads dynamically.
   let glibc_libs =
-    recipe.split.libs glibc "usr/lib/*.so*"
+    recipe.split.libs pkgs.glibc "usr/lib/*.so*"
     & {
       deps = {
         build = [],

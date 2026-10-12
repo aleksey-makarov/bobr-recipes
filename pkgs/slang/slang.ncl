@@ -75,7 +75,7 @@ fun pkgs =>
   in
 
   let slang_libs =
-    recipe.split.libs slang "usr/lib/libslang.so*"
+    recipe.split.libs pkgs.slang "usr/lib/libslang.so*"
     & {
       deps = {
         build = [],

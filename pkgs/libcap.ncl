@@ -58,7 +58,7 @@ fun pkgs =>
   in
 
   let libcap_libs =
-    recipe.split.libs libcap "usr/lib/*.so*"
+    recipe.split.libs pkgs.libcap "usr/lib/*.so*"
     & {
       deps = {
         build = [],

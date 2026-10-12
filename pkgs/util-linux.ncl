@@ -74,7 +74,7 @@ fun pkgs =>
   in
 
   let util_linux_libs =
-    recipe.split.libs util_linux "usr/lib/*.so*"
+    recipe.split.libs pkgs.util_linux "usr/lib/*.so*"
     & {
       deps = {
         build = [],

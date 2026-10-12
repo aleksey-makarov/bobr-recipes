@@ -77,7 +77,7 @@ fun pkgs =>
   in
 
   let openssl_libs =
-    recipe.split.libs openssl "usr/lib/*.so*"
+    recipe.split.libs pkgs.openssl "usr/lib/*.so*"
     & {
       deps = {
         build = [],

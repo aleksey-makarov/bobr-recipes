@@ -42,7 +42,7 @@ fun pkgs =>
   in
 
   let attr_libs =
-    recipe.split.libs attr "usr/lib/*.so*"
+    recipe.split.libs pkgs.attr "usr/lib/*.so*"
     & {
       deps = {
         build = [],

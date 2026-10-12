@@ -102,7 +102,7 @@ fun pkgs =>
 
   let ncurses_libs =
     recipe.split.libs
-      ncurses
+      pkgs.ncurses
       [
         "usr/lib/*.so*",
         "usr/share/terminfo/**",

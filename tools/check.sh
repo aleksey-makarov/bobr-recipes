@@ -63,6 +63,9 @@ tools/test/test-output-repository.sh
 step "recipe contracts"
 tools/test/test-recipe-contract.sh
 
+step "recipe overlays"
+tools/test/test-recipe-overlays.sh
+
 step "synthetic source preparation"
 tools/test/test-synthetic-common.sh
 

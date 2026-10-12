@@ -90,7 +90,7 @@ fun pkgs =>
   in
 
   let xz_libs =
-    recipe.split.libs xz "usr/lib/liblzma.so*"
+    recipe.split.libs pkgs.xz "usr/lib/liblzma.so*"
     & {
       deps = {
         build = [],

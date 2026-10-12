@@ -42,7 +42,7 @@ fun pkgs =>
   in
 
   let libxcrypt_libs =
-    recipe.split.libs libxcrypt "usr/lib/*.so*"
+    recipe.split.libs pkgs.libxcrypt "usr/lib/*.so*"
     & {
       deps = {
         build = [],

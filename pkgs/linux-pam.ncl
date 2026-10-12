@@ -88,7 +88,7 @@ fun pkgs =>
   # live under /usr/lib/security and come from the full `linux_pam` package that
   # the rootfs merges in.
   let linux_pam_libs =
-    recipe.split.libs linux_pam "usr/lib/libpam*.so*"
+    recipe.split.libs pkgs.linux_pam "usr/lib/libpam*.so*"
     & {
       deps = {
         build = [],

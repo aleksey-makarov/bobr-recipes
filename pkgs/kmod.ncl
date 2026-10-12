@@ -65,7 +65,7 @@ fun pkgs =>
   # against (see libkmod_deps in kmod's meson.build).
   let kmod_libs =
     recipe.split.libs
-      kmod
+      pkgs.kmod
       [
         "usr/lib/libkmod.so*",
       ]

@@ -48,7 +48,7 @@ fun pkgs =>
 
   let libdrm_libs =
     recipe.split.libs
-      libdrm
+      pkgs.libdrm
       [
         "usr/lib/libdrm.so*",
         "usr/lib/libdrm_*.so*",

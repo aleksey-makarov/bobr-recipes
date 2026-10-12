@@ -44,7 +44,7 @@ fun pkgs =>
   in
 
   let acl_libs =
-    recipe.split.libs acl "usr/lib/*.so*"
+    recipe.split.libs pkgs.acl "usr/lib/*.so*"
     & {
       deps = {
         build = [],
