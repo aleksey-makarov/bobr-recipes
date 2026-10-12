@@ -87,36 +87,36 @@ assert_equal "3" "${profile_output_repository_max_current_slots}" \
 assert_equal "1d" "${profile_output_repository_retention}" \
   "default retention"
 
-hetzner_profile="${temporary}/hetzner.ncl"
-write_profile "${hetzner_profile}" \
-  "${user_profile_value} & (import \"${recipes_path}/profiles/publish-hetzner.ncl\") & { store = \"hetzner-store\" }"
-resolve_profile "${hetzner_profile}"
-assert_equal "1" "${profile_output_repository_enabled}" "Hetzner publication enabled"
-assert_equal "0" "${profile_output_repository_create_bucket_if_missing}" "existing Hetzner bucket"
-assert_equal "s3://bobr" "${profile_output_repository_repository}" "Hetzner repository"
-assert_equal "https://nbg1.your-objectstorage.com" "${profile_output_repository_endpoint_url}" "Hetzner endpoint"
-assert_equal "nbg1" "${profile_output_repository_region}" "Hetzner region"
-assert_equal "bobr-hetzner" "${profile_output_repository_credentials_profile}" "Hetzner credentials profile"
-assert_equal "${temporary}/.config/bobr/aws-credentials" "${profile_output_repository_credentials_file}" "Hetzner credentials path"
-assert_equal "" "${profile_output_repository_ca_bundle}" "publicly trusted Hetzner TLS"
-assert_equal "https://bobr.nbg1.your-objectstorage.com/master" "${profile_output_repository_master_url}" "Hetzner master URL"
-assert_equal "https://bobr.nbg1.your-objectstorage.com/" "${profile_output_repository_data_base_url}" "Hetzner data URL"
-assert_equal "${recipes_path}/signing-key-1.pub.pem" "${profile_output_repository_trusted_keys[0]}" "Hetzner signing key"
-assert_equal "${temporary}/hetzner-store/repository-cache" "${profile_output_repository_cache}" "Hetzner cache"
+public_profile="${temporary}/public.ncl"
+write_profile "${public_profile}" \
+  "${user_profile_value} & (import \"${recipes_path}/profiles/publish-public.ncl\") & { store = \"public-store\" }"
+resolve_profile "${public_profile}"
+assert_equal "1" "${profile_output_repository_enabled}" "Public publication enabled"
+assert_equal "0" "${profile_output_repository_create_bucket_if_missing}" "existing public bucket"
+assert_equal "s3://bobr" "${profile_output_repository_repository}" "Public repository"
+assert_equal "https://nbg1.your-objectstorage.com" "${profile_output_repository_endpoint_url}" "Public endpoint"
+assert_equal "nbg1" "${profile_output_repository_region}" "Public region"
+assert_equal "bobr-public" "${profile_output_repository_credentials_profile}" "Public credentials profile"
+assert_equal "${temporary}/.config/bobr/aws-credentials" "${profile_output_repository_credentials_file}" "Public credentials path"
+assert_equal "" "${profile_output_repository_ca_bundle}" "publicly trusted TLS"
+assert_equal "https://bobr.nbg1.your-objectstorage.com/master" "${profile_output_repository_master_url}" "Public master URL"
+assert_equal "https://bobr.nbg1.your-objectstorage.com/" "${profile_output_repository_data_base_url}" "Public data URL"
+assert_equal "${recipes_path}/signing-key-1.pub.pem" "${profile_output_repository_trusted_keys[0]}" "Public signing key"
+assert_equal "${temporary}/public-store/repository-cache" "${profile_output_repository_cache}" "Public cache"
 
-hetzner_override="${temporary}/hetzner-override.ncl"
-write_profile "${hetzner_override}" \
-  "${user_profile_value} & (import \"${recipes_path}/profiles/publish-hetzner.ncl\") & { output_repository.credentials_file = \"private/keys\", output_repository.create_bucket_if_missing = true }"
-resolve_profile "${hetzner_override}"
-assert_equal "${temporary}/private/keys" "${profile_output_repository_credentials_file}" "Hetzner credentials override"
-assert_equal "1" "${profile_output_repository_create_bucket_if_missing}" "Hetzner initialization override"
-assert_equal "https://bobr.nbg1.your-objectstorage.com/master" "${profile_output_repository_master_url}" "Hetzner URL preserved after override"
+public_override="${temporary}/public-override.ncl"
+write_profile "${public_override}" \
+  "${user_profile_value} & (import \"${recipes_path}/profiles/publish-public.ncl\") & { output_repository.credentials_file = \"private/keys\", output_repository.create_bucket_if_missing = true }"
+resolve_profile "${public_override}"
+assert_equal "${temporary}/private/keys" "${profile_output_repository_credentials_file}" "Public credentials override"
+assert_equal "1" "${profile_output_repository_create_bucket_if_missing}" "Public initialization override"
+assert_equal "https://bobr.nbg1.your-objectstorage.com/master" "${profile_output_repository_master_url}" "Public URL preserved after override"
 
 # Reader presets are single provider entries. Normal merges override their
 # low-priority capabilities/backend fields without enabling publication.
-for preset in hetzner potato; do
+for preset in public potato; do
   case "${preset}" in
-    hetzner)
+    public)
       expected_master="https://bobr.nbg1.your-objectstorage.com/master"
       expected_ca=""
       ;;
@@ -383,7 +383,7 @@ write_profile "${temporary}/preset-request.ncl" \
   "${user_profile_value} & {
     store = \"request-store\",
     secondaries.providers = [
-      import \"${recipes_path}/profiles/provider-hetzner.ncl\",
+      import \"${recipes_path}/profiles/provider-public.ncl\",
       import \"${recipes_path}/profiles/provider-potato.ncl\",
     ],
   }"
@@ -396,7 +396,7 @@ if ! PATH="${temporary}/bin:${PATH}" \
 fi
 jq -e --arg root "${temporary}" '
   [.secondaries.providers[] | [.name, .capability]] == [
-    ["hetzner", "mappings"], ["hetzner", "content"],
+    ["public", "mappings"], ["public", "content"],
     ["potato", "mappings"], ["potato", "content"]
   ]
   and .secondaries.providers[0].backend == .secondaries.providers[1].backend

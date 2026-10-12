@@ -1,15 +1,15 @@
-# One read-side provider for the public Bobr repository in Nuremberg.
+# One read-side provider for the public Bobr repository.
 # Use as an array entry, not a profile fragment:
 #
 #     secondaries.providers = [
-#       import "bobr-recipes/profiles/provider-hetzner.ncl",
+#       import "bobr-recipes/profiles/provider-public.ncl",
 #     ],
 #
 # Both capabilities are enabled; ordinary overrides can disable either one.
 # Paths are relative to the top-level build profile. No S3 credentials are used;
 # data_base_url is obtained from the authenticated master.
 {
-  name | priority -50 = "hetzner",
+  name | priority -50 = "public",
   mappings | priority -50 = true,
   content | priority -50 = true,
   remote = {
