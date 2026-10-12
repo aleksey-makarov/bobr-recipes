@@ -132,7 +132,7 @@ fun pkgs =>
   # the dependency DAG; c_runtime then combines both physical trees into one
   # directly attributable runtime package without introducing a cycle.
   let gcc_libgcc = {
-    name = "gcc-libgcc-%{gcc.version}",
+    name = "gcc-libgcc-%{pkgs.gcc.version}",
     tag = "TreeSubset",
     deps = {
       build = [],
@@ -146,13 +146,13 @@ fun pkgs =>
       ],
     },
     inputs = {
-      tree = gcc,
+      tree = pkgs.gcc,
     },
   }
   in
 
   let c_runtime = {
-    name = "c-runtime-%{pkgs.glibc.name}-%{gcc.version}",
+    name = "c-runtime-%{pkgs.glibc.name}-%{pkgs.gcc.version}",
     tag = "TreeMerge",
     deps = {
       build = [],
@@ -161,18 +161,18 @@ fun pkgs =>
     config = {},
     inputs = {
       glibc = pkgs.glibc_libs,
-      libgcc = gcc_libgcc,
+      libgcc = pkgs.gcc_libgcc,
     },
   }
   in
 
   let gcc_libstdcxx = {
-    name = "gcc-libstdcxx-%{gcc.version}",
+    name = "gcc-libstdcxx-%{pkgs.gcc.version}",
     tag = "TreeSubset",
     deps = {
       build = [],
       runtime = [
-        c_runtime,
+        pkgs.c_runtime,
       ],
     },
     config = {
@@ -182,18 +182,18 @@ fun pkgs =>
       ],
     },
     inputs = {
-      tree = gcc,
+      tree = pkgs.gcc,
     },
   }
   in
 
   let gcc_libgomp = {
-    name = "gcc-libgomp-%{gcc.version}",
+    name = "gcc-libgomp-%{pkgs.gcc.version}",
     tag = "TreeSubset",
     deps = {
       build = [],
       runtime = [
-        c_runtime,
+        pkgs.c_runtime,
       ],
     },
     config = {
@@ -203,7 +203,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      tree = gcc,
+      tree = pkgs.gcc,
     },
   }
   in

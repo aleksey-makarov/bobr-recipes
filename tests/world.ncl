@@ -46,7 +46,7 @@ fun pkgs =>
     name = "world",
     tag = "Group",
     config = {},
-    inputs = recipe.numbered_inputs [os_world, host_bundle_world],
+    inputs = recipe.numbered_inputs [pkgs.os_world, pkgs.host_bundle_world],
   }
   in
 

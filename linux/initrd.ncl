@@ -501,7 +501,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = initrd_build_rootfs,
-      _tree = initrd_rootfs,
+      _tree = pkgs.initrd_rootfs,
       script = mk_initramfs_script,
     },
   }

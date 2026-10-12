@@ -483,10 +483,10 @@ fun pkgs =>
   in
 
   let image_checks = [
-    test_initrd_rootfs,
-    test_rootfs,
-    test_weston_rootfs,
-    test_gnome_rootfs,
+    pkgs.test_initrd_rootfs,
+    pkgs.test_rootfs,
+    pkgs.test_weston_rootfs,
+    pkgs.test_gnome_rootfs,
   ]
   in
 
@@ -504,11 +504,11 @@ fun pkgs =>
     config = {},
     inputs =
       recipe.numbered_inputs [
-        test_host_bundles,
-        test_runtime_closures,
-        test_bootstrap_rootfs,
-        test_image_rootfs,
-        test_final_toolchain,
+        pkgs.test_host_bundles,
+        pkgs.test_runtime_closures,
+        pkgs.test_bootstrap_rootfs,
+        pkgs.test_image_rootfs,
+        pkgs.test_final_toolchain,
       ],
   }
   in
