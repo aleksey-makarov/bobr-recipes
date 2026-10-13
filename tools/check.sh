@@ -69,6 +69,9 @@ tools/test/test-recipe-overlays.sh
 step "public archive Sources"
 tools/test/test-public-sources.sh
 
+step "libclc Source family"
+tools/test/test-libclc-source.sh
+
 step "Linux Source family"
 tools/test/test-linux-sources.sh
 

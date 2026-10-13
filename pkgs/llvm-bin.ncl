@@ -70,7 +70,7 @@ fun pkgs =>
 
               # Preserve the symlink layout expected by Clang and llvm-ar.
               for tool in \
-                clang clang++ clang-22 clang-cpp \
+                clang clang++ clang-%{recipe.version_prefix 1 inputs.source.version} clang-cpp \
                 llc opt \
                 llvm-ar llvm-as llvm-config llvm-dis llvm-link llvm-objdump \
                 llvm-ranlib
