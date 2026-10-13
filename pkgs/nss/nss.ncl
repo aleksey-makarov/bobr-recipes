@@ -3,7 +3,7 @@
 # so NSS is a hard eds dependency. NSS has no configure/`make install`; it builds
 # with its own coreconf make system and installs by hand (see nss-build.sh). The
 # build rootfs is the native toolchain closure plus NSPR, system sqlite, zlib,
-# perl and python. `version`/`source_object_hash` are node fields (overridable).
+# perl and python. Configure version and hash through pkgs.nss_src.
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
@@ -18,28 +18,25 @@ fun pkgs =>
   }
   in
 
-  let nss_src = fun version =>
-    fun hash =>
+  # Configure version and hash through pkgs.nss_src.
+  let nss_src = {
+    version | default = "3.125",
+    name = "nss-src-%{version}",
+    tag = "Source",
+    object_hash | default = "1ad541f10da7c58dec01f540ecc44d28cbbc033f741a57473de5a0893d91606d",
+    origin =
       let rtm_tag = std.string.replace "." "_" version in
       {
-        name = "nss-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://ftp.mozilla.org/pub/security/nss/releases/NSS_%{rtm_tag}_RTM/src/nss-%{version}.tar.gz",
-        },
-      }
+        tag = "Http",
+        url = "https://ftp.mozilla.org/pub/security/nss/releases/NSS_%{rtm_tag}_RTM/src/nss-%{version}.tar.gz",
+      },
+  }
   in
 
   let step_env = { BOBR_SOURCE_DIR = "@{build}/source" } in
 
   let nss = {
-    version | default = "3.125",
-    source_object_hash
-      | default
-      = "1ad541f10da7c58dec01f540ecc44d28cbbc033f741a57473de5a0893d91606d",
-    name = "nss-%{version}",
+    name = "nss-%{inputs.source.version}",
     # SandboxStageDeps, not a plain additive SandboxInstallDeps: the install
     # ends with `chown -R 0:0 ${out_dir}/usr`, which under a direct install into
     # / would recurse the live /usr and rewrite lower-layer file metadata (an
@@ -85,7 +82,7 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_nss,
-      source = nss_src version source_object_hash,
+      source = pkgs.nss_src,
     },
   }
   in
@@ -93,5 +90,6 @@ fun pkgs =>
   {
     include [
       nss,
+      nss_src,
     ],
   }

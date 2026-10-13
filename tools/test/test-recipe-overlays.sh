@@ -59,13 +59,13 @@ EOF_NICKEL
   fi
 done
 
-# Ordinary record merges must propagate the version and source identity too.
+# Source overlays must propagate through the full recipe and library split.
 nickel export --format json >"${temporary}/attr-version.json" <<EOF_NICKEL
 let pkgs = (import "${repo_root}/bobrpkgs.ncl") [
   fun _final => fun prev => {
-    attr = prev.attr & {
+    attr_src = prev.attr_src & {
       version = "9.8.7",
-      source_object_hash = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      object_hash = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
     },
   },
 ] in
@@ -74,12 +74,14 @@ let pkgs = (import "${repo_root}/bobrpkgs.ncl") [
   tree_name = pkgs.attr_libs.inputs.tree.name,
   source_name = pkgs.attr_libs.inputs.tree.inputs.source.name,
   source_hash = pkgs.attr_libs.inputs.tree.inputs.source.object_hash,
+  configure_args = pkgs.attr_libs.inputs.tree.config.configure_args,
 }
 EOF_NICKEL
 jq -e '
   .name == "attr-libs-9.8.7" and .tree_name == "attr-9.8.7"
   and .source_name == "attr-src-9.8.7"
   and .source_hash == "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  and .configure_args == ["--disable-static", "--sysconfdir=/etc", "--docdir=/usr/share/doc/attr-9.8.7"]
 ' "${temporary}/attr-version.json" >/dev/null
 
 # The development split must follow both the full package and the independently

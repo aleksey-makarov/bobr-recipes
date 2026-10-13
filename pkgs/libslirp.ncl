@@ -1,21 +1,19 @@
 fun pkgs =>
-  let libslirp_src = fun version =>
-    fun hash =>
-      {
-        name = "libslirp-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://gitlab.freedesktop.org/slirp/libslirp/-/archive/v%{version}/libslirp-v%{version}.tar.gz",
-        },
-      }
+  # Configure version and hash through pkgs.libslirp_src.
+  let libslirp_src = {
+    version | default = "4.9.3",
+    name = "libslirp-src-%{version}",
+    tag = "Source",
+    object_hash | default = "ee698ca4ce05217ca7d520c7f0b1b1228fd7d32922dd32d1051c347152588417",
+    origin = {
+      tag = "Http",
+      url = "https://gitlab.freedesktop.org/slirp/libslirp/-/archive/v%{version}/libslirp-v%{version}.tar.gz",
+    },
+  }
   in
 
   let libslirp = {
-    version | default = "4.9.3",
-    source_object_hash | default = "ee698ca4ce05217ca7d520c7f0b1b1228fd7d32922dd32d1051c347152588417",
-    name = "libslirp-%{version}",
+    name = "libslirp-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -34,7 +32,7 @@ fun pkgs =>
         argv = [
           "/bin/sh",
           "-ec",
-          "printf '%s\\n' '%{version}' > .tarball-version",
+          "printf '%s\\n' '%{inputs.source.version}' > .tarball-version",
         ],
       },
       setup_args = [
@@ -52,11 +50,11 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = libslirp_src version source_object_hash,
+      source = pkgs.libslirp_src,
     },
   }
   in
 
   {
-    include [libslirp],
+    include [libslirp, libslirp_src],
   }

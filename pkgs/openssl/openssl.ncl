@@ -1,17 +1,17 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let openssl_src = fun version =>
-    fun hash =>
-      {
-        name = "openssl-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/openssl/openssl/releases/download/openssl-%{version}/openssl-%{version}.tar.gz",
-        },
-      }
+  # Configure version and hash through pkgs.openssl_src.
+  let openssl_src = {
+    version | default = "3.5.7",
+    name = "openssl-src-%{version}",
+    tag = "Source",
+    object_hash | default = "a8c0d28a529ca480f9f36cf5792e2cd21984552a3c8e4aa11a24aa31aeac98e8",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/openssl/openssl/releases/download/openssl-%{version}/openssl-%{version}.tar.gz",
+    },
+  }
   in
 
   let buildscript_openssl = {
@@ -26,9 +26,7 @@ fun pkgs =>
   in
 
   let openssl = {
-    version | default = "3.5.7",
-    source_object_hash | default = "a8c0d28a529ca480f9f36cf5792e2cd21984552a3c8e4aa11a24aa31aeac98e8",
-    name = "openssl-%{version}",
+    name = "openssl-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -63,7 +61,7 @@ fun pkgs =>
             BOBR_INSTALL_DIR = "/",
             # The documentation directory is named after the version, and the
             # script must not have to be edited whenever the version moves.
-            OPENSSL_VERSION = version,
+            OPENSSL_VERSION = inputs.source.version,
           },
         },
       ],
@@ -71,7 +69,7 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_openssl,
-      source = openssl_src version source_object_hash,
+      source = pkgs.openssl_src,
     },
   }
   in
@@ -92,5 +90,6 @@ fun pkgs =>
     include [
       openssl,
       openssl_libs,
+      openssl_src,
     ],
   }

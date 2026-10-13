@@ -1,21 +1,19 @@
 fun pkgs =>
-  let iproute2_src = fun version =>
-    fun hash =>
-      {
-        name = "iproute2-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-%{version}.tar.xz",
-        },
-      }
+  # Configure version and hash through pkgs.iproute2_src.
+  let iproute2_src = {
+    version | default = "7.1.0",
+    name = "iproute2-src-%{version}",
+    tag = "Source",
+    object_hash | default = "fd9fa1b95809417157ca83dd72957e3261bdbce896353cb936f80af0b33a4b5c",
+    origin = {
+      tag = "Http",
+      url = "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-%{version}.tar.xz",
+    },
+  }
   in
 
   let iproute2 = {
-    version | default = "7.1.0",
-    source_object_hash | default = "fd9fa1b95809417157ca83dd72957e3261bdbce896353cb936f80af0b33a4b5c",
-    name = "iproute2-%{version}",
+    name = "iproute2-%{inputs.source.version}",
     tag = "Makefile",
     deps = {
       build = [
@@ -51,12 +49,12 @@ fun pkgs =>
         argv = [
           "/bin/sh",
           "-ec",
-          "install -vDm644 COPYING README* -t \"/usr/share/doc/iproute2-%{version}\"",
+          "install -vDm644 COPYING README* -t \"/usr/share/doc/iproute2-%{inputs.source.version}\"",
         ],
       },
     },
     inputs = {
-      source = iproute2_src version source_object_hash,
+      source = pkgs.iproute2_src,
     },
   }
   in
@@ -64,5 +62,6 @@ fun pkgs =>
   {
     include [
       iproute2,
+      iproute2_src,
     ],
   }

@@ -1,26 +1,24 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let attr_src = fun version =>
-    fun hash =>
-      {
-        name = "attr-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://download.savannah.gnu.org/releases/attr/attr-%{version}.tar.xz",
-            "https://deb.debian.org/debian/pool/main/a/attr/attr_%{version}.orig.tar.xz",
-          ],
-        },
-      }
+  # Configure version and hash through pkgs.attr_src.
+  let attr_src = {
+    version | default = "2.5.2",
+    name = "attr-src-%{version}",
+    tag = "Source",
+    object_hash | default = "f2e97b0ab7ce293681ab701915766190d607a1dba7fae8a718138150b700a70b",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://download.savannah.gnu.org/releases/attr/attr-%{version}.tar.xz",
+        "https://deb.debian.org/debian/pool/main/a/attr/attr_%{version}.orig.tar.xz",
+      ],
+    },
+  }
   in
 
   let attr = {
-    version | default = "2.5.2",
-    source_object_hash | default = "f2e97b0ab7ce293681ab701915766190d607a1dba7fae8a718138150b700a70b",
-    name = "attr-%{version}",
+    name = "attr-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -32,11 +30,11 @@ fun pkgs =>
       configure_args = [
         "--disable-static",
         "--sysconfdir=/etc",
-        "--docdir=/usr/share/doc/attr-%{version}",
+        "--docdir=/usr/share/doc/attr-%{inputs.source.version}",
       ],
     },
     inputs = {
-      source = attr_src version source_object_hash,
+      source = pkgs.attr_src,
     },
   }
   in
@@ -57,5 +55,6 @@ fun pkgs =>
     include [
       attr,
       attr_libs,
+      attr_src,
     ],
   }

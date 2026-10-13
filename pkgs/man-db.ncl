@@ -1,25 +1,23 @@
 fun pkgs =>
-  let man_db_src = fun version =>
-    fun hash =>
-      {
-        name = "man-db-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://download.savannah.gnu.org/releases/man-db/man-db-%{version}.tar.xz",
-            "https://deb.debian.org/debian/pool/main/m/man-db/man-db_%{version}.orig.tar.xz",
-            "https://tarballs.nixos.org/sha256/%{hash}",
-          ],
-        },
-      }
+  # Configure version and hash through pkgs.man_db_src.
+  let man_db_src = {
+    version | default = "2.13.1",
+    name = "man-db-src-%{version}",
+    tag = "Source",
+    object_hash | default = "8afebb6f7eb6bb8542929458841f5c7e6f240e30c86358c1fbcefbea076c87d9",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://download.savannah.gnu.org/releases/man-db/man-db-%{version}.tar.xz",
+        "https://deb.debian.org/debian/pool/main/m/man-db/man-db_%{version}.orig.tar.xz",
+        "https://tarballs.nixos.org/sha256/%{object_hash}",
+      ],
+    },
+  }
   in
 
   let man_db = {
-    version | default = "2.13.1",
-    source_object_hash | default = "8afebb6f7eb6bb8542929458841f5c7e6f240e30c86358c1fbcefbea076c87d9",
-    name = "man-db-%{version}",
+    name = "man-db-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -43,7 +41,7 @@ fun pkgs =>
     },
     config = {
       configure_args = [
-        "--docdir=/usr/share/doc/man-db-%{version}",
+        "--docdir=/usr/share/doc/man-db-%{inputs.source.version}",
         "--sysconfdir=/etc",
         "--sbindir=/usr/bin",
         "--disable-setuid",
@@ -56,7 +54,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = man_db_src version source_object_hash,
+      source = pkgs.man_db_src,
     },
   }
   in
@@ -64,5 +62,6 @@ fun pkgs =>
   {
     include [
       man_db,
+      man_db_src,
     ],
   }

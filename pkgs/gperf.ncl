@@ -1,24 +1,22 @@
 fun pkgs =>
-  let gperf_src = fun version =>
-    fun hash =>
-      {
-        name = "gperf-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/gperf/gperf-%{version}.tar.gz",
-            "https://mirrors.kernel.org/gnu/gperf/gperf-%{version}.tar.gz",
-          ],
-        },
-      }
+  # Configure version and hash through pkgs.gperf_src.
+  let gperf_src = {
+    version | default = "3.3",
+    name = "gperf-src-%{version}",
+    tag = "Source",
+    object_hash | default = "fd87e0aba7e43ae054837afd6cd4db03a3f2693deb3619085e6ed9d8d9604ad8",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/gperf/gperf-%{version}.tar.gz",
+        "https://mirrors.kernel.org/gnu/gperf/gperf-%{version}.tar.gz",
+      ],
+    },
+  }
   in
 
   let gperf = {
-    version | default = "3.3",
-    source_object_hash | default = "fd87e0aba7e43ae054837afd6cd4db03a3f2693deb3619085e6ed9d8d9604ad8",
-    name = "gperf-%{version}",
+    name = "gperf-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -28,10 +26,10 @@ fun pkgs =>
       ],
     },
     config = {
-      configure_args = ["--docdir=/usr/share/doc/gperf-%{version}"],
+      configure_args = ["--docdir=/usr/share/doc/gperf-%{inputs.source.version}"],
     },
     inputs = {
-      source = gperf_src version source_object_hash,
+      source = pkgs.gperf_src,
     },
   }
   in
@@ -39,5 +37,6 @@ fun pkgs =>
   {
     include [
       gperf,
+      gperf_src,
     ],
   }

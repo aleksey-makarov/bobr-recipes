@@ -1,24 +1,22 @@
 fun pkgs =>
-  let readline_src = fun version =>
-    fun hash =>
-      {
-        name = "readline-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/readline/readline-%{version}.tar.gz",
-            "https://mirrors.kernel.org/gnu/readline/readline-%{version}.tar.gz",
-          ],
-        },
-      }
+  # Configure version and hash through pkgs.readline_src.
+  let readline_src = {
+    version | default = "8.3",
+    name = "readline-src-%{version}",
+    tag = "Source",
+    object_hash | default = "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/readline/readline-%{version}.tar.gz",
+        "https://mirrors.kernel.org/gnu/readline/readline-%{version}.tar.gz",
+      ],
+    },
+  }
   in
 
   let readline = {
-    version | default = "8.3",
-    source_object_hash | default = "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc",
-    name = "readline-%{version}",
+    name = "readline-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -46,7 +44,7 @@ fun pkgs =>
       configure_args = [
         "--disable-static",
         "--with-curses",
-        "--docdir=/usr/share/doc/readline-%{version}",
+        "--docdir=/usr/share/doc/readline-%{inputs.source.version}",
       ],
       # Link libreadline.so against libtinfo (the terminfo/termcap routines live
       # there now that ncurses is built --with-termlib=tinfo), so the shared
@@ -57,7 +55,7 @@ fun pkgs =>
       make_args = ["SHLIB_LIBS=-ltinfo"],
     },
     inputs = {
-      source = readline_src version source_object_hash,
+      source = pkgs.readline_src,
     },
   }
   in
@@ -65,5 +63,6 @@ fun pkgs =>
   {
     include [
       readline,
+      readline_src,
     ],
   }

@@ -1,22 +1,21 @@
 fun pkgs =>
-  let expat_src = fun version =>
-    fun hash =>
+  # Configure version and hash through pkgs.expat_src.
+  let expat_src = {
+    version | default = "2.8.2",
+    name = "expat-src-%{version}",
+    tag = "Source",
+    object_hash | default = "3ad89b8588e6644bd4e49981480d48b21289eebbcd4f0a1a4afb1c29f99b6ab4",
+    origin =
       let release_tag = "R_" ++ std.string.replace "." "_" version in
       {
-        name = "expat-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/libexpat/libexpat/releases/download/%{release_tag}/expat-%{version}.tar.xz",
-        },
-      }
+        tag = "Http",
+        url = "https://github.com/libexpat/libexpat/releases/download/%{release_tag}/expat-%{version}.tar.xz",
+      },
+  }
   in
 
   let expat = {
-    version | default = "2.8.2",
-    source_object_hash | default = "3ad89b8588e6644bd4e49981480d48b21289eebbcd4f0a1a4afb1c29f99b6ab4",
-    name = "expat-%{version}",
+    name = "expat-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -27,11 +26,11 @@ fun pkgs =>
     config = {
       configure_args = [
         "--disable-static",
-        "--docdir=/usr/share/doc/expat-%{version}",
+        "--docdir=/usr/share/doc/expat-%{inputs.source.version}",
       ],
     },
     inputs = {
-      source = expat_src version source_object_hash,
+      source = pkgs.expat_src,
     },
   }
   in
@@ -39,5 +38,6 @@ fun pkgs =>
   {
     include [
       expat,
+      expat_src,
     ],
   }

@@ -1,17 +1,17 @@
 let br = import "../../build-rootfs.ncl" in
 
 fun pkgs =>
-  let bzip2_src = fun version =>
-    fun hash =>
-      {
-        name = "bzip2-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://www.sourceware.org/pub/bzip2/bzip2-%{version}.tar.gz",
-        },
-      }
+  # Configure version and hash through pkgs.bzip2_src.
+  let bzip2_src = {
+    version | default = "1.0.8",
+    name = "bzip2-src-%{version}",
+    tag = "Source",
+    object_hash | default = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
+    origin = {
+      tag = "Http",
+      url = "https://www.sourceware.org/pub/bzip2/bzip2-%{version}.tar.gz",
+    },
+  }
   in
 
   let bzip2_install_docs_patch = {
@@ -102,15 +102,13 @@ fun pkgs =>
   in
 
   let bzip2_gen1 = {
-    version | default = "1.0.8",
-    source_object_hash | default = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
-    name = "bzip2-gen1-%{version}",
+    name = "bzip2-gen1-%{inputs.source.version}",
     tag = "MakefileStageRootfs",
-    config = bzip2_config version,
+    config = bzip2_config inputs.source.version,
     inputs = {
       _rootfs =
-        br.build_rootfs_closure pkgs "bzip2-gen1-%{version}-build-rootfs" bzip2_gen1_build_deps,
-      source = bzip2_src version source_object_hash,
+        br.build_rootfs_closure pkgs "bzip2-gen1-%{inputs.source.version}-build-rootfs" bzip2_gen1_build_deps,
+      source = pkgs.bzip2_src,
       patch_install_docs = bzip2_install_docs_patch,
     },
   }
@@ -147,9 +145,7 @@ fun pkgs =>
   in
 
   let bzip2 = {
-    version | default = "1.0.8",
-    source_object_hash | default = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
-    name = "bzip2-%{version}",
+    name = "bzip2-%{inputs.source.version}",
     tag = "MakefileStageRootfs",
     deps = {
       build = [],
@@ -157,11 +153,11 @@ fun pkgs =>
         pkgs.c_runtime,
       ],
     },
-    config = bzip2_config version,
+    config = bzip2_config inputs.source.version,
     inputs = {
       _rootfs =
-        br.build_rootfs_closure pkgs "bzip2-%{version}-build-rootfs" bzip2_build_deps,
-      source = bzip2_src version source_object_hash,
+        br.build_rootfs_closure pkgs "bzip2-%{inputs.source.version}-build-rootfs" bzip2_build_deps,
+      source = pkgs.bzip2_src,
       patch_install_docs = bzip2_install_docs_patch,
     },
   }
@@ -171,5 +167,6 @@ fun pkgs =>
     include [
       bzip2_gen1,
       bzip2,
+      bzip2_src,
     ],
   }

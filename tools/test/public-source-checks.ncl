@@ -66,16 +66,29 @@ let pkgs_for = fun mode =>
   else
     package_set [ fun _final => fun prev => std.record.from_array (std.array.map (patch_case mode prev) cases)]
 in
-let source_from_goal = fun graph =>
+let builder_from_goal = fun graph =>
   let rec go = fun id =>
     let node = std.record.get id graph.nodes in
     if std.record.has_field "source" node.inputs then
-      std.record.get node.inputs.source graph.nodes
+      node
     else if std.record.has_field "tree" node.inputs then
       go node.inputs.tree
     else
       std.fail_with "public Source test: lowered builder has neither source nor tree input"
   in go
+in
+let replace_version = fun previous =>
+  fun version =>
+    let rec replace = fun value =>
+      if std.is_string value then
+        std.string.replace previous version value
+      else if std.is_array value then
+        std.array.map replace value
+      else if std.is_record value then
+        std.record.map (fun _field entry => replace entry) value
+      else
+        value
+    in replace
 in
 {
   count = std.array.length cases,
@@ -113,6 +126,7 @@ in
               )
               selected
           in
+          let splits = std.array.filter (fun entry => std.record.has_field "split" entry.consumer) builders in
           let graph =
             recipe.to_request_goals
               { include recipes_path }
@@ -120,7 +134,14 @@ in
               (
                 (std.array.map (fun spec => std.record.get spec.source pkgs) selected)
                 @ std.array.map (fun entry => entry.node) builders
+                @ std.array.map (fun entry => std.record.get entry.consumer.split.attr pkgs) splits
               )
+          in
+          let original_graph =
+            recipe.to_request_goals
+              { include recipes_path }
+              original
+              (std.array.map (fun entry => std.record.get entry.consumer.attr original) builders)
           in
           let source_checks =
             std.array.map_with_index
@@ -189,16 +210,64 @@ in
                       ++ entry.expected_source.version
                       && entry.node.inputs.source.version == entry.expected_source.version
                       && wire entry.node.inputs.source == wire entry.expected_source
-                      && source_from_goal graph (std.array.at (std.array.length selected + index) graph.goals) == wire entry.expected_source,
+                      && (
+                        let lowered = builder_from_goal graph (std.array.at (std.array.length selected + index) graph.goals) in
+                        std.record.get lowered.inputs.source graph.nodes == wire entry.expected_source
+                        && (
+                          if std.record.has_field "docdir_prefix" entry.consumer then
+                            let expected_arg = entry.consumer.docdir_prefix ++ entry.expected_source.version in
+                            std.array.elem expected_arg entry.node.config.configure_args
+                            && std.array.elem expected_arg lowered.config.script_config.configure_args
+                          else
+                            true
+                        )
+                        && (
+                          if std.record.get_or "config_follows_source" false entry.consumer then
+                            let previous = std.record.get entry.consumer.attr original in
+                            let expected = replace_version previous.inputs.source.version entry.expected_source.version in
+                            entry.node.config == expected previous.config
+                            && lowered.config == expected (builder_from_goal original_graph (std.array.at index original_graph.goals)).config
+                          else
+                            true
+                        )
+                        && (
+                          if std.record.has_field "rootfs_suffix" entry.consumer then
+                            let expected_name = entry.node.name ++ entry.consumer.rootfs_suffix in
+                            entry.node.inputs._rootfs.name == expected_name
+                            && (std.record.get lowered.inputs._rootfs graph.nodes).name == expected_name
+                          else
+                            true
+                        )
+                      ),
                   }
               )
               builders
           in
-          let checks = source_checks @ builder_checks in
+          let split_checks =
+            std.array.map_with_index
+              (fun index =>
+                fun entry =>
+                  let split = std.record.get entry.consumer.split.attr pkgs in
+                  let lowered = builder_from_goal graph (std.array.at (std.array.length selected + std.array.length builders + index) graph.goals) in
+                  {
+                    attr = entry.consumer.split.attr,
+                    correct =
+                      split.name == entry.consumer.split.name_prefix
+                      ++ entry.expected_source.version
+                      && split.inputs.tree.name == entry.node.name
+                      && wire split.inputs.tree.inputs.source == wire entry.expected_source
+                      && std.record.get lowered.inputs.source graph.nodes == wire entry.expected_source
+                      && split.config == (std.record.get entry.consumer.split.attr original).config,
+                  }
+              )
+              splits
+          in
+          let checks = source_checks @ builder_checks @ split_checks in
           {
             include mode,
             sources = std.array.length source_checks,
             builders = std.array.length builder_checks,
+            splits = std.array.length split_checks,
             failures = std.array.filter (fun check => !check.correct) checks,
             passed = std.array.all (fun check => check.correct) checks,
           },

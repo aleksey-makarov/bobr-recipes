@@ -1,17 +1,17 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let pkgconf_src = fun version =>
-    fun hash =>
-      {
-        name = "pkgconf-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://distfiles.ariadne.space/pkgconf/pkgconf-%{version}.tar.xz",
-        },
-      }
+  # Configure version and hash through pkgs.pkgconf_src.
+  let pkgconf_src = {
+    version | default = "2.5.1",
+    name = "pkgconf-src-%{version}",
+    tag = "Source",
+    object_hash | default = "cd05c9589b9f86ecf044c10a2269822bc9eb001eced2582cfffd658b0a50c243",
+    origin = {
+      tag = "Http",
+      url = "https://distfiles.ariadne.space/pkgconf/pkgconf-%{version}.tar.xz",
+    },
+  }
   in
 
   let pkgconf_config = fun version =>
@@ -53,22 +53,18 @@ fun pkgs =>
   in
 
   let pkgconf_gen1 = {
-    version | default = "2.5.1",
-    source_object_hash | default = "cd05c9589b9f86ecf044c10a2269822bc9eb001eced2582cfffd658b0a50c243",
-    name = "pkgconf-gen1-%{version}",
+    name = "pkgconf-gen1-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
-    config = pkgconf_config version "/stage",
+    config = pkgconf_config inputs.source.version "/stage",
     inputs = {
       _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "pkgconf-gen1-build-rootfs" [],
-      source = pkgconf_src version source_object_hash,
+      source = pkgs.pkgconf_src,
     },
   }
   in
 
   let pkgconf = {
-    version | default = "2.5.1",
-    source_object_hash | default = "cd05c9589b9f86ecf044c10a2269822bc9eb001eced2582cfffd658b0a50c243",
-    name = "pkgconf-%{version}",
+    name = "pkgconf-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -76,9 +72,9 @@ fun pkgs =>
         pkgs.c_runtime,
       ],
     },
-    config = pkgconf_config version "/",
+    config = pkgconf_config inputs.source.version "/",
     inputs = {
-      source = pkgconf_src version source_object_hash,
+      source = pkgs.pkgconf_src,
     },
   }
   in
@@ -87,5 +83,6 @@ fun pkgs =>
     include [
       pkgconf_gen1,
       pkgconf,
+      pkgconf_src,
     ],
   }

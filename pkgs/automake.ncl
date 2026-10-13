@@ -1,24 +1,22 @@
 fun pkgs =>
-  let automake_src = fun version =>
-    fun hash =>
-      {
-        name = "automake-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/automake/automake-%{version}.tar.xz",
-            "https://mirrors.kernel.org/gnu/automake/automake-%{version}.tar.xz",
-          ],
-        },
-      }
+  # Configure version and hash through pkgs.automake_src.
+  let automake_src = {
+    version | default = "1.18.1",
+    name = "automake-src-%{version}",
+    tag = "Source",
+    object_hash | default = "168aa363278351b89af56684448f525a5bce5079d0b6842bd910fdd3f1646887",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/automake/automake-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/automake/automake-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let automake = {
-    version | default = "1.18.1",
-    source_object_hash | default = "168aa363278351b89af56684448f525a5bce5079d0b6842bd910fdd3f1646887",
-    name = "automake-%{version}",
+    name = "automake-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -29,11 +27,11 @@ fun pkgs =>
     },
     config = {
       configure_args = [
-        "--docdir=/usr/share/doc/automake-%{version}",
+        "--docdir=/usr/share/doc/automake-%{inputs.source.version}",
       ],
     },
     inputs = {
-      source = automake_src version source_object_hash,
+      source = pkgs.automake_src,
     },
   }
   in
@@ -41,5 +39,6 @@ fun pkgs =>
   {
     include [
       automake,
+      automake_src,
     ],
   }

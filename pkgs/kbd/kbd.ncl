@@ -1,15 +1,15 @@
 fun pkgs =>
-  let kbd_src = fun version =>
-    fun hash =>
-      {
-        name = "kbd-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://www.kernel.org/pub/linux/utils/kbd/kbd-%{version}.tar.xz",
-        },
-      }
+  # Configure version and hash through pkgs.kbd_src.
+  let kbd_src = {
+    version | default = "2.10.0",
+    name = "kbd-src-%{version}",
+    tag = "Source",
+    object_hash | default = "6e5ca4f8d76ee9e3a8db700b667f13e12aac9933828a64e1aaad93d26be9b479",
+    origin = {
+      tag = "Http",
+      url = "https://www.kernel.org/pub/linux/utils/kbd/kbd-%{version}.tar.xz",
+    },
+  }
   in
 
   let kbd_backspace_patch = {
@@ -24,9 +24,7 @@ fun pkgs =>
   in
 
   let kbd = {
-    version | default = "2.10.0",
-    source_object_hash | default = "6e5ca4f8d76ee9e3a8db700b667f13e12aac9933828a64e1aaad93d26be9b479",
-    name = "kbd-%{version}",
+    name = "kbd-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -63,13 +61,13 @@ fun pkgs =>
           "-ec",
           m%"
             install -vdm755 "/usr/share/doc"
-            cp -R -v "@{build}/source/docs/doc" -T "/usr/share/doc/kbd-%{version}"
+            cp -R -v "@{build}/source/docs/doc" -T "/usr/share/doc/kbd-%{inputs.source.version}"
           "%,
         ],
       },
     },
     inputs = {
-      source = kbd_src version source_object_hash,
+      source = pkgs.kbd_src,
       # input name matches ^patch, so the synthetic builder applies it
       # (patch -Np1 in the source root) during source preparation.
       patch_backspace = kbd_backspace_patch,
@@ -80,5 +78,6 @@ fun pkgs =>
   {
     include [
       kbd,
+      kbd_src,
     ],
   }

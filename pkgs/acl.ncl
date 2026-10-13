@@ -1,26 +1,24 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let acl_src = fun version =>
-    fun hash =>
-      {
-        name = "acl-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://download.savannah.gnu.org/releases/acl/acl-%{version}.tar.xz",
-            "https://deb.debian.org/debian/pool/main/a/acl/acl_%{version}.orig.tar.xz",
-          ],
-        },
-      }
+  # Configure version and hash through pkgs.acl_src.
+  let acl_src = {
+    version | default = "2.3.2",
+    name = "acl-src-%{version}",
+    tag = "Source",
+    object_hash | default = "97203a72cae99ab89a067fe2210c1cbf052bc492b479eca7d226d9830883b0bd",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://download.savannah.gnu.org/releases/acl/acl-%{version}.tar.xz",
+        "https://deb.debian.org/debian/pool/main/a/acl/acl_%{version}.orig.tar.xz",
+      ],
+    },
+  }
   in
 
   let acl = {
-    version | default = "2.3.2",
-    source_object_hash | default = "97203a72cae99ab89a067fe2210c1cbf052bc492b479eca7d226d9830883b0bd",
-    name = "acl-%{version}",
+    name = "acl-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -34,11 +32,11 @@ fun pkgs =>
     config = {
       configure_args = [
         "--disable-static",
-        "--docdir=/usr/share/doc/acl-%{version}",
+        "--docdir=/usr/share/doc/acl-%{inputs.source.version}",
       ],
     },
     inputs = {
-      source = acl_src version source_object_hash,
+      source = pkgs.acl_src,
     },
   }
   in
@@ -60,5 +58,6 @@ fun pkgs =>
     include [
       acl,
       acl_libs,
+      acl_src,
     ],
   }
