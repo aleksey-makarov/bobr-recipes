@@ -10,7 +10,9 @@
 #
 # Like glycin, version/source_object_hash/cargo_lock are coupled: a version bump
 # must override all three together (cargo_lock = import "<their>/Cargo.lock").
+let recipe = import "../../recipe-lib.ncl" in
 let cargo = import "../../cargo.ncl" in
+let series = recipe.version_prefix 2 in
 
 fun pkgs =>
   let librsvg_src = fun version =>
@@ -21,7 +23,7 @@ fun pkgs =>
         object_hash = hash,
         origin = {
           tag = "Http",
-          url = "https://download.gnome.org/sources/librsvg/2.57/librsvg-%{version}.tar.xz",
+          url = "https://download.gnome.org/sources/librsvg/%{series version}/librsvg-%{version}.tar.xz",
         },
       }
   in
