@@ -29,14 +29,15 @@ fun pkgs =>
   in
 
   let glibc_src = {
-    name = "glibc-src-2.42",
+    version | default = "2.42",
+    name = "glibc-src-%{version}",
     tag = "Source",
-    object_hash = "d1775e32e4628e64ef930f435b67bb63af7599acb6be2b335b9f19f16509f17f",
+    object_hash | default = "d1775e32e4628e64ef930f435b67bb63af7599acb6be2b335b9f19f16509f17f",
     origin = {
       tag = "Http",
       url = [
-        "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz",
-        "https://mirrors.kernel.org/gnu/glibc/glibc-2.42.tar.xz",
+        "https://ftp.gnu.org/gnu/glibc/glibc-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/glibc/glibc-%{version}.tar.xz",
       ],
     },
   }
@@ -55,7 +56,7 @@ fun pkgs =>
   in
 
   let glibc_gen1 = {
-    name = "glibc-gen1-2.42",
+    name = "glibc-gen1-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
@@ -79,14 +80,14 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = glibc_bootstrap_rootfs,
-      source = glibc_src,
+      source = pkgs.glibc_src,
       patch_fhs = glibc_fhs_patch_2_42,
     },
   }
   in
 
   let glibc = {
-    name = "glibc-2.42",
+    name = "glibc-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
@@ -137,7 +138,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = recipe.gen1_toolchain_rootfs pkgs "glibc-build-rootfs" [],
-      source = glibc_src,
+      source = pkgs.glibc_src,
       patch_fhs = glibc_fhs_patch_2_42,
       patch_locale_archive = glibc_locale_archive_patch_2_42,
     },
@@ -162,5 +163,6 @@ fun pkgs =>
       glibc_gen1,
       glibc,
       glibc_libs,
+      glibc_src,
     ],
   }

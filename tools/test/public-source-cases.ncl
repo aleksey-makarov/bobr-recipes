@@ -58,6 +58,7 @@ in
   { source = "gettext_src", source_prefix = "gettext-src-", consumers = [{ attr = "gettext", name_prefix = "gettext-", config_follows_source = true, docdir_prefix = "--docdir=/usr/share/doc/gettext-" }] },
   { source = "gjs_src", source_prefix = "gjs-src-", consumers = [{ attr = "gjs", name_prefix = "gjs-" }] },
   { source = "glib_src", source_prefix = "glib-src-", version_url_parts = fun version => ["/%{version_prefix 2 version}/"], consumers = [{ attr = "glib_gen1", name_prefix = "glib-gen1-" }, { attr = "glib", name_prefix = "glib-", rootfs_suffix = "-build-rootfs" }] },
+  { source = "glibc_src", source_prefix = "glibc-src-", consumers = [{ attr = "glibc_gen1", name_prefix = "glibc-gen1-" }, { attr = "glibc", name_prefix = "glibc-", split = { attr = "glibc_libs", name_prefix = "glibc-libs-" } }] },
   { source = "glmark2_src", source_prefix = "glmark2-src-", consumers = [{ attr = "glmark2", name_prefix = "glmark2-" }] },
   { source = "glslang_src", source_prefix = "glslang-src-", consumers = [{ attr = "glslang", name_prefix = "glslang-" }] },
   { source = "glu_src", source_prefix = "glu-src-", consumers = [{ attr = "glu", name_prefix = "glu-" }] },

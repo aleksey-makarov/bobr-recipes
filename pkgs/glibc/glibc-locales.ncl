@@ -38,9 +38,9 @@ fun pkgs =>
         "ru_RU.UTF-8",
       ],
     all_locales | default = false,
-    # This recipe consumes pkgs.glibc directly, so its cache key already binds
-    # the archive to the exact libc/localedef build.
-    name = "glibc-locales-2.42",
+    # The rootfs consumes pkgs.glibc, so the cache key binds the archive to the
+    # exact libc/localedef build; keep the display name on the same version.
+    name = "glibc-locales-%{inputs._rootfs.inputs.glibc.inputs.source.version}",
     tag = "SandboxInstall",
     config = {
       script_config = {},

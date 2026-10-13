@@ -299,6 +299,12 @@ let patched = package_set [fun _final => fun prev => {
     object_hash = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   } },
 }] in
+let source_changed = package_set [fun _final => fun prev => {
+  glibc_src = prev.glibc_src & {
+    version = "9.8.7",
+    object_hash = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  },
+}] in
 let test_case = fun renamed =>
   let replacement = {
     name = if renamed then "overlay-bootstrap-rootfs" else original.glibc_gen1.inputs._rootfs.name,
@@ -322,6 +328,16 @@ in
   exports_patch = std.record.has_field "glibc_locale_archive_patch_2_42" original,
   patch_name = patched.glibc.inputs.patch_locale_archive.name,
   patch_hash = patched.glibc.inputs.patch_locale_archive.object_hash,
+  locale_name = source_changed.glibc_locales.name,
+  locale_glibc_name = source_changed.glibc_locales.inputs._rootfs.inputs.glibc.name,
+  locale_source_hash = source_changed.glibc_locales.inputs._rootfs.inputs.glibc.inputs.source.object_hash,
+  source_patches_unchanged =
+    source_changed.glibc_gen1.inputs.patch_fhs.object_hash
+      == original.glibc_gen1.inputs.patch_fhs.object_hash
+    && source_changed.glibc.inputs.patch_fhs.object_hash
+      == original.glibc.inputs.patch_fhs.object_hash
+    && source_changed.glibc.inputs.patch_locale_archive.object_hash
+      == original.glibc.inputs.patch_locale_archive.object_hash,
   cases = [test_case false, test_case true],
 }
 EOF_NICKEL
@@ -329,6 +345,10 @@ jq -e '
   (.exports_rootfs | not) and (.exports_patch | not)
   and .patch_name == "overlay-locale-patch"
   and .patch_hash == "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  and .locale_name == "glibc-locales-9.8.7"
+  and .locale_glibc_name == "glibc-9.8.7"
+  and .locale_source_hash == "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  and .source_patches_unchanged
   and all(.cases[];
     .check_name == ("check-" + .expected_name)
     and .configured_name == .expected_name
