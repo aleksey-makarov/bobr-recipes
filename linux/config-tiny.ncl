@@ -1,6 +1,6 @@
 # Minimal-monolithic kernel configuration, merged on top of `make tinyconfig`
-# when `linux.use_tinyconfig = true`. Same data model as config-distro.ncl;
-# `linux.config_options` is layered over it (right-biased).
+# for `linux_tiny`. Same data model as config-distro.ncl;
+# `linux_tiny.config_options` is layered over it (right-biased).
 #
 # Everything is built in (`'y`) and modules are off: the initrd ships no .ko
 # and we do not build modules, so anything needed to boot must be in-kernel.

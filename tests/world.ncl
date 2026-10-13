@@ -1,6 +1,6 @@
 # Aggregate artifact targets.
 #
-# `os_world` -- the shipped guest-side OS artifacts: kernel, initrd, and the
+# `os_world` -- the shipped guest-side OS artifacts: kernels, initrd, and the
 # three system images. Its dependency closure is the normal package graph.
 #
 # `host_bundle_world` -- all shipped host-side bundles and both release launcher
@@ -18,6 +18,7 @@ fun pkgs =>
     inputs =
       recipe.numbered_inputs [
         pkgs.linux,
+        pkgs.linux_tiny,
         pkgs.initrd,
         pkgs.qemu_image,
         pkgs.qemu_weston_image,

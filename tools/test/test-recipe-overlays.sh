@@ -218,7 +218,7 @@ let source = fun name => {
 } in
 let cases = [
   { target = "world", children = ["os_world", "host_bundle_world"] },
-  { target = "os_world", children = ["linux", "initrd", "qemu_image", "qemu_weston_image", "qemu_gnome_image"] },
+  { target = "os_world", children = ["linux", "linux_tiny", "initrd", "qemu_image", "qemu_weston_image", "qemu_gnome_image"] },
   { target = "host_bundle_world", children = ["bobr_bundle_launcher", "host_bundle_mc", "host_bundle_test_mesa", "host_bundle_qemu", "host_bundle_qemu_weston", "host_bundle_qemu_gnome"] },
   { target = "test_all", children = ["test_host_bundles", "test_runtime_closures", "test_bootstrap_rootfs", "test_image_rootfs", "test_final_toolchain"] },
   { target = "test_host_bundles", children = ["test_host_bundle_test_mesa", "test_host_bundle_qemu", "test_host_bundle_qemu_weston", "test_host_bundle_qemu_gnome"] },

@@ -1,12 +1,11 @@
 let recipe = import "../recipe-lib.ncl" in
 let br = import "../build-rootfs.ncl" in
 
-# The source release. `version` picks the kernel version and
-# `source_object_hash` is its source tarball hash; both are node fields, so an
-# overlay builds a different kernel by overriding them:
-#   linux = prev.linux & {
+# Configure the shared kernel archive through the public Source. To use a
+# different archive for one builder, override that builder's inputs.source.
+#   linux_src = prev.linux_src & {
 #     version = "6.19.1",
-#     source_object_hash = "<sha256>",
+#     object_hash = "<sha256>",
 #   }
 let major_version = fun version =>
   let matched = std.string.find "^([0-9]+)[.]" version in
@@ -16,10 +15,8 @@ let major_version = fun version =>
     std.fail_with "linux.ncl: version must start with a major version"
 in
 
-# The base kernel config sets (data). `use_tinyconfig` selects which one is
-# merged on top of the corresponding `make` base (defconfig / tinyconfig).
-# Overlays layer `config_options` over the selected set rather than editing
-# these files.
+# Each kernel recipe has its own make base and option set. Overlays layer
+# that recipe's config_options over its base rather than editing these files.
 let config_distro = import "config-distro.ncl" in
 let config_tiny = import "config-tiny.ncl" in
 
@@ -56,17 +53,16 @@ let kconfig_fragment = fun options =>
 in
 
 fun pkgs =>
-  let linux_source = fun version =>
-    fun hash =>
-      {
-        name = "linux-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://www.kernel.org/pub/linux/kernel/v%{major_version version}.x/linux-%{version}.tar.xz",
-        },
-      }
+  let linux_src = {
+    version | default = "6.18.38",
+    name = "linux-src-%{version}",
+    tag = "Source",
+    object_hash | default = "ac26e508abd56e9f8b89872b6e10c49fc823bcc70d8068a5d8504c1a7c4ff045",
+    origin = {
+      tag = "Http",
+      url = "https://www.kernel.org/pub/linux/kernel/v%{major_version version}.x/linux-%{version}.tar.xz",
+    },
+  }
   in
 
   let buildscript_linux = {
@@ -86,24 +82,22 @@ fun pkgs =>
   # variants are the *same* recipe and differ only in the rootfs they build in:
   #   - gen1: the OCI-derived buildpack rootfs, used to bootstrap system-rootfs
   #     before a self-hosted toolchain exists;
-  #   - plain: our self-hosted `system_rootfs_2`, so regular packages compile
-  #     against the same headers the toolchain itself was built against.
-  let mk_linux_headers = fun variant =>
+  #   - plain: a closure of our native toolchain plus the gen1 headers.
+  # The name prefix labels the stage; rootfs chooses the build environment.
+  let mk_linux_headers = fun name_prefix =>
     fun rootfs =>
       let headers_env = {
         BOBR_LINUX_BUILD_KIND = "headers",
         BOBR_SOURCE_DIR = "@{build}/source",
         # Install into a virgin /stage: the UAPI headers overlap the build rootfs
-        # (buildpack / system_rootfs_2 already carry kernel headers), so an
+        # (both build environments already carry kernel headers), so an
         # additive install to the real /usr/include would be rejected. The
         # SandboxStageRootfs lowering re-roots /stage -> / via TreeMove.
         BOBR_INSTALL_DIR = "/stage",
       }
       in
       {
-        version | default = "6.18.38",
-        source_object_hash | default = "ac26e508abd56e9f8b89872b6e10c49fc823bcc70d8068a5d8504c1a7c4ff045",
-        name = "linux-headers%{variant}-%{version}",
+        name = "%{name_prefix}-%{inputs.source.version}",
         tag = "SandboxStageRootfs",
         config = {
           steps = [
@@ -135,12 +129,12 @@ fun pkgs =>
         inputs = {
           _rootfs = rootfs,
           script = buildscript_linux,
-          source = linux_source version source_object_hash,
+          source = pkgs.linux_src,
         },
       }
   in
 
-  let linux_headers_gen1 = mk_linux_headers "-gen1" pkgs.oci_buildpack_deps_rootfs in
+  let linux_headers_gen1 = mk_linux_headers "linux-headers-gen1" pkgs.oci_buildpack_deps_rootfs in
   # Plain headers build in a deps-derived closure (no system_rootfs_2): the
   # native toolchain plus the gen1 kernel headers. The gen1 headers are needed
   # to compile the build's host tools (glibc's <bits/errno.h> pulls in
@@ -149,7 +143,7 @@ fun pkgs =>
   # gen1 headers already at /usr/include.
   let linux_headers =
     mk_linux_headers
-      ""
+      "linux-headers"
       (
         br.build_rootfs_closure
           pkgs
@@ -167,103 +161,109 @@ fun pkgs =>
   }
   in
 
-  let linux = {
-    version | default = "6.18.38",
-    source_object_hash | default = "ac26e508abd56e9f8b89872b6e10c49fc823bcc70d8068a5d8504c1a7c4ff045",
-    config_options | default = {},
-    use_tinyconfig | default = false,
-    name = "linux%{if use_tinyconfig then "-tiny" else ""}-%{version}",
-    tag = "SandboxInstallDeps",
-    deps = {
-      build = [
-        pkgs.linux_headers_gen1,
-        pkgs.glibc,
-        pkgs.binutils,
-        pkgs.gcc,
-        pkgs.bash,
-        pkgs.make,
-        pkgs.coreutils,
-        pkgs.gawk,
-        pkgs.sed,
-        pkgs.grep,
-        pkgs.findutils,
-        pkgs.diffutils,
-        pkgs.bc,
-        pkgs.bison,
-        pkgs.flex,
-        pkgs.zlib,
-        pkgs.elfutils,
-        pkgs.perl,
-        # certs/extract-cert (built for defconfig's signed-regdb / keyring
-        # chain) needs OpenSSL headers + libcrypto at build time.
-        pkgs.openssl,
-        # depmod (from kmod) is invoked by `make modules_install` to generate
-        # modules.dep/.alias so udev can autoload modules by modalias.
-        pkgs.kmod,
-      ],
-      runtime = [],
-    },
-    config = {
-      steps = [
-        recipe.prepare_source_step,
+  let mk_linux = fun name_prefix =>
+    fun config_base =>
+      fun base_options =>
         {
-          name = "configure",
-          run_as = "build-user",
-          cwd = "@{build}",
-          argv = ["@{script}"],
-          env = full_env & { BOBR_LINUX_CONFIG_BASE = if use_tinyconfig then "tinyconfig" else "defconfig" },
-        },
-        {
-          name = "build",
-          run_as = "build-user",
-          cwd = "@{build}",
-          argv = ["@{script}"],
-          env = full_env,
-        },
-        {
-          name = "install",
-          run_as = "root",
-          cwd = "@{build}",
-          argv = ["@{script}"],
-          env = full_env,
-        },
-      ],
-      script_config = {
-        "config.fragment" =
-          let base = if use_tinyconfig then config_tiny else config_distro in
-          kconfig_fragment (merge_over base config_options),
-      },
-    },
-    inputs = {
-      script = buildscript_linux,
-      source = linux_source version source_object_hash,
-    },
-  }
+          config_options | default = {},
+          name = "%{name_prefix}-%{inputs.source.version}",
+          tag = "SandboxInstallDeps",
+          deps = {
+            build = [
+              pkgs.linux_headers_gen1,
+              pkgs.glibc,
+              pkgs.binutils,
+              pkgs.gcc,
+              pkgs.bash,
+              pkgs.make,
+              pkgs.coreutils,
+              pkgs.gawk,
+              pkgs.sed,
+              pkgs.grep,
+              pkgs.findutils,
+              pkgs.diffutils,
+              pkgs.bc,
+              pkgs.bison,
+              pkgs.flex,
+              pkgs.zlib,
+              pkgs.elfutils,
+              pkgs.perl,
+              # certs/extract-cert (built for defconfig's signed-regdb / keyring
+              # chain) needs OpenSSL headers + libcrypto at build time.
+              pkgs.openssl,
+              # depmod (from kmod) is invoked by `make modules_install` to generate
+              # modules.dep/.alias so udev can autoload modules by modalias.
+              pkgs.kmod,
+            ],
+            runtime = [],
+          },
+          config = {
+            steps = [
+              recipe.prepare_source_step,
+              {
+                name = "configure",
+                run_as = "build-user",
+                cwd = "@{build}",
+                argv = ["@{script}"],
+                env = full_env & { BOBR_LINUX_CONFIG_BASE = config_base },
+              },
+              {
+                name = "build",
+                run_as = "build-user",
+                cwd = "@{build}",
+                argv = ["@{script}"],
+                env = full_env,
+              },
+              {
+                name = "install",
+                run_as = "root",
+                cwd = "@{build}",
+                argv = ["@{script}"],
+                env = full_env,
+              },
+            ],
+            script_config = {
+              "config.fragment" = kconfig_fragment (merge_over base_options config_options),
+            },
+          },
+          inputs = {
+            script = buildscript_linux,
+            source = pkgs.linux_src,
+          },
+        }
   in
+
+  let linux = mk_linux "linux" "defconfig" config_distro in
+  let linux_tiny = mk_linux "linux-tiny" "tinyconfig" config_tiny in
 
   # Extract the kernel image out of the linux fs-tree into a plain object
   # (a directory holding a single `bzImage`), so tools can use it directly
   # without poking into fs-files by hash.
-  let linux_bzimage = {
-    name = "linux-bzimage%{if pkgs.linux.use_tinyconfig then "-tiny" else ""}",
-    tag = "FsTreeExport",
-    config = {
-      copies = [
-        { from = "boot/bzImage", to = "bzImage" },
-      ],
-    },
-    inputs = {
-      input = pkgs.linux,
-    },
-  }
+  let mk_linux_bzimage = fun name =>
+    fun kernel =>
+      {
+        include name,
+        tag = "FsTreeExport",
+        config = {
+          copies = [
+            { from = "boot/bzImage", to = "bzImage" },
+          ],
+        },
+        inputs = {
+          input = kernel,
+        },
+      }
   in
+
+  let linux_bzimage = mk_linux_bzimage "linux-bzimage" pkgs.linux in
+  let linux_tiny_bzimage = mk_linux_bzimage "linux-bzimage-tiny" pkgs.linux_tiny in
 
   # All loadable modules + depmod metadata, split out of the linux fs-tree so
   # the running system's rootfs can ship a full `/lib/modules/<release>`
   # without also pulling in `boot/`. The initrd takes only the boot-critical
   # subset (see initrd.ncl); this is everything.
   let linux_modules = {
-    name = "linux-modules-%{pkgs.linux.version}",
+    name = "linux-modules-%{inputs.tree.inputs.source.version}",
     tag = "TreeSubset",
     config = {
       "include" = [
@@ -285,10 +285,10 @@ fun pkgs =>
   # `cpio(1)` would instead copy the on-disk metadata, which for a materialized
   # fs-tree varies with how the store happens to share its files. The program is
   # a self-contained C file needing nothing from the configured kernel tree, so
-  # it is compiled directly here rather than through the kernel build. Version
-  # and source hash follow `pkgs.linux`, so it reuses that tarball.
+  # it is compiled directly here rather than through the kernel build. Its
+  # Source follows the actual kernel input, including input-level overrides.
   let gen_init_cpio = {
-    name = "gen-init-cpio-%{pkgs.linux.version}",
+    name = "gen-init-cpio-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = recipe.native_build_deps pkgs,
@@ -314,7 +314,7 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      source = linux_source pkgs.linux.version pkgs.linux.source_object_hash,
+      source = pkgs.linux.inputs.source,
     },
   }
   in
@@ -323,9 +323,12 @@ fun pkgs =>
     include [
       linux_headers_gen1,
       linux,
+      linux_tiny,
       linux_headers,
       linux_bzimage,
+      linux_tiny_bzimage,
       linux_modules,
       gen_init_cpio,
+      linux_src,
     ],
   }
