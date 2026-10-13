@@ -1,25 +1,22 @@
 fun pkgs =>
-  let glslang_src = fun sdk_version =>
-    fun hash =>
-      {
-        name = "glslang-src-%{sdk_version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/KhronosGroup/glslang/archive/refs/tags/vulkan-sdk-%{sdk_version}.tar.gz",
-        },
-      }
+  let glslang_src = {
+    version | default = "1.4.350.0",
+    name = "glslang-src-%{version}",
+    tag = "Source",
+    object_hash
+      | default
+      = "a6885b1631fd77c89cd689b939cf2b3032c5ec13ee99250270d34bcad1efc10c",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/KhronosGroup/glslang/archive/refs/tags/vulkan-sdk-%{version}.tar.gz",
+    },
+  }
   in
 
   # Build the compiler against the matching installed SPIRV-Tools release,
   # instead of populating glslang's in-tree External directory.
   let glslang = {
-    sdk_version | default = "1.4.350.0",
-    source_object_hash
-      | default
-      = "a6885b1631fd77c89cd689b939cf2b3032c5ec13ee99250270d34bcad1efc10c",
-    name = "glslang-%{sdk_version}",
+    name = "glslang-%{inputs.source.version}",
     tag = "Cmake",
     deps = {
       build = [
@@ -57,13 +54,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = glslang_src sdk_version source_object_hash,
+      source = pkgs.glslang_src,
     },
   }
   in
 
   {
     include [
+      glslang_src,
       glslang,
     ],
   }

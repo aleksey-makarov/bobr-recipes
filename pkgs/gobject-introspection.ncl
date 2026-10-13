@@ -6,30 +6,26 @@ let recipe = import "../recipe-lib.ncl" in
 # glib_gen1 (the no-gir glib) -- so g-i builds against gen1 and the
 # glib<->gobject-introspection build cycle is broken. deps.build is ignored for
 # *Rootfs recipes; deps.runtime is honest (the FINAL glib), so a runtime closure
-# ships the final glib and never gen1. `version`/`source_object_hash` are node
-# fields (overridable), as in linux.ncl.
+# ships the final glib and never gen1.
 let br = import "../build-rootfs.ncl" in
 
 let branch = recipe.version_prefix 2 in
 
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "gobject-introspection-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gobject-introspection/%{branch version}/gobject-introspection-%{version}.tar.xz",
-        },
-      }
+  let gobject_introspection_src = {
+    version | default = "1.86.0",
+    name = "gobject-introspection-src-%{version}",
+    tag = "Source",
+    object_hash | default = "920d1a3fcedeadc32acff95c2e203b319039dd4b4a08dd1a2dfd283d19c0b9ae",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gobject-introspection/%{branch version}/gobject-introspection-%{version}.tar.xz",
+    },
+  }
   in
 
   let gobject_introspection = {
-    version | default = "1.86.0",
-    source_object_hash | default = "920d1a3fcedeadc32acff95c2e203b319039dd4b4a08dd1a2dfd283d19c0b9ae",
-    name = "gobject-introspection-%{version}",
+    name = "gobject-introspection-%{inputs.source.version}",
     tag = "MesonRootfs",
     deps = {
       build = [],
@@ -61,14 +57,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.gobject_introspection_src,
       # Build rootfs: the standard meson build deps + g-i's own build deps, but
       # with the final glib swapped for glib_gen1 so g-i compiles against the
       # no-gir glib (breaking the build cycle).
       _rootfs =
         br.build_rootfs_closure_substituting
           pkgs
-          "gobject-introspection-%{version}-build-rootfs"
+          "gobject-introspection-%{inputs.source.version}-build-rootfs"
           (br.meson_build_deps pkgs @ [pkgs.glib, pkgs.flex, pkgs.bison, pkgs.libffi])
           pkgs.glib
           pkgs.glib_gen1,
@@ -78,6 +74,7 @@ fun pkgs =>
 
   {
     include [
+      gobject_introspection_src,
       gobject_introspection,
     ],
   }

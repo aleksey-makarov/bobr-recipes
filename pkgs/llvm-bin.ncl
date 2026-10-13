@@ -3,21 +3,19 @@
 # build package, but tools such as bindgen include it in their runtime closure
 # because they load libclang dynamically.
 #
-# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "llvm-bin-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}/LLVM-%{version}-Linux-X64.tar.xz",
-        },
-      }
+  let llvm_bin_src = {
+    version | default = "22.1.8",
+    name = "llvm-bin-src-%{version}",
+    tag = "Source",
+    object_hash | default = "df0e1ecf16caf3489a272a5eea4eec9b0d82878f6477fa309504f918a0006384",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-%{version}/LLVM-%{version}-Linux-X64.tar.xz",
+    },
+  }
   in
 
   # The upstream archive is around 12 GiB unpacked because most command-line
@@ -26,11 +24,7 @@ fun pkgs =>
   # standalone tool. LLVM itself is linked statically into consumers, so this
   # package remains a build dependency and does not enter runtime closures.
   let llvm_bin = {
-    version | default = "22.1.8",
-    source_object_hash
-      | default
-      = "df0e1ecf16caf3489a272a5eea4eec9b0d82878f6477fa309504f918a0006384",
-    name = "llvm-bin-%{version}",
+    name = "llvm-bin-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -124,12 +118,12 @@ fun pkgs =>
               printf 'llvm-config version=%s link-mode=%s\n' \
                 "${llvm_version}" "${llvm_link_mode}"
               case "${clang_version}" in
-                "clang version %{version} "*) ;;
+                "clang version %{inputs.source.version} "*) ;;
                 *) echo "unexpected Clang version" >&2; exit 1 ;;
               esac
-              test "${llvm_version}" = "%{version}"
+              test "${llvm_version}" = "%{inputs.source.version}"
               test "${llvm_link_mode}" = "static"
-              test -s /usr/lib/libclang.so.22.1.8
+              test -s /usr/lib/libclang.so.%{inputs.source.version}
               test -s /usr/lib/libclangBasic.a
               test -s /usr/lib/libPolly.a
               test -s /usr/lib/libPollyISL.a
@@ -154,13 +148,14 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.llvm_bin_src,
     },
   }
   in
 
   {
     include [
+      llvm_bin_src,
       llvm_bin,
     ],
   }

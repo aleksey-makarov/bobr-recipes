@@ -181,6 +181,18 @@ in
                           std.array.map (std.string.replace previous.object_hash changed_hash) previous.origin.url,
                     }
                   in
+                  let version_url_parts_correct =
+                    if mode == "version_hash" && std.record.has_field "version_url_parts" spec then
+                      std.array.all
+                        (fun part =>
+                          std.array.any
+                            (fun url => std.array.length (std.string.split part url) > 1)
+                            urls
+                        )
+                        (spec.version_url_parts expected_version)
+                    else
+                      true
+                  in
                   {
                     attr = spec.source,
                     correct =
@@ -192,7 +204,8 @@ in
                       && (if mode == "origin" || mode == "replacement" then source.origin == fixture_origin else true)
                       && (if mode == "hash" then source.origin == hash_only_origin else true)
                       && (if mode == "default" || is_input_mode mode then wire source == wire previous else true)
-                      && std.array.all (fun url => std.string.is_match "9[._-]8[._-]7" url || std.string.is_match changed_hash url) urls,
+                      && std.array.all (fun url => std.string.is_match "9[._-]8[._-]7" url || std.string.is_match changed_hash url) urls
+                      && version_url_parts_correct,
                   }
               )
               selected
@@ -225,6 +238,13 @@ in
                           if std.record.get_or "config_follows_source" false entry.consumer then
                             let previous = std.record.get entry.consumer.attr original in
                             let expected = replace_version previous.inputs.source.version entry.expected_source.version in
+                            let expected =
+                              if std.record.has_field "config_version_alias" entry.consumer then
+                                let alias = entry.consumer.config_version_alias in
+                                fun config => replace_version (alias previous.inputs.source.version) (alias entry.expected_source.version) (expected config)
+                              else
+                                expected
+                            in
                             entry.node.config == expected previous.config
                             && lowered.config == expected (builder_from_goal original_graph (std.array.at index original_graph.goals)).config
                           else

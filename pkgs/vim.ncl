@@ -1,22 +1,23 @@
+let recipe = import "../recipe-lib.ncl" in
+let runtime_dir = fun version =>
+  "vim" ++ std.string.replace "." "" (recipe.version_prefix 2 version)
+in
+
 fun pkgs =>
-  let vim_src = fun version =>
-    fun hash =>
-      {
-        name = "vim-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/vim/vim/archive/v%{version}/vim-%{version}.tar.gz",
-        },
-      }
+  let vim_src = {
+    version | default = "9.2.0680",
+    name = "vim-src-%{version}",
+    tag = "Source",
+    object_hash | default = "9f306d8a25fc688ad2b814c1c420833ed20ff86deca907a81db0af08dde51a6f",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/vim/vim/archive/v%{version}/vim-%{version}.tar.gz",
+    },
+  }
   in
 
   let vim = {
-    version | default = "9.2.0680",
-    source_object_hash | default = "9f306d8a25fc688ad2b814c1c420833ed20ff86deca907a81db0af08dde51a6f",
-    runtime_dir = "vim92",
-    name = "vim-%{version}",
+    name = "vim-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -59,7 +60,7 @@ fun pkgs =>
                 ln -svf vim.1 "$(dirname "$L")/vi.1"
               fi
             done
-            ln -svf ../vim/%{runtime_dir}/doc "/usr/share/doc/vim-%{version}"
+            ln -svf ../vim/%{runtime_dir inputs.source.version}/doc "/usr/share/doc/vim-%{inputs.source.version}"
             cat > "/etc/vimrc" <<'EOF_INNER'
             " Begin /etc/vimrc
 
@@ -81,13 +82,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = vim_src version source_object_hash,
+      source = pkgs.vim_src,
     },
   }
   in
 
   {
     include [
+      vim_src,
       vim,
     ],
   }

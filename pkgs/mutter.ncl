@@ -4,27 +4,24 @@
 # notification and the profiler are all off, which drops those dependencies.
 # The native KMS backend (via logind + udev, EGL/GLES2 from mesa) is on. gvdb is
 # a bundled meson subproject, so it needs no recipe.
-# `version`/`source_object_hash`/`series` are node fields (overridable), as in linux.ncl.
+let recipe = import "../recipe-lib.ncl" in
+let series = recipe.version_prefix 1 in
+
 fun pkgs =>
-  let mk_src = fun version =>
-    fun series =>
-      fun hash =>
-        {
-          name = "mutter-src-%{version}",
-          tag = "Source",
-          object_hash = hash,
-          origin = {
-            tag = "Http",
-            url = "https://download.gnome.org/sources/mutter/%{series}/mutter-%{version}.tar.xz",
-          },
-        }
+  let mutter_src = {
+    version | default = "50.3",
+    name = "mutter-src-%{version}",
+    tag = "Source",
+    object_hash | default = "25663fa7afc96a4c092448990c0da664b7f04dd8d9f5e3b9be2b498b1b303cb4",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/mutter/%{series version}/mutter-%{version}.tar.xz",
+    },
+  }
   in
 
   let mutter = {
-    version | default = "50.3",
-    source_object_hash | default = "25663fa7afc96a4c092448990c0da664b7f04dd8d9f5e3b9be2b498b1b303cb4",
-    series | default = "50",
-    name = "mutter-%{version}",
+    name = "mutter-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -119,13 +116,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version series source_object_hash,
+      source = pkgs.mutter_src,
     },
   }
   in
 
   {
     include [
+      mutter_src,
       mutter,
     ],
   }

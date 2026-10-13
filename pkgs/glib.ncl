@@ -2,28 +2,23 @@ let recipe = import "../recipe-lib.ncl" in
 # GLib / GObject / GIO -- the base of the GNOME stack. Built in two passes to
 # break the glib <-> gobject-introspection cycle:
 #   glib_gen1 (introspection off) -> gobject-introspection -> glib (gir on).
-# Downstream uses `glib` (has the GLib/GObject/Gio typelibs). `version`/`source_object_hash`
-# are node fields (overridable), as in linux.ncl.
+# Downstream uses `glib` (has the GLib/GObject/Gio typelibs).
 let br = import "../build-rootfs.ncl" in
 
 let branch = recipe.version_prefix 2 in
 
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "glib-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/glib/%{branch version}/glib-%{version}.tar.xz",
-        },
-      }
+  let glib_src = {
+    version | default = "2.88.2",
+    name = "glib-src-%{version}",
+    tag = "Source",
+    object_hash | default = "cf3f215a640c8a4257f14317586b8f1fdd25a10a93cb4bdda147c0f9ad88e74f",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/glib/%{branch version}/glib-%{version}.tar.xz",
+    },
+  }
   in
-
-  let default_version = "2.88.2" in
-  let default_hash = "cf3f215a640c8a4257f14317586b8f1fdd25a10a93cb4bdda147c0f9ad88e74f" in
 
   # glib's own link deps (used both as build deps and in the build rootfs).
   let base_build = [
@@ -62,9 +57,7 @@ fun pkgs =>
   # gen1: the no-gir bootstrap pass. A normal Meson package, installed into the
   # private prefix.
   let glib_gen1 = {
-    version | default = default_version,
-    source_object_hash | default = default_hash,
-    name = "glib-gen1-%{version}",
+    name = "glib-gen1-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = base_build,
@@ -84,7 +77,7 @@ fun pkgs =>
         ],
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.glib_src,
     },
   }
   in
@@ -98,9 +91,7 @@ fun pkgs =>
   # closure ships this glib and never gen1. PKG_CONFIG_PATH selects gen1's build
   # metadata; its installed ELF files carry their own RUNPATH.
   let glib = {
-    version | default = default_version,
-    source_object_hash | default = default_hash,
-    name = "glib-%{version}",
+    name = "glib-%{inputs.source.version}",
     tag = "MesonRootfs",
     deps = {
       build = [],
@@ -113,11 +104,11 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.glib_src,
       _rootfs =
         br.build_rootfs_closure_substituting
           pkgs
-          "glib-%{version}-build-rootfs"
+          "glib-%{inputs.source.version}-build-rootfs"
           (br.meson_build_deps pkgs @ base_build @ [pkgs.gobject_introspection, pkgs.glib_gen1])
           pkgs.glib
           pkgs.glib_gen1,
@@ -127,6 +118,7 @@ fun pkgs =>
 
   {
     include [
+      glib_src,
       glib_gen1,
       glib,
     ],

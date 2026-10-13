@@ -1,25 +1,22 @@
 fun pkgs =>
-  let spirv_tools_src = fun sdk_version =>
-    fun hash =>
-      {
-        name = "spirv-tools-src-%{sdk_version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/vulkan-sdk-%{sdk_version}.tar.gz",
-        },
-      }
+  let spirv_tools_src = {
+    version | default = "1.4.350.0",
+    name = "spirv-tools-src-%{version}",
+    tag = "Source",
+    object_hash
+      | default
+      = "446b288fe76d3f31bbf9a405d62b97020ac0f135edb0ed5dbdf1136c488138f5",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/vulkan-sdk-%{version}.tar.gz",
+    },
+  }
   in
 
   # libclc's SPIR-V backend needs spirv-link, while Mesa also benefits from
   # keeping the complete matching SDK tool set available at build time.
   let spirv_tools = {
-    sdk_version | default = "1.4.350.0",
-    source_object_hash
-      | default
-      = "446b288fe76d3f31bbf9a405d62b97020ac0f135edb0ed5dbdf1136c488138f5",
-    name = "spirv-tools-%{sdk_version}",
+    name = "spirv-tools-%{inputs.source.version}",
     tag = "Cmake",
     deps = {
       build = [
@@ -54,13 +51,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = spirv_tools_src sdk_version source_object_hash,
+      source = pkgs.spirv_tools_src,
     },
   }
   in
 
   {
     include [
+      spirv_tools_src,
       spirv_tools,
     ],
   }
