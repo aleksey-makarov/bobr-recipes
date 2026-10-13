@@ -1,20 +1,19 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let gcc_src = fun version =>
-    fun hash =>
-      {
-        name = "gcc-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/gcc/gcc-%{version}/gcc-%{version}.tar.xz",
-            "https://mirrors.kernel.org/gnu/gcc/gcc-%{version}/gcc-%{version}.tar.xz",
-          ],
-        },
-      }
+  let gcc_src = {
+    version | default = "15.2.0",
+    name = "gcc-src-%{version}",
+    tag = "Source",
+    object_hash | default = "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/gcc/gcc-%{version}/gcc-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/gcc/gcc-%{version}/gcc-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let gcc_x86_64_libdir_patch = {
@@ -59,9 +58,7 @@ fun pkgs =>
   in
 
   let gcc_gen1 = {
-    version | default = "15.2.0",
-    source_object_hash | default = "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e",
-    name = "gcc-gen1-%{version}",
+    name = "gcc-gen1-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       pre_configure = gcc_prereqs_pre_configure,
@@ -77,7 +74,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.oci_buildpack_deps_rootfs,
-      source = gcc_src version source_object_hash,
+      source = pkgs.gcc_src,
       gmp = pkgs.gmp.inputs.source,
       mpfr = pkgs.mpfr.inputs.source,
       mpc = pkgs.mpc.inputs.source,
@@ -87,9 +84,7 @@ fun pkgs =>
   in
 
   let gcc = {
-    version | default = "15.2.0",
-    source_object_hash | default = "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e",
-    name = "gcc-%{version}",
+    name = "gcc-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       pre_configure = gcc_prereqs_pre_configure,
@@ -117,7 +112,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = recipe.gen1_toolchain_rootfs pkgs "gcc-build-rootfs" [],
-      source = gcc_src version source_object_hash,
+      source = pkgs.gcc_src,
       gmp = pkgs.gmp.inputs.source,
       mpfr = pkgs.mpfr.inputs.source,
       mpc = pkgs.mpc.inputs.source,
@@ -132,7 +127,7 @@ fun pkgs =>
   # the dependency DAG; c_runtime then combines both physical trees into one
   # directly attributable runtime package without introducing a cycle.
   let gcc_libgcc = {
-    name = "gcc-libgcc-%{pkgs.gcc.version}",
+    name = "gcc-libgcc-%{inputs.tree.inputs.source.version}",
     tag = "TreeSubset",
     deps = {
       build = [],
@@ -152,7 +147,7 @@ fun pkgs =>
   in
 
   let c_runtime = {
-    name = "c-runtime-%{pkgs.glibc.name}-%{pkgs.gcc.version}",
+    name = "c-runtime-%{pkgs.glibc.name}-%{pkgs.gcc.inputs.source.version}",
     tag = "TreeMerge",
     deps = {
       build = [],
@@ -167,7 +162,7 @@ fun pkgs =>
   in
 
   let gcc_libstdcxx = {
-    name = "gcc-libstdcxx-%{pkgs.gcc.version}",
+    name = "gcc-libstdcxx-%{inputs.tree.inputs.source.version}",
     tag = "TreeSubset",
     deps = {
       build = [],
@@ -177,8 +172,7 @@ fun pkgs =>
     },
     config = {
       "include" = [
-        "usr/lib/libstdc++.so.6",
-        "usr/lib/libstdc++.so.6.0.34",
+        "usr/lib/libstdc++.so.6*",
       ],
     },
     inputs = {
@@ -188,7 +182,7 @@ fun pkgs =>
   in
 
   let gcc_libgomp = {
-    name = "gcc-libgomp-%{pkgs.gcc.version}",
+    name = "gcc-libgomp-%{inputs.tree.inputs.source.version}",
     tag = "TreeSubset",
     deps = {
       build = [],
@@ -198,8 +192,7 @@ fun pkgs =>
     },
     config = {
       "include" = [
-        "usr/lib/libgomp.so.1",
-        "usr/lib/libgomp.so.1.0.0",
+        "usr/lib/libgomp.so.1*",
       ],
     },
     inputs = {
@@ -216,5 +209,6 @@ fun pkgs =>
       c_runtime,
       gcc_libstdcxx,
       gcc_libgomp,
+      gcc_src,
     ],
   }

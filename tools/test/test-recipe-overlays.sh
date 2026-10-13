@@ -124,12 +124,18 @@ let recipe = import "${repo_root}/recipe-lib.ncl" in
 let package_set = import "${repo_root}/bobrpkgs.ncl" in
 let original = package_set [] in
 let test_case = fun renamed =>
-  let version = if renamed then "9.8.7" else original.gcc.version in
-  let replacement = {
+  let version = if renamed then "9.8.7" else original.gcc.inputs.source.version in
+  let replacement_source = {
     include version,
-    name = if renamed then "overlay-gcc-9.8.7" else original.gcc.name,
+    name = "overlay-gcc-src-%{version}",
     tag = "Source",
     object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  } in
+  let replacement = {
+    name = if renamed then "overlay-gcc-9.8.7" else original.gcc.name,
+    tag = "Tree",
+    config = { tree = { entries = [{ type = "dir", path = "usr/lib" }] } },
+    inputs = { source = replacement_source },
   } in
   let pkgs = package_set [fun _final => fun _prev => { gcc = replacement }] in
   {
@@ -146,9 +152,7 @@ let test_case = fun renamed =>
           expected_tree_name = replacement.name,
           tree_name = split.inputs.tree.name,
           original_includes = (std.record.get ("gcc_" ++ suffix) original).config.include,
-          lowered = if split.inputs.tree.tag == "Source" then
-            recipe.to_request { recipes_path = "${repo_root}" } pkgs split
-          else null,
+          lowered = recipe.to_request { recipes_path = "${repo_root}" } pkgs split,
         }
       )
       ["libgcc", "libstdcxx", "libgomp"],
@@ -163,10 +167,12 @@ jq -e '
       .name == .expected_name and .tree_name == .expected_tree_name
       and .lowered.root.name == .expected_name
       and .lowered.root.config.include == .original_includes
-      and (.lowered | length) == 2
-      and (.lowered[.lowered.root.inputs.tree] |
-        .tag == "Source"
-        and .object_hash == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+      and (.lowered | length) == 3
+      and (.lowered[.lowered.root.inputs.tree] as $tree |
+        $tree.tag == "Tree"
+        and (.lowered[$tree.inputs.source] |
+          .tag == "Source"
+          and .object_hash == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
     )
   )
 ' "${temporary}/gcc-splits.json" >/dev/null

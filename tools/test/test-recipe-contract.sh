@@ -1625,15 +1625,9 @@ jq -e '
   and .libgcc.input == "gcc-15.2.0"
   and .libgcc.include == ["usr/lib/libgcc_s.so.1"]
   and .libstdcxx.runtime == [.c_runtime.name]
-  and .libstdcxx.include == [
-    "usr/lib/libstdc++.so.6",
-    "usr/lib/libstdc++.so.6.0.34"
-  ]
+  and .libstdcxx.include == ["usr/lib/libstdc++.so.6*"]
   and .libgomp.runtime == [.c_runtime.name]
-  and .libgomp.include == [
-    "usr/lib/libgomp.so.1",
-    "usr/lib/libgomp.so.1.0.0"
-  ]
+  and .libgomp.include == ["usr/lib/libgomp.so.1*"]
   and .popt_runtime == [.c_runtime.name]
   and .gperf_runtime == [.c_runtime.name, "gcc-libstdcxx-15.2.0"]
   and .gettext_runtime == [

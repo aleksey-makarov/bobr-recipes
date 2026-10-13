@@ -52,6 +52,7 @@ in
   { source = "gdbm_src", source_prefix = "gdbm-src-", consumers = [{ attr = "gdbm", name_prefix = "gdbm-" }] },
   { source = "gdk_pixbuf_src", source_prefix = "gdk-pixbuf-src-", consumers = [{ attr = "gdk_pixbuf", name_prefix = "gdk-pixbuf-" }] },
   { source = "gdm_src", source_prefix = "gdm-src-", consumers = [{ attr = "gdm", name_prefix = "gdm-" }] },
+  { source = "gcc_src", source_prefix = "gcc-src-", consumers = [{ attr = "gcc_gen1", name_prefix = "gcc-gen1-" }, { attr = "gcc", name_prefix = "gcc-" }] },
   { source = "geoclue_src", source_prefix = "geoclue-src-", consumers = [{ attr = "geoclue", name_prefix = "geoclue-" }] },
   { source = "geocode_glib_src", source_prefix = "geocode-glib-src-", consumers = [{ attr = "geocode_glib", name_prefix = "geocode-glib-" }] },
   { source = "gettext_src", source_prefix = "gettext-src-", consumers = [{ attr = "gettext", name_prefix = "gettext-", config_follows_source = true, docdir_prefix = "--docdir=/usr/share/doc/gettext-" }] },
