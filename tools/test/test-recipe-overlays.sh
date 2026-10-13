@@ -279,4 +279,104 @@ jq -e '
   )
 ' "${temporary}/aggregates.json" >/dev/null
 
-echo "recipe overlay tests passed (library/compiler splits, runtime, initrd, aggregates)"
+# Glibc implementation details stay private. Bootstrap checks must inspect the
+# environment actually selected by glibc_gen1, including input-level overlays.
+nickel export --format json >"${temporary}/glibc-private.json" <<EOF_NICKEL
+let package_set = import "${repo_root}/bobrpkgs.ncl" in
+let original = package_set [] in
+let patched = package_set [fun _final => fun prev => {
+  glibc = prev.glibc & { inputs.patch_locale_archive | force = {
+    name = "overlay-locale-patch",
+    tag = "Source",
+    object_hash = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  } },
+}] in
+let test_case = fun renamed =>
+  let replacement = {
+    name = if renamed then "overlay-bootstrap-rootfs" else original.glibc_gen1.inputs._rootfs.name,
+    tag = "Source",
+    object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  } in
+  let pkgs = package_set [fun _final => fun prev => {
+    glibc_gen1 = prev.glibc_gen1 & { inputs._rootfs | force = replacement },
+  }] in
+  let check = pkgs.test_bootstrap_rootfs.inputs.reports.inputs.n001 in
+  {
+    expected_name = replacement.name,
+    check_name = check.name,
+    configured_name = check.config.script_config.name,
+    target_name = check.inputs._target.name,
+    target_hash = if check.inputs._target.tag == "Source" then check.inputs._target.object_hash else null,
+  }
+in
+{
+  exports_rootfs = std.record.has_field "glibc_bootstrap_rootfs" original,
+  exports_patch = std.record.has_field "glibc_locale_archive_patch_2_42" original,
+  patch_name = patched.glibc.inputs.patch_locale_archive.name,
+  patch_hash = patched.glibc.inputs.patch_locale_archive.object_hash,
+  cases = [test_case false, test_case true],
+}
+EOF_NICKEL
+jq -e '
+  (.exports_rootfs | not) and (.exports_patch | not)
+  and .patch_name == "overlay-locale-patch"
+  and .patch_hash == "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  and all(.cases[];
+    .check_name == ("check-" + .expected_name)
+    and .configured_name == .expected_name
+    and .target_name == .expected_name
+    and .target_hash == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  )
+' "${temporary}/glibc-private.json" >/dev/null
+
+# Package-specific patches and defaults are private inputs, not standalone
+# public recipes. They remain customizable through their consumer's inputs.
+nickel export --format json >"${temporary}/private-sources.json" <<EOF_NICKEL
+let package_set = import "${repo_root}/bobrpkgs.ncl" in
+let original = package_set [] in
+let cases = [
+  { consumer = "expect", input = "patch_gcc15", former_export = "expect_gcc15_patch" },
+  { consumer = "glmark2", input = "patch_data_path_environment", former_export = "data_path_environment_patch" },
+  { consumer = "kbd", input = "patch_backspace", former_export = "kbd_backspace_patch" },
+  { consumer = "mc", input = "defaults", former_export = "mc_defaults" },
+  { consumer = "mc", input = "patch_runtime_paths", former_export = "runtime_paths_patch" },
+  { consumer = "mesa_demos", input = "patch_use_libopengl", former_export = "use_libopengl_patch" },
+  { consumer = "slang", input = "patch_use_path_ln", former_export = "use_path_ln_patch" },
+  { consumer = "virglrenderer", input = "patch_render_server_path", former_export = "render_server_path_patch" },
+] in
+let test_case = fun args => fun renamed =>
+  let original_input = std.record.get args.input (std.record.get args.consumer original).inputs in
+  let replacement = {
+    name = if renamed then "overlay-%{args.former_export}" else original_input.name,
+    tag = "Source",
+    object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    origin = { tag = "RecipePath", path = "overlay-fixture.patch" },
+  } in
+  let pkgs = package_set [fun _final => fun prev => {
+    "%{args.consumer}" = std.record.get args.consumer prev & {
+      inputs."%{args.input}" | force = replacement,
+    },
+  }] in
+  let actual = std.record.get args.input (std.record.get args.consumer pkgs).inputs in
+  {
+    exported = std.record.has_field args.former_export original,
+    original_tag = original_input.tag,
+    expected_name = replacement.name,
+    actual_name = actual.name,
+    actual_tag = actual.tag,
+    actual_hash = actual.object_hash,
+    actual_origin = actual.origin,
+  }
+in
+std.array.flat_map (fun args => [test_case args false, test_case args true]) cases
+EOF_NICKEL
+jq -e '
+  length == 16 and all(.[];
+    (.exported | not) and .original_tag == "Source"
+    and .actual_name == .expected_name and .actual_tag == "Source"
+    and .actual_hash == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    and .actual_origin == {tag: "RecipePath", path: "overlay-fixture.patch"}
+  )
+' "${temporary}/private-sources.json" >/dev/null
+
+echo "recipe overlay tests passed (library/compiler splits, runtime, initrd, aggregates, private inputs)"

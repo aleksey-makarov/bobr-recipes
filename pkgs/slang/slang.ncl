@@ -88,7 +88,6 @@ fun pkgs =>
 
   {
     include [
-      use_path_ln_patch,
       slang,
       slang_libs,
     ],

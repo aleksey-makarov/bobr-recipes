@@ -159,9 +159,7 @@ fun pkgs =>
 
   {
     include [
-      glibc_bootstrap_rootfs,
       glibc_gen1,
-      glibc_locale_archive_patch_2_42,
       glibc,
       glibc_libs,
     ],

@@ -79,7 +79,6 @@ fun pkgs =>
 
   {
     include [
-      kbd_backspace_patch,
       kbd,
     ],
   }

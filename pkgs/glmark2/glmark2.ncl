@@ -82,7 +82,6 @@ fun pkgs =>
 
   {
     include [
-      data_path_environment_patch,
       glmark2,
     ],
   }

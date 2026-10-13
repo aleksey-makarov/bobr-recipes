@@ -431,8 +431,8 @@ fun pkgs =>
       pkgs.oci_buildpack_deps_rootfs.name
       pkgs.oci_buildpack_deps_rootfs,
     mk_rootfs_check
-      pkgs.glibc_bootstrap_rootfs.name
-      pkgs.glibc_bootstrap_rootfs,
+      pkgs.glibc_gen1.inputs._rootfs.name
+      pkgs.glibc_gen1.inputs._rootfs,
     mk_rootfs_check
       "gen1-toolchain-rootfs"
       (recipe.gen1_toolchain_rootfs pkgs "gen1-toolchain-rootfs" []),

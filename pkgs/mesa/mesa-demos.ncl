@@ -96,7 +96,6 @@ fun pkgs =>
 
   {
     include [
-      use_libopengl_patch,
       mesa_demos,
     ],
   }

@@ -85,8 +85,6 @@ fun pkgs =>
 
   {
     include [
-      mc_defaults,
-      runtime_paths_patch,
       mc,
     ],
   }

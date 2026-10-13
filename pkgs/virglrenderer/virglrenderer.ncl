@@ -76,7 +76,6 @@ fun pkgs =>
 
   {
     include [
-      render_server_path_patch,
       virglrenderer,
     ],
   }
