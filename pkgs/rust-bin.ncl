@@ -90,7 +90,7 @@ fun pkgs =>
   in
 
   let rust_std_native_musl = {
-    version | default = rust_bin.version,
+    version | default = pkgs.rust_bin.version,
     source_object_hash
       | default
       = "9744b43bed4a89db05e83dc8054d3e92e23ddb70a6c08c54ccde9a58d7b28627",

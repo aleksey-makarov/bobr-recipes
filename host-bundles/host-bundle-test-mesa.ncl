@@ -212,7 +212,7 @@ fun pkgs =>
     inputs = {
       _rootfs = pkgs.oci_buildpack_deps_rootfs,
       script = smoke_script,
-      bundle = host_bundle_test_mesa,
+      bundle = pkgs.host_bundle_test_mesa,
     },
   }
   in

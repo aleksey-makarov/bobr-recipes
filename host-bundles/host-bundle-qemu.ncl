@@ -312,13 +312,13 @@ fun pkgs =>
   in
 
   let test_host_bundle_qemu =
-    mk_host_bundle_test plain_args host_bundle_qemu
+    mk_host_bundle_test plain_args pkgs.host_bundle_qemu
   in
   let test_host_bundle_qemu_weston =
-    mk_host_bundle_test weston_args host_bundle_qemu_weston
+    mk_host_bundle_test weston_args pkgs.host_bundle_qemu_weston
   in
   let test_host_bundle_qemu_gnome =
-    mk_host_bundle_test gnome_args host_bundle_qemu_gnome
+    mk_host_bundle_test gnome_args pkgs.host_bundle_qemu_gnome
   in
 
   {

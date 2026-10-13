@@ -379,4 +379,98 @@ jq -e '
   )
 ' "${temporary}/private-sources.json" >/dev/null
 
-echo "recipe overlay tests passed (library/compiler splits, runtime, initrd, aggregates, private inputs)"
+# Target std inherits the final compiler version, but remains independently
+# overridable. Changing versions still requires supplying matching source hashes.
+nickel export --format json >"${temporary}/rust-std.json" <<EOF_NICKEL
+let package_set = import "${repo_root}/bobrpkgs.ncl" in
+let compiler_overlay = fun _final => fun prev => {
+  rust_bin = prev.rust_bin & { version = "9.8.7" },
+  rust_std_native_musl = prev.rust_std_native_musl & {
+    source_object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  },
+} in
+let summary = fun pkgs => {
+  compiler_version = pkgs.rust_bin.version,
+  std_version = pkgs.rust_std_native_musl.version,
+  std_name = pkgs.rust_std_native_musl.name,
+  source_name = pkgs.rust_std_native_musl.inputs.source.name,
+  source_url = pkgs.rust_std_native_musl.inputs.source.origin.url,
+  source_hash = pkgs.rust_std_native_musl.inputs.source.object_hash,
+} in
+{
+  original = summary (package_set []),
+  inherited = summary (package_set [compiler_overlay]),
+  explicit = summary (package_set [compiler_overlay, fun _final => fun prev => {
+    rust_std_native_musl = prev.rust_std_native_musl & { version = "8.7.6" },
+  }]),
+}
+EOF_NICKEL
+jq -e '
+  .original.compiler_version == .original.std_version
+  and .inherited.compiler_version == "9.8.7"
+  and .inherited.std_version == "9.8.7"
+  and .explicit.compiler_version == "9.8.7"
+  and .explicit.std_version == "8.7.6"
+  and all(.inherited, .explicit;
+    .std_name == ("rust-std-native-musl-" + .std_version)
+    and .source_name == ("rust-std-x86-64-unknown-linux-musl-src-" + .std_version)
+    and .source_url == ("https://static.rust-lang.org/dist/rust-std-" + .std_version + "-x86_64-unknown-linux-musl.tar.xz")
+    and .source_hash == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  )
+' "${temporary}/rust-std.json" >/dev/null
+
+# Smoke tests must exercise the final public bundle, also through test_all.
+# Replace only the bundle and check environment to keep lowering small.
+nickel export --format json >"${temporary}/bundle-tests.json" <<EOF_NICKEL
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let package_set = import "${repo_root}/bobrpkgs.ncl" in
+let original = package_set [] in
+let cases = [
+  { bundle_attr = "host_bundle_test_mesa", test_attr = "test_host_bundle_test_mesa", slot = "n000" },
+  { bundle_attr = "host_bundle_qemu", test_attr = "test_host_bundle_qemu", slot = "n001" },
+  { bundle_attr = "host_bundle_qemu_weston", test_attr = "test_host_bundle_qemu_weston", slot = "n002" },
+  { bundle_attr = "host_bundle_qemu_gnome", test_attr = "test_host_bundle_qemu_gnome", slot = "n003" },
+] in
+let test_case = fun args => fun renamed =>
+  let replacement = {
+    name = if renamed then "overlay-%{args.bundle_attr}" else (std.record.get args.bundle_attr original).name,
+    tag = "Source",
+    object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  } in
+  let pkgs = package_set [fun _final => fun _prev => {
+    "%{args.bundle_attr}" = replacement,
+    oci_buildpack_deps_rootfs = {
+      name = "fixture-check-rootfs",
+      tag = "Source",
+      object_hash = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    },
+  }] in
+  let check = std.record.get args.test_attr pkgs in
+  let parent_check = std.record.get args.slot pkgs.test_all.inputs.n000.inputs in
+  {
+    expected_name = replacement.name,
+    actual_name = check.inputs.bundle.name,
+    actual_tag = check.inputs.bundle.tag,
+    parent_name = parent_check.inputs.bundle.name,
+    parent_tag = parent_check.inputs.bundle.tag,
+    parent_hash = if parent_check.inputs.bundle.tag == "Source" then parent_check.inputs.bundle.object_hash else null,
+    config_unchanged = check.config == (std.record.get args.test_attr original).config,
+    lowered = if check.inputs.bundle.tag == "Source" then
+      recipe.to_request { recipes_path = "${repo_root}" } pkgs check else null,
+  }
+in
+std.array.flat_map (fun args => [test_case args false, test_case args true]) cases
+EOF_NICKEL
+jq -e '
+  length == 8 and all(.[];
+    .actual_name == .expected_name and .actual_tag == "Source"
+    and .parent_name == .expected_name and .parent_tag == "Source"
+    and .parent_hash == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    and .config_unchanged and (.lowered | length) == 4
+    and .lowered[.lowered.root.inputs.bundle].name == .expected_name
+    and .lowered[.lowered.root.inputs.bundle].tag == "Source"
+    and .lowered[.lowered.root.inputs.bundle].object_hash == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  )
+' "${temporary}/bundle-tests.json" >/dev/null
+
+echo "recipe overlay tests passed (library/compiler splits, runtime, initrd, aggregates, private inputs, Rust std, bundle tests)"
