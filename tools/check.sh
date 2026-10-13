@@ -72,6 +72,9 @@ tools/test/test-public-sources.sh
 step "Linux Source family"
 tools/test/test-linux-sources.sh
 
+step "Linux build script"
+tools/test/test-linux-build-script.sh
+
 step "synthetic source preparation"
 tools/test/test-synthetic-common.sh
 
