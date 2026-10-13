@@ -5,7 +5,7 @@
 # The build rootfs is assembled as a closure (base_filesystem + native toolchain
 # + these tools) -- no system_rootfs_X.
 #
-# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
+# Configure version and hash through `pkgs.mozjs_src`.
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
@@ -20,27 +20,22 @@ fun pkgs =>
   }
   in
 
-  let mozjs_src = fun version =>
-    fun hash =>
-      {
-        name = "mozjs-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://archive.mozilla.org/pub/firefox/releases/%{version}/source/firefox-%{version}.source.tar.xz",
-        },
-      }
+  let mozjs_src = {
+    version | default = "140.12.0esr",
+    name = "mozjs-src-%{version}",
+    tag = "Source",
+    object_hash | default = "85dfb9f6021152b4302b8968ef485d958c8c471cb02415a19853daaad5acce62",
+    origin = {
+      tag = "Http",
+      url = "https://archive.mozilla.org/pub/firefox/releases/%{version}/source/firefox-%{version}.source.tar.xz",
+    },
+  }
   in
 
   let step_env = { BOBR_SOURCE_DIR = "@{build}/source" } in
 
   let mozjs = {
-    version | default = "140.12.0esr",
-    source_object_hash
-      | default
-      = "85dfb9f6021152b4302b8968ef485d958c8c471cb02415a19853daaad5acce62",
-    name = "mozjs-%{version}",
+    name = "mozjs-%{inputs.source.version}",
     tag = "SandboxStageDeps",
     deps = {
       # Deps-derived build rootfs (SandboxStageDeps assembles it, no hand-rolled
@@ -94,13 +89,14 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_mozjs,
-      source = mozjs_src version source_object_hash,
+      source = pkgs.mozjs_src,
     },
   }
   in
 
   {
     include [
+      mozjs_src,
       mozjs,
     ],
   }

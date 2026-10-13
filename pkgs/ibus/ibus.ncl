@@ -13,27 +13,22 @@
 # at build time from a Compose file; upstream reads it from libX11's locale data
 # which we do not ship, so we build in-tree and supply a minimal ./Compose via a
 # patch (see ibus-compose.patch). gnome-shell needs only the IBus-1.0 typelib.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.ibus_src`.
 fun pkgs =>
-  let ibus_src = fun version =>
-    fun hash =>
-      {
-        name = "ibus-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/ibus/ibus/releases/download/%{version}/ibus-%{version}.tar.gz",
-        },
-      }
+  let ibus_src = {
+    version | default = "1.5.34",
+    name = "ibus-src-%{version}",
+    tag = "Source",
+    object_hash | default = "12a72210ce5250f8a66df562a75e034e67b2bce74c4df2983dc86d1154894943",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/ibus/ibus/releases/download/%{version}/ibus-%{version}.tar.gz",
+    },
+  }
   in
 
   let ibus = {
-    version | default = "1.5.34",
-    source_object_hash
-      | default
-      = "12a72210ce5250f8a66df562a75e034e67b2bce74c4df2983dc86d1154894943",
-    name = "ibus-%{version}",
+    name = "ibus-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -89,7 +84,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = ibus_src version source_object_hash,
+      source = pkgs.ibus_src,
       # Supplies src/Compose for the build-time compose-table generator.
       # Applied by the synthetic builder (input name matches ^patch).
       patch_compose = {
@@ -107,6 +102,7 @@ fun pkgs =>
 
   {
     include [
+      ibus_src,
       ibus,
     ],
   }

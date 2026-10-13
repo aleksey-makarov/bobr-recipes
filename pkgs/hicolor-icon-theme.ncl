@@ -1,27 +1,24 @@
 # hicolor-icon-theme -- the base/fallback icon theme structure (index.theme and
 # the directory layout every other theme inherits). Data only, no deps.
-# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
+# Configure version and hash through `pkgs.hicolor_icon_theme_src`.
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "hicolor-icon-theme-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://icon-theme.freedesktop.org/releases/hicolor-icon-theme-%{version}.tar.xz",
-            "https://sources.buildroot.net/hicolor-icon-theme/hicolor-icon-theme-%{version}.tar.xz",
-          ],
-        },
-      }
+  let hicolor_icon_theme_src = {
+    version | default = "0.18",
+    name = "hicolor-icon-theme-src-%{version}",
+    tag = "Source",
+    object_hash | default = "db0e50a80aa3bf64bb45cbca5cf9f75efd9348cf2ac690b907435238c3cf81d7",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://icon-theme.freedesktop.org/releases/hicolor-icon-theme-%{version}.tar.xz",
+        "https://sources.buildroot.net/hicolor-icon-theme/hicolor-icon-theme-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let hicolor_icon_theme = {
-    version | default = "0.18",
-    source_object_hash | default = "db0e50a80aa3bf64bb45cbca5cf9f75efd9348cf2ac690b907435238c3cf81d7",
-    name = "hicolor-icon-theme-%{version}",
+    name = "hicolor-icon-theme-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [],
@@ -33,13 +30,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.hicolor_icon_theme_src,
     },
   }
   in
 
   {
     include [
+      hicolor_icon_theme_src,
       hicolor_icon_theme,
     ],
   }

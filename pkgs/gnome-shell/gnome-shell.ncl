@@ -6,29 +6,24 @@ let recipe = import "../../recipe-lib.ncl" in
 # NetworkManager, camera (pipewire) and portal-helper features are off, the
 # GTK4/libadwaita extensions app and the man pages/tests too -- we want the shell
 # session, not the full optional surface. systemd integration is on.
-# `version`/`source_object_hash`/`series` are node fields (overridable).
+# Configure version and hash through `pkgs.gnome_shell_src`.
 let series = recipe.version_prefix 1 in
 
 fun pkgs =>
-  let gnome_shell_src = fun version =>
-    fun hash =>
-      {
-        name = "gnome-shell-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gnome-shell/%{series version}/gnome-shell-%{version}.tar.xz",
-        },
-      }
+  let gnome_shell_src = {
+    version | default = "50.3",
+    name = "gnome-shell-src-%{version}",
+    tag = "Source",
+    object_hash | default = "450458c44a26d25a9b84288e12b9005d4c5c44648cfc6b790be19a05de7f1735",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gnome-shell/%{series version}/gnome-shell-%{version}.tar.xz",
+    },
+  }
   in
 
   let gnome_shell = {
-    version | default = "50.3",
-    source_object_hash
-      | default
-      = "450458c44a26d25a9b84288e12b9005d4c5c44648cfc6b790be19a05de7f1735",
-    name = "gnome-shell-%{version}",
+    name = "gnome-shell-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -98,7 +93,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = gnome_shell_src version source_object_hash,
+      source = pkgs.gnome_shell_src,
       # Drop the vestigial X11 includes from shell-app-usage.c (no X11 symbols
       # are used); our mutter is Wayland-only, so the X11 headers are not wired
       # into the build. Applied by the synthetic builder (input name matches
@@ -118,6 +113,7 @@ fun pkgs =>
 
   {
     include [
+      gnome_shell_src,
       gnome_shell,
     ],
   }

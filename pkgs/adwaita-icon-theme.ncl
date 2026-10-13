@@ -3,28 +3,25 @@ let recipe = import "../recipe-lib.ncl" in
 # meson build requires gtk4-update-icon-cache at configure time (required:true);
 # the actual cache run is skip_if_destdir, so under our DESTDIR install it is
 # skipped and the icon cache is produced later by the qemu_gnome_rootfs finalize
-# step. Hence gtk4 is a build-only dep. `version`/`source_object_hash` are node fields
-# (overridable), as in linux.ncl.
+# step. Hence gtk4 is a build-only dep.
+# Configure version and hash through `pkgs.adwaita_icon_theme_src`.
 let branch = recipe.version_prefix 1 in
 
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "adwaita-icon-theme-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/adwaita-icon-theme/%{branch version}/adwaita-icon-theme-%{version}.tar.xz",
-        },
-      }
+  let adwaita_icon_theme_src = {
+    version | default = "50.0",
+    name = "adwaita-icon-theme-src-%{version}",
+    tag = "Source",
+    object_hash | default = "fac6e0401fca714780561a081b8f7e27c3bc1db34ebda4da175081f26b24d460",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/adwaita-icon-theme/%{branch version}/adwaita-icon-theme-%{version}.tar.xz",
+    },
+  }
   in
 
   let adwaita_icon_theme = {
-    version | default = "50.0",
-    source_object_hash | default = "fac6e0401fca714780561a081b8f7e27c3bc1db34ebda4da175081f26b24d460",
-    name = "adwaita-icon-theme-%{version}",
+    name = "adwaita-icon-theme-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -38,13 +35,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.adwaita_icon_theme_src,
     },
   }
   in
 
   {
     include [
+      adwaita_icon_theme_src,
       adwaita_icon_theme,
     ],
   }

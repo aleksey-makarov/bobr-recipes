@@ -9,27 +9,22 @@
 # Bluetooth DUN, nmtui (newt), cloud-setup and connectivity check (libcurl),
 # SELinux, audit, eBPF, NBFT, docs/man/tests. Crypto uses NSS; session tracking
 # and suspend/resume go through systemd-logind.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.networkmanager_src`.
 fun pkgs =>
-  let networkmanager_src = fun version =>
-    fun hash =>
-      {
-        name = "networkmanager-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://gitlab.freedesktop.org/api/v4/projects/411/packages/generic/NetworkManager/%{version}/NetworkManager-%{version}.tar.xz",
-        },
-      }
+  let networkmanager_src = {
+    version | default = "1.56.1",
+    name = "networkmanager-src-%{version}",
+    tag = "Source",
+    object_hash | default = "b0ee9a89dfba39d2a1a69d60868be99096d3b6b66a1a22bf8a9d5a38b8aed50e",
+    origin = {
+      tag = "Http",
+      url = "https://gitlab.freedesktop.org/api/v4/projects/411/packages/generic/NetworkManager/%{version}/NetworkManager-%{version}.tar.xz",
+    },
+  }
   in
 
   let networkmanager = {
-    version | default = "1.56.1",
-    source_object_hash
-      | default
-      = "b0ee9a89dfba39d2a1a69d60868be99096d3b6b66a1a22bf8a9d5a38b8aed50e",
-    name = "networkmanager-%{version}",
+    name = "networkmanager-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -108,13 +103,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = networkmanager_src version source_object_hash,
+      source = pkgs.networkmanager_src,
     },
   }
   in
 
   {
     include [
+      networkmanager_src,
       networkmanager,
     ],
   }

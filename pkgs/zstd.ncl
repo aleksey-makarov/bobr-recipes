@@ -1,23 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let zstd_src = fun version =>
-    fun hash =>
-      {
-        name = "zstd-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/facebook/zstd/releases/download/v%{version}/zstd-%{version}.tar.gz",
-        },
-      }
+  let zstd_src = {
+    version | default = "1.5.7",
+    name = "zstd-src-%{version}",
+    tag = "Source",
+    object_hash | default = "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/facebook/zstd/releases/download/v%{version}/zstd-%{version}.tar.gz",
+    },
+  }
   in
 
   let zstd = {
-    version | default = "1.5.7",
-    source_object_hash | default = "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3",
-    name = "zstd-%{version}",
+    name = "zstd-%{inputs.source.version}",
     tag = "Makefile",
     deps = {
       # zstd's Makefile links zlib into the CLI when zlib.h is present (as in the
@@ -49,7 +46,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = zstd_src version source_object_hash,
+      source = pkgs.zstd_src,
     },
   }
   in
@@ -58,9 +55,7 @@ fun pkgs =>
   # Keep it separate from the ordinary zstd package, whose public contract
   # intentionally removes libzstd.a.
   let zstd_static = {
-    version | default = "1.5.7",
-    source_object_hash | default = "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3",
-    name = "zstd-static-%{version}",
+    name = "zstd-static-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = recipe.native_build_deps pkgs,
@@ -94,13 +89,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = zstd_src version source_object_hash,
+      source = pkgs.zstd_src,
     },
   }
   in
 
   {
     include [
+      zstd_src,
       zstd,
       zstd_static,
     ],

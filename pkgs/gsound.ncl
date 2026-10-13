@@ -1,27 +1,22 @@
 # gsound -- small GObject library for playing system sounds (a thin wrapper over
 # libcanberra). Pulled in as a dependency of gnome-bluetooth. Meson build; links
 # glib and libcanberra and produces the GSound-1.0 typelib.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.gsound_src`.
 fun pkgs =>
-  let gsound_src = fun version =>
-    fun hash =>
-      {
-        name = "gsound-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gsound/1.0/gsound-%{version}.tar.xz",
-        },
-      }
+  let gsound_src = {
+    version | default = "1.0.3",
+    name = "gsound-src-%{version}",
+    tag = "Source",
+    object_hash | default = "ca2d039e1ebd148647017a7f548862350bc9af01986d39f10cfdc8e95f07881a",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gsound/1.0/gsound-%{version}.tar.xz",
+    },
+  }
   in
 
   let gsound = {
-    version | default = "1.0.3",
-    source_object_hash
-      | default
-      = "ca2d039e1ebd148647017a7f548862350bc9af01986d39f10cfdc8e95f07881a",
-    name = "gsound-%{version}",
+    name = "gsound-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -46,13 +41,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = gsound_src version source_object_hash,
+      source = pkgs.gsound_src,
     },
   }
   in
 
   {
     include [
+      gsound_src,
       gsound,
     ],
   }

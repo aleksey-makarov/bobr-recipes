@@ -2,27 +2,22 @@
 # NSS builds on it, and evolution-data-server's camel links both (camel.c uses
 # NSPR threading and the NSS certificate database unconditionally). Autotools,
 # but configure lives in the nspr/ subdirectory of the tarball.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.nspr_src`.
 fun pkgs =>
-  let nspr_src = fun version =>
-    fun hash =>
-      {
-        name = "nspr-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://ftp.mozilla.org/pub/nspr/releases/v%{version}/src/nspr-%{version}.tar.gz",
-        },
-      }
+  let nspr_src = {
+    version | default = "4.39",
+    name = "nspr-src-%{version}",
+    tag = "Source",
+    object_hash | default = "bbd02ee87a55676063a63e5bc819e0227de2666b47307b2a0134414cdf42368e",
+    origin = {
+      tag = "Http",
+      url = "https://ftp.mozilla.org/pub/nspr/releases/v%{version}/src/nspr-%{version}.tar.gz",
+    },
+  }
   in
 
   let nspr = {
-    version | default = "4.39",
-    source_object_hash
-      | default
-      = "bbd02ee87a55676063a63e5bc819e0227de2666b47307b2a0134414cdf42368e",
-    name = "nspr-%{version}",
+    name = "nspr-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -39,7 +34,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = nspr_src version source_object_hash,
+      source = pkgs.nspr_src,
       # NSPR bakes the wall-clock build time into its libraries; make it derive
       # the build time from SOURCE_DATE_EPOCH so the output is reproducible.
       # Applied by the synthetic builder (input key matches ^patch).
@@ -58,6 +53,7 @@ fun pkgs =>
 
   {
     include [
+      nspr_src,
       nspr,
     ],
   }

@@ -1,26 +1,23 @@
 fun pkgs =>
-  let xkeyboard_config_src = fun version =>
-    fun hash =>
-      {
-        name = "xkeyboard-config-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://www.x.org/releases/individual/data/xkeyboard-config/xkeyboard-config-%{version}.tar.xz",
-            "https://downloads.yoctoproject.org/mirror/sources/xkeyboard-config-%{version}.tar.xz",
-          ],
-        },
-      }
+  let xkeyboard_config_src = {
+    version | default = "2.44",
+    name = "xkeyboard-config-src-%{version}",
+    tag = "Source",
+    object_hash | default = "54d2c33eeebb031d48fa590c543e54c9bcbd0f00386ebc6489b2f47a0da4342a",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://www.x.org/releases/individual/data/xkeyboard-config/xkeyboard-config-%{version}.tar.xz",
+        "https://downloads.yoctoproject.org/mirror/sources/xkeyboard-config-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   # Keymap data consumed by libxkbcommon at runtime (installed under
   # /usr/share/X11/xkb). Data only -- no runtime libraries.
   let xkeyboard_config = {
-    version | default = "2.44",
-    source_object_hash | default = "54d2c33eeebb031d48fa590c543e54c9bcbd0f00386ebc6489b2f47a0da4342a",
-    name = "xkeyboard-config-%{version}",
+    name = "xkeyboard-config-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -38,13 +35,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = xkeyboard_config_src version source_object_hash,
+      source = pkgs.xkeyboard_config_src,
     },
   }
   in
 
   {
     include [
+      xkeyboard_config_src,
       xkeyboard_config,
     ],
   }

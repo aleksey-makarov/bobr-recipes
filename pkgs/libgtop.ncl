@@ -1,29 +1,24 @@
 let recipe = import "../recipe-lib.ncl" in
 # libgtop -- library to obtain system/process information. gnome-control-center's
 # Privacy/Usage panel links against libgtop-2.0. Autotools build against glib.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.libgtop_src`.
 fun pkgs =>
   let series = recipe.version_prefix 2 in
 
-  let libgtop_src = fun version =>
-    fun hash =>
-      {
-        name = "libgtop-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/libgtop/%{series version}/libgtop-%{version}.tar.xz",
-        },
-      }
+  let libgtop_src = {
+    version | default = "2.41.3",
+    name = "libgtop-src-%{version}",
+    tag = "Source",
+    object_hash | default = "775676df958e2ea2452f7568f28b2ea581063d312773dd5c0b7624c1b9b2da8c",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/libgtop/%{series version}/libgtop-%{version}.tar.xz",
+    },
+  }
   in
 
   let libgtop = {
-    version | default = "2.41.3",
-    source_object_hash
-      | default
-      = "775676df958e2ea2452f7568f28b2ea581063d312773dd5c0b7624c1b9b2da8c",
-    name = "libgtop-%{version}",
+    name = "libgtop-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -45,9 +40,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libgtop_src version source_object_hash,
+      source = pkgs.libgtop_src,
     },
   }
   in
 
-  { include [libgtop] }
+  {
+    include [
+      libgtop_src,
+      libgtop
+    ]
+  }

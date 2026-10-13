@@ -4,30 +4,25 @@
 # is a hard dependency of the GNOME session. Meson build; introspection is on
 # (that is what produces the typelib gnome-shell needs), vala bindings and docs
 # are off. Session tracking via systemd-logind (elogind off).
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.accountsservice_src`.
 fun pkgs =>
-  let accountsservice_src = fun version =>
-    fun hash =>
-      {
-        name = "accountsservice-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://www.freedesktop.org/software/accountsservice/accountsservice-%{version}.tar.xz",
-            "https://deb.debian.org/debian/pool/main/a/accountsservice/accountsservice_%{version}.orig.tar.xz",
-          ],
-        },
-      }
+  let accountsservice_src = {
+    version | default = "23.13.9",
+    name = "accountsservice-src-%{version}",
+    tag = "Source",
+    object_hash | default = "adda4cdeae24fa0992e7df3ffff9effa7090be3ac233a3edfdf69d5a9c9b924f",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://www.freedesktop.org/software/accountsservice/accountsservice-%{version}.tar.xz",
+        "https://deb.debian.org/debian/pool/main/a/accountsservice/accountsservice_%{version}.orig.tar.xz",
+      ],
+    },
+  }
   in
 
   let accountsservice = {
-    version | default = "23.13.9",
-    source_object_hash
-      | default
-      = "adda4cdeae24fa0992e7df3ffff9effa7090be3ac233a3edfdf69d5a9c9b924f",
-    name = "accountsservice-%{version}",
+    name = "accountsservice-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -58,7 +53,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = accountsservice_src version source_object_hash,
+      source = pkgs.accountsservice_src,
       # Build fixes: substitute the version literally (our source extraction
       # strips the accountsservice-<version> directory generate-version.sh reads)
       # and drop subdir('tests') (the bundled mocklibc does not compile with a
@@ -78,6 +73,7 @@ fun pkgs =>
 
   {
     include [
+      accountsservice_src,
       accountsservice,
     ],
   }

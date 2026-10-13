@@ -1,26 +1,23 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let coreutils_src = fun version =>
-    fun hash =>
-      {
-        name = "coreutils-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/coreutils/coreutils-%{version}.tar.xz",
-            "https://mirrors.kernel.org/gnu/coreutils/coreutils-%{version}.tar.xz",
-          ],
-        },
-      }
+  let coreutils_src = {
+    version | default = "9.7",
+    name = "coreutils-src-%{version}",
+    tag = "Source",
+    object_hash | default = "e8bb26ad0293f9b5a1fc43fb42ba970e312c66ce92c1b0b16713d7500db251bf",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/coreutils/coreutils-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/coreutils/coreutils-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let coreutils_gen1 = {
-    version | default = "9.7",
-    source_object_hash | default = "e8bb26ad0293f9b5a1fc43fb42ba970e312c66ce92c1b0b16713d7500db251bf",
-    name = "coreutils-gen1-%{version}",
+    name = "coreutils-gen1-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
@@ -48,15 +45,13 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.oci_buildpack_deps_rootfs,
-      source = coreutils_src version source_object_hash,
+      source = pkgs.coreutils_src,
     },
   }
   in
 
   let coreutils = {
-    version | default = "9.7",
-    source_object_hash | default = "e8bb26ad0293f9b5a1fc43fb42ba970e312c66ce92c1b0b16713d7500db251bf",
-    name = "coreutils-%{version}",
+    name = "coreutils-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
@@ -84,13 +79,14 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "coreutils-build-rootfs" [],
-      source = coreutils_src version source_object_hash,
+      source = pkgs.coreutils_src,
     },
   }
   in
 
   {
     include [
+      coreutils_src,
       coreutils_gen1,
       coreutils,
     ],

@@ -1,21 +1,18 @@
 fun pkgs =>
-  let shadow_src = fun version =>
-    fun hash =>
-      {
-        name = "shadow-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz",
-        },
-      }
+  let shadow_src = {
+    version | default = "4.19.4",
+    name = "shadow-src-%{version}",
+    tag = "Source",
+    object_hash | default = "ce57a313e315a0a7cb04a8f50cc20753e994e487bbe9b78a2a824ca75cb486c0",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz",
+    },
+  }
   in
 
   let shadow = {
-    version | default = "4.19.4",
-    source_object_hash | default = "ce57a313e315a0a7cb04a8f50cc20753e994e487bbe9b78a2a824ca75cb486c0",
-    name = "shadow-%{version}",
+    name = "shadow-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       # pkgconf is not among the default Autotools build deps, so it must be
@@ -95,13 +92,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = shadow_src version source_object_hash,
+      source = pkgs.shadow_src,
     },
   }
   in
 
   {
     include [
+      shadow_src,
       shadow,
     ],
   }

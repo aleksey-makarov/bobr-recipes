@@ -1,27 +1,24 @@
 fun pkgs =>
-  let libpng_src = fun version =>
-    fun hash =>
-      {
-        name = "libpng-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          # Canonical SourceForge project path (+ /download fallback), matching the
-          # other SF-hosted recipes. The short download.sourceforge.net/libpng/ form
-          # goes through an extra HTML redirect the downloader can save by mistake.
-          url = [
-            "https://downloads.sourceforge.net/project/libpng/libpng16/%{version}/libpng-%{version}.tar.xz",
-            "https://sourceforge.net/projects/libpng/files/libpng16/%{version}/libpng-%{version}.tar.xz/download",
-          ],
-        },
-      }
+  let libpng_src = {
+    version | default = "1.6.50",
+    name = "libpng-src-%{version}",
+    tag = "Source",
+    object_hash | default = "4df396518620a7aa3651443e87d1b2862e4e88cad135a8b93423e01706232307",
+    origin = {
+      tag = "Http",
+      # Canonical SourceForge project path (+ /download fallback), matching the
+      # other SF-hosted recipes. The short download.sourceforge.net/libpng/ form
+      # goes through an extra HTML redirect the downloader can save by mistake.
+      url = [
+        "https://downloads.sourceforge.net/project/libpng/libpng16/%{version}/libpng-%{version}.tar.xz",
+        "https://sourceforge.net/projects/libpng/files/libpng16/%{version}/libpng-%{version}.tar.xz/download",
+      ],
+    },
+  }
   in
 
   let libpng = {
-    version | default = "1.6.50",
-    source_object_hash | default = "4df396518620a7aa3651443e87d1b2862e4e88cad135a8b93423e01706232307",
-    name = "libpng-%{version}",
+    name = "libpng-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -50,13 +47,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = libpng_src version source_object_hash,
+      source = pkgs.libpng_src,
     },
   }
   in
 
   {
     include [
+      libpng_src,
       libpng,
     ],
   }

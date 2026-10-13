@@ -5,27 +5,22 @@
 # the daemon/backend and all network location sources are off, which keeps the
 # dependency set down to glib. Location will simply be unavailable at runtime,
 # which gnome-shell handles gracefully -- only the typelib import must succeed.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.geoclue_src`.
 fun pkgs =>
-  let geoclue_src = fun version =>
-    fun hash =>
-      {
-        name = "geoclue-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://gitlab.freedesktop.org/geoclue/geoclue/-/archive/%{version}/geoclue-%{version}.tar.gz",
-        },
-      }
+  let geoclue_src = {
+    version | default = "2.8.2",
+    name = "geoclue-src-%{version}",
+    tag = "Source",
+    object_hash | default = "5435f7d48105fe89a4259f807658281e854881267254bcd4eeac6e26c222055b",
+    origin = {
+      tag = "Http",
+      url = "https://gitlab.freedesktop.org/geoclue/geoclue/-/archive/%{version}/geoclue-%{version}.tar.gz",
+    },
+  }
   in
 
   let geoclue = {
-    version | default = "2.8.2",
-    source_object_hash
-      | default
-      = "5435f7d48105fe89a4259f807658281e854881267254bcd4eeac6e26c222055b",
-    name = "geoclue-%{version}",
+    name = "geoclue-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -54,13 +49,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = geoclue_src version source_object_hash,
+      source = pkgs.geoclue_src,
     },
   }
   in
 
   {
     include [
+      geoclue_src,
       geoclue,
     ],
   }

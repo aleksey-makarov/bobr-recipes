@@ -2,27 +2,22 @@
 # A dependency of gnome-online-accounts, which control-center's online-accounts
 # panel uses. Meson build against glib, libsoup 3 and json-glib. gtk-doc,
 # examples and tests are off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.librest_src`.
 fun pkgs =>
-  let librest_src = fun version =>
-    fun hash =>
-      {
-        name = "rest-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/rest/0.9/rest-%{version}.tar.xz",
-        },
-      }
+  let librest_src = {
+    version | default = "0.9.1",
+    name = "rest-src-%{version}",
+    tag = "Source",
+    object_hash | default = "9266a5c10ece383e193dfb7ffb07b509cc1f51521ab8dad76af96ed14212c2e3",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/rest/0.9/rest-%{version}.tar.xz",
+    },
+  }
   in
 
   let librest = {
-    version | default = "0.9.1",
-    source_object_hash
-      | default
-      = "9266a5c10ece383e193dfb7ffb07b509cc1f51521ab8dad76af96ed14212c2e3",
-    name = "rest-%{version}",
+    name = "rest-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -53,13 +48,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = librest_src version source_object_hash,
+      source = pkgs.librest_src,
     },
   }
   in
 
   {
     include [
+      librest_src,
       librest,
     ],
   }

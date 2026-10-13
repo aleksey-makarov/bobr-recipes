@@ -1,20 +1,19 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let tcl_src = fun version =>
-    fun hash =>
-      {
-        name = "tcl-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://downloads.sourceforge.net/project/tcl/Tcl/%{version}/tcl%{version}-src.tar.gz",
-            "https://sourceforge.net/projects/tcl/files/Tcl/%{version}/tcl%{version}-src.tar.gz/download",
-          ],
-        },
-      }
+  let tcl_src = {
+    version | default = "8.6.16",
+    name = "tcl-src-%{version}",
+    tag = "Source",
+    object_hash | default = "91cb8fa61771c63c262efb553059b7c7ad6757afa5857af6265e4b0bdc2a14a5",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://downloads.sourceforge.net/project/tcl/Tcl/%{version}/tcl%{version}-src.tar.gz",
+        "https://sourceforge.net/projects/tcl/files/Tcl/%{version}/tcl%{version}-src.tar.gz/download",
+      ],
+    },
+  }
   in
 
   let buildscript_tcl = {
@@ -29,9 +28,7 @@ fun pkgs =>
   in
 
   let tcl = {
-    version | default = "8.6.16",
-    source_object_hash | default = "91cb8fa61771c63c262efb553059b7c7ad6757afa5857af6265e4b0bdc2a14a5",
-    name = "tcl-%{version}",
+    name = "tcl-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -69,13 +66,14 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_tcl,
-      source = tcl_src version source_object_hash,
+      source = pkgs.tcl_src,
     },
   }
   in
 
   {
     include [
+      tcl_src,
       tcl,
     ],
   }

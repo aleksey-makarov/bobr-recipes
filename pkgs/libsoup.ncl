@@ -4,29 +4,24 @@ let recipe = import "../recipe-lib.ncl" in
 # checks via libpsl, cookie storage via sqlite, gzip via zlib. Brotli, GSSAPI,
 # NTLM, sysprof, vala and docs are off. tls_check is off: glib-networking is not
 # needed at compile time (it is a runtime dependency for TLS).
-# `version`/`source_object_hash`/`series` are node fields (overridable).
+# Configure version and hash through `pkgs.libsoup_src`.
 let series = recipe.version_prefix 2 in
 
 fun pkgs =>
-  let libsoup_src = fun version =>
-    fun hash =>
-      {
-        name = "libsoup-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/libsoup/%{series version}/libsoup-%{version}.tar.xz",
-        },
-      }
+  let libsoup_src = {
+    version | default = "3.6.6",
+    name = "libsoup-src-%{version}",
+    tag = "Source",
+    object_hash | default = "51ed0ae06f9d5a40f401ff459e2e5f652f9a510b7730e1359ee66d14d4872740",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/libsoup/%{series version}/libsoup-%{version}.tar.xz",
+    },
+  }
   in
 
   let libsoup = {
-    version | default = "3.6.6",
-    source_object_hash
-      | default
-      = "51ed0ae06f9d5a40f401ff459e2e5f652f9a510b7730e1359ee66d14d4872740",
-    name = "libsoup-%{version}",
+    name = "libsoup-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -62,13 +57,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libsoup_src version source_object_hash,
+      source = pkgs.libsoup_src,
     },
   }
   in
 
   {
     include [
+      libsoup_src,
       libsoup,
     ],
   }

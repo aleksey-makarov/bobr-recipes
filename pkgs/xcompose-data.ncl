@@ -1,29 +1,26 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let xcompose_data_src = fun version =>
-    fun hash =>
-      {
-        name = "xcompose-data-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://www.x.org/releases/individual/lib/libX11-%{version}.tar.xz",
-            "https://downloads.yoctoproject.org/mirror/sources/libX11-%{version}.tar.xz",
-          ],
-        },
-      }
+  let xcompose_data_src = {
+    version | default = "1.8.13",
+    name = "xcompose-data-src-%{version}",
+    tag = "Source",
+    object_hash | default = "69606f485c2c07c14ef64f75b7bb326d48587af33795d9ab3e607c0b5f94f11c",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://www.x.org/releases/individual/lib/libX11-%{version}.tar.xz",
+        "https://downloads.yoctoproject.org/mirror/sources/libX11-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   # libxkbcommon uses the traditional X locale database for Compose sequences
   # even in a pure-Wayland process.  Build only that architecture-neutral data
   # from libX11; no X11 client library enters the runtime closure.
   let xcompose_data = {
-    version | default = "1.8.13",
-    source_object_hash | default = "69606f485c2c07c14ef64f75b7bb326d48587af33795d9ab3e607c0b5f94f11c",
-    name = "xcompose-data-%{version}",
+    name = "xcompose-data-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -94,11 +91,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = xcompose_data_src version source_object_hash,
+      source = pkgs.xcompose_data_src,
     },
   }
   in
 
   {
-    include [xcompose_data],
+    include [
+      xcompose_data_src,
+      xcompose_data
+    ],
   }

@@ -1,27 +1,22 @@
 # p11-kit -- PKCS#11 module loader / trust store. gcr (linked by gnome-shell)
 # needs the p11-kit-1 library. The release tarball is Autotools; it finds
 # libtasn1 and libffi with pkg-config (hence pkgconf in the build deps).
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.p11_kit_src`.
 fun pkgs =>
-  let p11_kit_src = fun version =>
-    fun hash =>
-      {
-        name = "p11-kit-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/p11-glue/p11-kit/releases/download/%{version}/p11-kit-%{version}.tar.xz",
-        },
-      }
+  let p11_kit_src = {
+    version | default = "0.26.4",
+    name = "p11-kit-src-%{version}",
+    tag = "Source",
+    object_hash | default = "89c3ffb10e076ee036e14732bf6547a1e1c4fb48699a5dee7ceb5ce4f7c0c462",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/p11-glue/p11-kit/releases/download/%{version}/p11-kit-%{version}.tar.xz",
+    },
+  }
   in
 
   let p11_kit = {
-    version | default = "0.26.4",
-    source_object_hash
-      | default
-      = "89c3ffb10e076ee036e14732bf6547a1e1c4fb48699a5dee7ceb5ce4f7c0c462",
-    name = "p11-kit-%{version}",
+    name = "p11-kit-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -47,13 +42,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = p11_kit_src version source_object_hash,
+      source = pkgs.p11_kit_src,
     },
   }
   in
 
   {
     include [
+      p11_kit_src,
       p11_kit,
     ],
   }

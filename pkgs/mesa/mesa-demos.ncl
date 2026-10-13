@@ -1,18 +1,17 @@
 fun pkgs =>
-  let mesa_demos_src = fun version =>
-    fun hash =>
-      {
-        name = "mesa-demos-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://archive.mesa3d.org/demos/mesa-demos-%{version}.tar.xz",
-            "https://downloads.yoctoproject.org/mirror/sources/mesa-demos-%{version}.tar.xz",
-          ],
-        },
-      }
+  let mesa_demos_src = {
+    version | default = "9.0.0",
+    name = "mesa-demos-src-%{version}",
+    tag = "Source",
+    object_hash | default = "3046a3d26a7b051af7ebdd257a5f23bfeb160cad6ed952329cdff1e9f1ed496b",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://archive.mesa3d.org/demos/mesa-demos-%{version}.tar.xz",
+        "https://downloads.yoctoproject.org/mirror/sources/mesa-demos-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let use_libopengl_patch = {
@@ -29,11 +28,7 @@ fun pkgs =>
   # EGL diagnostics and small Wayland rendering demos. Keep every X11/GLX,
   # GLUT, direct-DRM, and Vulkan demo out of this package.
   let mesa_demos = {
-    version | default = "9.0.0",
-    source_object_hash
-      | default
-      = "3046a3d26a7b051af7ebdd257a5f23bfeb160cad6ed952329cdff1e9f1ed496b",
-    name = "mesa-demos-%{version}",
+    name = "mesa-demos-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -88,7 +83,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = mesa_demos_src version source_object_hash,
+      source = pkgs.mesa_demos_src,
       patch_use_libopengl = use_libopengl_patch,
     },
   }
@@ -96,6 +91,7 @@ fun pkgs =>
 
   {
     include [
+      mesa_demos_src,
       mesa_demos,
     ],
   }

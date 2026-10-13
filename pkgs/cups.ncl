@@ -3,27 +3,22 @@
 # asserts CUPS >= 1.4). We only need the client library and its pkg-config file,
 # so the scheduler-side extras (Avahi mDNS, systemd activation, PAM, the web UI
 # languages) are turned off. TLS is provided by OpenSSL.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.cups_src`.
 fun pkgs =>
-  let cups_src = fun version =>
-    fun hash =>
-      {
-        name = "cups-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/OpenPrinting/cups/releases/download/v%{version}/cups-%{version}-source.tar.gz",
-        },
-      }
+  let cups_src = {
+    version | default = "2.4.19",
+    name = "cups-src-%{version}",
+    tag = "Source",
+    object_hash | default = "820984b12a67f98705785aae2dd1347fe0ac097828001d4583ff64574aed6389",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/OpenPrinting/cups/releases/download/v%{version}/cups-%{version}-source.tar.gz",
+    },
+  }
   in
 
   let cups = {
-    version | default = "2.4.19",
-    source_object_hash
-      | default
-      = "820984b12a67f98705785aae2dd1347fe0ac097828001d4583ff64574aed6389",
-    name = "cups-%{version}",
+    name = "cups-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -59,13 +54,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = cups_src version source_object_hash,
+      source = pkgs.cups_src,
     },
   }
   in
 
   {
     include [
+      cups_src,
       cups,
     ],
   }

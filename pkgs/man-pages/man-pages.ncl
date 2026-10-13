@@ -1,17 +1,16 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let man_pages_src = fun version =>
-    fun hash =>
-      {
-        name = "man-pages-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-%{version}.tar.xz",
-        },
-      }
+  let man_pages_src = {
+    version | default = "6.15",
+    name = "man-pages-src-%{version}",
+    tag = "Source",
+    object_hash | default = "03d8ebf618bd5df57cb4bf355efa3f4cd3a00b771efd623d4fd042b5dceb4465",
+    origin = {
+      tag = "Http",
+      url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-%{version}.tar.xz",
+    },
+  }
   in
 
   let buildscript_man_pages = {
@@ -26,9 +25,7 @@ fun pkgs =>
   in
 
   let man_pages = {
-    version | default = "6.15",
-    source_object_hash | default = "03d8ebf618bd5df57cb4bf355efa3f4cd3a00b771efd623d4fd042b5dceb4465",
-    name = "man-pages-%{version}",
+    name = "man-pages-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -56,13 +53,14 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_man_pages,
-      source = man_pages_src version source_object_hash,
+      source = pkgs.man_pages_src,
     },
   }
   in
 
   {
     include [
+      man_pages_src,
       man_pages,
     ],
   }

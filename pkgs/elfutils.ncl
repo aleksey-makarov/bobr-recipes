@@ -1,23 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let elfutils_src = fun version =>
-    fun hash =>
-      {
-        name = "elfutils-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://sourceware.org/ftp/elfutils/%{version}/elfutils-%{version}.tar.bz2",
-        },
-      }
+  let elfutils_src = {
+    version | default = "0.193",
+    name = "elfutils-src-%{version}",
+    tag = "Source",
+    object_hash | default = "7857f44b624f4d8d421df851aaae7b1402cfe6bcdd2d8049f15fc07d3dde7635",
+    origin = {
+      tag = "Http",
+      url = "https://sourceware.org/ftp/elfutils/%{version}/elfutils-%{version}.tar.bz2",
+    },
+  }
   in
 
   let elfutils = {
-    version | default = "0.193",
-    source_object_hash | default = "7857f44b624f4d8d421df851aaae7b1402cfe6bcdd2d8049f15fc07d3dde7635",
-    name = "elfutils-%{version}",
+    name = "elfutils-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
@@ -43,13 +40,14 @@ fun pkgs =>
             pkgs.pkgconf_gen1,
             pkgs.zlib,
           ],
-      source = elfutils_src version source_object_hash,
+      source = pkgs.elfutils_src,
     },
   }
   in
 
   {
     include [
+      elfutils_src,
       elfutils,
     ],
   }

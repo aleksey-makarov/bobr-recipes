@@ -7,29 +7,24 @@ let recipe = import "../recipe-lib.ncl" in
 # vala bindings, docs and tests are all off -- dropping those dependencies. TLS
 # goes through GIO (glib-networking) at runtime, and NSS/krb5/phonenumber are
 # auto-detected (absent, hence inert), so no heavy crypto stack is pulled in.
-# `version`/`source_object_hash`/`series` are node fields (overridable).
+# Configure version and hash through `pkgs.evolution_data_server_src`.
 let series = recipe.version_prefix 2 in
 
 fun pkgs =>
-  let eds_src = fun version =>
-    fun hash =>
-      {
-        name = "evolution-data-server-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/evolution-data-server/%{series version}/evolution-data-server-%{version}.tar.xz",
-        },
-      }
+  let evolution_data_server_src = {
+    version | default = "3.56.2",
+    name = "evolution-data-server-src-%{version}",
+    tag = "Source",
+    object_hash | default = "df4ec29950f29a76eac6fbe0f814c48d2cef7d3fdb905002a4a883dd761ce93c",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/evolution-data-server/%{series version}/evolution-data-server-%{version}.tar.xz",
+    },
+  }
   in
 
   let evolution_data_server = {
-    version | default = "3.56.2",
-    source_object_hash
-      | default
-      = "df4ec29950f29a76eac6fbe0f814c48d2cef7d3fdb905002a4a883dd761ce93c",
-    name = "evolution-data-server-%{version}",
+    name = "evolution-data-server-%{inputs.source.version}",
     tag = "Cmake",
     deps = {
       build = [
@@ -109,13 +104,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = eds_src version source_object_hash,
+      source = pkgs.evolution_data_server_src,
     },
   }
   in
 
   {
     include [
+      evolution_data_server_src,
       evolution_data_server,
     ],
   }

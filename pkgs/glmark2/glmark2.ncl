@@ -1,15 +1,14 @@
 fun pkgs =>
-  let glmark2_src = fun version =>
-    fun hash =>
-      {
-        name = "glmark2-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/glmark2/glmark2/archive/refs/tags/%{version}.tar.gz",
-        },
-      }
+  let glmark2_src = {
+    version | default = "2023.01",
+    name = "glmark2-src-%{version}",
+    tag = "Source",
+    object_hash | default = "8fece3fc323b643644a525be163dc4931a4189971eda1de8ad4c1712c5db3d67",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/glmark2/glmark2/archive/refs/tags/%{version}.tar.gz",
+    },
+  }
   in
 
   let data_path_environment_patch = {
@@ -25,11 +24,7 @@ fun pkgs =>
   in
 
   let glmark2 = {
-    version | default = "2023.01",
-    source_object_hash
-      | default
-      = "8fece3fc323b643644a525be163dc4931a4189971eda1de8ad4c1712c5db3d67",
-    name = "glmark2-%{version}",
+    name = "glmark2-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -74,7 +69,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = glmark2_src version source_object_hash,
+      source = pkgs.glmark2_src,
       patch_data_path_environment = data_path_environment_patch,
     },
   }
@@ -82,6 +77,7 @@ fun pkgs =>
 
   {
     include [
+      glmark2_src,
       glmark2,
     ],
   }

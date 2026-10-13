@@ -7,29 +7,25 @@ let recipe = import "../recipe-lib.ncl" in
 #
 # Optional bits are off: readline (console line-editing), the sysprof profiler,
 # installed tests, and the gtk/dbus test suites -- gnome-shell needs libgjs, not
-# those. `version`/`source_object_hash` are node fields (overridable).
+# those.
+# Configure version and hash through `pkgs.gjs_src`.
 let series = recipe.version_prefix 2 in
 
 fun pkgs =>
-  let gjs_src = fun version =>
-    fun hash =>
-      {
-        name = "gjs-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gjs/%{series version}/gjs-%{version}.tar.xz",
-        },
-      }
+  let gjs_src = {
+    version | default = "1.88.1",
+    name = "gjs-src-%{version}",
+    tag = "Source",
+    object_hash | default = "767bab80e665d672cb00563c25f0b392a9ec8c2996ed1d4454c698b4c2f0a3d9",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gjs/%{series version}/gjs-%{version}.tar.xz",
+    },
+  }
   in
 
   let gjs = {
-    version | default = "1.88.1",
-    source_object_hash
-      | default
-      = "767bab80e665d672cb00563c25f0b392a9ec8c2996ed1d4454c698b4c2f0a3d9",
-    name = "gjs-%{version}",
+    name = "gjs-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -62,13 +58,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = gjs_src version source_object_hash,
+      source = pkgs.gjs_src,
     },
   }
   in
 
   {
     include [
+      gjs_src,
       gjs,
     ],
   }

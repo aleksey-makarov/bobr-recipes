@@ -5,29 +5,24 @@ let recipe = import "../recipe-lib.ncl" in
 # The Fedora and Kerberos providers are disabled, so the conditional GCR,
 # krb5, and keyutils dependencies are not part of this build.
 # Documentation, man pages and the Vala binding are off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.gnome_online_accounts_src`.
 fun pkgs =>
   let series = recipe.version_prefix 2 in
 
-  let goa_src = fun version =>
-    fun hash =>
-      {
-        name = "gnome-online-accounts-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gnome-online-accounts/%{series version}/gnome-online-accounts-%{version}.tar.xz",
-        },
-      }
+  let gnome_online_accounts_src = {
+    version | default = "3.58.1",
+    name = "gnome-online-accounts-src-%{version}",
+    tag = "Source",
+    object_hash | default = "9ec1900cc51409c2067c07c828c10be06fe3bf68d2999bb72d7d5ed325ed9bbc",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gnome-online-accounts/%{series version}/gnome-online-accounts-%{version}.tar.xz",
+    },
+  }
   in
 
   let gnome_online_accounts = {
-    version | default = "3.58.1",
-    source_object_hash
-      | default
-      = "9ec1900cc51409c2067c07c828c10be06fe3bf68d2999bb72d7d5ed325ed9bbc",
-    name = "gnome-online-accounts-%{version}",
+    name = "gnome-online-accounts-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -69,13 +64,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = goa_src version source_object_hash,
+      source = pkgs.gnome_online_accounts_src,
     },
   }
   in
 
   {
     include [
+      gnome_online_accounts_src,
       gnome_online_accounts,
     ],
   }

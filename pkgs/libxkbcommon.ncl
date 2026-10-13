@@ -1,24 +1,21 @@
 fun pkgs =>
-  let libxkbcommon_src = fun version =>
-    fun hash =>
-      {
-        name = "libxkbcommon-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/xkbcommon/libxkbcommon/archive/refs/tags/xkbcommon-%{version}.tar.gz",
-        },
-      }
+  let libxkbcommon_src = {
+    version | default = "1.13.2",
+    name = "libxkbcommon-src-%{version}",
+    tag = "Source",
+    object_hash | default = "acc4d5f7c3cbba5f9f8d08d8bdbeede84ecede46792f47929aa9321873385528",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/xkbcommon/libxkbcommon/archive/refs/tags/xkbcommon-%{version}.tar.gz",
+    },
+  }
   in
 
   # Keymap compiler used by the compositor. x11/wayland integrations are off;
   # keymap data comes from xkeyboard-config at the default config root. The
   # xkbregistry library (libxml2-backed) is on -- mutter links it unconditionally.
   let libxkbcommon = {
-    version | default = "1.13.2",
-    source_object_hash | default = "acc4d5f7c3cbba5f9f8d08d8bdbeede84ecede46792f47929aa9321873385528",
-    name = "libxkbcommon-%{version}",
+    name = "libxkbcommon-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -49,13 +46,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libxkbcommon_src version source_object_hash,
+      source = pkgs.libxkbcommon_src,
     },
   }
   in
 
   {
     include [
+      libxkbcommon_src,
       libxkbcommon,
     ],
   }

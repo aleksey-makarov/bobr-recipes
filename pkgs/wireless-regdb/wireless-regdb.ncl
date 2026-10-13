@@ -1,20 +1,19 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let wireless_regdb_src = fun version =>
-    fun hash =>
-      {
-        name = "wireless-regdb-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://mirrors.edge.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-%{version}.tar.xz",
-            "https://mirrors.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-%{version}.tar.xz",
-          ],
-        },
-      }
+  let wireless_regdb_src = {
+    version | default = "2026.05.30",
+    name = "wireless-regdb-src-%{version}",
+    tag = "Source",
+    object_hash | default = "8a27bfc081bafed8c24dd70fab0d96f098e5a0bfcd08d3da672595f225ab8993",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://mirrors.edge.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-%{version}.tar.xz",
+        "https://mirrors.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let buildscript_wireless_regdb = {
@@ -35,11 +34,7 @@ fun pkgs =>
   # would come up with its Wi-Fi needlessly crippled. Pure data -- versions are
   # release dates, and a new one means the rules changed somewhere.
   let wireless_regdb = {
-    version | default = "2026.05.30",
-    source_object_hash
-      | default
-      = "8a27bfc081bafed8c24dd70fab0d96f098e5a0bfcd08d3da672595f225ab8993",
-    name = "wireless-regdb-%{version}",
+    name = "wireless-regdb-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -66,13 +61,14 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_wireless_regdb,
-      source = wireless_regdb_src version source_object_hash,
+      source = pkgs.wireless_regdb_src,
     },
   }
   in
 
   {
     include [
+      wireless_regdb_src,
       wireless_regdb,
     ],
   }

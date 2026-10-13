@@ -6,27 +6,22 @@
 # PAM, systemd, JSON audit, GPGME, libarchive and the Python bindings are all
 # off, so we avoid pulling in lmdb, jansson, openldap, etc. Samba's internal
 # libraries (talloc/tdb/tevent/ldb and bundled Heimdal) are built bundled.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.samba_src`.
 fun pkgs =>
-  let samba_src = fun version =>
-    fun hash =>
-      {
-        name = "samba-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.samba.org/pub/samba/stable/samba-%{version}.tar.gz",
-        },
-      }
+  let samba_src = {
+    version | default = "4.24.4",
+    name = "samba-src-%{version}",
+    tag = "Source",
+    object_hash | default = "df2c51ab4361ec626ab9988e5946efcca8465bc7afae834291d5558468265ff8",
+    origin = {
+      tag = "Http",
+      url = "https://download.samba.org/pub/samba/stable/samba-%{version}.tar.gz",
+    },
+  }
   in
 
   let samba = {
-    version | default = "4.24.4",
-    source_object_hash
-      | default
-      = "df2c51ab4361ec626ab9988e5946efcca8465bc7afae834291d5558468265ff8",
-    name = "samba-%{version}",
+    name = "samba-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -115,9 +110,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = samba_src version source_object_hash,
+      source = pkgs.samba_src,
     },
   }
   in
 
-  { include [samba] }
+  {
+    include [
+      samba_src,
+      samba
+    ]
+  }

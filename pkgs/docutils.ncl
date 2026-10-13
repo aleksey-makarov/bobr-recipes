@@ -2,25 +2,22 @@
 # generates man pages, e.g. for mutter), so it lives in the root as an ordinary
 # recipe rather than under python/ with the library modules; it still builds via
 # the PythonModule tag (flit_core backend). See python/README.txt.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.docutils_src`.
 fun pkgs =>
-  let docutils_src = fun version =>
-    fun hash =>
-      {
-        name = "docutils-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://files.pythonhosted.org/packages/source/d/docutils/docutils-%{version}.tar.gz",
-        },
-      }
+  let docutils_src = {
+    version | default = "0.21.2",
+    name = "docutils-src-%{version}",
+    tag = "Source",
+    object_hash | default = "3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f",
+    origin = {
+      tag = "Http",
+      url = "https://files.pythonhosted.org/packages/source/d/docutils/docutils-%{version}.tar.gz",
+    },
+  }
   in
 
   let docutils = {
-    version | default = "0.21.2",
-    source_object_hash | default = "3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f",
-    name = "docutils-%{version}",
+    name = "docutils-%{inputs.source.version}",
     tag = "PythonModule",
     deps = {
       build = [
@@ -32,9 +29,14 @@ fun pkgs =>
     },
     config = {},
     inputs = {
-      source = docutils_src version source_object_hash,
+      source = pkgs.docutils_src,
     },
   }
   in
 
-  { include [docutils] }
+  {
+    include [
+      docutils_src,
+      docutils
+    ]
+  }

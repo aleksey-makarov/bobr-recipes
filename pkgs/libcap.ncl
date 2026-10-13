@@ -1,23 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let libcap_src = fun version =>
-    fun hash =>
-      {
-        name = "libcap-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-%{version}.tar.xz",
-        },
-      }
+  let libcap_src = {
+    version | default = "2.78",
+    name = "libcap-src-%{version}",
+    tag = "Source",
+    object_hash | default = "0d621e562fd932ccf67b9660fb018e468a683d7b827541df27813228c996bb11",
+    origin = {
+      tag = "Http",
+      url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-%{version}.tar.xz",
+    },
+  }
   in
 
   let libcap = {
-    version | default = "2.78",
-    source_object_hash | default = "0d621e562fd932ccf67b9660fb018e468a683d7b827541df27813228c996bb11",
-    name = "libcap-%{version}",
+    name = "libcap-%{inputs.source.version}",
     tag = "Makefile",
     deps = {
       build = [],
@@ -52,7 +49,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = libcap_src version source_object_hash,
+      source = pkgs.libcap_src,
     },
   }
   in
@@ -71,6 +68,7 @@ fun pkgs =>
 
   {
     include [
+      libcap_src,
       libcap,
       libcap_libs,
     ],

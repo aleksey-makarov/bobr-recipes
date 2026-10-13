@@ -5,31 +5,26 @@
 #
 # Plain autotools, but the sources live in the tarball's `source/` subdir, and
 # the release naming needs two forms of the version: `77-1` in the git tag and
-# `77_1` in the filename. `version`/`source_object_hash` are node fields
-# (overridable), as in linux.ncl.
+# `77_1` in the filename.
+# Configure version and hash through `pkgs.icu_src`.
 let dash = fun v => std.string.replace "." "-" v in
 let under = fun v => std.string.replace "." "_" v in
 
 fun pkgs =>
-  let icu_src = fun version =>
-    fun hash =>
-      {
-        name = "icu-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/unicode-org/icu/releases/download/release-%{dash version}/icu4c-%{under version}-src.tgz",
-        },
-      }
+  let icu_src = {
+    version | default = "77.1",
+    name = "icu-src-%{version}",
+    tag = "Source",
+    object_hash | default = "588e431f77327c39031ffbb8843c0e3bc122c211374485fa87dc5f3faff24061",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/unicode-org/icu/releases/download/release-%{dash version}/icu4c-%{under version}-src.tgz",
+    },
+  }
   in
 
   let icu = {
-    version | default = "77.1",
-    source_object_hash
-      | default
-      = "588e431f77327c39031ffbb8843c0e3bc122c211374485fa87dc5f3faff24061",
-    name = "icu-%{version}",
+    name = "icu-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -53,13 +48,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = icu_src version source_object_hash,
+      source = pkgs.icu_src,
     },
   }
   in
 
   {
     include [
+      icu_src,
       icu,
     ],
   }

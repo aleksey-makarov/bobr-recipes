@@ -3,29 +3,24 @@ let recipe = import "../recipe-lib.ncl" in
 # build on nettle + GMP, using the system libtasn1 and libunistring rather than
 # the bundled copies, with p11-kit for PKCS#11. IDN (libidn2), the documentation,
 # the test suite and the Guile bindings are off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.gnutls_src`.
 fun pkgs =>
   let series = recipe.version_prefix 2 in
 
-  let gnutls_src = fun version =>
-    fun hash =>
-      {
-        name = "gnutls-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://www.gnupg.org/ftp/gcrypt/gnutls/v%{series version}/gnutls-%{version}.tar.xz",
-        },
-      }
+  let gnutls_src = {
+    version | default = "3.8.13",
+    name = "gnutls-src-%{version}",
+    tag = "Source",
+    object_hash | default = "ffed8ec1bf09c2426d4f14aae377de4753b53e537d685e604e99a8b16ca9c97e",
+    origin = {
+      tag = "Http",
+      url = "https://www.gnupg.org/ftp/gcrypt/gnutls/v%{series version}/gnutls-%{version}.tar.xz",
+    },
+  }
   in
 
   let gnutls = {
-    version | default = "3.8.13",
-    source_object_hash
-      | default
-      = "ffed8ec1bf09c2426d4f14aae377de4753b53e537d685e604e99a8b16ca9c97e",
-    name = "gnutls-%{version}",
+    name = "gnutls-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -61,9 +56,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = gnutls_src version source_object_hash,
+      source = pkgs.gnutls_src,
     },
   }
   in
 
-  { include [gnutls] }
+  {
+    include [
+      gnutls_src,
+      gnutls
+    ]
+  }

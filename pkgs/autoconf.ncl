@@ -1,20 +1,19 @@
 let br = import "../build-rootfs.ncl" in
 
 fun pkgs =>
-  let autoconf_src = fun version =>
-    fun hash =>
-      {
-        name = "autoconf-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz",
-            "https://mirrors.kernel.org/gnu/autoconf/autoconf-%{version}.tar.xz",
-          ],
-        },
-      }
+  let autoconf_src = {
+    version | default = "2.73",
+    name = "autoconf-src-%{version}",
+    tag = "Source",
+    object_hash | default = "9fd672b1c8425fac2fa67fa0477b990987268b90ff36d5f016dae57be0d6b52e",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/autoconf/autoconf-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   # Deps-derived build rootfs, replacing the curated system_rootfs_2: the native
@@ -30,9 +29,7 @@ fun pkgs =>
   in
 
   let autoconf = {
-    version | default = "2.73",
-    source_object_hash | default = "9fd672b1c8425fac2fa67fa0477b990987268b90ff36d5f016dae57be0d6b52e",
-    name = "autoconf-%{version}",
+    name = "autoconf-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     deps = {
       build = [],
@@ -47,13 +44,14 @@ fun pkgs =>
     config = {},
     inputs = {
       _rootfs = autoconf_build_rootfs,
-      source = autoconf_src version source_object_hash,
+      source = pkgs.autoconf_src,
     },
   }
   in
 
   {
     include [
+      autoconf_src,
       autoconf,
     ],
   }

@@ -1,24 +1,21 @@
 fun pkgs =>
-  let grub_src = fun version =>
-    fun hash =>
-      {
-        name = "grub-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/grub/grub-%{version}.tar.xz",
-            "https://mirrors.kernel.org/gnu/grub/grub-%{version}.tar.xz",
-          ],
-        },
-      }
+  let grub_src = {
+    version | default = "2.12",
+    name = "grub-src-%{version}",
+    tag = "Source",
+    object_hash | default = "f3c97391f7c4eaa677a78e090c7e97e6dc47b16f655f04683ebd37bef7fe0faa",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/grub/grub-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/grub/grub-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let grub = {
-    version | default = "2.12",
-    source_object_hash | default = "f3c97391f7c4eaa677a78e090c7e97e6dc47b16f655f04683ebd37bef7fe0faa",
-    name = "grub-%{version}",
+    name = "grub-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -68,13 +65,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = grub_src version source_object_hash,
+      source = pkgs.grub_src,
     },
   }
   in
 
   {
     include [
+      grub_src,
       grub,
     ],
   }

@@ -1,24 +1,21 @@
 fun pkgs =>
-  let qemu_src = fun version =>
-    fun hash =>
-      {
-        name = "qemu-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.qemu.org/qemu-%{version}.tar.xz",
-        },
-      }
+  let qemu_src = {
+    version | default = "11.0.3",
+    name = "qemu-src-%{version}",
+    tag = "Source",
+    object_hash | default = "da5fcffc32762820568b828ed430a728864d34d50b6d2f30358597760cbb0523",
+    origin = {
+      tag = "Http",
+      url = "https://download.qemu.org/qemu-%{version}.tar.xz",
+    },
+  }
   in
 
   # Host-side system emulator for the x86-64 development images. This is a
   # deliberately focused KVM build: no TCG fallback and no remote/UI stacks
   # other than SDL-on-Wayland with virglrenderer.
   let qemu = {
-    version | default = "11.0.3",
-    source_object_hash | default = "da5fcffc32762820568b828ed430a728864d34d50b6d2f30358597760cbb0523",
-    name = "qemu-%{version}",
+    name = "qemu-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -119,11 +116,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = qemu_src version source_object_hash,
+      source = pkgs.qemu_src,
     },
   }
   in
 
   {
-    include [qemu],
+    include [
+      qemu_src,
+      qemu
+    ],
   }

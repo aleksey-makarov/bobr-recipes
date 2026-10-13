@@ -4,29 +4,24 @@ let recipe = import "../recipe-lib.ncl" in
 # pins the 44.x stable series. Meson build; GTK4 library only (the legacy GTK3
 # libgnome-desktop-3.0 and its X11/xrandr deps are off), docs/tests off, udev and
 # systemd integration off. The thumbnail sandbox uses libseccomp.
-# `version`/`source_object_hash`/`series` are node fields (overridable).
+# Configure version and hash through `pkgs.gnome_desktop_src`.
 let series = recipe.version_prefix 1 in
 
 fun pkgs =>
-  let gnome_desktop_src = fun version =>
-    fun hash =>
-      {
-        name = "gnome-desktop-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gnome-desktop/%{series version}/gnome-desktop-%{version}.tar.xz",
-        },
-      }
+  let gnome_desktop_src = {
+    version | default = "44.5",
+    name = "gnome-desktop-src-%{version}",
+    tag = "Source",
+    object_hash | default = "20e0995a6e3a03e8c1026c5a27bc3f45e69ffcc392ad743dcab6107a541d232f",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gnome-desktop/%{series version}/gnome-desktop-%{version}.tar.xz",
+    },
+  }
   in
 
   let gnome_desktop = {
-    version | default = "44.5",
-    source_object_hash
-      | default
-      = "20e0995a6e3a03e8c1026c5a27bc3f45e69ffcc392ad743dcab6107a541d232f",
-    name = "gnome-desktop-%{version}",
+    name = "gnome-desktop-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -68,13 +63,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = gnome_desktop_src version source_object_hash,
+      source = pkgs.gnome_desktop_src,
     },
   }
   in
 
   {
     include [
+      gnome_desktop_src,
       gnome_desktop,
     ],
   }

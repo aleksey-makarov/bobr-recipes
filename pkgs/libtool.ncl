@@ -1,24 +1,21 @@
 fun pkgs =>
-  let libtool_src = fun version =>
-    fun hash =>
-      {
-        name = "libtool-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz",
-            "https://mirrors.kernel.org/gnu/libtool/libtool-%{version}.tar.xz",
-          ],
-        },
-      }
+  let libtool_src = {
+    version | default = "2.5.4",
+    name = "libtool-src-%{version}",
+    tag = "Source",
+    object_hash | default = "f81f5860666b0bc7d84baddefa60d1cb9fa6fceb2398cc3baca6afaa60266675",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/libtool/libtool-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let libtool = {
-    version | default = "2.5.4",
-    source_object_hash | default = "f81f5860666b0bc7d84baddefa60d1cb9fa6fceb2398cc3baca6afaa60266675",
-    name = "libtool-%{version}",
+    name = "libtool-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -44,13 +41,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = libtool_src version source_object_hash,
+      source = pkgs.libtool_src,
     },
   }
   in
 
   {
     include [
+      libtool_src,
       libtool,
     ],
   }

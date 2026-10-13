@@ -1,18 +1,17 @@
 # GNU Midnight Commander -- text-mode file manager. Autotools; S-Lang screen
 # backend, gpm and X11 off (no console-mouse / X deps). Needs glib and S-Lang.
-# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
+# Configure version and hash through `pkgs.mc_src`.
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "mc-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "http://ftp.midnight-commander.org/mc-%{version}.tar.xz",
-        },
-      }
+  let mc_src = {
+    version | default = "4.8.33",
+    name = "mc-src-%{version}",
+    tag = "Source",
+    object_hash | default = "cae149d42f844e5185d8c81d7db3913a8fa214c65f852200a9d896b468af164c",
+    origin = {
+      tag = "Http",
+      url = "http://ftp.midnight-commander.org/mc-%{version}.tar.xz",
+    },
+  }
   in
 
   let runtime_paths_patch = {
@@ -38,9 +37,7 @@ fun pkgs =>
   in
 
   let mc = {
-    version | default = "4.8.33",
-    source_object_hash | default = "cae149d42f844e5185d8c81d7db3913a8fa214c65f852200a9d896b468af164c",
-    name = "mc-%{version}",
+    name = "mc-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -76,7 +73,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.mc_src,
       patch_runtime_paths = runtime_paths_patch,
       defaults = mc_defaults,
     },
@@ -85,6 +82,7 @@ fun pkgs =>
 
   {
     include [
+      mc_src,
       mc,
     ],
   }

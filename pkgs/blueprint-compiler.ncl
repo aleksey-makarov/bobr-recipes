@@ -4,27 +4,22 @@
 # it is installed to /usr and invoked via python3 inside the build sandbox.
 # Upstream has no release tarballs on download.gnome.org, so the source is the
 # GitLab tag archive.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.blueprint_compiler_src`.
 fun pkgs =>
-  let bp_src = fun version =>
-    fun hash =>
-      {
-        name = "blueprint-compiler-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://gitlab.gnome.org/GNOME/blueprint-compiler/-/archive/v%{version}/blueprint-compiler-v%{version}.tar.gz",
-        },
-      }
+  let blueprint_compiler_src = {
+    version | default = "0.22.2",
+    name = "blueprint-compiler-src-%{version}",
+    tag = "Source",
+    object_hash | default = "ba4dddeb22a1929ed5987e74cb69c592e22bc74f0c04cfdb9028b907cf688af6",
+    origin = {
+      tag = "Http",
+      url = "https://gitlab.gnome.org/GNOME/blueprint-compiler/-/archive/v%{version}/blueprint-compiler-v%{version}.tar.gz",
+    },
+  }
   in
 
   let blueprint_compiler = {
-    version | default = "0.22.2",
-    source_object_hash
-      | default
-      = "ba4dddeb22a1929ed5987e74cb69c592e22bc74f0c04cfdb9028b907cf688af6",
-    name = "blueprint-compiler-v%{version}",
+    name = "blueprint-compiler-v%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -51,13 +46,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = bp_src version source_object_hash,
+      source = pkgs.blueprint_compiler_src,
     },
   }
   in
 
   {
     include [
+      blueprint_compiler_src,
       blueprint_compiler,
     ],
   }

@@ -8,27 +8,22 @@
 # ModemManager (wwan), CUPS, smartcard, USB protection, ALSA, Xwayland/X11 -- are
 # all off. The remaining plugins use components we already build (colord, gudev,
 # upower, geoclue, libgweather, pulseaudio, polkit, libcanberra, libnotify).
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.gnome_settings_daemon_src`.
 fun pkgs =>
-  let gsd_src = fun version =>
-    fun hash =>
-      {
-        name = "gnome-settings-daemon-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gnome-settings-daemon/50/gnome-settings-daemon-%{version}.tar.xz",
-        },
-      }
+  let gnome_settings_daemon_src = {
+    version | default = "50.1",
+    name = "gnome-settings-daemon-src-%{version}",
+    tag = "Source",
+    object_hash | default = "dd2c9730914f0ececa0229dd8a8c2940a57ddeb0802434558d4b164d79cfe05c",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gnome-settings-daemon/50/gnome-settings-daemon-%{version}.tar.xz",
+    },
+  }
   in
 
   let gnome_settings_daemon = {
-    version | default = "50.1",
-    source_object_hash
-      | default
-      = "dd2c9730914f0ececa0229dd8a8c2940a57ddeb0802434558d4b164d79cfe05c",
-    name = "gnome-settings-daemon-%{version}",
+    name = "gnome-settings-daemon-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -88,13 +83,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = gsd_src version source_object_hash,
+      source = pkgs.gnome_settings_daemon_src,
     },
   }
   in
 
   {
     include [
+      gnome_settings_daemon_src,
       gnome_settings_daemon,
     ],
   }

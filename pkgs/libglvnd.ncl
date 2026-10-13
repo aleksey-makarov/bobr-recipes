@@ -1,25 +1,20 @@
 fun pkgs =>
-  let libglvnd_src = fun version =>
-    fun hash =>
-      {
-        name = "libglvnd-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/NVIDIA/libglvnd/archive/refs/tags/v%{version}.tar.gz",
-        },
-      }
+  let libglvnd_src = {
+    version | default = "1.7.0",
+    name = "libglvnd-src-%{version}",
+    tag = "Source",
+    object_hash | default = "073e7292788d4d3eeb45ea6c7bdcce9bfdb3b3eef8d7dbd47f2f30dce046ef98",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/NVIDIA/libglvnd/archive/refs/tags/v%{version}.tar.gz",
+    },
+  }
   in
 
   # Vendor-neutral EGL/OpenGL dispatch for the host graphics stack. X11 and
   # GLX are deliberately disabled: HostBundle graphics is Wayland-only.
   let libglvnd = {
-    version | default = "1.7.0",
-    source_object_hash
-      | default
-      = "073e7292788d4d3eeb45ea6c7bdcce9bfdb3b3eef8d7dbd47f2f30dce046ef98",
-    name = "libglvnd-%{version}",
+    name = "libglvnd-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [],
@@ -56,13 +51,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = libglvnd_src version source_object_hash,
+      source = pkgs.libglvnd_src,
     },
   }
   in
 
   {
     include [
+      libglvnd_src,
       libglvnd,
     ],
   }

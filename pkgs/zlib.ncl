@@ -1,23 +1,20 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let zlib_src = fun version =>
-    fun hash =>
-      {
-        name = "zlib-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://zlib.net/fossils/zlib-%{version}.tar.gz",
-        },
-      }
+  let zlib_src = {
+    version | default = "1.3.1",
+    name = "zlib-src-%{version}",
+    tag = "Source",
+    object_hash | default = "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23",
+    origin = {
+      tag = "Http",
+      url = "https://zlib.net/fossils/zlib-%{version}.tar.gz",
+    },
+  }
   in
 
   let zlib = {
-    version | default = "1.3.1",
-    source_object_hash | default = "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23",
-    name = "zlib-%{version}",
+    name = "zlib-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     deps = {
       build = [],
@@ -43,13 +40,14 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "zlib-build-rootfs" [],
-      source = zlib_src version source_object_hash,
+      source = pkgs.zlib_src,
     },
   }
   in
 
   {
     include [
+      zlib_src,
       zlib,
     ],
   }

@@ -8,29 +8,24 @@ let recipe = import "../recipe-lib.ncl" in
 # colord, gcr-4, polkit, gsound, accountsservice, upower, pulseaudio, gnome-
 # desktop-4/gnome-bg-4, gnome-settings-daemon and libadwaita. IBus support is on
 # (the Keyboard panel). Documentation, tests, Snap and malcontent are off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.gnome_control_center_src`.
 fun pkgs =>
   let series = recipe.version_prefix 1 in
 
-  let cc_src = fun version =>
-    fun hash =>
-      {
-        name = "gnome-control-center-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gnome-control-center/%{series version}/gnome-control-center-%{version}.tar.xz",
-        },
-      }
+  let gnome_control_center_src = {
+    version | default = "50.3",
+    name = "gnome-control-center-src-%{version}",
+    tag = "Source",
+    object_hash | default = "06eebb0fd3056c4d8d78bbd3754c96108f381d70b760da423c5024946944287c",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gnome-control-center/%{series version}/gnome-control-center-%{version}.tar.xz",
+    },
+  }
   in
 
   let gnome_control_center = {
-    version | default = "50.3",
-    source_object_hash
-      | default
-      = "06eebb0fd3056c4d8d78bbd3754c96108f381d70b760da423c5024946944287c",
-    name = "gnome-control-center-%{version}",
+    name = "gnome-control-center-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -125,13 +120,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = cc_src version source_object_hash,
+      source = pkgs.gnome_control_center_src,
     },
   }
   in
 
   {
     include [
+      gnome_control_center_src,
       gnome_control_center,
     ],
   }

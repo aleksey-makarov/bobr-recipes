@@ -6,25 +6,22 @@
 # also prepends an `Include /etc/ssh/sshd_config.d/*.conf` line to the shipped
 # sshd_config so the image can drop in policy (system-runtime-files provides
 # 10-stateless.conf); prepended because sshd uses the first value per keyword.
-# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
+# Configure version and hash through `pkgs.openssh_src`.
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "openssh-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz",
-        },
-      }
+  let openssh_src = {
+    version | default = "10.4p1",
+    name = "openssh-src-%{version}",
+    tag = "Source",
+    object_hash | default = "ef6026dd2aea8d56059638d5d3262902c892ceba9f88395835e0d06d3fb63238",
+    origin = {
+      tag = "Http",
+      url = "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz",
+    },
+  }
   in
 
   let openssh = {
-    version | default = "10.4p1",
-    source_object_hash | default = "ef6026dd2aea8d56059638d5d3262902c892ceba9f88395835e0d06d3fb63238",
-    name = "openssh-%{version}",
+    name = "openssh-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -71,13 +68,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.openssh_src,
     },
   }
   in
 
   {
     include [
+      openssh_src,
       openssh,
     ],
   }

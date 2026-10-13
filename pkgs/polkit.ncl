@@ -5,27 +5,22 @@
 # PAM. Docs/tests/examples/man are off. Upstream ships no release tarball, so we
 # take the static GitHub archive; the meson project version is hardcoded, so the
 # archive (no git metadata) builds fine.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.polkit_src`.
 fun pkgs =>
-  let polkit_src = fun version =>
-    fun hash =>
-      {
-        name = "polkit-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/polkit-org/polkit/archive/refs/tags/%{version}.tar.gz",
-        },
-      }
+  let polkit_src = {
+    version | default = "126",
+    name = "polkit-src-%{version}",
+    tag = "Source",
+    object_hash | default = "2814a7281989f6baa9e57bd33bbc5e148827e2721ccef22aaf28ab2b376068e8",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/polkit-org/polkit/archive/refs/tags/%{version}.tar.gz",
+    },
+  }
   in
 
   let polkit = {
-    version | default = "126",
-    source_object_hash
-      | default
-      = "2814a7281989f6baa9e57bd33bbc5e148827e2721ccef22aaf28ab2b376068e8",
-    name = "polkit-%{version}",
+    name = "polkit-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -63,13 +58,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = polkit_src version source_object_hash,
+      source = pkgs.polkit_src,
     },
   }
   in
 
   {
     include [
+      polkit_src,
       polkit,
     ],
   }

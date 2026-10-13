@@ -5,27 +5,22 @@
 # iOS-battery backend off, docs/man off, Linux (udev/logind) OS backend.
 # Fetch the upstream release-tag archive from freedesktop.org GitLab; Debian's
 # active pool removes superseded versions and is not a persistent source URL.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.upower_src`.
 fun pkgs =>
-  let upower_src = fun version =>
-    fun hash =>
-      {
-        name = "upower-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://gitlab.freedesktop.org/upower/upower/-/archive/v%{version}/upower-v%{version}.tar.bz2",
-        },
-      }
+  let upower_src = {
+    version | default = "1.91.5",
+    name = "upower-src-%{version}",
+    tag = "Source",
+    object_hash | default = "c465a1c7fc05d00ac2bc7321c19b9b7e479410d8392bd7eb3e714275729629fd",
+    origin = {
+      tag = "Http",
+      url = "https://gitlab.freedesktop.org/upower/upower/-/archive/v%{version}/upower-v%{version}.tar.bz2",
+    },
+  }
   in
 
   let upower = {
-    version | default = "1.91.5",
-    source_object_hash
-      | default
-      = "c465a1c7fc05d00ac2bc7321c19b9b7e479410d8392bd7eb3e714275729629fd",
-    name = "upower-%{version}",
+    name = "upower-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -57,13 +52,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = upower_src version source_object_hash,
+      source = pkgs.upower_src,
     },
   }
   in
 
   {
     include [
+      upower_src,
       upower,
     ],
   }

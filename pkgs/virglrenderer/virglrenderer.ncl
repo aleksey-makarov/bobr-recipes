@@ -1,15 +1,14 @@
 fun pkgs =>
-  let virglrenderer_src = fun version =>
-    fun hash =>
-      {
-        name = "virglrenderer-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://gitlab.freedesktop.org/virgl/virglrenderer/-/archive/%{version}/virglrenderer-%{version}.tar.gz",
-        },
-      }
+  let virglrenderer_src = {
+    version | default = "1.3.0",
+    name = "virglrenderer-src-%{version}",
+    tag = "Source",
+    object_hash | default = "065bc56e89e6f631f96101cd62eba0748e48eb888b434edc86e89d05395e76f3",
+    origin = {
+      tag = "Http",
+      url = "https://gitlab.freedesktop.org/virgl/virglrenderer/-/archive/%{version}/virglrenderer-%{version}.tar.gz",
+    },
+  }
   in
 
   let render_server_path_patch = {
@@ -25,9 +24,7 @@ fun pkgs =>
   in
 
   let virglrenderer = {
-    version | default = "1.3.0",
-    source_object_hash | default = "065bc56e89e6f631f96101cd62eba0748e48eb888b434edc86e89d05395e76f3",
-    name = "virglrenderer-%{version}",
+    name = "virglrenderer-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -68,7 +65,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = virglrenderer_src version source_object_hash,
+      source = pkgs.virglrenderer_src,
       patch_render_server_path = render_server_path_patch,
     },
   }
@@ -76,6 +73,7 @@ fun pkgs =>
 
   {
     include [
+      virglrenderer_src,
       virglrenderer,
     ],
   }

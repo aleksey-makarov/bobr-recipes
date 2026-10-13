@@ -1,17 +1,16 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let hwdata_src = fun version =>
-    fun hash =>
-      {
-        name = "hwdata-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/vcrhonek/hwdata/archive/refs/tags/v%{version}.tar.gz",
-        },
-      }
+  let hwdata_src = {
+    version | default = "0.395",
+    name = "hwdata-src-%{version}",
+    tag = "Source",
+    object_hash | default = "1166f733c57afa82cfdad56e62ef044835fbc8c99ef65f033e6a5802716b5c66",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/vcrhonek/hwdata/archive/refs/tags/v%{version}.tar.gz",
+    },
+  }
   in
 
   let buildscript_hwdata = {
@@ -31,9 +30,7 @@ fun pkgs =>
   # incomplete in the git archive (missing generated hwdata.spec) and only
   # needed for distro packaging anyway.
   let hwdata = {
-    version | default = "0.395",
-    source_object_hash | default = "1166f733c57afa82cfdad56e62ef044835fbc8c99ef65f033e6a5802716b5c66",
-    name = "hwdata-%{version}",
+    name = "hwdata-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -60,13 +57,14 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_hwdata,
-      source = hwdata_src version source_object_hash,
+      source = pkgs.hwdata_src,
     },
   }
   in
 
   {
     include [
+      hwdata_src,
       hwdata,
     ],
   }

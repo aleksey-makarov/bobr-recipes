@@ -1,28 +1,25 @@
 # colord -- color management. mutter links only the client library (libcolord),
 # so the daemon is off (-Ddaemon=false), which drops the heavy daemon deps
 # (gusb, sqlite, polkit, libgudev). Client lib needs glib + lcms2.
-# `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
+# Configure version and hash through `pkgs.colord_src`.
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "colord-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://www.freedesktop.org/software/colord/releases/colord-%{version}.tar.xz",
-            "https://downloads.yoctoproject.org/mirror/sources/colord-%{version}.tar.xz",
-          ],
-        },
-      }
+  let colord_src = {
+    version | default = "1.4.8",
+    name = "colord-src-%{version}",
+    tag = "Source",
+    object_hash | default = "21500bd68975312a7f0f3ce6019d9f75f42aacaa75ca7115ec720b5445406896",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://www.freedesktop.org/software/colord/releases/colord-%{version}.tar.xz",
+        "https://downloads.yoctoproject.org/mirror/sources/colord-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let colord = {
-    version | default = "1.4.8",
-    source_object_hash | default = "21500bd68975312a7f0f3ce6019d9f75f42aacaa75ca7115ec720b5445406896",
-    name = "colord-%{version}",
+    name = "colord-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -61,13 +58,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.colord_src,
     },
   }
   in
 
   {
     include [
+      colord_src,
       colord,
     ],
   }

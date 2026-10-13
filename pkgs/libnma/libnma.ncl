@@ -6,27 +6,22 @@
 # (-Dlibnma_gtk3=false) and we build the GTK4 library and its NMA4 typelib alone.
 # Meson build; libnm/gtk4/gcr/iso-codes are the real deps; the mobile-broadband
 # provider database, Vala bindings and gtk-doc are off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.libnma_src`.
 fun pkgs =>
-  let libnma_src = fun version =>
-    fun hash =>
-      {
-        name = "libnma-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/libnma/1.10/libnma-%{version}.tar.xz",
-        },
-      }
+  let libnma_src = {
+    version | default = "1.10.6",
+    name = "libnma-src-%{version}",
+    tag = "Source",
+    object_hash | default = "53a6fb2b190ad37c5986caed3e98bede7c3c602399ee4f93c8fc054303d76dab",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/libnma/1.10/libnma-%{version}.tar.xz",
+    },
+  }
   in
 
   let libnma = {
-    version | default = "1.10.6",
-    source_object_hash
-      | default
-      = "53a6fb2b190ad37c5986caed3e98bede7c3c602399ee4f93c8fc054303d76dab",
-    name = "libnma-%{version}",
+    name = "libnma-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -62,7 +57,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libnma_src version source_object_hash,
+      source = pkgs.libnma_src,
       # Makes the GTK3 half of libnma optional so we can build GTK4-only (we ship
       # no GTK3). Applied by the synthetic builder (input name matches ^patch).
       patch_gtk4_only = {
@@ -80,6 +75,7 @@ fun pkgs =>
 
   {
     include [
+      libnma_src,
       libnma,
     ],
   }

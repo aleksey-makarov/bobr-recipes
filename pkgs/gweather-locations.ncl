@@ -5,27 +5,22 @@
 # Meson build; the Locations.bin generator runs python3 with PyGObject
 # (from gi.repository import GLib), so pygobject and the GLib typelib are build
 # tools here. Data only -- no shared libraries.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.gweather_locations_src`.
 fun pkgs =>
-  let gweather_locations_src = fun version =>
-    fun hash =>
-      {
-        name = "gweather-locations-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gweather-locations/2026/gweather-locations-%{version}.tar.xz",
-        },
-      }
+  let gweather_locations_src = {
+    version | default = "2026.2",
+    name = "gweather-locations-src-%{version}",
+    tag = "Source",
+    object_hash | default = "e7570a3661e0a752a06387b2032585cf588fc56770b1f9f39f1a55d17b2835fe",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gweather-locations/2026/gweather-locations-%{version}.tar.xz",
+    },
+  }
   in
 
   let gweather_locations = {
-    version | default = "2026.2",
-    source_object_hash
-      | default
-      = "e7570a3661e0a752a06387b2032585cf588fc56770b1f9f39f1a55d17b2835fe",
-    name = "gweather-locations-%{version}",
+    name = "gweather-locations-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -45,13 +40,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = gweather_locations_src version source_object_hash,
+      source = pkgs.gweather_locations_src,
     },
   }
   in
 
   {
     include [
+      gweather_locations_src,
       gweather_locations,
     ],
   }

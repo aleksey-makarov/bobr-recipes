@@ -1,24 +1,21 @@
 fun pkgs =>
-  let texinfo_src = fun version =>
-    fun hash =>
-      {
-        name = "texinfo-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/texinfo/texinfo-%{version}.tar.xz",
-            "https://mirrors.kernel.org/gnu/texinfo/texinfo-%{version}.tar.xz",
-          ],
-        },
-      }
+  let texinfo_src = {
+    version | default = "7.2",
+    name = "texinfo-src-%{version}",
+    tag = "Source",
+    object_hash | default = "0329d7788fbef113fa82cb80889ca197a344ce0df7646fe000974c5d714363a6",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/texinfo/texinfo-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/texinfo/texinfo-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let texinfo = {
-    version | default = "7.2",
-    source_object_hash | default = "0329d7788fbef113fa82cb80889ca197a344ce0df7646fe000974c5d714363a6",
-    name = "texinfo-%{version}",
+    name = "texinfo-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -64,13 +61,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = texinfo_src version source_object_hash,
+      source = pkgs.texinfo_src,
     },
   }
   in
 
   {
     include [
+      texinfo_src,
       texinfo,
     ],
   }

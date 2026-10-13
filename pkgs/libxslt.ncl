@@ -2,27 +2,22 @@
 # build tool: many GNOME packages render their man pages from DocBook XML with
 # xsltproc (AppStream, gdm, ...). Autotools build; the Python bindings, the
 # libgcrypt crypto extensions and the debugger are off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.libxslt_src`.
 fun pkgs =>
-  let libxslt_src = fun version =>
-    fun hash =>
-      {
-        name = "libxslt-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/libxslt/1.1/libxslt-%{version}.tar.xz",
-        },
-      }
+  let libxslt_src = {
+    version | default = "1.1.45",
+    name = "libxslt-src-%{version}",
+    tag = "Source",
+    object_hash | default = "9acfe68419c4d06a45c550321b3212762d92f41465062ca4ea19e632ee5d216e",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/libxslt/1.1/libxslt-%{version}.tar.xz",
+    },
+  }
   in
 
   let libxslt = {
-    version | default = "1.1.45",
-    source_object_hash
-      | default
-      = "9acfe68419c4d06a45c550321b3212762d92f41465062ca4ea19e632ee5d216e",
-    name = "libxslt-%{version}",
+    name = "libxslt-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -43,13 +38,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libxslt_src version source_object_hash,
+      source = pkgs.libxslt_src,
     },
   }
   in
 
   {
     include [
+      libxslt_src,
       libxslt,
     ],
   }

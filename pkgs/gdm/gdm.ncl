@@ -7,30 +7,25 @@ let recipe = import "../../recipe-lib.ncl" in
 # (only pulled in by XDMCP), and plymouth are not needed. logind provider is
 # systemd. PAM config is left as 'none' at build time; the actual PAM files are
 # wired into the rootfs separately.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.gdm_src`.
 fun pkgs =>
   # download.gnome.org groups gdm tarballs by major version ("50" for 50.1).
   let series = recipe.version_prefix 1 in
 
-  let gdm_src = fun version =>
-    fun hash =>
-      {
-        name = "gdm-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gdm/%{series version}/gdm-%{version}.tar.xz",
-        },
-      }
+  let gdm_src = {
+    version | default = "50.1",
+    name = "gdm-src-%{version}",
+    tag = "Source",
+    object_hash | default = "770159373512192410f412b5d0c4678ec1573f1ae4b39c81fe75861fe8890174",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gdm/%{series version}/gdm-%{version}.tar.xz",
+    },
+  }
   in
 
   let gdm = {
-    version | default = "50.1",
-    source_object_hash
-      | default
-      = "770159373512192410f412b5d0c4678ec1573f1ae4b39c81fe75861fe8890174",
-    name = "gdm-%{version}",
+    name = "gdm-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -83,7 +78,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = gdm_src version source_object_hash,
+      source = pkgs.gdm_src,
       # Removes subdir('docs') (gnome.yelp needs itstool, which we do not ship
       # and gdm offers no option to disable). Applied by the synthetic builder
       # (input name matches ^patch).
@@ -102,6 +97,7 @@ fun pkgs =>
 
   {
     include [
+      gdm_src,
       gdm,
     ],
   }

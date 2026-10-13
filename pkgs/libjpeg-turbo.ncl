@@ -1,25 +1,22 @@
 # libjpeg-turbo -- JPEG codec, needed by gdk-pixbuf. CMake-only (3.x dropped
 # autotools), built with the Cmake builder. SIMD is off to avoid a nasm build
-# dep. `version`/`source_object_hash` are node fields (overridable), as in
-# linux.ncl.
+# dep.
+# Configure version and hash through `pkgs.libjpeg_turbo_src`.
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "libjpeg-turbo-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%{version}/libjpeg-turbo-%{version}.tar.gz",
-        },
-      }
+  let libjpeg_turbo_src = {
+    version | default = "3.1.0",
+    name = "libjpeg-turbo-src-%{version}",
+    tag = "Source",
+    object_hash | default = "9564c72b1dfd1d6fe6274c5f95a8d989b59854575d4bbee44ade7bc17aa9bc93",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%{version}/libjpeg-turbo-%{version}.tar.gz",
+    },
+  }
   in
 
   let libjpeg_turbo = {
-    version | default = "3.1.0",
-    source_object_hash | default = "9564c72b1dfd1d6fe6274c5f95a8d989b59854575d4bbee44ade7bc17aa9bc93",
-    name = "libjpeg-turbo-%{version}",
+    name = "libjpeg-turbo-%{inputs.source.version}",
     tag = "Cmake",
     deps = {
       build = [],
@@ -36,13 +33,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.libjpeg_turbo_src,
     },
   }
   in
 
   {
     include [
+      libjpeg_turbo_src,
       libjpeg_turbo,
     ],
   }

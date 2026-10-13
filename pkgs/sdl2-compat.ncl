@@ -1,21 +1,18 @@
 fun pkgs =>
-  let sdl2_compat_src = fun version =>
-    fun hash =>
-      {
-        name = "sdl2-compat-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/libsdl-org/sdl2-compat/archive/refs/tags/release-%{version}.tar.gz",
-        },
-      }
+  let sdl2_compat_src = {
+    version | default = "2.32.68",
+    name = "sdl2-compat-src-%{version}",
+    tag = "Source",
+    object_hash | default = "72f846becfd2d321da3d2e7a15410f5f156d904257f4c4c608b546614113936b",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/libsdl-org/sdl2-compat/archive/refs/tags/release-%{version}.tar.gz",
+    },
+  }
   in
 
   let sdl2_compat = {
-    version | default = "2.32.68",
-    source_object_hash | default = "72f846becfd2d321da3d2e7a15410f5f156d904257f4c4c608b546614113936b",
-    name = "sdl2-compat-%{version}",
+    name = "sdl2-compat-%{inputs.source.version}",
     tag = "Cmake",
     deps = {
       build = [
@@ -51,11 +48,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = sdl2_compat_src version source_object_hash,
+      source = pkgs.sdl2_compat_src,
     },
   }
   in
 
   {
-    include [sdl2_compat],
+    include [
+      sdl2_compat_src,
+      sdl2_compat
+    ],
   }

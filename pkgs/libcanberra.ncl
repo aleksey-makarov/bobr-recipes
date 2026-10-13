@@ -3,32 +3,27 @@
 # Autotools project: the PulseAudio backend is kept (our session audio), the
 # vorbisfile loader decodes the theme .ogg files, and backend modules are loaded
 # through libltdl. ALSA, OSS, GStreamer, udev, tdb and all GTK bindings are off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.libcanberra_src`.
 fun pkgs =>
-  let libcanberra_src = fun version =>
-    fun hash =>
-      {
-        name = "libcanberra-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "http://0pointer.de/lennart/projects/libcanberra/libcanberra-%{version}.tar.xz",
-            # 0pointer.de is frequently down; the BLFS conglomeration mirror
-            # keeps the identical upstream tarball.
-            "https://ftp.osuosl.org/pub/blfs/conglomeration/libcanberra/libcanberra-%{version}.tar.xz",
-          ],
-        },
-      }
+  let libcanberra_src = {
+    version | default = "0.30",
+    name = "libcanberra-src-%{version}",
+    tag = "Source",
+    object_hash | default = "c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72",
+    origin = {
+      tag = "Http",
+      url = [
+        "http://0pointer.de/lennart/projects/libcanberra/libcanberra-%{version}.tar.xz",
+        # 0pointer.de is frequently down; the BLFS conglomeration mirror
+        # keeps the identical upstream tarball.
+        "https://ftp.osuosl.org/pub/blfs/conglomeration/libcanberra/libcanberra-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let libcanberra = {
-    version | default = "0.30",
-    source_object_hash
-      | default
-      = "c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72",
-    name = "libcanberra-%{version}",
+    name = "libcanberra-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -59,13 +54,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libcanberra_src version source_object_hash,
+      source = pkgs.libcanberra_src,
     },
   }
   in
 
   {
     include [
+      libcanberra_src,
       libcanberra,
     ],
   }

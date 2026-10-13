@@ -1,24 +1,21 @@
 fun pkgs =>
-  let fontconfig_src = fun version =>
-    fun hash =>
-      {
-        name = "fontconfig-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://www.freedesktop.org/software/fontconfig/release/fontconfig-%{version}.tar.xz",
-            "https://sources.buildroot.net/fontconfig/fontconfig-%{version}.tar.xz",
-          ],
-        },
-      }
+  let fontconfig_src = {
+    version | default = "2.16.0",
+    name = "fontconfig-src-%{version}",
+    tag = "Source",
+    object_hash | default = "6a33dc555cc9ba8b10caf7695878ef134eeb36d0af366041f639b1da9b6ed220",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://www.freedesktop.org/software/fontconfig/release/fontconfig-%{version}.tar.xz",
+        "https://sources.buildroot.net/fontconfig/fontconfig-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let fontconfig = {
-    version | default = "2.16.0",
-    source_object_hash | default = "6a33dc555cc9ba8b10caf7695878ef134eeb36d0af366041f639b1da9b6ed220",
-    name = "fontconfig-%{version}",
+    name = "fontconfig-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -41,13 +38,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = fontconfig_src version source_object_hash,
+      source = pkgs.fontconfig_src,
     },
   }
   in
 
   {
     include [
+      fontconfig_src,
       fontconfig,
     ],
   }

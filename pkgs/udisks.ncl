@@ -6,27 +6,22 @@
 # in a diskless QEMU guest, the same call we made for ModemManager's modem
 # backends. The client library and its GObject-introspection typelib are enough
 # for control-center to build and run.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.udisks_src`.
 fun pkgs =>
-  let udisks_src = fun version =>
-    fun hash =>
-      {
-        name = "udisks-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/storaged-project/udisks/releases/download/udisks-%{version}/udisks-%{version}.tar.bz2",
-        },
-      }
+  let udisks_src = {
+    version | default = "2.11.1",
+    name = "udisks-src-%{version}",
+    tag = "Source",
+    object_hash | default = "e88c52bae02fa13414604bbef42c6bb91c2e24177ee0057ed55c6bd7451bcb6d",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/storaged-project/udisks/releases/download/udisks-%{version}/udisks-%{version}.tar.bz2",
+    },
+  }
   in
 
   let udisks = {
-    version | default = "2.11.1",
-    source_object_hash
-      | default
-      = "e88c52bae02fa13414604bbef42c6bb91c2e24177ee0057ed55c6bd7451bcb6d",
-    name = "udisks-%{version}",
+    name = "udisks-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -58,9 +53,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = udisks_src version source_object_hash,
+      source = pkgs.udisks_src,
     },
   }
   in
 
-  { include [udisks] }
+  {
+    include [
+      udisks_src,
+      udisks
+    ]
+  }

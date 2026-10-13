@@ -1,24 +1,21 @@
 fun pkgs =>
-  let dbus_src = fun version =>
-    fun hash =>
-      {
-        name = "dbus-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://dbus.freedesktop.org/releases/dbus/dbus-%{version}.tar.xz",
-            "https://sources.buildroot.net/dbus/dbus-%{version}.tar.xz",
-          ],
-        },
-      }
+  let dbus_src = {
+    version | default = "1.16.2",
+    name = "dbus-src-%{version}",
+    tag = "Source",
+    object_hash | default = "0ba2a1a4b16afe7bceb2c07e9ce99a8c2c3508e5dec290dbb643384bd6beb7e2",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://dbus.freedesktop.org/releases/dbus/dbus-%{version}.tar.xz",
+        "https://sources.buildroot.net/dbus/dbus-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let dbus = {
-    version | default = "1.16.2",
-    source_object_hash | default = "0ba2a1a4b16afe7bceb2c07e9ce99a8c2c3508e5dec290dbb643384bd6beb7e2",
-    name = "dbus-%{version}",
+    name = "dbus-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -109,13 +106,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = dbus_src version source_object_hash,
+      source = pkgs.dbus_src,
     },
   }
   in
 
   {
     include [
+      dbus_src,
       dbus,
     ],
   }

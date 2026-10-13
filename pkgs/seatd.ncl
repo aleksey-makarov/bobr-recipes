@@ -1,15 +1,14 @@
 fun pkgs =>
-  let seatd_src = fun version =>
-    fun hash =>
-      {
-        name = "seatd-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://git.sr.ht/~kennylevinsen/seatd/archive/%{version}.tar.gz",
-        },
-      }
+  let seatd_src = {
+    version | default = "0.9.3",
+    name = "seatd-src-%{version}",
+    tag = "Source",
+    object_hash | default = "302564d54d8e28191fadfd734f2675ecb0c9e0615a58011b89ef15dfa4dbaa96",
+    origin = {
+      tag = "Http",
+      url = "https://git.sr.ht/~kennylevinsen/seatd/archive/%{version}.tar.gz",
+    },
+  }
   in
 
   # libseat + the seatd daemon. The logind backend (libseat over systemd-logind)
@@ -17,9 +16,7 @@ fun pkgs =>
   # -- which is how weston.service runs in the weston image. The seatd and builtin
   # backends are kept as fallbacks (LIBSEAT_BACKEND=seatd, no logind needed).
   let seatd = {
-    version | default = "0.9.3",
-    source_object_hash | default = "302564d54d8e28191fadfd734f2675ecb0c9e0615a58011b89ef15dfa4dbaa96",
-    name = "seatd-%{version}",
+    name = "seatd-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -43,13 +40,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = seatd_src version source_object_hash,
+      source = pkgs.seatd_src,
     },
   }
   in
 
   {
     include [
+      seatd_src,
       seatd,
     ],
   }

@@ -2,27 +2,22 @@
 # themes run sassc to compile their SCSS stylesheets to CSS. The git tag archive
 # ships only configure.ac, so we regenerate configure with autoreconf. Links
 # libsass.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.sassc_src`.
 fun pkgs =>
-  let sassc_src = fun version =>
-    fun hash =>
-      {
-        name = "sassc-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/sass/sassc/archive/refs/tags/%{version}.tar.gz",
-        },
-      }
+  let sassc_src = {
+    version | default = "3.6.2",
+    name = "sassc-src-%{version}",
+    tag = "Source",
+    object_hash | default = "608dc9002b45a91d11ed59e352469ecc05e4f58fc1259fc9a9f5b8f0f8348a03",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/sass/sassc/archive/refs/tags/%{version}.tar.gz",
+    },
+  }
   in
 
   let sassc = {
-    version | default = "3.6.2",
-    source_object_hash
-      | default
-      = "608dc9002b45a91d11ed59e352469ecc05e4f58fc1259fc9a9f5b8f0f8348a03",
-    name = "sassc-%{version}",
+    name = "sassc-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -48,13 +43,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = sassc_src version source_object_hash,
+      source = pkgs.sassc_src,
     },
   }
   in
 
   {
     include [
+      sassc_src,
       sassc,
     ],
   }

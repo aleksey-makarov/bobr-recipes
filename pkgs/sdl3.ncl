@@ -1,23 +1,20 @@
 fun pkgs =>
-  let sdl3_src = fun version =>
-    fun hash =>
-      {
-        name = "sdl3-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/libsdl-org/SDL/archive/refs/tags/release-%{version}.tar.gz",
-        },
-      }
+  let sdl3_src = {
+    version | default = "3.4.10",
+    name = "sdl3-src-%{version}",
+    tag = "Source",
+    object_hash | default = "0dc11d980ba17250200718fa4e28011da293f27ed92f92203afffe396811f307",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/libsdl-org/SDL/archive/refs/tags/release-%{version}.tar.gz",
+    },
+  }
   in
 
   # Host-side SDL: Wayland-only video with desktop OpenGL. Audio and the other
   # host-integration backends are deliberately absent from the QEMU bundle.
   let sdl3 = {
-    version | default = "3.4.10",
-    source_object_hash | default = "0dc11d980ba17250200718fa4e28011da293f27ed92f92203afffe396811f307",
-    name = "sdl3-%{version}",
+    name = "sdl3-%{inputs.source.version}",
     tag = "Cmake",
     deps = {
       build = [
@@ -74,11 +71,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = sdl3_src version source_object_hash,
+      source = pkgs.sdl3_src,
     },
   }
   in
 
   {
-    include [sdl3],
+    include [
+      sdl3_src,
+      sdl3
+    ],
   }

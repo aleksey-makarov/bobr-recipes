@@ -8,26 +8,24 @@
 # Source is fetched from the freedesktop GitLab archive with `unpack = true`, so
 # the object hash is the extracted tree's fsobj-hash rather than the tarball
 # bytes -- GitLab regenerates archive tarballs non-reproducibly, but the tree is
-# stable. `version`/`source_object_hash` are node fields (overridable), as in linux.ncl.
+# stable.
+# Configure version and hash through `pkgs.libei_src`.
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "libei-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://gitlab.freedesktop.org/libinput/libei/-/archive/%{version}/libei-%{version}.tar.gz",
-          unpack = true,
-        },
-      }
+  let libei_src = {
+    version | default = "1.4.1",
+    name = "libei-src-%{version}",
+    tag = "Source",
+    object_hash | default = "c3e78cdfd27ee4635e657ce7f9c4454fc67ad4dbf0a3f9ada057b130bbafe278",
+    origin = {
+      tag = "Http",
+      url = "https://gitlab.freedesktop.org/libinput/libei/-/archive/%{version}/libei-%{version}.tar.gz",
+      unpack = true,
+    },
+  }
   in
 
   let libei = {
-    version | default = "1.4.1",
-    source_object_hash | default = "c3e78cdfd27ee4635e657ce7f9c4454fc67ad4dbf0a3f9ada057b130bbafe278",
-    name = "libei-%{version}",
+    name = "libei-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -51,13 +49,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.libei_src,
     },
   }
   in
 
   {
     include [
+      libei_src,
       libei,
     ],
   }

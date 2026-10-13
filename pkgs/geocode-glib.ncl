@@ -3,27 +3,22 @@
 # (dependency('geocode-glib-2.0') in its meson.build), which in turn provides the
 # GWeather-4.0 typelib gnome-shell imports at startup. Meson build against
 # libsoup 3; gtk-doc and installed-tests off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.geocode_glib_src`.
 fun pkgs =>
-  let geocode_glib_src = fun version =>
-    fun hash =>
-      {
-        name = "geocode-glib-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/geocode-glib/3.26/geocode-glib-%{version}.tar.xz",
-        },
-      }
+  let geocode_glib_src = {
+    version | default = "3.26.4",
+    name = "geocode-glib-src-%{version}",
+    tag = "Source",
+    object_hash | default = "2d9a6826d158470449a173871221596da0f83ebdcff98b90c7049089056a37aa",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/geocode-glib/3.26/geocode-glib-%{version}.tar.xz",
+    },
+  }
   in
 
   let geocode_glib = {
-    version | default = "3.26.4",
-    source_object_hash
-      | default
-      = "2d9a6826d158470449a173871221596da0f83ebdcff98b90c7049089056a37aa",
-    name = "geocode-glib-%{version}",
+    name = "geocode-glib-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -53,13 +48,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = geocode_glib_src version source_object_hash,
+      source = pkgs.geocode_glib_src,
     },
   }
   in
 
   {
     include [
+      geocode_glib_src,
       geocode_glib,
     ],
   }

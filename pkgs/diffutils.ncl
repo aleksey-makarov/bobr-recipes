@@ -1,26 +1,23 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let diffutils_src = fun version =>
-    fun hash =>
-      {
-        name = "diffutils-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/diffutils/diffutils-%{version}.tar.xz",
-            "https://mirrors.kernel.org/gnu/diffutils/diffutils-%{version}.tar.xz",
-          ],
-        },
-      }
+  let diffutils_src = {
+    version | default = "3.12",
+    name = "diffutils-src-%{version}",
+    tag = "Source",
+    object_hash | default = "7c8b7f9fc8609141fdea9cece85249d308624391ff61dedaf528fcb337727dfd",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/diffutils/diffutils-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/diffutils/diffutils-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let diffutils_gen1 = {
-    version | default = "3.12",
-    source_object_hash | default = "7c8b7f9fc8609141fdea9cece85249d308624391ff61dedaf528fcb337727dfd",
-    name = "diffutils-gen1-%{version}",
+    name = "diffutils-gen1-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls"],
@@ -28,15 +25,13 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.oci_buildpack_deps_rootfs,
-      source = diffutils_src version source_object_hash,
+      source = pkgs.diffutils_src,
     },
   }
   in
 
   let diffutils = {
-    version | default = "3.12",
-    source_object_hash | default = "7c8b7f9fc8609141fdea9cece85249d308624391ff61dedaf528fcb337727dfd",
-    name = "diffutils-%{version}",
+    name = "diffutils-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls"],
@@ -44,13 +39,14 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "diffutils-build-rootfs" [],
-      source = diffutils_src version source_object_hash,
+      source = pkgs.diffutils_src,
     },
   }
   in
 
   {
     include [
+      diffutils_src,
       diffutils_gen1,
       diffutils,
     ],

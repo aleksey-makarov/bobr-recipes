@@ -3,29 +3,24 @@
 # built with the Cmake builder. Shared library only; docs, tests and the vala
 # bindings are off. ICU provides RSCALE (non-Gregorian calendar) support; perl
 # drives libical's code generation.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.libical_src`.
 fun pkgs =>
-  let libical_src = fun version =>
-    fun hash =>
-      {
-        name = "libical-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/libical/libical/releases/download/v%{version}/libical-%{version}.tar.gz",
-        },
-      }
+  let libical_src = {
+    version | default = "3.0.20",
+    name = "libical-src-%{version}",
+    tag = "Source",
+    object_hash | default = "e73de92f5a6ce84c1b00306446b290a2b08cdf0a80988eca0a2c9d5c3510b4c2",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/libical/libical/releases/download/v%{version}/libical-%{version}.tar.gz",
+    },
+  }
   in
 
   let libical = {
     # eds 3.56 uses libical-glib 3.0 API (e.g. i_cal_duration_as_int), which the
     # 4.0 series removed, so stay on the 3.0 branch.
-    version | default = "3.0.20",
-    source_object_hash
-      | default
-      = "e73de92f5a6ce84c1b00306446b290a2b08cdf0a80988eca0a2c9d5c3510b4c2",
-    name = "libical-%{version}",
+    name = "libical-%{inputs.source.version}",
     tag = "Cmake",
     deps = {
       build = [
@@ -59,13 +54,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libical_src version source_object_hash,
+      source = pkgs.libical_src,
     },
   }
   in
 
   {
     include [
+      libical_src,
       libical,
     ],
   }

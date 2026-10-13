@@ -1,23 +1,18 @@
 fun pkgs =>
-  let libdecor_src = fun version =>
-    fun hash =>
-      {
-        name = "libdecor-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://gitlab.freedesktop.org/libdecor/libdecor/-/archive/%{version}/libdecor-%{version}.tar.gz",
-        },
-      }
+  let libdecor_src = {
+    version | default = "0.2.5",
+    name = "libdecor-src-%{version}",
+    tag = "Source",
+    object_hash | default = "39c109a9a7eae943ba34d18a282c447d5729f9c486c8bc05ea305e4acd341522",
+    origin = {
+      tag = "Http",
+      url = "https://gitlab.freedesktop.org/libdecor/libdecor/-/archive/%{version}/libdecor-%{version}.tar.gz",
+    },
+  }
   in
 
   let libdecor = {
-    version | default = "0.2.5",
-    source_object_hash
-      | default
-      = "39c109a9a7eae943ba34d18a282c447d5729f9c486c8bc05ea305e4acd341522",
-    name = "libdecor-%{version}",
+    name = "libdecor-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -57,13 +52,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = libdecor_src version source_object_hash,
+      source = pkgs.libdecor_src,
     },
   }
   in
 
   {
     include [
+      libdecor_src,
       libdecor,
     ],
   }

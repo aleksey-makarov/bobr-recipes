@@ -1,26 +1,23 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let binutils_src = fun version =>
-    fun hash =>
-      {
-        name = "binutils-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://sourceware.org/pub/binutils/releases/binutils-%{version}.tar.xz",
-            "https://mirrors.kernel.org/gnu/binutils/binutils-%{version}.tar.xz",
-          ],
-        },
-      }
+  let binutils_src = {
+    version | default = "2.45",
+    name = "binutils-src-%{version}",
+    tag = "Source",
+    object_hash | default = "c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://sourceware.org/pub/binutils/releases/binutils-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/binutils/binutils-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let binutils_gen1 = {
-    version | default = "2.45",
-    source_object_hash | default = "c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2",
-    name = "binutils-gen1-%{version}",
+    name = "binutils-gen1-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
@@ -36,15 +33,13 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.oci_buildpack_deps_rootfs,
-      source = binutils_src version source_object_hash,
+      source = pkgs.binutils_src,
     },
   }
   in
 
   let binutils = {
-    version | default = "2.45",
-    source_object_hash | default = "c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2",
-    name = "binutils-%{version}",
+    name = "binutils-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = [
@@ -62,13 +57,14 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = recipe.gen1_toolchain_rootfs pkgs "binutils-build-rootfs" [],
-      source = binutils_src version source_object_hash,
+      source = pkgs.binutils_src,
     },
   }
   in
 
   {
     include [
+      binutils_src,
       binutils_gen1,
       binutils,
     ],

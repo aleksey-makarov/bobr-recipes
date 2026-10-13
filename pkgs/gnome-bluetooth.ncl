@@ -5,27 +5,22 @@
 # and docs off. There is no Bluetooth hardware in the QEMU guest, so the indicator
 # stays idle -- but building it with -Dbluetooth=true also gives gnome-shell an
 # early async import in _setupIndicators, which its startup ordering relies on.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.gnome_bluetooth_src`.
 fun pkgs =>
-  let gnome_bluetooth_src = fun version =>
-    fun hash =>
-      {
-        name = "gnome-bluetooth-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gnome-bluetooth/47/gnome-bluetooth-%{version}.tar.xz",
-        },
-      }
+  let gnome_bluetooth_src = {
+    version | default = "47.2",
+    name = "gnome-bluetooth-src-%{version}",
+    tag = "Source",
+    object_hash | default = "41f20e6d6176b72590af63552b232d83f2fffdd77ecfaa5eaf32c5a4a86fad64",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gnome-bluetooth/47/gnome-bluetooth-%{version}.tar.xz",
+    },
+  }
   in
 
   let gnome_bluetooth = {
-    version | default = "47.2",
-    source_object_hash
-      | default
-      = "41f20e6d6176b72590af63552b232d83f2fffdd77ecfaa5eaf32c5a4a86fad64",
-    name = "gnome-bluetooth-%{version}",
+    name = "gnome-bluetooth-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -62,13 +57,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = gnome_bluetooth_src version source_object_hash,
+      source = pkgs.gnome_bluetooth_src,
     },
   }
   in
 
   {
     include [
+      gnome_bluetooth_src,
       gnome_bluetooth,
     ],
   }

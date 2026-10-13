@@ -1,54 +1,50 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let sed_src = fun version =>
-    fun hash =>
-      {
-        name = "sed-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/sed/sed-%{version}.tar.xz",
-            "https://mirrors.kernel.org/gnu/sed/sed-%{version}.tar.xz",
-          ],
-        },
-      }
+  let sed_src = {
+    version | default = "4.9",
+    name = "sed-src-%{version}",
+    tag = "Source",
+    object_hash | default = "6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/sed/sed-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/sed/sed-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let sed_gen1 = {
-    version | default = "4.9",
-    source_object_hash | default = "6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181",
-    name = "sed-gen1-%{version}",
+    name = "sed-gen1-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls", "--without-selinux"],
     },
     inputs = {
       _rootfs = pkgs.oci_buildpack_deps_rootfs,
-      source = sed_src version source_object_hash,
+      source = pkgs.sed_src,
     },
   }
   in
 
   let sed = {
-    version | default = "4.9",
-    source_object_hash | default = "6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181",
-    name = "sed-%{version}",
+    name = "sed-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--disable-nls", "--without-selinux"],
     },
     inputs = {
       _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "sed-build-rootfs" [],
-      source = sed_src version source_object_hash,
+      source = pkgs.sed_src,
     },
   }
   in
 
   {
     include [
+      sed_src,
       sed_gen1,
       sed,
     ],

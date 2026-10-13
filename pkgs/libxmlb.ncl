@@ -2,27 +2,22 @@
 # A dependency of AppStream (it stores the metadata pool as an xmlb blob). Meson
 # build; links glib, liblzma (xz) and libzstd for the compressed blobs. The CLI
 # tool, gtk-doc, introspection, the Snowball stemmer and tests are off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.libxmlb_src`.
 fun pkgs =>
-  let libxmlb_src = fun version =>
-    fun hash =>
-      {
-        name = "libxmlb-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/hughsie/libxmlb/releases/download/%{version}/libxmlb-%{version}.tar.xz",
-        },
-      }
+  let libxmlb_src = {
+    version | default = "0.3.28",
+    name = "libxmlb-src-%{version}",
+    tag = "Source",
+    object_hash | default = "5982b4fe344deb36e57b40d7582f594ecd9414f86fb8258bb56f8b1a38e1d527",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/hughsie/libxmlb/releases/download/%{version}/libxmlb-%{version}.tar.xz",
+    },
+  }
   in
 
   let libxmlb = {
-    version | default = "0.3.28",
-    source_object_hash
-      | default
-      = "5982b4fe344deb36e57b40d7582f594ecd9414f86fb8258bb56f8b1a38e1d527",
-    name = "libxmlb-%{version}",
+    name = "libxmlb-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -54,13 +49,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libxmlb_src version source_object_hash,
+      source = pkgs.libxmlb_src,
     },
   }
   in
 
   {
     include [
+      libxmlb_src,
       libxmlb,
     ],
   }

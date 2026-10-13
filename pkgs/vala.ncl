@@ -3,27 +3,22 @@
 # generate their C. The release tarball ships the compiler's pre-generated C, so
 # it bootstraps without an existing valac; flex and bison regenerate the scanner
 # and parser. valadoc is disabled to avoid the graphviz (libgvc) dependency.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.vala_src`.
 fun pkgs =>
-  let vala_src = fun version =>
-    fun hash =>
-      {
-        name = "vala-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/vala/0.56/vala-%{version}.tar.xz",
-        },
-      }
+  let vala_src = {
+    version | default = "0.56.19",
+    name = "vala-src-%{version}",
+    tag = "Source",
+    object_hash | default = "5ad7cbbfcc0de61b403d6797c9ef60455bfbebd8e162aec33b5b0b097adfb9d5",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/vala/0.56/vala-%{version}.tar.xz",
+    },
+  }
   in
 
   let vala = {
-    version | default = "0.56.19",
-    source_object_hash
-      | default
-      = "5ad7cbbfcc0de61b403d6797c9ef60455bfbebd8e162aec33b5b0b097adfb9d5",
-    name = "vala-%{version}",
+    name = "vala-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -46,13 +41,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = vala_src version source_object_hash,
+      source = pkgs.vala_src,
     },
   }
   in
 
   {
     include [
+      vala_src,
       vala,
     ],
   }

@@ -1,27 +1,24 @@
 let recipe = import "../recipe-lib.ncl" in
 # json-glib -- JSON parsing/serialization on GObject, used by mutter and other
-# GNOME components. `version`/`source_object_hash` are node fields (overridable), as in
-# linux.ncl.
+# GNOME components.
+# Configure version and hash through `pkgs.json_glib_src`.
 let branch = recipe.version_prefix 2 in
 
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "json-glib-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/json-glib/%{branch version}/json-glib-%{version}.tar.xz",
-        },
-      }
+  let json_glib_src = {
+    version | default = "1.10.8",
+    name = "json-glib-src-%{version}",
+    tag = "Source",
+    object_hash | default = "55c5c141a564245b8f8fbe7698663c87a45a7333c2a2c56f06f811ab73b212dd",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/json-glib/%{branch version}/json-glib-%{version}.tar.xz",
+    },
+  }
   in
 
   let json_glib = {
-    version | default = "1.10.8",
-    source_object_hash | default = "55c5c141a564245b8f8fbe7698663c87a45a7333c2a2c56f06f811ab73b212dd",
-    name = "json-glib-%{version}",
+    name = "json-glib-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -46,13 +43,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.json_glib_src,
     },
   }
   in
 
   {
     include [
+      json_glib_src,
       json_glib,
     ],
   }

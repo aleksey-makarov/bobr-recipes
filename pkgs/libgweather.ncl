@@ -3,27 +3,22 @@
 # used by the clock/date menu weather section), so it is a hard dependency of the
 # session. Meson build against libsoup 3; introspection on (produces the typelib),
 # Vala bindings, gtk-doc and tests off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.libgweather_src`.
 fun pkgs =>
-  let libgweather_src = fun version =>
-    fun hash =>
-      {
-        name = "libgweather-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/libgweather/4.6/libgweather-%{version}.tar.xz",
-        },
-      }
+  let libgweather_src = {
+    version | default = "4.6.0",
+    name = "libgweather-src-%{version}",
+    tag = "Source",
+    object_hash | default = "7f5d0e8c9685ef2ff46c2f3a57cae48d7bf3540b2d83921f889ef28e6a876788",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/libgweather/4.6/libgweather-%{version}.tar.xz",
+    },
+  }
   in
 
   let libgweather = {
-    version | default = "4.6.0",
-    source_object_hash
-      | default
-      = "7f5d0e8c9685ef2ff46c2f3a57cae48d7bf3540b2d83921f889ef28e6a876788",
-    name = "libgweather-%{version}",
+    name = "libgweather-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -59,13 +54,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libgweather_src version source_object_hash,
+      source = pkgs.libgweather_src,
     },
   }
   in
 
   {
     include [
+      libgweather_src,
       libgweather,
     ],
   }

@@ -4,7 +4,7 @@
 # Makefile, so a small build driver (duktape-build.sh) compiles the shared
 # library and lays out the install tree. Build rootfs is the native toolchain
 # closure -- duktape needs nothing beyond a C compiler and libm.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.duktape_src`.
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
@@ -19,27 +19,22 @@ fun pkgs =>
   }
   in
 
-  let duktape_src = fun version =>
-    fun hash =>
-      {
-        name = "duktape-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/svaarala/duktape/releases/download/v%{version}/duktape-%{version}.tar.xz",
-        },
-      }
+  let duktape_src = {
+    version | default = "2.7.0",
+    name = "duktape-src-%{version}",
+    tag = "Source",
+    object_hash | default = "90f8d2fa8b5567c6899830ddef2c03f3c27960b11aca222fa17aa7ac613c2890",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/svaarala/duktape/releases/download/v%{version}/duktape-%{version}.tar.xz",
+    },
+  }
   in
 
   let step_env = { BOBR_SOURCE_DIR = "@{build}/source" } in
 
   let duktape = {
-    version | default = "2.7.0",
-    source_object_hash
-      | default
-      = "90f8d2fa8b5567c6899830ddef2c03f3c27960b11aca222fa17aa7ac613c2890",
-    name = "duktape-%{version}",
+    name = "duktape-%{inputs.source.version}",
     # Deps-derived additive SandboxInstallDeps: the builder assembles the build
     # rootfs from deps.build (the native toolchain -- cc + libm are all duktape
     # needs) instead of a hand-rolled _rootfs, and captures the install
@@ -74,13 +69,14 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_duktape,
-      source = duktape_src version source_object_hash,
+      source = pkgs.duktape_src,
     },
   }
   in
 
   {
     include [
+      duktape_src,
       duktape,
     ],
   }

@@ -2,30 +2,25 @@
 # gnome-control-center's Color panel: `dependency('colord-gtk4')`). Meson build
 # against colord, GTK4 and lcms2. Only the GTK4 binding is built (no GTK2/GTK3);
 # docs, tests, man pages and the Vala binding are off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.colord_gtk_src`.
 fun pkgs =>
-  let colord_gtk_src = fun version =>
-    fun hash =>
-      {
-        name = "colord-gtk-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://www.freedesktop.org/software/colord/releases/colord-gtk-%{version}.tar.xz",
-            "https://deb.debian.org/debian/pool/main/c/colord-gtk/colord-gtk_%{version}.orig.tar.xz",
-          ],
-        },
-      }
+  let colord_gtk_src = {
+    version | default = "0.3.1",
+    name = "colord-gtk-src-%{version}",
+    tag = "Source",
+    object_hash | default = "c176b889b75630a17f4e3d7ef24c09a3e12368e633496087459c8b53ac3a122d",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://www.freedesktop.org/software/colord/releases/colord-gtk-%{version}.tar.xz",
+        "https://deb.debian.org/debian/pool/main/c/colord-gtk/colord-gtk_%{version}.orig.tar.xz",
+      ],
+    },
+  }
   in
 
   let colord_gtk = {
-    version | default = "0.3.1",
-    source_object_hash
-      | default
-      = "c176b889b75630a17f4e3d7ef24c09a3e12368e633496087459c8b53ac3a122d",
-    name = "colord-gtk-%{version}",
+    name = "colord-gtk-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -58,13 +53,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = colord_gtk_src version source_object_hash,
+      source = pkgs.colord_gtk_src,
     },
   }
   in
 
   {
     include [
+      colord_gtk_src,
       colord_gtk,
     ],
   }

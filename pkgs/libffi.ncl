@@ -1,21 +1,18 @@
 fun pkgs =>
-  let libffi_src = fun version =>
-    fun hash =>
-      {
-        name = "libffi-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/libffi/libffi/releases/download/v%{version}/libffi-%{version}.tar.gz",
-        },
-      }
+  let libffi_src = {
+    version | default = "3.6.0",
+    name = "libffi-src-%{version}",
+    tag = "Source",
+    object_hash | default = "31ff1fe32deaebfbb388727f32677bb254bf2a41382c51464c0b1837c9ee9828",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/libffi/libffi/releases/download/v%{version}/libffi-%{version}.tar.gz",
+    },
+  }
   in
 
   let libffi = {
-    version | default = "3.6.0",
-    source_object_hash | default = "31ff1fe32deaebfbb388727f32677bb254bf2a41382c51464c0b1837c9ee9828",
-    name = "libffi-%{version}",
+    name = "libffi-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [],
@@ -33,13 +30,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libffi_src version source_object_hash,
+      source = pkgs.libffi_src,
     },
   }
   in
 
   {
     include [
+      libffi_src,
       libffi,
     ],
   }

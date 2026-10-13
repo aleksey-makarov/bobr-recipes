@@ -10,27 +10,22 @@
 # polkit, the systemd suspend/resume + journal integration, man pages, bash
 # completion, tests and examples are all off. udev/gudev stay on (gudev-1.0 and
 # udev.pc come from systemd-dev); libsystemd.pc (needed by dbus-1.pc) too.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.modemmanager_src`.
 fun pkgs =>
-  let mm_src = fun version =>
-    fun hash =>
-      {
-        name = "ModemManager-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/archive/%{version}/ModemManager-%{version}.tar.gz",
-        },
-      }
+  let modemmanager_src = {
+    version | default = "1.24.2",
+    name = "ModemManager-src-%{version}",
+    tag = "Source",
+    object_hash | default = "fbc75adcc0d7b0565f256e7ff4e8872b0a37c4413ff576665f7470932d9c1b68",
+    origin = {
+      tag = "Http",
+      url = "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/archive/%{version}/ModemManager-%{version}.tar.gz",
+    },
+  }
   in
 
   let modemmanager = {
-    version | default = "1.24.2",
-    source_object_hash
-      | default
-      = "fbc75adcc0d7b0565f256e7ff4e8872b0a37c4413ff576665f7470932d9c1b68",
-    name = "ModemManager-%{version}",
+    name = "ModemManager-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -73,13 +68,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mm_src version source_object_hash,
+      source = pkgs.modemmanager_src,
     },
   }
   in
 
   {
     include [
+      modemmanager_src,
       modemmanager,
     ],
   }

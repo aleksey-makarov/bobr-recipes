@@ -1,17 +1,16 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let slang_src = fun version =>
-    fun hash =>
-      {
-        name = "slang-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://www.jedsoft.org/releases/slang/slang-%{version}.tar.bz2",
-        },
-      }
+  let slang_src = {
+    version | default = "2.3.3",
+    name = "slang-src-%{version}",
+    tag = "Source",
+    object_hash | default = "f9145054ae131973c61208ea82486d5dd10e3c5cdad23b7c4a0617743c8f5a18",
+    origin = {
+      tag = "Http",
+      url = "https://www.jedsoft.org/releases/slang/slang-%{version}.tar.bz2",
+    },
+  }
   in
 
   let use_path_ln_patch = {
@@ -26,9 +25,7 @@ fun pkgs =>
   in
 
   let slang = {
-    version | default = "2.3.3",
-    source_object_hash | default = "f9145054ae131973c61208ea82486d5dd10e3c5cdad23b7c4a0617743c8f5a18",
-    name = "slang-%{version}",
+    name = "slang-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -68,7 +65,7 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = slang_src version source_object_hash,
+      source = pkgs.slang_src,
       patch_use_path_ln = use_path_ln_patch,
     },
   }
@@ -88,6 +85,7 @@ fun pkgs =>
 
   {
     include [
+      slang_src,
       slang,
       slang_libs,
     ],

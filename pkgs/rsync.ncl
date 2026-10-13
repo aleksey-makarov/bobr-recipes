@@ -1,21 +1,18 @@
 fun pkgs =>
-  let rsync_src = fun version =>
-    fun hash =>
-      {
-        name = "rsync-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.samba.org/pub/rsync/src/rsync-%{version}.tar.gz",
-        },
-      }
+  let rsync_src = {
+    version | default = "3.4.2",
+    name = "rsync-src-%{version}",
+    tag = "Source",
+    object_hash | default = "ff10aa2c151cd4b2dbbe6135126dbc854046113d2dfb49572a348233267eb315",
+    origin = {
+      tag = "Http",
+      url = "https://download.samba.org/pub/rsync/src/rsync-%{version}.tar.gz",
+    },
+  }
   in
 
   let rsync = {
-    version | default = "3.4.2",
-    source_object_hash | default = "ff10aa2c151cd4b2dbbe6135126dbc854046113d2dfb49572a348233267eb315",
-    name = "rsync-%{version}",
+    name = "rsync-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       # --without-included-zlib links the system zlib, so its headers must be in
@@ -39,13 +36,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = rsync_src version source_object_hash,
+      source = pkgs.rsync_src,
     },
   }
   in
 
   {
     include [
+      rsync_src,
       rsync,
     ],
   }

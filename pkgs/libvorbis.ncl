@@ -2,27 +2,22 @@
 # libvorbisfile, which libcanberra uses to decode the event-sound theme .ogg
 # files; libcanberra in turn is a hard dependency of gnome-settings-daemon.
 # Autotools build; links libogg.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.libvorbis_src`.
 fun pkgs =>
-  let libvorbis_src = fun version =>
-    fun hash =>
-      {
-        name = "libvorbis-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://downloads.xiph.org/releases/vorbis/libvorbis-%{version}.tar.xz",
-        },
-      }
+  let libvorbis_src = {
+    version | default = "1.3.7",
+    name = "libvorbis-src-%{version}",
+    tag = "Source",
+    object_hash | default = "b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b",
+    origin = {
+      tag = "Http",
+      url = "https://downloads.xiph.org/releases/vorbis/libvorbis-%{version}.tar.xz",
+    },
+  }
   in
 
   let libvorbis = {
-    version | default = "1.3.7",
-    source_object_hash
-      | default
-      = "b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b",
-    name = "libvorbis-%{version}",
+    name = "libvorbis-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -40,13 +35,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = libvorbis_src version source_object_hash,
+      source = pkgs.libvorbis_src,
     },
   }
   in
 
   {
     include [
+      libvorbis_src,
       libvorbis,
     ],
   }

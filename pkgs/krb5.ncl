@@ -2,29 +2,24 @@ let recipe = import "../recipe-lib.ncl" in
 # krb5 -- MIT Kerberos 5. gnome-control-center's System panel hard-requires krb5
 # (`dependency('krb5')` + assert). Autotools build; the configure script lives in
 # the tarball's src/ subdirectory. Installs into merged-usr (sbin -> bin).
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.krb5_src`.
 fun pkgs =>
   let series = recipe.version_prefix 2 in
 
-  let krb5_src = fun version =>
-    fun hash =>
-      {
-        name = "krb5-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://kerberos.org/dist/krb5/%{series version}/krb5-%{version}.tar.gz",
-        },
-      }
+  let krb5_src = {
+    version | default = "1.22.2",
+    name = "krb5-src-%{version}",
+    tag = "Source",
+    object_hash | default = "3243ffbc8ea4d4ac22ddc7dd2a1dc54c57874c40648b60ff97009763554eaf13",
+    origin = {
+      tag = "Http",
+      url = "https://kerberos.org/dist/krb5/%{series version}/krb5-%{version}.tar.gz",
+    },
+  }
   in
 
   let krb5 = {
-    version | default = "1.22.2",
-    source_object_hash
-      | default
-      = "3243ffbc8ea4d4ac22ddc7dd2a1dc54c57874c40648b60ff97009763554eaf13",
-    name = "krb5-%{version}",
+    name = "krb5-%{inputs.source.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -63,9 +58,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = krb5_src version source_object_hash,
+      source = pkgs.krb5_src,
     },
   }
   in
 
-  { include [krb5] }
+  {
+    include [
+      krb5_src,
+      krb5
+    ]
+  }

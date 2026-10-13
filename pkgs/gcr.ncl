@@ -5,29 +5,24 @@ let recipe = import "../recipe-lib.ncl" in
 # socket activation, vala bindings and gi-docgen docs are all off -- gnome-shell
 # needs libgcr-4, not those. Crypto backend is libgcrypt (the default); trust
 # and PKCS#11 come from p11-kit-1.
-# `version`/`source_object_hash`/`series` are node fields (overridable).
+# Configure version and hash through `pkgs.gcr_src`.
 let series = recipe.version_prefix 2 in
 
 fun pkgs =>
-  let gcr_src = fun version =>
-    fun hash =>
-      {
-        name = "gcr-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/gcr/%{series version}/gcr-%{version}.tar.xz",
-        },
-      }
+  let gcr_src = {
+    version | default = "4.4.0.1",
+    name = "gcr-src-%{version}",
+    tag = "Source",
+    object_hash | default = "0c3c341e49f9f4f2532a4884509804190a0c2663e6120360bb298c5d174a8098",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/gcr/%{series version}/gcr-%{version}.tar.xz",
+    },
+  }
   in
 
   let gcr = {
-    version | default = "4.4.0.1",
-    source_object_hash
-      | default
-      = "0c3c341e49f9f4f2532a4884509804190a0c2663e6120360bb298c5d174a8098",
-    name = "gcr-%{version}",
+    name = "gcr-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -60,13 +55,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = gcr_src version source_object_hash,
+      source = pkgs.gcr_src,
     },
   }
   in
 
   {
     include [
+      gcr_src,
       gcr,
     ],
   }

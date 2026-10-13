@@ -1,21 +1,18 @@
 fun pkgs =>
-  let lz4_src = fun version =>
-    fun hash =>
-      {
-        name = "lz4-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/lz4/lz4/releases/download/v%{version}/lz4-%{version}.tar.gz",
-        },
-      }
+  let lz4_src = {
+    version | default = "1.10.0",
+    name = "lz4-src-%{version}",
+    tag = "Source",
+    object_hash | default = "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/lz4/lz4/releases/download/v%{version}/lz4-%{version}.tar.gz",
+    },
+  }
   in
 
   let lz4 = {
-    version | default = "1.10.0",
-    source_object_hash | default = "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b",
-    name = "lz4-%{version}",
+    name = "lz4-%{inputs.source.version}",
     tag = "Makefile",
     deps = {
       build = [],
@@ -30,13 +27,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = lz4_src version source_object_hash,
+      source = pkgs.lz4_src,
     },
   }
   in
 
   {
     include [
+      lz4_src,
       lz4,
     ],
   }

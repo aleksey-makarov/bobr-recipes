@@ -2,25 +2,22 @@
 # application (invokes ninja at run time), so it lives in the root as an ordinary
 # recipe rather than under python/ with the library modules; it still builds via
 # the PythonModule tag (setuptools backend). See python/README.txt.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.meson_src`.
 fun pkgs =>
-  let meson_src = fun version =>
-    fun hash =>
-      {
-        name = "meson-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/mesonbuild/meson/releases/download/%{version}/meson-%{version}.tar.gz",
-        },
-      }
+  let meson_src = {
+    version | default = "1.8.3",
+    name = "meson-src-%{version}",
+    tag = "Source",
+    object_hash | default = "f118aa910fc0a137cc2dd0122232dbf82153d9a12fb5b0f5bb64896f6a157abf",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/mesonbuild/meson/releases/download/%{version}/meson-%{version}.tar.gz",
+    },
+  }
   in
 
   let meson = {
-    version | default = "1.8.3",
-    source_object_hash | default = "f118aa910fc0a137cc2dd0122232dbf82153d9a12fb5b0f5bb64896f6a157abf",
-    name = "meson-%{version}",
+    name = "meson-%{inputs.source.version}",
     tag = "PythonModule",
     deps = {
       build = [
@@ -50,9 +47,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = meson_src version source_object_hash,
+      source = pkgs.meson_src,
     },
   }
   in
 
-  { include [meson] }
+  {
+    include [
+      meson_src,
+      meson
+    ]
+  }

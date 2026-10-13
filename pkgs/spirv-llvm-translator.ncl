@@ -1,25 +1,20 @@
 fun pkgs =>
-  let spirv_llvm_translator_src = fun version =>
-    fun hash =>
-      {
-        name = "spirv-llvm-translator-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v%{version}.tar.gz",
-        },
-      }
+  let spirv_llvm_translator_src = {
+    version | default = "22.1.4",
+    name = "spirv-llvm-translator-src-%{version}",
+    tag = "Source",
+    object_hash | default = "77888f4e22e312d1ac05737407c45dffcc6d0c9c725f9d08bbeb04a6dbe1a5f2",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v%{version}.tar.gz",
+    },
+  }
   in
 
   # Mesa's CLC compiler links LLVMSPIRVLib. Translator release lines are tied
   # to an LLVM major/minor, so keep this on 22.1 alongside llvm_bin 22.1.8.
   let spirv_llvm_translator = {
-    version | default = "22.1.4",
-    source_object_hash
-      | default
-      = "77888f4e22e312d1ac05737407c45dffcc6d0c9c725f9d08bbeb04a6dbe1a5f2",
-    name = "spirv-llvm-translator-%{version}",
+    name = "spirv-llvm-translator-%{inputs.source.version}",
     tag = "Cmake",
     deps = {
       build = [
@@ -56,14 +51,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source =
-        spirv_llvm_translator_src version source_object_hash,
+      source = pkgs.spirv_llvm_translator_src,
     },
   }
   in
 
   {
     include [
+      spirv_llvm_translator_src,
       spirv_llvm_translator,
     ],
   }

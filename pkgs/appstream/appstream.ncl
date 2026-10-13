@@ -4,30 +4,25 @@
 # libxml2, libfyaml, libxmlb and libcurl. Qt bindings, systemd/journal, Vala,
 # gir, apt support, display detection, optional compression/hashing, SVG
 # rendering, the Snowball stemmer, the compose tool and all docs are off.
-# `version`/`source_object_hash` are node fields (overridable).
+# Configure version and hash through `pkgs.appstream_src`.
 fun pkgs =>
-  let appstream_src = fun version =>
-    fun hash =>
-      {
-        name = "appstream-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://www.freedesktop.org/software/appstream/releases/AppStream-%{version}.tar.xz",
-            "https://deb.debian.org/debian/pool/main/a/appstream/appstream_%{version}.orig.tar.xz",
-          ],
-        },
-      }
+  let appstream_src = {
+    version | default = "1.1.6",
+    name = "appstream-src-%{version}",
+    tag = "Source",
+    object_hash | default = "e298929f39729e84a70f6be6941f3e7f3fc2ee3c83cb3ea1b1b5b280a8fe3a24",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://www.freedesktop.org/software/appstream/releases/AppStream-%{version}.tar.xz",
+        "https://deb.debian.org/debian/pool/main/a/appstream/appstream_%{version}.orig.tar.xz",
+      ],
+    },
+  }
   in
 
   let appstream = {
-    version | default = "1.1.6",
-    source_object_hash
-      | default
-      = "e298929f39729e84a70f6be6941f3e7f3fc2ee3c83cb3ea1b1b5b280a8fe3a24",
-    name = "appstream-%{version}",
+    name = "appstream-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -72,7 +67,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = appstream_src version source_object_hash,
+      source = pkgs.appstream_src,
       # Replaces the appstreamcli metainfo's itstool_join with a plain install of
       # the untranslated file, so the build needs no itstool (which would need
       # python libxml2 bindings). Applied by the synthetic builder (name ^patch).
@@ -91,6 +86,7 @@ fun pkgs =>
 
   {
     include [
+      appstream_src,
       appstream,
     ],
   }

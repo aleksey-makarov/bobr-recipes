@@ -1,26 +1,21 @@
 fun pkgs =>
-  let glu_src = fun version =>
-    fun hash =>
-      {
-        name = "glu-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://archive.mesa3d.org/glu/glu-%{version}.tar.xz",
-            "https://sources.buildroot.net/libglu/glu-%{version}.tar.xz",
-          ],
-        },
-      }
+  let glu_src = {
+    version | default = "9.0.3",
+    name = "glu-src-%{version}",
+    tag = "Source",
+    object_hash | default = "bd43fe12f374b1192eb15fe20e45ff456b9bc26ab57f0eee919f96ca0f8a330f",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://archive.mesa3d.org/glu/glu-%{version}.tar.xz",
+        "https://sources.buildroot.net/libglu/glu-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let glu = {
-    version | default = "9.0.3",
-    source_object_hash
-      | default
-      = "bd43fe12f374b1192eb15fe20e45ff456b9bc26ab57f0eee919f96ca0f8a330f",
-    name = "glu-%{version}",
+    name = "glu-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -52,13 +47,14 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = glu_src version source_object_hash,
+      source = pkgs.glu_src,
     },
   }
   in
 
   {
     include [
+      glu_src,
       glu,
     ],
   }

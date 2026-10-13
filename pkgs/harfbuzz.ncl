@@ -3,26 +3,23 @@
 # hb-cairo would pull cairo->freetype into the graph). The dependency on
 # freetype is one-directional (freetype is NOT rebuilt with harfbuzz -- that
 # would create a mutual runtime dep, and harfbuzz-in-freetype only tweaks
-# autohinting), so there is no cycle. `version`/`source_object_hash` are node fields
-# (overridable), as in linux.ncl.
+# autohinting), so there is no cycle.
+# Configure version and hash through `pkgs.harfbuzz_src`.
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "harfbuzz-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/harfbuzz/harfbuzz/releases/download/%{version}/harfbuzz-%{version}.tar.xz",
-        },
-      }
+  let harfbuzz_src = {
+    version | default = "14.2.1",
+    name = "harfbuzz-src-%{version}",
+    tag = "Source",
+    object_hash | default = "a54a5d8e9380a41fbb762ce367bcbf7704792dfca0d93f1bbca86c5a57902e0e",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/harfbuzz/harfbuzz/releases/download/%{version}/harfbuzz-%{version}.tar.xz",
+    },
+  }
   in
 
   let harfbuzz = {
-    version | default = "14.2.1",
-    source_object_hash | default = "a54a5d8e9380a41fbb762ce367bcbf7704792dfca0d93f1bbca86c5a57902e0e",
-    name = "harfbuzz-%{version}",
+    name = "harfbuzz-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -52,13 +49,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.harfbuzz_src,
     },
   }
   in
 
   {
     include [
+      harfbuzz_src,
       harfbuzz,
     ],
   }

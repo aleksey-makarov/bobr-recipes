@@ -1,24 +1,21 @@
 # libgudev -- GObject bindings for libudev (device enumeration), required by
-# colord and mutter. Wraps libudev from systemd. `version`/`source_object_hash` are node
-# fields (overridable), as in linux.ncl.
+# colord and mutter. Wraps libudev from systemd.
+# Configure version and hash through `pkgs.libgudev_src`.
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "libgudev-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/libgudev/%{version}/libgudev-%{version}.tar.xz",
-        },
-      }
+  let libgudev_src = {
+    version | default = "238",
+    name = "libgudev-src-%{version}",
+    tag = "Source",
+    object_hash | default = "61266ab1afc9d73dbc60a8b2af73e99d2fdff47d99544d085760e4fa667b5dd1",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/libgudev/%{version}/libgudev-%{version}.tar.xz",
+    },
+  }
   in
 
   let libgudev = {
-    version | default = "238",
-    source_object_hash | default = "61266ab1afc9d73dbc60a8b2af73e99d2fdff47d99544d085760e4fa667b5dd1",
-    name = "libgudev-%{version}",
+    name = "libgudev-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -43,13 +40,14 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.libgudev_src,
     },
   }
   in
 
   {
     include [
+      libgudev_src,
       libgudev,
     ],
   }

@@ -1,26 +1,23 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let gawk_src = fun version =>
-    fun hash =>
-      {
-        name = "gawk-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/gawk/gawk-%{version}.tar.xz",
-            "https://mirrors.kernel.org/gnu/gawk/gawk-%{version}.tar.xz",
-          ],
-        },
-      }
+  let gawk_src = {
+    version | default = "5.3.2",
+    name = "gawk-src-%{version}",
+    tag = "Source",
+    object_hash | default = "f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/gawk/gawk-%{version}.tar.xz",
+        "https://mirrors.kernel.org/gnu/gawk/gawk-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   let gawk_gen1 = {
-    version | default = "5.3.2",
-    source_object_hash | default = "f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc",
-    name = "gawk-gen1-%{version}",
+    name = "gawk-gen1-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--without-readline"],
@@ -52,7 +49,7 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.oci_buildpack_deps_rootfs,
-      source = gawk_src version source_object_hash,
+      source = pkgs.gawk_src,
     },
   }
   in
@@ -92,9 +89,7 @@ fun pkgs =>
   in
 
   let gawk = {
-    version | default = "5.3.2",
-    source_object_hash | default = "f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc",
-    name = "gawk-%{version}",
+    name = "gawk-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       configure_args = ["--without-readline"],
@@ -110,13 +105,14 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = recipe.bootstrap_toolchain_rootfs pkgs "gawk-build-rootfs" [],
-      source = gawk_src version source_object_hash,
+      source = pkgs.gawk_src,
     },
   }
   in
 
   {
     include [
+      gawk_src,
       gawk_gen1,
       awk_symlink,
       gawk,

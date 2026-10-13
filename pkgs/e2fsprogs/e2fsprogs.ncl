@@ -1,17 +1,16 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let e2fsprogs_src = fun version =>
-    fun hash =>
-      {
-        name = "e2fsprogs-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v%{version}/e2fsprogs-%{version}.tar.gz",
-        },
-      }
+  let e2fsprogs_src = {
+    version | default = "1.47.3",
+    name = "e2fsprogs-src-%{version}",
+    tag = "Source",
+    object_hash | default = "2f5164e64dd7d91eadd1e0e8a77d92c06dd7837bb19f1d9189ce1939b363d2b4",
+    origin = {
+      tag = "Http",
+      url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v%{version}/e2fsprogs-%{version}.tar.gz",
+    },
+  }
   in
 
   let buildscript_e2fsprogs = {
@@ -26,9 +25,7 @@ fun pkgs =>
   in
 
   let e2fsprogs = {
-    version | default = "1.47.3",
-    source_object_hash | default = "2f5164e64dd7d91eadd1e0e8a77d92c06dd7837bb19f1d9189ce1939b363d2b4",
-    name = "e2fsprogs-%{version}",
+    name = "e2fsprogs-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -70,13 +67,14 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_e2fsprogs,
-      source = e2fsprogs_src version source_object_hash,
+      source = pkgs.e2fsprogs_src,
     },
   }
   in
 
   {
     include [
+      e2fsprogs_src,
       e2fsprogs,
     ],
   }

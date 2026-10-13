@@ -1,17 +1,16 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let iana_etc_src = fun version =>
-    fun hash =>
-      {
-        name = "iana-etc-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/Mic92/iana-etc/releases/download/%{version}/iana-etc-%{version}.tar.gz",
-        },
-      }
+  let iana_etc_src = {
+    version | default = "20250807",
+    name = "iana-etc-src-%{version}",
+    tag = "Source",
+    object_hash | default = "4f88470a2cac2a2f9568285aaff9aeaee0ab66c6ba3c12bba51adca915fa92b1",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/Mic92/iana-etc/releases/download/%{version}/iana-etc-%{version}.tar.gz",
+    },
+  }
   in
 
   let buildscript_iana_etc = {
@@ -26,9 +25,7 @@ fun pkgs =>
   in
 
   let iana_etc = {
-    version | default = "20250807",
-    source_object_hash | default = "4f88470a2cac2a2f9568285aaff9aeaee0ab66c6ba3c12bba51adca915fa92b1",
-    name = "iana-etc-%{version}",
+    name = "iana-etc-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -55,13 +52,14 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_iana_etc,
-      source = iana_etc_src version source_object_hash,
+      source = pkgs.iana_etc_src,
     },
   }
   in
 
   {
     include [
+      iana_etc_src,
       iana_etc,
     ],
   }

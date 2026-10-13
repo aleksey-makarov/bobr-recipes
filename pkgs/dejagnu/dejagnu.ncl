@@ -1,20 +1,19 @@
 let recipe = import "../../recipe-lib.ncl" in
 
 fun pkgs =>
-  let dejagnu_src = fun version =>
-    fun hash =>
-      {
-        name = "dejagnu-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://ftp.gnu.org/gnu/dejagnu/dejagnu-%{version}.tar.gz",
-            "https://mirrors.kernel.org/gnu/dejagnu/dejagnu-%{version}.tar.gz",
-          ],
-        },
-      }
+  let dejagnu_src = {
+    version | default = "1.6.3",
+    name = "dejagnu-src-%{version}",
+    tag = "Source",
+    object_hash | default = "87daefacd7958b4a69f88c6856dbd1634261963c414079d0c371f589cd66a2e3",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://ftp.gnu.org/gnu/dejagnu/dejagnu-%{version}.tar.gz",
+        "https://mirrors.kernel.org/gnu/dejagnu/dejagnu-%{version}.tar.gz",
+      ],
+    },
+  }
   in
 
   let buildscript_dejagnu = {
@@ -29,9 +28,7 @@ fun pkgs =>
   in
 
   let dejagnu = {
-    version | default = "1.6.3",
-    source_object_hash | default = "87daefacd7958b4a69f88c6856dbd1634261963c414079d0c371f589cd66a2e3",
-    name = "dejagnu-%{version}",
+    name = "dejagnu-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -72,13 +69,14 @@ fun pkgs =>
     },
     inputs = {
       script = buildscript_dejagnu,
-      source = dejagnu_src version source_object_hash,
+      source = pkgs.dejagnu_src,
     },
   }
   in
 
   {
     include [
+      dejagnu_src,
       dejagnu,
     ],
   }

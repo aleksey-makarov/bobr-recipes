@@ -473,4 +473,125 @@ jq -e '
   )
 ' "${temporary}/bundle-tests.json" >/dev/null
 
-echo "recipe overlay tests passed (library/compiler splits, runtime, initrd, aggregates, private inputs, Rust std, bundle tests)"
+# Pilot public archive Source owns version/hash. Both builders share it by
+# default; input-level overrides can select independent Sources and versions.
+nickel export --format json >"${temporary}/gzip-source.json" <<EOF_NICKEL
+let recipe = import "${repo_root}/recipe-lib.ncl" in
+let package_set = import "${repo_root}/bobrpkgs.ncl" in
+let replacement = {
+  version = "7.6.5",
+  name = "overlay-gzip-source",
+  tag = "Source",
+  object_hash = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  origin = { tag = "Http", url = "https://example.invalid/custom-gzip.tar.xz" },
+} in
+let run = fun overlays =>
+  let pkgs = package_set overlays in
+  {
+    final_name = pkgs.gzip.name,
+    builders_have_version = std.record.has_field "version" pkgs.gzip || std.record.has_field "version" pkgs.gzip_gen1,
+    builders_have_hash = std.record.has_field "source_object_hash" pkgs.gzip || std.record.has_field "source_object_hash" pkgs.gzip_gen1,
+    public_source = pkgs.gzip_src,
+    final_source = pkgs.gzip.inputs.source,
+    bootstrap_name = pkgs.gzip_gen1.name,
+    bootstrap_source = pkgs.gzip_gen1.inputs.source,
+    request = recipe.to_request { recipes_path = "${repo_root}" } pkgs pkgs.gzip,
+    source_request = recipe.to_request { recipes_path = "${repo_root}" } pkgs pkgs.gzip_src,
+  }
+in
+{
+  original = run [],
+  source_fields = run [fun _final => fun prev => {
+    gzip_src = prev.gzip_src & {
+      version = "9.8.7",
+      object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    },
+  }],
+  source_hash = run [fun _final => fun prev => {
+    gzip_src = prev.gzip_src & {
+      object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    },
+  }],
+  source_origin = run [fun _final => fun prev => {
+    gzip_src = prev.gzip_src & {
+      origin | force = { tag = "Http", url = "https://example.invalid/gzip-mirror.tar.xz" },
+    },
+  }],
+  source_replacement = run [fun _final => fun _prev => { gzip_src = replacement }],
+  bootstrap_input = run [fun _final => fun prev => {
+    gzip_gen1 = prev.gzip_gen1 & {
+      inputs.source | force = replacement,
+    },
+  }],
+  final_input = run [fun _final => fun prev => {
+    gzip = prev.gzip & {
+      inputs.source | force = replacement,
+    },
+  }],
+  final_input_same_version = run [fun _final => fun prev => {
+    gzip = prev.gzip & {
+      inputs.source | force = replacement & { version | force = "1.14" },
+    },
+  }],
+  combined = run [fun _final => fun prev => {
+    gzip_src = prev.gzip_src & {
+      version = "9.8.7",
+      object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    },
+    gzip_gen1 = prev.gzip_gen1 & { inputs.source | force = replacement },
+  }],
+}
+EOF_NICKEL
+jq -e '
+  length == 9 and (.original as $original |
+  .original.final_source.name == "gzip-src-1.14"
+  and .original.final_name == "gzip-1.14"
+  and .original.bootstrap_name == "gzip-gen1-1.14"
+  and .original.bootstrap_source == .original.final_source
+  and .source_fields.final_source.name == "gzip-src-9.8.7"
+  and .source_fields.final_name == "gzip-9.8.7"
+  and .source_fields.bootstrap_name == "gzip-gen1-9.8.7"
+  and .source_fields.final_source.object_hash == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  and .source_fields.bootstrap_source == .source_fields.final_source
+  and .source_fields.final_source.origin.url == [
+    "https://ftp.gnu.org/gnu/gzip/gzip-9.8.7.tar.xz",
+    "https://mirrors.kernel.org/gnu/gzip/gzip-9.8.7.tar.xz"
+  ]
+  and .source_hash.final_source.name == $original.final_source.name
+  and .source_hash.final_source.object_hash == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  and .source_hash.bootstrap_source == .source_hash.final_source
+  and .source_origin.final_source.origin.url == "https://example.invalid/gzip-mirror.tar.xz"
+  and .source_origin.final_source.object_hash == $original.final_source.object_hash
+  and .source_origin.bootstrap_source == .source_origin.final_source
+  and .source_replacement.final_source.name == "overlay-gzip-source"
+  and .source_replacement.final_source.object_hash == "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  and .source_replacement.bootstrap_source == .source_replacement.final_source
+  and .bootstrap_input.bootstrap_name == "gzip-gen1-7.6.5"
+  and .bootstrap_input.bootstrap_source == .source_replacement.final_source
+  and .bootstrap_input.final_source == $original.final_source
+  and .final_input.final_name == "gzip-7.6.5"
+  and .final_input.final_source == .source_replacement.final_source
+  and .final_input.bootstrap_source == $original.bootstrap_source
+  and .final_input_same_version.final_name == "gzip-1.14"
+  and .final_input_same_version.final_source.name == "overlay-gzip-source"
+  and .final_input_same_version.final_source.object_hash == "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  and .final_input_same_version.bootstrap_source == $original.bootstrap_source
+  and .combined.final_name == "gzip-9.8.7"
+  and .combined.bootstrap_name == "gzip-gen1-7.6.5"
+  and .combined.final_source == .source_fields.final_source
+  and .combined.bootstrap_source == .source_replacement.final_source
+  and all(to_entries[];
+    .value as $case | $case.request as $graph |
+    ($case.builders_have_version | not) and ($case.builders_have_hash | not)
+    and $case.final_name == ("gzip-" + $case.final_source.version)
+    and $case.bootstrap_name == ("gzip-gen1-" + $case.bootstrap_source.version)
+    and ($case.source_request | length) == 1
+    and $case.source_request.root == ($case.public_source | del(.version))
+    and $graph[$graph[$graph.root.inputs.tree].inputs.source] == ($case.final_source | del(.version))
+    and ([$graph[] | select(.name == ($case.bootstrap_name + "-staged"))] as $bootstrap |
+      ($bootstrap | length) == 1
+      and $graph[$bootstrap[0].inputs.source] == ($case.bootstrap_source | del(.version)))
+  ))
+' "${temporary}/gzip-source.json" >/dev/null
+
+echo "recipe overlay tests passed (library/compiler splits, runtime, initrd, aggregates, private inputs, Rust std, bundle tests, gzip Source)"
