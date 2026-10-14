@@ -4,6 +4,7 @@ set -euo pipefail
 step="${1:-${BOBR_STEP_NAME:-}}"
 step="${step:?step name is required}"
 source_dir="${BOBR_SOURCE_DIR:?BOBR_SOURCE_DIR is required}"
+perl_api_version="${PERL_API_VERSION:?PERL_API_VERSION is required}"
 # Install into the virgin /stage (SandboxStageRootfs): configure baked prefix=/usr,
 # DESTDIR relocates it, and the lowering's TreeMove re-roots /stage -> /.
 out_dir="/stage"
@@ -69,12 +70,12 @@ step_configure() {
   sh Configure -des \
     -D prefix=/usr \
     -D vendorprefix=/usr \
-    -D privlib=/usr/lib/perl5/5.42/core_perl \
-    -D archlib=/usr/lib/perl5/5.42/core_perl \
-    -D sitelib=/usr/lib/perl5/5.42/site_perl \
-    -D sitearch=/usr/lib/perl5/5.42/site_perl \
-    -D vendorlib=/usr/lib/perl5/5.42/vendor_perl \
-    -D vendorarch=/usr/lib/perl5/5.42/vendor_perl \
+    -D privlib="/usr/lib/perl5/${perl_api_version}/core_perl" \
+    -D archlib="/usr/lib/perl5/${perl_api_version}/core_perl" \
+    -D sitelib="/usr/lib/perl5/${perl_api_version}/site_perl" \
+    -D sitearch="/usr/lib/perl5/${perl_api_version}/site_perl" \
+    -D vendorlib="/usr/lib/perl5/${perl_api_version}/vendor_perl" \
+    -D vendorarch="/usr/lib/perl5/${perl_api_version}/vendor_perl" \
     -D man1dir=/usr/share/man/man1 \
     -D man3dir=/usr/share/man/man3 \
     -D pager='/usr/bin/less -isR' \

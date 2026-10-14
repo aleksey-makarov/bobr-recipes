@@ -2,9 +2,6 @@ let recipe = import "../../recipe-lib.ncl" in
 let br = import "../../build-rootfs.ncl" in
 # Perl and its build-only CPAN modules are aggregated here so the package set
 # imports only perl/perl.ncl (not each module file individually).
-let mk_perl_parse_yapp = import "perl-parse-yapp.ncl" in
-let mk_perl_xml_parser = import "perl-xml-parser.ncl" in
-
 fun pkgs =>
   let buildscript_perl_configure = {
     name = "buildscript-perl-configure",
@@ -17,23 +14,20 @@ fun pkgs =>
   }
   in
 
-  let perl_src = fun version =>
-    fun hash =>
-      {
-        name = "perl-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://www.cpan.org/src/5.0/perl-%{version}.tar.xz",
-        },
-      }
+  let perl_src = {
+    version | default = "5.42.2",
+    name = "perl-src-%{version}",
+    tag = "Source",
+    object_hash | default = "0a585eeb9e363c0f80482ddb3571625250c2c86aeb408853e8ea50805cfb14bb",
+    origin = {
+      tag = "Http",
+      url = "https://www.cpan.org/src/5.0/perl-%{version}.tar.xz",
+    },
+  }
   in
 
   let perl = {
-    version | default = "5.42.2",
-    source_object_hash | default = "0a585eeb9e363c0f80482ddb3571625250c2c86aeb408853e8ea50805cfb14bb",
-    name = "perl-%{version}",
+    name = "perl-%{inputs.source.version}",
     tag = "SandboxStageDeps",
     deps = {
       # Deps-derived build rootfs (SandboxStageDeps assembles it, no hand-rolled
@@ -48,41 +42,45 @@ fun pkgs =>
         pkgs.zlib,
       ],
     },
-    config = {
-      steps = [
-        recipe.prepare_source_step,
-        {
-          name = "configure",
-          run_as = "build-user",
-          cwd = "@{build}",
-          argv = ["@{script}", "configure"],
-          env = { BOBR_SOURCE_DIR = "@{build}/source" },
-        },
-        {
-          name = "build",
-          run_as = "build-user",
-          cwd = "@{build}",
-          argv = ["@{script}", "build"],
-          env = { BOBR_SOURCE_DIR = "@{build}/source" },
-        },
-        {
-          name = "install",
-          run_as = "root",
-          cwd = "@{build}",
-          argv = ["@{script}", "install"],
-          env = { BOBR_SOURCE_DIR = "@{build}/source" },
-        },
-      ],
-    },
+    config =
+      let step_env = {
+        BOBR_SOURCE_DIR = "@{build}/source",
+        PERL_API_VERSION = recipe.version_prefix 2 inputs.source.version,
+      }
+      in
+      {
+        steps = [
+          recipe.prepare_source_step,
+          {
+            name = "configure",
+            run_as = "build-user",
+            cwd = "@{build}",
+            argv = ["@{script}", "configure"],
+            env = step_env,
+          },
+          {
+            name = "build",
+            run_as = "build-user",
+            cwd = "@{build}",
+            argv = ["@{script}", "build"],
+            env = step_env,
+          },
+          {
+            name = "install",
+            run_as = "root",
+            cwd = "@{build}",
+            argv = ["@{script}", "install"],
+            env = step_env,
+          },
+        ],
+      },
     inputs = {
       script = buildscript_perl_configure,
-      source = perl_src version source_object_hash,
+      source = pkgs.perl_src,
     },
   }
   in
 
-  # `include` names each field after the identifier, so bind the applied nodes
-  # to their attribute names first (it cannot take an application expression).
-  let perl_parse_yapp = mk_perl_parse_yapp pkgs in
-  let perl_xml_parser = mk_perl_xml_parser pkgs in
-  { include [perl, perl_parse_yapp, perl_xml_parser] }
+  { include [perl_src, perl] }
+  & (import "perl-parse-yapp.ncl") pkgs
+  & (import "perl-xml-parser.ncl") pkgs

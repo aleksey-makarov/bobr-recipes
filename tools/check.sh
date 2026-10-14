@@ -84,6 +84,9 @@ tools/test/test-sqlite-source.sh
 step "systemd Source family"
 tools/test/test-systemd-sources.sh
 
+step "Perl Source family"
+tools/test/test-perl-sources.sh
+
 step "Linux Source family"
 tools/test/test-linux-sources.sh
 
