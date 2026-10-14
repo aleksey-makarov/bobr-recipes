@@ -3,28 +3,17 @@ let br = import "../../build-rootfs.ncl" in
 # package set imports only python/python.ncl (not each module file
 # individually). Each module is its own PythonModule recipe (additive install of
 # a pip-built wheel); the interpreter no longer bundles them.
-let mk_python_flit_core = import "python-flit-core.ncl" in
-let mk_python_setuptools = import "python-setuptools.ncl" in
-let mk_python_packaging = import "python-packaging.ncl" in
-let mk_python_wheel = import "python-wheel.ncl" in
-let mk_python_six = import "python-six.ncl" in
-let mk_python_markupsafe = import "python-markupsafe.ncl" in
-let mk_python_jinja2 = import "python-jinja2.ncl" in
-let mk_python_mako = import "python-mako.ncl" in
-let mk_python_pyyaml = import "python-pyyaml.ncl" in
-
 fun pkgs =>
-  let python_src = fun version =>
-    fun hash =>
-      {
-        name = "python-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://www.python.org/ftp/python/%{version}/Python-%{version}.tar.xz",
-        },
-      }
+  let python_src = {
+    version | default = "3.13.7",
+    name = "python-src-%{version}",
+    tag = "Source",
+    object_hash | default = "5462f9099dfd30e238def83c71d91897d8caa5ff6ebc7a50f14d4802cdaaa79a",
+    origin = {
+      tag = "Http",
+      url = "https://www.python.org/ftp/python/%{version}/Python-%{version}.tar.xz",
+    },
+  }
   in
 
   # Deps-derived build rootfs, replacing the curated system_rootfs_2: the native
@@ -58,9 +47,7 @@ fun pkgs =>
   in
 
   let python_gen1 = {
-    version | default = "3.13.7",
-    source_object_hash | default = "5462f9099dfd30e238def83c71d91897d8caa5ff6ebc7a50f14d4802cdaaa79a",
-    name = "python-gen1-%{version}",
+    name = "python-gen1-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     config = {
       in_tree = true,
@@ -110,15 +97,13 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = pkgs.oci_buildpack_deps_rootfs,
-      source = python_src version source_object_hash,
+      source = pkgs.python_src,
     },
   }
   in
 
   let python = {
-    version | default = "3.13.7",
-    source_object_hash | default = "5462f9099dfd30e238def83c71d91897d8caa5ff6ebc7a50f14d4802cdaaa79a",
-    name = "python-%{version}",
+    name = "python-%{inputs.source.version}",
     tag = "AutotoolsStageRootfs",
     deps = {
       build = [],
@@ -172,34 +157,18 @@ fun pkgs =>
     },
     inputs = {
       _rootfs = python_build_rootfs,
-      source = python_src version source_object_hash,
+      source = pkgs.python_src,
     },
   }
   in
 
-  # `include` names each field after the identifier, so bind the applied module
-  # nodes to their attribute names first (it cannot take application expressions).
-  let python_flit_core = mk_python_flit_core pkgs in
-  let python_setuptools = mk_python_setuptools pkgs in
-  let python_packaging = mk_python_packaging pkgs in
-  let python_wheel = mk_python_wheel pkgs in
-  let python_six = mk_python_six pkgs in
-  let python_markupsafe = mk_python_markupsafe pkgs in
-  let python_jinja2 = mk_python_jinja2 pkgs in
-  let python_mako = mk_python_mako pkgs in
-  let python_pyyaml = mk_python_pyyaml pkgs in
-  {
-    include [
-      python_gen1,
-      python,
-      python_flit_core,
-      python_setuptools,
-      python_packaging,
-      python_wheel,
-      python_six,
-      python_markupsafe,
-      python_jinja2,
-      python_mako,
-      python_pyyaml,
-    ]
-  }
+  { include [python_src, python_gen1, python] }
+  & (import "python-flit-core.ncl") pkgs
+  & (import "python-setuptools.ncl") pkgs
+  & (import "python-packaging.ncl") pkgs
+  & (import "python-wheel.ncl") pkgs
+  & (import "python-six.ncl") pkgs
+  & (import "python-markupsafe.ncl") pkgs
+  & (import "python-jinja2.ncl") pkgs
+  & (import "python-mako.ncl") pkgs
+  & (import "python-pyyaml.ncl") pkgs

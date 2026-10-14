@@ -87,6 +87,9 @@ tools/test/test-systemd-sources.sh
 step "Perl Source family"
 tools/test/test-perl-sources.sh
 
+step "Python Source family"
+tools/test/test-python-sources.sh
+
 step "Linux Source family"
 tools/test/test-linux-sources.sh
 
