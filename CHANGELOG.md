@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.12
+
+- Made package sources public recipes so overlays can replace versions and
+  archives without changing the default BuildKeys.
+- Made Cargo sources and vendored crates explicit inputs, and fixed overlays
+  through split outputs, runtime dependencies, images, and aggregate targets.
+- Split regular and tiny kernels, added host QEMU runners, and added public
+  repository profiles.
+
 ## 0.1.11
 
 - Added request v6 profiles with independent local and remote mapping/content
