@@ -205,6 +205,7 @@ in
   { source = "qemu_src", source_prefix = "qemu-src-", consumers = [{ attr = "qemu", name_prefix = "qemu-" }] },
   { source = "readline_src", source_prefix = "readline-src-", consumers = [{ attr = "readline", name_prefix = "readline-", config_follows_source = true, docdir_prefix = "--docdir=/usr/share/doc/readline-" }] },
   { source = "rsync_src", source_prefix = "rsync-src-", consumers = [{ attr = "rsync", name_prefix = "rsync-" }] },
+  { source = "rust_bin_src", source_prefix = "rust-bin-src-", consumers = [{ attr = "rust_bin", name_prefix = "rust-bin-" }] },
   { source = "samba_src", source_prefix = "samba-src-", consumers = [{ attr = "samba", name_prefix = "samba-" }] },
   { source = "sassc_src", source_prefix = "sassc-src-", consumers = [{ attr = "sassc", name_prefix = "sassc-" }] },
   { source = "sdl2_compat_src", source_prefix = "sdl2-compat-src-", consumers = [{ attr = "sdl2_compat", name_prefix = "sdl2-compat-" }] },

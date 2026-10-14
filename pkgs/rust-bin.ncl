@@ -6,26 +6,22 @@ let recipe = import "../recipe-lib.ncl" in
 # detour). The official dist targets an old glibc, so it runs on our newer glibc
 # (forward-compatible); rustc is relocatable (finds its sysroot next to the
 # binary), so installing it to /usr works. It never ships in a runtime rootfs --
-# only appears in build rootfs closures. `version`/`source_object_hash` are node fields
-# (overridable), as in linux.ncl.
+# only appears in build rootfs closures.
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "rust-bin-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://static.rust-lang.org/dist/rust-%{version}-x86_64-unknown-linux-gnu.tar.xz",
-        },
-      }
+  let rust_bin_src = {
+    version | default = "1.97.0",
+    name = "rust-bin-src-%{version}",
+    tag = "Source",
+    object_hash | default = "1cf17e4905b841d4c8e3f76467ac148d55fb3f54bf213c86f0d287a36471d904",
+    origin = {
+      tag = "Http",
+      url = "https://static.rust-lang.org/dist/rust-%{version}-x86_64-unknown-linux-gnu.tar.xz",
+    },
+  }
   in
 
   let rust_bin = {
-    version | default = "1.97.0",
-    source_object_hash | default = "1cf17e4905b841d4c8e3f76467ac148d55fb3f54bf213c86f0d287a36471d904",
-    name = "rust-bin-%{version}",
+    name = "rust-bin-%{inputs.source.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -67,7 +63,7 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.rust_bin_src,
     },
   }
   in
@@ -75,26 +71,22 @@ fun pkgs =>
   # Target standard library used to build the HostBundle launcher as a static
   # musl executable for the native x86_64 package set. Keep this as a separate
   # build-only layer instead of enlarging rust_bin for every Rust consumer.
-  # The target archive must always have exactly the same version as rust_bin.
-  let mk_rust_std_native_musl_src = fun version =>
-    fun hash =>
-      {
-        name = "rust-std-x86-64-unknown-linux-musl-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://static.rust-lang.org/dist/rust-std-%{version}-x86_64-unknown-linux-musl.tar.xz",
-        },
-      }
+  # Its version follows rust_bin by default; an explicit Source override lets
+  # callers manage a different compatible pairing themselves.
+  let rust_std_native_musl_src = {
+    version | default = pkgs.rust_bin.inputs.source.version,
+    name = "rust-std-x86-64-unknown-linux-musl-src-%{version}",
+    tag = "Source",
+    object_hash | default = "9744b43bed4a89db05e83dc8054d3e92e23ddb70a6c08c54ccde9a58d7b28627",
+    origin = {
+      tag = "Http",
+      url = "https://static.rust-lang.org/dist/rust-std-%{version}-x86_64-unknown-linux-musl.tar.xz",
+    },
+  }
   in
 
   let rust_std_native_musl = {
-    version | default = pkgs.rust_bin.version,
-    source_object_hash
-      | default
-      = "9744b43bed4a89db05e83dc8054d3e92e23ddb70a6c08c54ccde9a58d7b28627",
-    name = "rust-std-native-musl-%{version}",
+    name = "rust-std-native-musl-%{inputs.source.version}",
     tag = "SandboxStageDeps",
     deps = {
       build = [
@@ -132,14 +124,16 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      source = mk_rust_std_native_musl_src version source_object_hash,
+      source = pkgs.rust_std_native_musl_src,
     },
   }
   in
 
   {
     include [
+      rust_bin_src,
       rust_bin,
+      rust_std_native_musl_src,
       rust_std_native_musl,
     ],
   }

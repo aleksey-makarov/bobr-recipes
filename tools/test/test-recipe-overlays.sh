@@ -408,29 +408,57 @@ jq -e '
   )
 ' "${temporary}/private-sources.json" >/dev/null
 
-# Target std inherits the final compiler version, but remains independently
-# overridable. Changing versions still requires supplying matching source hashes.
+# Target std Source inherits the final compiler Source version, but remains
+# independently overridable. Changing versions still requires matching hashes.
 nickel export --format json >"${temporary}/rust-std.json" <<EOF_NICKEL
 let package_set = import "${repo_root}/bobrpkgs.ncl" in
 let compiler_overlay = fun _final => fun prev => {
-  rust_bin = prev.rust_bin & { version = "9.8.7" },
-  rust_std_native_musl = prev.rust_std_native_musl & {
-    source_object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  rust_bin_src = prev.rust_bin_src & {
+    version = "9.8.7",
+    object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  },
+  rust_std_native_musl_src = prev.rust_std_native_musl_src & {
+    object_hash = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   },
 } in
 let summary = fun pkgs => {
-  compiler_version = pkgs.rust_bin.version,
-  std_version = pkgs.rust_std_native_musl.version,
+  compiler_version = pkgs.rust_bin.inputs.source.version,
+  compiler_name = pkgs.rust_bin.name,
+  compiler_source_name = pkgs.rust_bin.inputs.source.name,
+  compiler_source_hash = pkgs.rust_bin.inputs.source.object_hash,
+  std_version = pkgs.rust_std_native_musl.inputs.source.version,
   std_name = pkgs.rust_std_native_musl.name,
   source_name = pkgs.rust_std_native_musl.inputs.source.name,
   source_url = pkgs.rust_std_native_musl.inputs.source.origin.url,
   source_hash = pkgs.rust_std_native_musl.inputs.source.object_hash,
+  builders_have_version = std.record.has_field "version" pkgs.rust_bin || std.record.has_field "version" pkgs.rust_std_native_musl,
+  builders_have_hash = std.record.has_field "source_object_hash" pkgs.rust_bin || std.record.has_field "source_object_hash" pkgs.rust_std_native_musl,
 } in
 {
   original = summary (package_set []),
   inherited = summary (package_set [compiler_overlay]),
   explicit = summary (package_set [compiler_overlay, fun _final => fun prev => {
-    rust_std_native_musl = prev.rust_std_native_musl & { version = "8.7.6" },
+    rust_std_native_musl_src = prev.rust_std_native_musl_src & { version = "8.7.6" },
+  }]),
+  source_replacement = summary (package_set [compiler_overlay, fun _final => fun _prev => {
+    rust_std_native_musl_src = {
+      version = "6.5.4",
+      name = "replacement-rust-std-source",
+      tag = "Source",
+      object_hash = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      origin = { tag = "Http", url = "https://example.invalid/replacement-rust-std.tar.xz" },
+    },
+  }]),
+  input = summary (package_set [compiler_overlay, fun _final => fun prev => {
+    rust_std_native_musl = prev.rust_std_native_musl & {
+      inputs.source | force = {
+        version = "7.6.5",
+        name = "custom-rust-std-source",
+        tag = "Source",
+        object_hash = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        origin = { tag = "Http", url = "https://example.invalid/custom-rust-std.tar.xz" },
+      },
+    },
   }]),
 }
 EOF_NICKEL
@@ -438,13 +466,30 @@ jq -e '
   .original.compiler_version == .original.std_version
   and .inherited.compiler_version == "9.8.7"
   and .inherited.std_version == "9.8.7"
+  and .inherited.compiler_name == "rust-bin-9.8.7"
+  and .inherited.compiler_source_name == "rust-bin-src-9.8.7"
+  and .inherited.compiler_source_hash == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   and .explicit.compiler_version == "9.8.7"
   and .explicit.std_version == "8.7.6"
+  and .source_replacement.compiler_version == "9.8.7"
+  and .source_replacement.std_version == "6.5.4"
+  and .source_replacement.std_name == "rust-std-native-musl-6.5.4"
+  and .source_replacement.source_name == "replacement-rust-std-source"
+  and .source_replacement.source_url == "https://example.invalid/replacement-rust-std.tar.xz"
+  and .source_replacement.source_hash == "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  and .input.compiler_version == "9.8.7"
+  and .input.std_version == "7.6.5"
+  and .input.std_name == "rust-std-native-musl-7.6.5"
+  and .input.source_name == "custom-rust-std-source"
+  and .input.source_hash == "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  and all(.original, .inherited, .explicit, .source_replacement, .input;
+    (.builders_have_version | not) and (.builders_have_hash | not)
+  )
   and all(.inherited, .explicit;
     .std_name == ("rust-std-native-musl-" + .std_version)
     and .source_name == ("rust-std-x86-64-unknown-linux-musl-src-" + .std_version)
     and .source_url == ("https://static.rust-lang.org/dist/rust-std-" + .std_version + "-x86_64-unknown-linux-musl.tar.xz")
-    and .source_hash == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    and .source_hash == "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
   )
 ' "${temporary}/rust-std.json" >/dev/null
 
