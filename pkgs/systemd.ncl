@@ -1,40 +1,43 @@
 let recipe = import "../recipe-lib.ncl" in
 
 fun pkgs =>
-  let systemd_src = fun version =>
-    fun hash =>
-      {
-        name = "systemd-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://github.com/systemd/systemd/archive/v%{version}/systemd-%{version}.tar.gz",
-        },
-      }
+  let systemd_src = {
+    version | default = "260.1",
+    name = "systemd-src-%{version}",
+    tag = "Source",
+    object_hash | default = "11b9821892b75d19af7b21f0f7f4e53636638147faf3e6a4ded78b40cb38993f",
+    origin = {
+      tag = "Http",
+      url = "https://github.com/systemd/systemd/archive/v%{version}/systemd-%{version}.tar.gz",
+    },
+  }
   in
 
-  let systemd_man_pages_src = fun version =>
-    fun hash =>
-      {
-        name = "systemd-man-pages-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-%{version}.tar.xz",
-            "https://ftp2.osuosl.org/pub/blfs/conglomeration/systemd/systemd-man-pages-%{version}.tar.xz",
-          ],
-        },
-      }
+  let systemd_man_pages_src = {
+    version | default = "260.1",
+    name = "systemd-man-pages-src-%{version}",
+    tag = "Source",
+    object_hash | default = "b0c143b3388afac9e1154facf0821809b396ab86f3f61ddc8028679a7d65d83c",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-%{version}.tar.xz",
+        "https://ftp2.osuosl.org/pub/blfs/conglomeration/systemd/systemd-man-pages-%{version}.tar.xz",
+      ],
+    },
+  }
+  in
+
+  let matching_version = fun source_version =>
+    fun man_pages_version =>
+      if source_version == man_pages_version then
+        source_version
+      else
+        std.fail_with "systemd: source version '%{source_version}' must match man pages version '%{man_pages_version}'"
   in
 
   let systemd = {
-    version | default = "260.1",
-    source_object_hash | default = "11b9821892b75d19af7b21f0f7f4e53636638147faf3e6a4ded78b40cb38993f",
-    man_pages_object_hash | default = "b0c143b3388afac9e1154facf0821809b396ab86f3f61ddc8028679a7d65d83c",
-    name = "systemd-%{version}",
+    name = "systemd-%{matching_version inputs.source.version inputs.man_pages.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -103,7 +106,7 @@ fun pkgs =>
         "-Dnobody-group=nogroup",
         "-Dsysupdate=disabled",
         "-Dukify=disabled",
-        "-Ddocdir=/usr/share/doc/systemd-%{version}",
+        "-Ddocdir=/usr/share/doc/systemd-%{matching_version inputs.source.version inputs.man_pages.version}",
       ],
       post_install = {
         name = "install_man_pages_and_machine_id",
@@ -136,8 +139,8 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = systemd_src version source_object_hash,
-      man_pages = systemd_man_pages_src version man_pages_object_hash,
+      source = pkgs.systemd_src,
+      man_pages = pkgs.systemd_man_pages_src,
     },
   }
   in
@@ -171,7 +174,7 @@ fun pkgs =>
   in
 
   let systemd_dev = {
-    name = "systemd-dev-%{pkgs.systemd.version}",
+    name = "systemd-dev-%{inputs.tree.inputs.source.version}",
     tag = "TreeSubset",
     config = {
       "include" = [
@@ -205,6 +208,8 @@ fun pkgs =>
 
   {
     include [
+      systemd_src,
+      systemd_man_pages_src,
       systemd,
       systemd_libs,
       systemd_dev,

@@ -91,9 +91,10 @@ let pkgs = (import "${repo_root}/bobrpkgs.ncl") [
   fun _final => fun _prev => {
     systemd = {
       name = "overlay-systemd-9.8.7",
-      version = "9.8.7",
       tag = "Source",
       object_hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      # systemd_dev derives its version from the selected tree's source.
+      inputs.source.version = "9.8.7",
     },
     systemd_libs = {
       name = "overlay-systemd-libs-9.8.7",

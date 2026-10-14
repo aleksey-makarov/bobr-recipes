@@ -6,43 +6,47 @@ let recipe = import "../recipe-lib.ncl" in
 # `tzcode` (for the `zic` compiler) plus the matching `tzdata` (the zone source
 # files); a single zic run compiles the standard region files so that the
 # aliases in `backward` resolve. Only the zoneinfo tree is kept.
-# `version`/`*_object_hash` are node fields (overridable).
+# The code and data archives are public Sources and must use the same IANA
+# release version.
 fun pkgs =>
-  let tzcode_src = fun version =>
-    fun hash =>
-      {
-        name = "tzcode-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://data.iana.org/time-zones/releases/tzcode%{version}.tar.gz",
-        },
-      }
+  let tzcode_src = {
+    version | default = "2026c",
+    name = "tzcode-src-%{version}",
+    tag = "Source",
+    object_hash
+      | default
+      = "b1cffc3ace4c4c7cd0efba2f7add86ec3d0b79da48bcf03582671fd3c8feace8",
+    origin = {
+      tag = "Http",
+      url = "https://data.iana.org/time-zones/releases/tzcode%{version}.tar.gz",
+    },
+  }
   in
 
-  let tzdata_src = fun version =>
-    fun hash =>
-      {
-        name = "tzdata-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://data.iana.org/time-zones/releases/tzdata%{version}.tar.gz",
-        },
-      }
+  let tzdata_src = {
+    version | default = "2026c",
+    name = "tzdata-src-%{version}",
+    tag = "Source",
+    object_hash
+      | default
+      = "e4a178a4477f3d0ea77cc31828ff72aa38feff8d61aa13e7e99e142e9d902be4",
+    origin = {
+      tag = "Http",
+      url = "https://data.iana.org/time-zones/releases/tzdata%{version}.tar.gz",
+    },
+  }
+  in
+
+  let matching_version = fun code_version =>
+    fun data_version =>
+      if code_version == data_version then
+        code_version
+      else
+        std.fail_with "tzdata: tzcode version '%{code_version}' must match tzdata version '%{data_version}'"
   in
 
   let tzdata = {
-    version | default = "2026c",
-    code_object_hash
-      | default
-      = "b1cffc3ace4c4c7cd0efba2f7add86ec3d0b79da48bcf03582671fd3c8feace8",
-    data_object_hash
-      | default
-      = "e4a178a4477f3d0ea77cc31828ff72aa38feff8d61aa13e7e99e142e9d902be4",
-    name = "tzdata-%{version}",
+    name = "tzdata-%{matching_version inputs.source.version inputs.tzdata.version}",
     tag = "SandboxInstallDeps",
     deps = {
       build = [
@@ -101,10 +105,16 @@ fun pkgs =>
       script_config = {},
     },
     inputs = {
-      source = tzcode_src version code_object_hash,
-      tzdata = tzdata_src version data_object_hash,
+      source = pkgs.tzcode_src,
+      tzdata = pkgs.tzdata_src,
     },
   }
   in
 
-  { include [tzdata] }
+  {
+    include [
+      tzcode_src,
+      tzdata_src,
+      tzdata,
+    ],
+  }

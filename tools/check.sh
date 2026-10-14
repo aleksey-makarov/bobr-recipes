@@ -75,6 +75,15 @@ tools/test/test-libclc-source.sh
 step "Mesa Source family"
 tools/test/test-mesa-source.sh
 
+step "tzdata Source family"
+tools/test/test-tzdata-sources.sh
+
+step "SQLite Source"
+tools/test/test-sqlite-source.sh
+
+step "systemd Source family"
+tools/test/test-systemd-sources.sh
+
 step "Linux Source family"
 tools/test/test-linux-sources.sh
 
