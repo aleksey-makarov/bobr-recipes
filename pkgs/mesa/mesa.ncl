@@ -1,18 +1,17 @@
 fun pkgs =>
-  let mesa_src = fun version =>
-    fun hash =>
-      {
-        name = "mesa-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = [
-            "https://archive.mesa3d.org/mesa-%{version}.tar.xz",
-            "https://sources.buildroot.net/mesa3d/mesa-%{version}.tar.xz",
-          ],
-        },
-      }
+  let mesa_src = {
+    version | default = "26.1.4",
+    name = "mesa-src-%{version}",
+    tag = "Source",
+    object_hash | default = "072705caa9adf4740f1489194b13e278ad959166863b5271fe423a86353c9ab6",
+    origin = {
+      tag = "Http",
+      url = [
+        "https://archive.mesa3d.org/mesa-%{version}.tar.xz",
+        "https://sources.buildroot.net/mesa3d/mesa-%{version}.tar.xz",
+      ],
+    },
+  }
   in
 
   # Graphics stack for a QEMU virtio-gpu guest. GL/GLES goes through the virgl
@@ -27,9 +26,7 @@ fun pkgs =>
   # Wayland GL/Vulkan clients (incl. the GNOME session) can create surfaces.
   # Zink/venus need the Vulkan headers at build and the loader at runtime.
   let mesa_guest = {
-    version | default = "26.1.4",
-    source_object_hash | default = "072705caa9adf4740f1489194b13e278ad959166863b5271fe423a86353c9ab6",
-    name = "mesa-guest-%{version}",
+    name = "mesa-guest-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -77,7 +74,7 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mesa_src version source_object_hash,
+      source = pkgs.mesa_src,
     },
   }
   in
@@ -127,10 +124,10 @@ fun pkgs =>
   # Full host graphics stack: Wayland-only OpenGL/EGL/GLES plus open Gallium
   # and Vulkan drivers for software, Intel, AMD, and NVIDIA hardware.
   let mesa = {
-    version | default = "26.1.4",
-    source_object_hash | default = "072705caa9adf4740f1489194b13e278ad959166863b5271fe423a86353c9ab6",
+    # The Rust crate list follows Mesa's Meson wraps and must be updated when a
+    # source update changes them.
     rust_crate_specs | default = import "rust-crate-specs.ncl",
-    name = "mesa-%{version}",
+    name = "mesa-%{inputs.source.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -255,14 +252,15 @@ fun pkgs =>
       ],
     },
     inputs = {
-      source = mesa_src version source_object_hash,
-      rust_crates = mesa_rust_crates version rust_crate_specs,
+      source = pkgs.mesa_src,
+      rust_crates = mesa_rust_crates inputs.source.version rust_crate_specs,
     },
   }
   in
 
   {
     include [
+      mesa_src,
       mesa_guest,
       mesa,
     ],

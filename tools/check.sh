@@ -72,6 +72,9 @@ tools/test/test-public-sources.sh
 step "libclc Source family"
 tools/test/test-libclc-source.sh
 
+step "Mesa Source family"
+tools/test/test-mesa-source.sh
+
 step "Linux Source family"
 tools/test/test-linux-sources.sh
 

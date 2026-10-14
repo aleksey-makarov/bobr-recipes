@@ -159,6 +159,7 @@ in
   { source = "man_pages_src", source_prefix = "man-pages-src-", consumers = [{ attr = "man_pages", name_prefix = "man-pages-" }] },
   { source = "mc_src", source_prefix = "mc-src-", consumers = [{ attr = "mc", name_prefix = "mc-" }] },
   { source = "mesa_demos_src", source_prefix = "mesa-demos-src-", consumers = [{ attr = "mesa_demos", name_prefix = "mesa-demos-" }] },
+  { source = "mesa_src", source_prefix = "mesa-src-", consumers = [{ attr = "mesa_guest", name_prefix = "mesa-guest-" }, { attr = "mesa", name_prefix = "mesa-" }] },
   { source = "meson_src", source_prefix = "meson-src-", consumers = [{ attr = "meson", name_prefix = "meson-" }] },
   { source = "modemmanager_src", source_prefix = "ModemManager-src-", consumers = [{ attr = "modemmanager", name_prefix = "ModemManager-" }] },
   { source = "mozjs_src", source_prefix = "mozjs-src-", consumers = [{ attr = "mozjs", name_prefix = "mozjs-" }] },
