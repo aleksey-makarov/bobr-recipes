@@ -6,7 +6,6 @@
 # phases themselves, which config fields pass through to `script_config`, and
 # which boolean flags lower to the string "true" (script_config supports only
 # string leaves).
-let cargo = import "../cargo.ncl" in
 let br = import "../build-rootfs.ncl" in
 fun pkgs =>
   # One `Source` node per synthetic build script. The `.fsobj-hash` sidecar
@@ -467,14 +466,11 @@ fun pkgs =>
   in
   let lower_cargo_package_node = fun node =>
     let build_rootfs = build_rootfs_for rust_package_default_build_deps node in
-    let crates_bundle =
-      cargo.vendor_bundle (node.name ++ "-crates") node.cargo_lock
-    in
     let package_inputs =
       std.record.update
         "_rootfs"
         build_rootfs
-        (std.record.update "crates" crates_bundle node.inputs)
+        node.inputs
     in
     lower_cargo_node (
       std.record.update

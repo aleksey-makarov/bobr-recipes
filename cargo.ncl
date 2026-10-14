@@ -9,11 +9,11 @@
 # URL). Non-registry entries (the package itself, path and git dependencies) are
 # skipped -- they carry no `source = "registry+..."`.
 #
-# `vendor_bundle name lock` collects those crate sources into one `Bundle`
-# object: a plain directory of `.crate` files (one hardlink each), so a Rust
-# package recipe takes a single input instead of one bind mount per crate. The
-# `Cargo` builder injects that bundle as the `crates` input and a built-in vendor
-# step unpacks it into a cargo `vendor/` tree with offline source replacement.
+# `vendor_inputs lock` returns the input record for a public `Bundle` recipe;
+# `vendor_bundle name lock` constructs a complete private Bundle when no extra
+# overridable metadata is needed. The recipe passes that Bundle explicitly as
+# `inputs.crates`. The Cargo pipeline unpacks it into a `vendor/` tree and uses
+# offline source replacement.
 let san = fun s =>
   s
   |> std.string.replace "-" "_"
@@ -38,8 +38,37 @@ let crate_sources_fn = fun lock =>
     }
   )
 in
+let vendor_inputs_fn = fun lock =>
+  std.array.fold_left
+    (fun acc => fun src => std.record.insert src.name src acc)
+    {}
+    (crate_sources_fn lock)
+in
 {
   crate_sources = crate_sources_fn,
+  vendor_inputs = vendor_inputs_fn,
+
+  matching_version = fun package_name =>
+    fun source_version =>
+      fun crates_version =>
+        if source_version == crates_version then
+          source_version
+        else
+          std.fail_with "%{package_name}: source version '%{source_version}' must match vendored crates version '%{crates_version}'",
+
+  # Custom Meson/Autotools recipes which invoke Cargo use this after creating
+  # their offline vendor directory. It checks the lockfile shipped by the
+  # unpacked upstream source against the available vendored dependency set.
+  verify_lock_step = {
+    name = "bobr_verify_cargo_lock",
+    run_as = "build-user",
+    cwd = "@{build}/source",
+    argv = [
+      "/bin/sh",
+      "-ec",
+      "cargo metadata --format-version 1 --locked --offline >/dev/null",
+    ],
+  },
 
   vendor_bundle = fun bundle_name =>
     fun lock =>
@@ -47,10 +76,6 @@ in
         name = bundle_name,
         tag = "Bundle",
         config = {},
-        inputs =
-          std.array.fold_left
-            (fun acc => fun src => std.record.insert src.name src acc)
-            {}
-            (crate_sources_fn lock),
+        inputs = vendor_inputs_fn lock,
       },
 }

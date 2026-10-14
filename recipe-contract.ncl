@@ -501,6 +501,19 @@ let SyntheticPackageInputsShape = {
   ..
 }
 in
+let CargoPackageInputsShape = {
+  source | Dyn,
+  crates | Dyn,
+  ..
+}
+in
+let CargoRootfsInputsShape = {
+  _rootfs | Dyn,
+  source | Dyn,
+  crates | Dyn,
+  ..
+}
+in
 let SandboxInputsShape = { .. }
 in
 
@@ -530,8 +543,8 @@ let tag_specs = {
   MesonRootfs = { config = MesonConfig, inputs = SyntheticRootfsInputsShape, requires_deps = false },
   PerlModule = { config = PerlModuleConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
   PythonModule = { config = PythonModuleConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
-  Cargo = { config = CargoConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
-  CargoRootfs = { config = CargoConfig, inputs = SyntheticRootfsInputsShape, requires_deps = false },
+  Cargo = { config = CargoConfig, inputs = CargoPackageInputsShape, requires_deps = true },
+  CargoRootfs = { config = CargoConfig, inputs = CargoRootfsInputsShape, requires_deps = false },
   Cmake = { config = CmakeConfig, inputs = SyntheticPackageInputsShape, requires_deps = true },
   Sandbox = { config = SandboxConfig, inputs = SandboxRootfsInputsShape, requires_deps = false },
   SandboxInstall = { config = SandboxConfig, inputs = SandboxRootfsInputsShape, requires_deps = false },

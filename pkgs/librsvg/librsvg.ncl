@@ -8,24 +8,38 @@
 # by the Makefile from the source root -- at that offline config. Introspection is
 # on (produces the typelib), the gdk-pixbuf SVG loader, Vala, docs and tests off.
 #
-# Like glycin, version/source_object_hash/cargo_lock are coupled: a version bump
-# must override all three together (cargo_lock = import "<their>/Cargo.lock").
+# Like glycin, the public source and vendored-crates recipes are a coupled pair:
+# a version update must replace both so the offline dependency set matches the
+# Cargo.lock shipped by the selected source.
 let recipe = import "../../recipe-lib.ncl" in
 let cargo = import "../../cargo.ncl" in
 let series = recipe.version_prefix 2 in
 
 fun pkgs =>
-  let librsvg_src = fun version =>
-    fun hash =>
-      {
-        name = "librsvg-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/librsvg/%{series version}/librsvg-%{version}.tar.xz",
-        },
-      }
+  let matching_version = cargo.matching_version "librsvg" in
+
+  let librsvg_src = {
+    version | default = "2.57.1",
+    name = "librsvg-src-%{version}",
+    tag = "Source",
+    object_hash
+      | default
+      = "074671a3ed6fbcd67cae2a40e539107f4f097ca8a4ab1a894c05e2524ff340ef",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/librsvg/%{series version}/librsvg-%{version}.tar.xz",
+    },
+  }
+  in
+
+  let librsvg_crates = {
+    version | default = "2.57.1",
+    cargo_lock | default = import "Cargo.lock" as 'Toml,
+    name = "librsvg-crates-%{version}",
+    tag = "Bundle",
+    config = {},
+    inputs = cargo.vendor_inputs cargo_lock,
+  }
   in
 
   # Unpack each vendored `.crate` into a cargo `vendor/` tree and point cargo at
@@ -67,12 +81,7 @@ fun pkgs =>
   in
 
   let librsvg = {
-    version | default = "2.57.1",
-    source_object_hash
-      | default
-      = "074671a3ed6fbcd67cae2a40e539107f4f097ca8a4ab1a894c05e2524ff340ef",
-    cargo_lock | default = import "Cargo.lock" as 'Toml,
-    name = "librsvg-%{version}",
+    name = "librsvg-%{matching_version inputs.source.version inputs.crates.version}",
     tag = "Autotools",
     deps = {
       build = [
@@ -132,14 +141,16 @@ fun pkgs =>
       },
     },
     inputs = {
-      source = librsvg_src version source_object_hash,
-      crates = cargo.vendor_bundle "librsvg-crates-%{version}" cargo_lock,
+      source = pkgs.librsvg_src,
+      crates = pkgs.librsvg_crates,
     },
   }
   in
 
   {
     include [
+      librsvg_src,
+      librsvg_crates,
       librsvg,
     ],
   }

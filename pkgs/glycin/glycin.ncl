@@ -5,29 +5,39 @@ let recipe = import "../../recipe-lib.ncl" in
 # built.
 #
 # glycin is a Rust (Cargo workspace) project driven by Meson; its crates are
-# vendored offline via `cargo.ncl` + the `Bundle` builder. Because a Cargo.lock
-# pins one exact version, the version and its vendored crates must move together,
-# so this exposes three coupled, mutually consistent overridable fields --
-# `version`, `source_object_hash`, and `cargo_lock`. To move to another version,
-# an overlay must override ALL THREE together (`cargo_lock = import
-# "<their>/Cargo.lock" as 'Toml`); otherwise the version and the vendored crates
-# would disagree.
+# vendored offline via `cargo.ncl` + the `Bundle` builder. The public source and
+# vendored-crates recipes are a coupled pair: a version update must replace both
+# so the offline dependency set matches the Cargo.lock shipped by the selected
+# source.
 let cargo = import "../../cargo.ncl" in
 
 let series = recipe.version_prefix 2 in
 
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "glycin-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://download.gnome.org/sources/glycin/%{series version}/glycin-%{version}.tar.xz",
-        },
-      }
+  let matching_version = cargo.matching_version "glycin" in
+
+  let glycin_src = {
+    version | default = "2.1.5",
+    name = "glycin-src-%{version}",
+    tag = "Source",
+    object_hash
+      | default
+      = "6c09757ee906330a60b6705753aa56bca007ad219b95e6e3537510d41bc341c8",
+    origin = {
+      tag = "Http",
+      url = "https://download.gnome.org/sources/glycin/%{series version}/glycin-%{version}.tar.xz",
+    },
+  }
+  in
+
+  let glycin_crates = {
+    version | default = "2.1.5",
+    cargo_lock | default = import "Cargo.lock" as 'Toml,
+    name = "glycin-crates-%{version}",
+    tag = "Bundle",
+    config = {},
+    inputs = cargo.vendor_inputs cargo_lock,
+  }
   in
 
   # Unpack each bundled `.crate` into a cargo `vendor/` tree and point cargo at
@@ -70,12 +80,7 @@ fun pkgs =>
   in
 
   let glycin = {
-    version | default = "2.1.5",
-    source_object_hash
-      | default
-      = "6c09757ee906330a60b6705753aa56bca007ad219b95e6e3537510d41bc341c8",
-    cargo_lock | default = import "Cargo.lock" as 'Toml,
-    name = "glycin-%{version}",
+    name = "glycin-%{matching_version inputs.source.version inputs.crates.version}",
     tag = "Meson",
     deps = {
       build = [
@@ -109,17 +114,19 @@ fun pkgs =>
         "-Dcapi_docs=false",
         "-Dpython_tests=false",
       ],
-      pre_configure = vendor_crates_step,
+      pre_configure = [vendor_crates_step, cargo.verify_lock_step],
     },
     inputs = {
-      source = mk_src version source_object_hash,
-      crates = cargo.vendor_bundle "glycin-crates-%{version}" cargo_lock,
+      source = pkgs.glycin_src,
+      crates = pkgs.glycin_crates,
     },
   }
   in
 
   {
     include [
+      glycin_src,
+      glycin_crates,
       glycin,
     ],
   }

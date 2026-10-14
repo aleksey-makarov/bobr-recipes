@@ -1,27 +1,36 @@
 # bobr-bundle-launcher is built from its published source crate rather than a
 # prebuilt bobr release asset. Cargo.lock supplies the complete immutable
 # dependency set consumed by the generic offline Cargo builder.
+let cargo = import "../../cargo.ncl" in
 fun pkgs =>
-  let mk_src = fun version =>
-    fun hash =>
-      {
-        name = "bobr-bundle-launcher-src-%{version}",
-        tag = "Source",
-        object_hash = hash,
-        origin = {
-          tag = "Http",
-          url = "https://static.crates.io/crates/bobr-bundle-launcher/bobr-bundle-launcher-%{version}.crate",
-        },
-      }
+  let matching_version = cargo.matching_version "bobr-bundle-launcher" in
+
+  let bobr_bundle_launcher_src = {
+    version | default = "0.1.10",
+    name = "bobr-bundle-launcher-src-%{version}",
+    tag = "Source",
+    object_hash
+      | default
+      = "f75f78790ec03db607606ccc64d2ff3805eddad721dd631d7a32b3e83227713a",
+    origin = {
+      tag = "Http",
+      url = "https://static.crates.io/crates/bobr-bundle-launcher/bobr-bundle-launcher-%{version}.crate",
+    },
+  }
+  in
+
+  let bobr_bundle_launcher_crates = {
+    version | default = "0.1.10",
+    cargo_lock | default = import "Cargo.lock" as 'Toml,
+    name = "bobr-bundle-launcher-%{version}-crates",
+    tag = "Bundle",
+    config = {},
+    inputs = cargo.vendor_inputs cargo_lock,
+  }
   in
 
   let bobr_bundle_launcher = {
-    version | default = "0.1.10",
-    source_object_hash
-      | default
-      = "f75f78790ec03db607606ccc64d2ff3805eddad721dd631d7a32b3e83227713a",
-    cargo_lock | default = import "Cargo.lock" as 'Toml,
-    name = "bobr-bundle-launcher-%{version}",
+    name = "bobr-bundle-launcher-%{matching_version inputs.source.version inputs.crates.version}",
     tag = "Cargo",
     config = {
       bins = ["bobr-bundle-launcher"],
@@ -62,13 +71,16 @@ fun pkgs =>
       runtime = [],
     },
     inputs = {
-      source = mk_src version source_object_hash,
+      source = pkgs.bobr_bundle_launcher_src,
+      crates = pkgs.bobr_bundle_launcher_crates,
     },
   }
   in
 
   {
     include [
+      bobr_bundle_launcher_src,
+      bobr_bundle_launcher_crates,
       bobr_bundle_launcher,
     ],
   }

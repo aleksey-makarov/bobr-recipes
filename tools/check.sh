@@ -90,6 +90,9 @@ tools/test/test-perl-sources.sh
 step "Python Source family"
 tools/test/test-python-sources.sh
 
+step "Cargo Source families"
+tools/test/test-cargo-sources.sh
+
 step "Linux Source family"
 tools/test/test-linux-sources.sh
 
