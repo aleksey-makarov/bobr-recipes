@@ -99,6 +99,9 @@ tools/test/test-linux-sources.sh
 step "Linux build script"
 tools/test/test-linux-build-script.sh
 
+step "QEMU runners"
+tools/test/test-qemu-runners.sh
+
 step "synthetic source preparation"
 tools/test/test-synthetic-common.sh
 

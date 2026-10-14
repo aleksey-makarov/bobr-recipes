@@ -54,11 +54,12 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-# tools/bobr-mcp-local.py -> up through tools/ to the recipes root.
+# Keep the physical recipes root for executing its tools, but derive the
+# default adjacent profile from the path used to invoke a symlinked checkout.
+INVOCATION_RECIPES_DIR = Path(__file__).absolute().parent.parent
 RECIPES_DIR = Path(__file__).resolve().parent.parent
-WORKSPACE_DIR = RECIPES_DIR.parent
 BUILD_SH = RECIPES_DIR / "bin" / "bobr-build.sh"
-DEFAULT_PROFILE = WORKSPACE_DIR / "bobr.ncl"
+DEFAULT_PROFILE = INVOCATION_RECIPES_DIR.parent / "bobr.ncl"
 
 TARGET_RE = re.compile(r"^[A-Za-z0-9_]+$")
 HASH_RE = re.compile(r"unexpected object hash:.*got ([0-9a-f]{64})")

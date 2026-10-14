@@ -7,8 +7,11 @@ die() {
   exit 1
 }
 
-script_path="$(readlink -f "${BASH_SOURCE[0]}")"
-workspace="$(dirname "$(dirname "$(dirname "$script_path")")")"
+script_path="${BASH_SOURCE[0]}"
+[[ "${script_path}" = /* ]] || script_path="${PWD}/${script_path}"
+# Preserve a symlinked bobr-recipes path: the store belongs to the workspace
+# containing the checkout as invoked, not necessarily to its physical target.
+workspace="$(cd -L "$(dirname "${script_path}")/../.." && pwd -L)"
 store="${workspace}/bobr-store"
 kernel="${store}/object-refs/linux-bzimage/bzImage"
 initrd="${store}/object-refs/initrd/initramfs.img"
