@@ -92,6 +92,116 @@ EOF_CATALOG
   mv -f "${temporary_catalog}" "${logs_path}/recipe-catalog.json"
 }
 
+cleanup_podman_state() {
+  [ -n "${podman_state_dir:-}" ] || return 0
+  rm -f "${podman_state_dir}/pid.fifo" "${podman_state_dir}/pid"
+  rmdir "${podman_state_dir}" 2>/dev/null || true
+  podman_state_dir=""
+}
+
+run_bobr_under_podman() {
+  local request_path="$1"
+  local pid_fifo pid_file reader_pid podman_pid
+  local bobr_pid="" pending_signal=""
+  local completed="" wait_status=0 podman_status=0
+  local reader_reaped=0 podman_reaped=0
+
+  forward_bobr_signal() {
+    pending_signal="$1"
+    if [ -n "${bobr_pid}" ]; then
+      kill -s "$1" -- "${bobr_pid}" 2>/dev/null || true
+    fi
+  }
+
+  trap 'forward_bobr_signal INT' INT
+  trap 'forward_bobr_signal TERM' TERM
+
+  podman_state_dir="$(mktemp -d)"
+  pid_fifo="${podman_state_dir}/pid.fifo"
+  pid_file="${podman_state_dir}/pid"
+  mkfifo -m 600 "${pid_fifo}"
+
+  # The reader turns the FIFO handshake into a waitable process. This lets us
+  # detect Podman startup failure without polling for either a PID file or a
+  # process-tree shape.
+  (
+    trap '' INT
+    IFS= read -r child_pid < "${pid_fifo}"
+    printf '%s\n' "${child_pid}" > "${pid_file}"
+  ) &
+  reader_pid="$!"
+
+  # Keep the driver in the terminal's foreground process group. Podman and
+  # Bobr run in a separate session, so Ctrl-C reaches this script first. The
+  # inner shell reports the PID which exec will preserve for Bobr.
+  # shellcheck disable=SC2016
+  setsid --wait podman unshare sh -c '
+    pid_fifo=$1
+    shift
+    printf "%s\n" "$$" > "${pid_fifo}"
+    exec "$@"
+  ' sh "${pid_fifo}" bobr < "${request_path}" &
+  podman_pid="$!"
+
+  while [ ! -s "${pid_file}" ]; do
+    completed=""
+    wait_status=0
+    wait -n -p completed "${reader_pid}" "${podman_pid}" \
+      || wait_status="$?"
+    if [ -z "${completed:-}" ]; then
+      # A trapped terminal signal interrupted wait. Forwarding is deferred
+      # until the Bobr PID arrives through the handshake.
+      continue
+    fi
+    if [ "${completed}" = "${reader_pid}" ]; then
+      reader_reaped=1
+      break
+    fi
+    podman_reaped=1
+    podman_status="${wait_status}"
+    if [ -s "${pid_file}" ]; then
+      break
+    fi
+    kill "${reader_pid}" 2>/dev/null || true
+    wait "${reader_pid}" 2>/dev/null || true
+    trap - INT TERM
+    cleanup_podman_state
+    return "${podman_status}"
+  done
+
+  IFS= read -r bobr_pid < "${pid_file}"
+  if ! [[ "${bobr_pid}" =~ ^[1-9][0-9]*$ ]]; then
+    echo "${tool}: podman unshare reported an invalid Bobr PID" >&2
+    kill -TERM -- "-${podman_pid}" 2>/dev/null || true
+    wait "${podman_pid}" 2>/dev/null || true
+    trap - INT TERM
+    cleanup_podman_state
+    return 2
+  fi
+  if [ -n "${pending_signal}" ]; then
+    kill -s "${pending_signal}" -- "${bobr_pid}" 2>/dev/null || true
+  fi
+
+  if [ "${reader_reaped}" -eq 0 ]; then
+    wait "${reader_pid}" 2>/dev/null || true
+  fi
+  if [ "${podman_reaped}" -eq 0 ]; then
+    while :; do
+      completed=""
+      wait_status=0
+      wait -n -p completed "${podman_pid}" || wait_status="$?"
+      if [ -n "${completed:-}" ]; then
+        podman_status="${wait_status}"
+        break
+      fi
+    done
+  fi
+
+  trap - INT TERM
+  cleanup_podman_state
+  return "${podman_status}"
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --target)
@@ -228,17 +338,18 @@ if [ "${dry_run}" -eq 1 ]; then
   exit 0
 fi
 
-bobr_cmd=(bobr)
+podman_state_dir=""
 if [ "${podman_unshare}" -eq 1 ]; then
-  bobr_cmd=(podman unshare bobr)
   require_cmd podman
+  require_cmd setsid
+  require_cmd mkfifo
 fi
 
 # Export the request to a file first -- timed on its own -- rather than piping
 # nickel straight into bobr, so the recipes -> JSON pass and the build itself are
 # measured and reported separately.
 request_json="$(mktemp)"
-trap 'rm -f "${request_json}"' EXIT
+trap 'rm -f "${request_json}"; cleanup_podman_state' EXIT
 echo "==> evaluate Nickel recipes and generate JSON request" >&2
 nickel_started_at="$(date +%s.%N)"
 printf '%s\n' "${request_expr}" | nickel export --format json > "${request_json}"
@@ -262,7 +373,11 @@ write_run_context running null
 
 bobr_started_at="$(date +%s.%N)"
 bobr_status=0
-"${bobr_cmd[@]}" < "${request_json}" || bobr_status="$?"
+if [ "${podman_unshare}" -eq 1 ]; then
+  run_bobr_under_podman "${request_json}" || bobr_status="$?"
+else
+  bobr < "${request_json}" || bobr_status="$?"
+fi
 bobr_finished_at="$(date +%s.%N)"
 report_phase_time "bobr build" "${bobr_started_at}" "${bobr_finished_at}"
 if [ "${bobr_status}" -ne 0 ]; then
