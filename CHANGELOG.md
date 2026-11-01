@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.13
+
+- Forwarded terminal signals to Bobr under Podman and waited for cancellation
+  cleanup before returning control to the shell.
+
 ## 0.1.12
 
 - Made package sources public recipes so overlays can replace versions and
