@@ -39,7 +39,10 @@ class CompareStoresTests(unittest.TestCase):
             "run_id": run_id,
             "goals": ["world"],
             "outcome": outcome,
-            "exit_status": 0 if outcome == "success" else 1,
+            "exit_status": {
+                "success": 0,
+                "cancelled": 130,
+            }.get(outcome, 1),
             "bobr": {
                 "version": "test",
                 "request_schema": "bobr-request-v6",
@@ -185,13 +188,17 @@ class CompareStoresTests(unittest.TestCase):
             self.make_run(store, "one")
             self.make_run(store, "two", outcome="failed")
             self.make_run(store, "three", commit="2" * 40, dirty=True)
+            self.make_run(store, "four", outcome="cancelled")
 
             identities, outcomes, warnings, source = (
                 compare.load_build_contexts(store, readers=2)
             )
 
             self.assertEqual(source, "run logs")
-            self.assertEqual(outcomes, {"success": 2, "failed": 1})
+            self.assertEqual(
+                outcomes,
+                {"success": 2, "failed": 1, "cancelled": 1},
+            )
             self.assertEqual(len(identities["bobr"]), 1)
             self.assertEqual(
                 identities["bobr-recipes"],

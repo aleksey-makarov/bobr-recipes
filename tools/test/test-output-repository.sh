@@ -610,7 +610,8 @@ mapfile -t contexts < <(
     -name context.json -type f | sort
 )
 jq -s -e '
-  ([.[] | select(.outcome == "failed" and .exit_status == 130)] | length) == 1
+  ([.[] | select(.outcome == "cancelled" and .exit_status == 130)] | length)
+    == 1
 ' "${contexts[@]}" >/dev/null \
   || fail "cancelled Bobr status was not recorded"
 

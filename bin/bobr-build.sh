@@ -416,7 +416,11 @@ fi
 bobr_finished_at="$(date +%s.%N)"
 report_phase_time "bobr build" "${bobr_started_at}" "${bobr_finished_at}"
 if [ "${bobr_status}" -ne 0 ]; then
-  write_run_context failed "${bobr_status}"
+  if [ "${bobr_status}" -eq 130 ]; then
+    write_run_context cancelled "${bobr_status}"
+  else
+    write_run_context failed "${bobr_status}"
+  fi
   exit "${bobr_status}"
 fi
 

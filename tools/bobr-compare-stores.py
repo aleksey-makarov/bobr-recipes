@@ -163,7 +163,7 @@ def load_build_contexts(store: Path, readers: int):
         identities["goals"].add(_canonical_json(goals))
         valid_contexts += 1
         outcome = context.get("outcome")
-        if outcome in {"running", "success", "failed"}:
+        if outcome in {"running", "success", "failed", "cancelled"}:
             outcomes[outcome] = outcomes.get(outcome, 0) + 1
         else:
             warnings.append(f"invalid run outcome in {path}")
