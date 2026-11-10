@@ -401,6 +401,13 @@ if [ "\${1:-}" = "--build-info" ]; then
   printf '%s\n' '{"version":"test","request_schema":"$(nickel export --format raw "${recipes_path}/request-schema.ncl")","provenance":null}'
   exit 0
 fi
+if [ "\${MOCK_BOBR_WAIT_FOR_SIGNAL:-0}" = 1 ]; then
+  trap 'printf "%s\n" INT > "\${MOCK_BOBR_SIGNAL_LOG}"; exit 130' INT
+  printf '%s\n' ready > "\${MOCK_BOBR_READY_FILE}"
+  while :; do
+    sleep 1
+  done
+fi
 cat >/dev/null
 printf '%s\n' goal-hash
 exit "\${MOCK_BOBR_STATUS:-0}"
@@ -555,5 +562,56 @@ assert_commands \
 assert_equal "4" "$(context_count)" "publication-failure context count"
 assert_equal "4" "$(catalog_count)" "publication-failure catalog count"
 assert_context_outcomes 3 1
+
+# A service manager initially signals only this wrapper. It must forward the
+# signal to Bobr, wait for Bobr to stop, and preserve its exit status.
+export MOCK_BOBR_READY_FILE="${temporary}/bobr-ready"
+export MOCK_BOBR_SIGNAL_LOG="${temporary}/bobr-signal"
+rm -f "${MOCK_BOBR_READY_FILE}" "${MOCK_BOBR_SIGNAL_LOG}"
+python3 - "${recipes_path}/bin/bobr-build.sh" "${build_only_profile}" \
+  "${temporary}/cancel-stdout" "${temporary}/cancel-stderr" <<'PY'
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+
+command, profile, stdout_path, stderr_path = sys.argv[1:]
+environment = os.environ.copy()
+environment["MOCK_BOBR_WAIT_FOR_SIGNAL"] = "1"
+with open(stdout_path, "wb") as stdout, open(stderr_path, "wb") as stderr:
+    process = subprocess.Popen(
+        [command, profile], env=environment, stdout=stdout, stderr=stderr
+    )
+    deadline = time.monotonic() + 15
+    ready = Path(environment["MOCK_BOBR_READY_FILE"])
+    while not ready.exists():
+        if process.poll() is not None:
+            raise SystemExit(f"wrapper exited before Bobr was ready: {process.returncode}")
+        if time.monotonic() >= deadline:
+            process.kill()
+            raise SystemExit("timed out waiting for Bobr")
+        time.sleep(0.05)
+    os.kill(process.pid, signal.SIGINT)
+    try:
+        status = process.wait(timeout=15)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait()
+        raise SystemExit("wrapper did not stop after SIGINT")
+if status != 130:
+    raise SystemExit(f"wrapper returned {status}, expected 130")
+PY
+assert_equal "INT" "$(cat "${MOCK_BOBR_SIGNAL_LOG}")" \
+  "signal forwarded to Bobr"
+mapfile -t contexts < <(
+  find "${temporary}/store/logs" -mindepth 2 -maxdepth 2 \
+    -name context.json -type f | sort
+)
+jq -s -e '
+  ([.[] | select(.outcome == "failed" and .exit_status == 130)] | length) == 1
+' "${contexts[@]}" >/dev/null \
+  || fail "cancelled Bobr status was not recorded"
 
 echo "test-output-repository.sh: all tests passed"

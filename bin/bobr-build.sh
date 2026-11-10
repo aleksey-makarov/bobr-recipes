@@ -99,6 +99,41 @@ cleanup_podman_state() {
   podman_state_dir=""
 }
 
+run_bobr_direct() {
+  local request_path="$1"
+  local bobr_pid="" pending_signal="" wait_status=0
+
+  forward_bobr_signal() {
+    pending_signal="$1"
+    if [ -n "${bobr_pid}" ]; then
+      kill -s "$1" -- "${bobr_pid}" 2>/dev/null || true
+    fi
+  }
+
+  trap 'forward_bobr_signal INT' INT
+  trap 'forward_bobr_signal TERM' TERM
+
+  (
+    trap - INT TERM
+    exec bobr < "${request_path}"
+  ) &
+  bobr_pid="$!"
+  if [ -n "${pending_signal}" ]; then
+    kill -s "${pending_signal}" -- "${bobr_pid}" 2>/dev/null || true
+  fi
+
+  while :; do
+    wait_status=0
+    wait "${bobr_pid}" || wait_status="$?"
+    if ! kill -0 "${bobr_pid}" 2>/dev/null; then
+      break
+    fi
+  done
+
+  trap - INT TERM
+  return "${wait_status}"
+}
+
 run_bobr_under_podman() {
   local request_path="$1"
   local pid_fifo pid_file reader_pid podman_pid
@@ -376,7 +411,7 @@ bobr_status=0
 if [ "${podman_unshare}" -eq 1 ]; then
   run_bobr_under_podman "${request_json}" || bobr_status="$?"
 else
-  bobr < "${request_json}" || bobr_status="$?"
+  run_bobr_direct "${request_json}" || bobr_status="$?"
 fi
 bobr_finished_at="$(date +%s.%N)"
 report_phase_time "bobr build" "${bobr_started_at}" "${bobr_finished_at}"
